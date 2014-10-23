@@ -1,10 +1,12 @@
 import SonatypeKeys._
 
-import _root_.sbtbuildinfo.Plugin.BuildInfoKey
+//import _root_.sbtbuildinfo.Plugin.BuildInfoKey
 
 import com.typesafe.sbt.SbtGit.GitKeys._
 
 name := "case-app"
+
+version := "0.1.0"
 
 organization := "com.github.alexarchambault"
 
@@ -22,30 +24,6 @@ scalacOptions ++= Seq(
 , "-deprecation"
 )
 
-typelevelDefaultSettings
-
-TypelevelKeys.githubProject := ("alexarchambault", name.value)
-
-net.virtualvoid.sbt.graph.Plugin.graphSettings
-
-buildInfoSettings
-
-sourceGenerators in Compile <+= buildInfo
-
-buildInfoKeys := Seq[BuildInfoKey](
-  name
-  , version
-  , scalaVersion
-  , sbtVersion
-  , gitHeadCommit
-  , BuildInfoKey.action("buildTime") {
-    System.currentTimeMillis
-  }
-)
-
-buildInfoPackage := "caseapp"
-
-profileName := "alexandre.archambault"
 
 xerial.sbt.Sonatype.sonatypeSettings
 
