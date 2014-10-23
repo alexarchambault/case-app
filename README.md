@@ -41,9 +41,7 @@ object MyProg extends AppOf[MyProg]
 ```
 assuming you added the following lines to your `build.sbt`:
 ```
-resolvers += Resolver.sonatypeRepo("snapshots")
-
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.1.0-SNAPSHOT"
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.1.0"
 ```
 
 So transitioning from `scala.App` to case-app consists in importing `caseapp._`, making the former singleton
