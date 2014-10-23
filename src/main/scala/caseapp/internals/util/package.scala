@@ -44,7 +44,7 @@ package object util {
     ccRecursiveMembersAnnotationsFoldHelper(typeOf[C], f)
 
   private def ccRecursiveMembersAnnotationsFoldHelper[A](tpe: Type, f: Annotation => Option[A]): CCRecursiveFieldAnnotations[A] = {
-    val constructorSymbol = tpe.declaration(nme.CONSTRUCTOR)
+    val constructorSymbol = tpe.decl(nme.CONSTRUCTOR)
     val defaultConstructor =
       if (constructorSymbol.isMethod) constructorSymbol.asMethod
       else
@@ -59,7 +59,7 @@ package object util {
         val t =
           for {
             t <- Some(tpe.member(sym.name)).filter(_.isMethod)
-            _type <- Some(t.asMethod.typeSignatureIn(tpe).typeSymbol).filter(_.isClass)
+            _type <- Some(t.asMethod.typeSignatureIn(tpe).finalResultType.typeSymbol).filter(_.isClass)
             c <- Some(_type.asClass).filter(_.isCaseClass)
           } yield c.typeSignature
 
