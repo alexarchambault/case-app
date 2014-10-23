@@ -18,30 +18,36 @@ object MyProg extends App {
 
 and you want to it to accept command-line arguments. Using *case-app*, you can just make the code above look like:
 ```scala    
-// Importing caseapp
-// Options are simply variables of this case class.
 import caseapp._
 
-// The object extending App (from the `scala` namespace) becomes a case class extending App (from caseapp).
+case class MyProg() extends App {
+
+  // core of your app
+
+}
+
+object MyProg extends AppOf[MyProg] {
+  val ignore = me
+}
+```
+assuming you added the following lines to your `build.sbt`:
+```
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.1.0"
+```
+
+You can then add options to your program, for example:
+```scala
+
 case class MyProg(
   foo: Boolean = false,
   user: String,
   password: String,
   bar: Option[String]
-) extends App {            
+) extends App {
 
-  // core of your app, using the arguments above
+  // core of your app, using the variables above
 
 }
-
-// Still defining a singleton, extending AppOf[itself]
-// The val ignore = me line is there because of a limitation or bug in scalac, see below.
-object MyProg extends AppOf[MyProg]
-{ val ignore = me }
-```
-assuming you added the following lines to your `build.sbt`:
-```
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.1.0"
 ```
 
 So transitioning from `scala.App` to case-app consists in importing `caseapp._`, making the former singleton
