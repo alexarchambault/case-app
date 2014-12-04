@@ -4,6 +4,7 @@ package internals
 import java.text.SimpleDateFormat
 import java.util.GregorianCalendar
 
+import shapeless.labelled.{ FieldType, field }
 import shapeless.{ :: => _, _ }
 import scalaz.{ Tag, @@ }
 import scala.util.{ Try, Success, Failure }
@@ -48,18 +49,28 @@ object PreFolderSingleValue {
   }
 }
 
-object PreFolderTC extends LabelledProductTypeClass[PreFolder] {
+object PreFolder {
   import shapeless.::
 
-  def product[H, T <: HList](name: String, cHead: PreFolder[H], cTail: PreFolder[T]): PreFolder[H :: T] =
+  implicit val hnilPreFolder: PreFolder[HNil] = PreFolder.preFolder { names =>
+    Folder(Nil) { (_, _) =>
+      Success(None)
+    }
+  }
+
+  implicit def hconsPreFolder[K <: Symbol, H, T <: HList] (implicit 
+    key: Witness.Aux[K]
+  , headPreFolder: Lazy[PreFolder[H]]
+  , tailPreFolder: Lazy[PreFolder[T]]
+  ): PreFolder[FieldType[K, H] :: T] =
     PreFolder.preFolder { names =>
-      val headUnderlying = cHead(names.left.getOrElse(RecNames(Nil)).names.find(_._1 == name).map(_._2) getOrElse Right(Nil))
-      val tailUnderlying = cTail(names)
+      val headUnderlying = headPreFolder.value(names.left.getOrElse(RecNames(Nil)).names.find(_._1 == key.value.name).map(_._2) getOrElse Right(Nil))
+      val tailUnderlying = tailPreFolder.value(names)
 
       Folder(headUnderlying.descriptions ::: tailUnderlying.descriptions) { (l, args) =>
         headUnderlying(l.head, args) match {
           case Success(Some((h, args))) =>
-            Success(Some((h :: l.tail, args)))
+            Success(Some((field[K](h) :: l.tail, args)))
           case Success(None) =>
             tailUnderlying(l.tail, args) match {
               case Success(Some((t, args))) =>
@@ -75,34 +86,22 @@ object PreFolderTC extends LabelledProductTypeClass[PreFolder] {
       }
     }
 
-  val emptyProduct: PreFolder[HNil] = PreFolder.preFolder { names =>
-    Folder(Nil) { (_, _) =>
-      Success(None)
+  implicit def preFolderProject[F, G <: HList] (implicit
+    gen: LabelledGeneric.Aux[F, G]
+  , underlying: Lazy[PreFolder[G]]
+  ): PreFolder[F] = {
+    val u = underlying.value
+    
+    PreFolder.preFolder {
+      names =>
+        val _underlying = u(names)
+        Folder(_underlying.descriptions) { (f, args) =>
+          _underlying(gen.to(f), args).map(_.map{ case (g, args) =>
+            (gen.from(g), args)
+          })
+        }
     }
   }
-
-  def project[F, G](instance: => PreFolder[G], to: F => G, from: G => F): PreFolder[F] = PreFolder.preFolder {
-    val _instance = instance
-
-    names =>
-      val underlying = _instance(names)
-      Folder(underlying.descriptions) { (f, args) =>
-        underlying(to(f), args).map(_.map{ case (g, args) =>
-          (from(g), args)
-        })
-      }
-  }
-
-}
-
-object PreFolder extends LabelledProductTypeClassCompanion[PreFolder] {
-  implicit val tc: LabelledProductTypeClass[PreFolder] = PreFolderTC
-
-  import language.experimental.macros
-
-  // Already in PreFolder.auto, copied here for more convient use
-  implicit def derive[T](implicit ev: LabelledProductTypeClass[PreFolder]): PreFolder[T] =
-     macro shapeless.GenericMacros.deriveLabelledProductInstance[PreFolder, T]
 
 
   def preFolder[T](f: Either[RecNames, List[Name]] => Folder[T]): PreFolder[T] = new PreFolder[T] {
