@@ -6,7 +6,7 @@ import com.typesafe.sbt.SbtGit.GitKeys._
 
 name := "case-app"
 
-version := "0.1.0"
+version := "0.1.1-SNAPSHOT"
 
 organization := "com.github.alexarchambault"
 
