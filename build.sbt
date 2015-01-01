@@ -10,7 +10,12 @@ version := "0.1.1-SNAPSHOT"
 
 organization := "com.github.alexarchambault"
 
-scalaVersion := "2.11.2"
+scalaVersion := "2.11.4"
+
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
 
 libraryDependencies ++= Seq(
   "org.scala-lang"  % "scala-reflect" % scalaVersion.value
