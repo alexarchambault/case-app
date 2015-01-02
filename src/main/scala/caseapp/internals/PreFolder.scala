@@ -6,7 +6,6 @@ import java.util.GregorianCalendar
 
 import shapeless.labelled.{ FieldType, field }
 import shapeless.{ :: => _, _ }
-import scalaz.{ Tag, @@ }
 import scala.util.{ Try, Success, Failure }
 
 
@@ -148,13 +147,6 @@ object PreFolder {
       c.setTime(fmt parse head)
       c
     })
-  }
-
-  import language.implicitConversions
-  private implicit def unwrap[A, T](a: A @@ T): A = Tag.unsubst[A, scalaz.Id.Id, T](a)
-
-  implicit val intCounterPreFolder: PreFolder[Int @@ Counter] = PreFolderSingleValue.flag { (current, args) =>
-    Try(Some((Tag.of(current + 1), args)))
   }
 
   implicit def optionPreFolder[T: PreFolder : Default]: PreFolder[Option[T]] = PreFolder.preFolder { names =>

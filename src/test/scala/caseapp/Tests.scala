@@ -5,8 +5,6 @@ import java.util.GregorianCalendar
 import scala.util.Success
 import org.scalatest._
 
-import scalaz.Tag
-
 object Tests {
 
   case class NoArgs()
@@ -17,7 +15,7 @@ object Tests {
   )
   
   case class MoreArgs(
-    count  : Int @@ Counter
+    count  : List[Unit]
   , few    : FewArgs = FewArgs()
   )
 
@@ -36,7 +34,7 @@ object Tests {
   case class Demo(
     first: Boolean = false
   , @ExtraName("V") value: Option[String] = None
-  , @ExtraName("v") verbose: Int @@ Counter
+  , @ExtraName("v") verbose: List[Unit]
   , @ExtraName("S") stages: List[String]
   ) extends App
   
@@ -70,17 +68,17 @@ class Tests extends FlatSpec with Matchers {
 
   it should "parse a args recursively and return a default value and remaining args" in {
     val parser = implicitly[Parser[MoreArgs]]
-    parser(List("user arg", "--num-foo", "4", "--count", "other user arg", "--count")) shouldEqual Success((MoreArgs(count = Tag.of(2), few = FewArgs(numFoo = 4)), List("user arg", "other user arg")))
+    parser(List("user arg", "--num-foo", "4", "--count", "other user arg", "--count")) shouldEqual Success((MoreArgs(count = List.fill(2)(()), few = FewArgs(numFoo = 4)), List("user arg", "other user arg")))
   }
   
   it should "parse args" in {
     val parser = implicitly[Parser[demo.Demo]]
-    parser(List("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first")) shouldEqual Success((demo.Demo(first = true, value = Some("Some value"), verbose = Tag.of(3), stages = List("first", "second")), List("user arg", "other user arg")))
+    parser(List("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first")) shouldEqual Success((demo.Demo(first = true, value = Some("Some value"), verbose = List.fill(3)(()), stages = List("first", "second")), List("user arg", "other user arg")))
   }
 
   it should "parse short args" in {
     val parser = implicitly[Parser[demo.Demo]]
-    parser(List("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first")) shouldEqual Success((demo.Demo(first = true, value = Some("Some value"), verbose = Tag.of(3), stages = List("first", "second")), List("user arg", "other user arg")))
+    parser(List("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first")) shouldEqual Success((demo.Demo(first = true, value = Some("Some value"), verbose = List.fill(3)(()), stages = List("first", "second")), List("user arg", "other user arg")))
   }
 
   it should "parse list args" in {

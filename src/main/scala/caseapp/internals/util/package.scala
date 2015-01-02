@@ -6,7 +6,6 @@ import java.util.GregorianCalendar
 import reflect._
 import scala.reflect.runtime.currentMirror
 import scala.reflect.runtime.universe.{ Try => _, Name => _, _ }
-import scalaz.Tag
 import shapeless.{ :+:, CNil, Inl, Inr }
 
 package object util {
@@ -123,7 +122,6 @@ package object util {
             case t if t =:= typeOf[Long]             => 0L
             case t if t =:= typeOf[Float]             => 0.0f
             case t if t =:= typeOf[Double]             => 0.0
-            case t if t =:= typeOf[Int @@ Counter]  => Tag.of[Counter](0)
             case t if t =:= typeOf[java.util.Calendar]  => new GregorianCalendar()
             case t                         => throw new IllegalArgumentException(t.toString)
           }
