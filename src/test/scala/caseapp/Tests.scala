@@ -7,29 +7,29 @@ import org.scalatest._
 
 object Tests {
 
-  case class NoArgs()
+  case class NoArgs() extends App
   
   case class FewArgs(
     value  : String = "default"
   , numFoo : Int = -10
-  )
+  ) extends App
   
   case class MoreArgs(
     count  : List[Unit]
   , few    : FewArgs = FewArgs()
-  )
+  ) extends App
 
   case class WithList(
     list   : List[Int]
-  )
+  ) extends App
 
   case class WithTaggedList(
     list   : List[String]
-  )
+  ) extends App
 
   case class WithCalendar(
     date   : java.util.Calendar
-  )
+  ) extends App
 
   case class Demo(
     first: Boolean = false
@@ -38,6 +38,13 @@ object Tests {
   , @ExtraName("S") stages: List[String]
   ) extends App
   
+  implicitly[Parser[WithHelp[NoArgs]]]
+  implicitly[Parser[WithHelp[FewArgs]]]
+  implicitly[Parser[WithHelp[MoreArgs]]]
+  implicitly[Parser[WithHelp[WithList]]]
+  implicitly[Parser[WithHelp[WithTaggedList]]]
+  implicitly[Parser[WithHelp[WithCalendar]]]
+
   implicitly[Parser[WithHelp[Demo]]]
   
 }
