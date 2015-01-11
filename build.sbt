@@ -1,9 +1,5 @@
 import SonatypeKeys._
 
-//import _root_.sbtbuildinfo.Plugin.BuildInfoKey
-
-import com.typesafe.sbt.SbtGit.GitKeys._
-
 name := "case-app"
 
 version := "0.1.1-SNAPSHOT"
