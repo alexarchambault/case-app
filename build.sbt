@@ -12,6 +12,8 @@ organization := "com.github.alexarchambault"
 
 scalaVersion := "2.11.4"
 
+crossScalaVersions := Seq("2.10.4", "2.11.4")
+
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases"),
   Resolver.sonatypeRepo("snapshots")
@@ -19,9 +21,22 @@ resolvers ++= Seq(
 
 libraryDependencies ++= Seq(
   "org.scala-lang"  % "scala-reflect" % scalaVersion.value
-,    "com.chuusai" %% "shapeless"     % "2.1.0-SNAPSHOT"
 ,  "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
 )
+
+libraryDependencies ++= {
+  if (scalaVersion.value startsWith "2.10.")
+    Seq(
+      "com.chuusai" %% "shapeless" % "2.1.0-SNAPSHOT" cross CrossVersion.full,
+      // For shapeless LabelledGeneric to work, you may need to add it
+      // to your own project too...
+      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+    )
+  else
+    Seq(
+      "com.chuusai" %% "shapeless" % "2.1.0-SNAPSHOT"
+    )
+}
 
 scalacOptions ++= Seq(
   "-feature"

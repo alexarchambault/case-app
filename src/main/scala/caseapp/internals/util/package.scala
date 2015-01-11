@@ -43,7 +43,7 @@ package object util {
     ccRecursiveMembersAnnotationsFoldHelper(typeOf[C], f)
 
   private def ccRecursiveMembersAnnotationsFoldHelper[A](tpe: Type, f: Annotation => Option[A]): CCRecursiveFieldAnnotations[A] = {
-    val constructorSymbol = tpe.decl(nme.CONSTRUCTOR)
+    val constructorSymbol = tpe.declaration(nme.CONSTRUCTOR) // FIXME Should be tpe.decl in scala 2.11
     val defaultConstructor =
       if (constructorSymbol.isMethod) constructorSymbol.asMethod
       else
@@ -58,7 +58,7 @@ package object util {
         val t =
           for {
             t <- Some(tpe.member(sym.name)).filter(_.isMethod)
-            _type <- Some(t.asMethod.typeSignatureIn(tpe).finalResultType.typeSymbol).filter(_.isClass)
+            _type <- Some(t.asMethod.typeSignatureIn(tpe).typeSymbol).filter(_.isClass) // FIXME Add a .finalResultType before .typeSymbol in scala 2.11
             c <- Some(_type.asClass).filter(_.isCaseClass)
           } yield c.typeSignature
 
@@ -148,6 +148,8 @@ package object util {
 
     instantiateCCHelper[C](im)
   }
+
+  // FIXME Lots of deprecated methods in scala 2.11 in the three functions below
 
   def instantiateCCAnnotationFromAnnotation[C <: Product : TypeTag]: Annotation => Option[C] = {
     val c = util.instantiateCC[C]
