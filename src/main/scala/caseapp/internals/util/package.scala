@@ -26,8 +26,6 @@ package object util {
       }
     }
 
-  case class CCRecursiveFieldAnnotations[A](annotations: List[(String, Either[CCRecursiveFieldAnnotations[A], List[A]])])
-
   /**
    * See http://stackoverflow.com/questions/14785054/construct-case-class-from-collection-of-parameters
    * and http://stackoverflow.com/questions/16079113/scala-2-10-reflection-how-do-i-extract-the-field-values-from-a-case-class
@@ -62,14 +60,14 @@ package object util {
             c <- Some(_type.asClass).filter(_.isCaseClass)
           } yield c.typeSignature
 
-        sym.name.toString -> (t match {
+        sym.name.toString -> ((t match {
           case Some(c) =>
             Left(ccRecursiveMembersAnnotationsFoldHelper[A](c, f))
           case None =>
             val allAnnotations = tpe.member(sym.name).annotations
             val annotations = allAnnotations.map(f).collect { case Some(v) => v}
             Right(annotations)
-        })
+        }): Either[CCRecursiveFieldAnnotations[A], List[A]])
       }
     )
   }
