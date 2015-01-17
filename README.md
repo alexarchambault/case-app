@@ -224,12 +224,6 @@ cannot get along the default constructor of `AppOf` (defining `AppOf` like `AppO
 as one then runs into the same problem as [here](https://issues.scala-lang.org/browse/SI-5000)
 and [here](https://issues.scala-lang.org/browse/SI-7666).
 
-* Why depend on both shapeless *and* scalaz?
-
-shapeless is used mainly for its `LabelledProductTypeClass` mechanism. scalaz is used for its `Tag` mechanism -
-shapeless has a `Tag` mechanism as well, but one runs into the same problem as [here](https://github.com/scalaz/scalaz/issues/747)
-with it - this problem is fixed in scalaz 7.1, so we use the latter.
-     
 * case-app uses `DelayedInit`, like `scala.App`
 
 It does this in order to delay the execution of the content
