@@ -18,7 +18,6 @@ resolvers ++= Seq(
 libraryDependencies ++= Seq(
   "org.scala-lang"  % "scala-reflect" % scalaVersion.value
 , "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
-, "org.scalaz" %% "scalaz-core" % "7.1.0"
 )
 
 libraryDependencies ++= {
