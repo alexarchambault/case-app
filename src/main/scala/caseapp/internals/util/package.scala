@@ -115,6 +115,7 @@ package object util {
             case t if t =:= typeOf[Boolean]         => false
             case t if t =:= typeOf[String]          => ""
             case t if t =:= typeOf[Int]             => 0
+            case t if t =:= typeOf[Int @@ Counter] => Tag.of[Counter](0)
             case t if t <:< typeOf[Option[Any]]     => None
             case t if t <:< typeOf[List[Any]]     => Nil
             case t if t =:= typeOf[Long]             => 0L

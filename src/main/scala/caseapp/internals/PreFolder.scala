@@ -85,6 +85,13 @@ object PreFolder {
       }
     }
 
+  // Using a ~specialized implicit for tagged types here, see https://github.com/milessabin/shapeless/issues/309
+  implicit def hconsTaggedHeadPreFolder[K <: Symbol, H, HT, T <: HList] (implicit
+    key: Witness.Aux[K]
+  , headPreFolder: Lazy[PreFolder[H @@ HT]]
+  , tailPreFolder: Lazy[PreFolder[T]]
+  ): PreFolder[FieldType[K, H @@ HT] :: T] = hconsPreFolder[K, H @@ HT, T]
+
   implicit def preFolderProject[F, G <: HList] (implicit
     gen: LabelledGeneric.Aux[F, G]
   , underlying: Lazy[PreFolder[G]]
@@ -121,6 +128,10 @@ object PreFolder {
 
   implicit val intPreFolder: PreFolder[Int] = PreFolderSingleValue { (current, head) =>
     Try(Some(head.toInt))
+  }
+
+  implicit val intCounterPreFolder: PreFolder[Int @@ Counter] = PreFolderSingleValue.flag { (current, args) =>
+    Try(Some((Tag.of(Tag.unwrap(current) + 1), args)))
   }
 
   implicit val longPreFolder: PreFolder[Long] = PreFolderSingleValue { (current, head) =>

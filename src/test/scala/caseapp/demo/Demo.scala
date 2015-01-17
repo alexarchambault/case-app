@@ -5,7 +5,7 @@ package demo
 case class Demo(
   first: Boolean
 , @ExtraName("V")   value : Option[String]
-, @ExtraName("v") verbose : List[Unit]
+, @ExtraName("v") verbose : Int @@ Counter
 , @ExtraName("S") @ValueDescription("stages")  stages : List[String]
 ) extends App {
 

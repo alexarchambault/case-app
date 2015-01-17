@@ -18,6 +18,7 @@ object Default {
 
   implicit val unitDefault: Default[Unit] = Default(())
   implicit val intDefault: Default[Int] = Default(0)
+  implicit val counterDefault: Default[Int @@ Counter] = Default(Tag of 0)
   implicit val stringDefault: Default[String] = Default("")
 
   implicit def optionDefault[T]: Default[Option[T]] = Default(None)
