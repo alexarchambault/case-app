@@ -1,11 +1,11 @@
 package caseapp
-package internals
+package core
 
 import java.util.GregorianCalendar
 
 import reflect._
-import scala.reflect.runtime.currentMirror
-import scala.reflect.runtime.universe.{ Try => _, Name => _, _ }
+import reflect.runtime.currentMirror
+import reflect.runtime.universe.{ Try => _, Name => _, _ }
 import shapeless.{ :+:, CNil, Inl, Inr }
 
 package object util {

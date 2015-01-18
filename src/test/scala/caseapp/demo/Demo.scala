@@ -23,8 +23,9 @@ case class MyApp(
 }
 
 object MyApp extends AppOf[MyApp] {
-  val ignore = me
+  val parser = default
 }
 
-object Demo extends AppOf[Demo]
-{ val ignore = me }
+object Demo extends AppOf[Demo] {
+  val parser = default
+}
