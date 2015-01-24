@@ -16,25 +16,25 @@ private[core] case class ArgParserException(withName: String => Exception) exten
  * A type class which given names, returns a NamedArgParser
  */
 trait ArgParser[T] {
-  def apply(names: Either[Names, List[Name]]): NamedArgParser[T]
+  def apply(names: (Option[Names], List[Name])): NamedArgParser[T]
 }
 
 object ArgParser {
   def apply[T](implicit argParser: ArgParser[T]): ArgParser[T] = argParser
 
-  def singleValue[T](f: (T, String) => Try[Option[T]]): ArgParser[T] = _singleValue[T](isFlag = false, {
+  def value[T](f: (T, String) => Try[T]): ArgParser[T] = _value[T](isFlag = false, {
     (current, args) => args match {
       case Nil =>
         Failure(ArgParserException(name => new Exception(s"Missing value of argument $name")))
       case head :: tail =>
-        f(current, head).map(_.map(t => (t, tail)))
+        f(current, head).map(t => Some((t, tail)))
     }
   })
 
-  def flag[T](f: (T, List[String]) => Try[Option[(T, List[String])]]): ArgParser[T] = _singleValue[T](isFlag = true, f)
+  def flag[T](f: (T, List[String]) => Try[Option[(T, List[String])]]): ArgParser[T] = _value[T](isFlag = true, f)
   
-  private def _singleValue[T](isFlag: Boolean, f: (T, List[String]) => Try[Option[(T, List[String])]]): ArgParser[T] = ArgParser.from { _names =>
-    val names = _names.right getOrElse Nil
+  private def _value[T](isFlag: Boolean, f: (T, List[String]) => Try[Option[(T, List[String])]]): ArgParser[T] = ArgParser.from { _names =>
+    val names = _names._2
 
     NamedArgParser.from(NamesInfo(names.map(_.option), isFlag) :: Nil) { (current, args) =>
       (Option.empty[List[String]] /: names) {
@@ -66,7 +66,13 @@ object ArgParser {
   , tailArgParser: Lazy[ArgParser[T]]
   ): ArgParser[FieldType[K, H] :: T] =
     ArgParser.from { names =>
-      val headUnderlying = headArgParser.value(names.left.getOrElse(Names(Nil)).names.find(_._1 == key.value.name).map(_._2) getOrElse Right(Nil))
+      def default = List(Name(util.pascalCaseSplit(key.value.name.toList).map(_.toLowerCase).mkString("-")))
+      val headUnderlying = headArgParser.value({
+        // A bit hack-ish, for custom argument names whose types are also case classes.
+        // Using a proper type class for NamesOf should solve that.
+        val e = names._1.getOrElse(Names(Nil)).names.find(_._1 == key.value.name).map(_._2)
+        (e.flatMap(_.left.map(Some(_)).left getOrElse None), e.flatMap(_.right.toOption).getOrElse(Nil) ++ default)
+      })
       val tailUnderlying = tailArgParser.value(names)
 
       NamedArgParser.from(headUnderlying.namesInfos ::: tailUnderlying.namesInfos) { (l, args) =>
@@ -112,8 +118,8 @@ object ArgParser {
     }
 
 
-  def from[T](f: Either[Names, List[Name]] => NamedArgParser[T]): ArgParser[T] = new ArgParser[T] {
-    def apply(names: Either[Names, List[Name]]) = f(names)
+  def from[T](f: ((Option[Names], List[Name])) => NamedArgParser[T]): ArgParser[T] = new ArgParser[T] {
+    def apply(names: (Option[Names], List[Name])) = f(names)
   }
 
   implicit val unitArgParser: ArgParser[Unit] = {
@@ -128,38 +134,38 @@ object ArgParser {
     }
   }
 
-  implicit val intArgParser: ArgParser[Int] = ArgParser.singleValue { (current, head) =>
-    Try(Some(head.toInt))
+  implicit val intArgParser: ArgParser[Int] = ArgParser.value { (current, head) =>
+    Try(head.toInt)
   }
 
   implicit val intCounterArgParser: ArgParser[Int @@ Counter] = ArgParser.flag { (current, args) =>
     Try(Some((Tag.of(Tag.unwrap(current) + 1), args)))
   }
 
-  implicit val longArgParser: ArgParser[Long] = ArgParser.singleValue { (current, head) =>
-    Try(Some(head.toLong))
+  implicit val longArgParser: ArgParser[Long] = ArgParser.value { (current, head) =>
+    Try(head.toLong)
   }
 
-  implicit val floatArgParser: ArgParser[Float] = ArgParser.singleValue { (current, head) =>
-    Try(Some(head.toFloat))
+  implicit val floatArgParser: ArgParser[Float] = ArgParser.value { (current, head) =>
+    Try(head.toFloat)
   }
 
-  implicit val doubleArgParser: ArgParser[Double] = ArgParser.singleValue { (current, head) =>
-    Try(Some(head.toDouble))
+  implicit val doubleArgParser: ArgParser[Double] = ArgParser.value { (current, head) =>
+    Try(head.toDouble)
   }
 
-  implicit val stringArgParser: ArgParser[String] = ArgParser.singleValue { (current, head) =>
-    Try(Some(head))
+  implicit val stringArgParser: ArgParser[String] = ArgParser.value { (current, head) =>
+    Try(head)
   }
 
   private val fmt = new SimpleDateFormat("yyyy-MM-dd")
 
-  implicit val dateArgParser: ArgParser[java.util.Calendar] = ArgParser.singleValue { (current, head) =>
-    Try(Some{
+  implicit val dateArgParser: ArgParser[java.util.Calendar] = ArgParser.value { (current, head) =>
+    Try {
       val c = new GregorianCalendar
-      c.setTime(fmt parse head)
+      c setTime fmt.parse(head)
       c
-    })
+    }
   }
 
   implicit def optionArgParser[T: ArgParser : Default]: ArgParser[Option[T]] = ArgParser.from { names =>

@@ -1,253 +1,297 @@
 # case-app
 
-*Seamless command-line argument parsing for Scala*
+*Type-level & seamless command-line argument parsing for Scala*
 
-**case-app** parses command-line arguments. Possible options are simply variables of a case class, their types are validated
-at compile-time via type-level programming, and these case classes can be defined recursively for more convenience (see below for more details).
-
-## Getting started
-
-Let's assume you have an application of the form
+Just put your options in one or several case classes, like in
 ```scala
-object MyProg extends App {
-
-  // core of your app...
-
-}
+case class Options(
+  user: Option[String],
+  enableFoo: Boolean,
+  files: List[String]
+)
 ```
-
-and you want to it to accept command-line arguments. Using *case-app*, you can just make the code above look like:
-```scala    
-import caseapp._
-
-case class MyProg() extends App {
-
-  // core of your app
-
-}
-
-object MyProg extends AppOf[MyProg] {
-  val ignore = me
-}
-```
-assuming you added the following lines to your `build.sbt`:
-```
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.1.0"
-```
-
-You can then add options to your program, for example:
+or
 ```scala
-
-case class MyProg(
-  foo: Boolean = false,
+case class AuthOptions(
   user: String,
-  password: String,
-  bar: Option[String]
-) extends App {
+  password: String
+)
 
-  // core of your app, using the variables above
+case class PathOptions(
+  fooPath: String,
+  barPath: String
+)
 
+case class Options(
+  auth: AuthOptions,
+  paths: PathOptions
+)
+```
+
+Parse them with
+```scala
+CaseApp.parse[Options](args) match {
+  case Left(err) =>
+    // Option parsing failed, error description in err
+  case Right((options, remainingArgs)) =>
+    // Success, we have options and remainingArgs
 }
 ```
 
-So transitioning from `scala.App` to case-app consists in importing `caseapp._`, making the former singleton
-extending `App` (from the `scala` namespace) a case class extending `App` (from `caseapp`), and declaring a singleton with the same
-name as the case class, extending `AppOf[`*it-self*`]` (and adding the line `val ignore = me` in it, see below for more
-explanations).
+Alternately, accept help and usage options with
+```scala
+CaseApp.parseWithHelp[Options](args) match {
+  case Left(err) =>
+    // Option parsing failed, error description in err
+  case Right((options, help, usage, remainingArgs)) =>
+    // Success, we have options and remainingArgs
 
-Running this app with the `--help` option (like `sbt "run --help"`) will show a description of the available options.
-Running it with unrecognized or malformed options will stop the program prematurely with an error message.
+    // help and usage booleans tell us whether help or usage were requested
+    if (help) {
+      CaseApp.printHelp[Options]()
+      sys exit 0
+    }
+
+    if (usage) {
+      CaseApp.printUsage[Options]()
+      sys exit 0
+    }
+}
+```
+
+Last refinement, you can also avoid the pain of having to define an
+intermediary `scala.App` singleton or a `main` method with
+```scala
+case class MyApp(
+  user: Option[String], // Nested case classes of options like above also accepted
+  enableFoo: Boolean,
+  files: List[String]
+) extends App { // Extending caseapp.App
+
+  // core of your app, i.e. what would have been in main
+  // remaining arguments are in
+  //   def remainingArgs: Seq[String]
+
+}
+
+object MyApp extends AppOf[MyApp] {
+  val parser = default
+}
+```
+
+The singleton `MyApp` will then contain a main method that will:
+- parse the command-line arguments,
+- if requested, print a help or usage message and exit,
+- run the content of a `MyApp` case class instance with the options
+set, and the remaining arguments available through `remainingArgs`. This
+uses `DelayedInit` under the hood.
+
+`MyApp` can then by run with options, e.g.
+```
+--user aaa --enable-foo extra_arg other_extra_arg
+```
+or
+```
+--user bbb --file first_file --file second_file
+```
+
+## Usage
+
+Add to your `build.sbt`
+```scala
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
+libraryDependencies +=
+  "com.github.alexarchambault" %% "case-app" % "0.2.0-SNAPSHOT"
+```
+
+Import `caseapp._` (or just `caseapp.CaseApp` if you don't
+need `caseapp.App` and annotations).
+
+See above for usage examples.
 
 ## Features
 
 ### Default values
 
-Default values should be specified explicitly when defining the case class nesting the options. If they are not,
-the main types supported by default are given hard-coded default values (`Int`: `0`, `Option[...]`: `None`, etc.).
+Options can be given default values. These will be kept
+if no corresponding option was specified in the arguments.
+
+Also, for options whose type does not match (hard-coded) usual types
+like `Int`, `String`, etc.,
+you must specify a default value for them. (This restriction
+may be removed in the future - then parsing would simply fail
+with a `Left` if no corresponding option was found in the arguments.
+For now, a default value *must* be provided.)
+
+Nested case classes of options should also be given a default value. (This
+too should not be needed in the future).
 
 ### Extra names
 
 Options can be given several names, by annotating the corresponding variable:
 ```scala
-case class MyApp(
+case class Options(
   @ExtraName("bar") foo: Option[String]
-) extends App
+)
 ```
 
 One letter names are assumed to be short options (name `"a"` will match option `-a`), longer names
 are assumed to be long options (`"bar"` will match `"--bar"`).
 
-Name are converted to lower case and hyphenized in order to get the corresponding option, i.e.
+Names are hyphenized and converted to lower case in order to get the corresponding option, e.g.
 `"fooBar"` matches option `--foo-bar`.
 
-### Recursion
+### Nested option definitions
 
-Option case classes can nest each other to facilitate re-usability of options definition, like in:
+As illustrated above, case classes of options can be nested in other case classes
+to facilitate re-usability of option definitions, like in:
 ```scala
 case class CommonOptions(
   user: String,
   password: String
 )
 
-case class FirstApp(
-  common: CommonOptions
-, foo: Boolean
-) extends App {
-  // First app content
-}
+case class FirstAppOptions(
+  common: CommonOptions,
+  foo: Boolean
+)
 
-case class SecondApp(
-  common: CommonOptions
-, bar: Boolean
-) extends App {
-  // Second app content...
-}
+case class SecondAppOptions(
+  common: CommonOptions,
+  bar: Boolean
+)
 ```
 
-Options defined in `CommonOptions` are common to `FirstApp` and `SecondApp`.
+Options defined in `CommonOptions` are common to `FirstAppOptions`
+and `SecondAppOptions`.
 
 ### Counters
 
 Some more complex options can be specified multiple times on the command-line and should be
 "accumulated". For example, one would want to define a verbose option like
 ```scala
-case class MyApp(
+case class Options(
   @ExtraName("v") verbose: Int
-) extends App {
-  // ...
-}
+)
 ```
 
-Verbosity would then be specified on the command-line like `--verbose 3`. But this does not feel natural -
- the usual way of increasing verbosity is to repeat the verbosity option, which should be a flag, like in
- `-v -v -v`. To accept the latter (and only the latter), just tag `verbose` type with `Counter`:
+Verbosity would then have be specified on the command-line like `--verbose 3`.
+But the usual preferred way of increasing verbosity is to repeat the verbosity
+option, like in `-v -v -v`. To accept the latter,
+tag `verbose` type with `Counter`:
 ```scala
-case class MyApp(
+case class Options(
   @ExtraName("v") verbose: Int @@ Counter
-) extends App {
-  // ...
-}
+)
 ```
 
-`verbose` (and `v`) option will then be viewed as a flag, and the `verbose` variable will contain
+`verbose` (and `v`) option will then be viewed as a flag, and the
+`verbose` variable will contain
 the number of times this flag is specified on the command-line.
+
+It can optionally be given a default value other than 0. This
+value will be increased by the number of times `-v` or `--verbose`
+was specified in the arguments.
 
 
 ### Lists
 
-Another kind of repeated options is when you expect a list of values, like in
+You may also expect a list of values for an option, like in
 ```scala
-case class MyApp(
+case class Options(
   list: List[String]
-) extends App {
-  // ...
-}
+)
 ```
 
-In this case, case-app will accumulate the options in a list: `--list first --list second` will make
+In this case, case-app will accumulate the options in a list:
+`--list first --list second` will make
 the `list` variable have the value `List("first", "second")`.
 
+Here too, `list` can be given a non-`Nil` default value. Items from
+the arguments will simply be appended to it.
 
 
 ### Help message and options
 
-Running an app with the `--help` or `-h` options will make it print a help message, e.g. running
+The help message generated by caseapp can be enhanced with
+annotations, like in
 ```scala
-case class MyApp(
-  foo: Option[String]
-, bar: Int
-) extends App {
-  // ...
-}
+  @AppName("Glorious App")
+  @AppVersion("0.1.0")
+case class AppOptions(
+    @ValueDescription("a foo")
+    @HelpMessage("Specify some foo")
+  foo: Option[String],
+    @ValueDescription("bar count")
+    @HelpMessage("Specify the bar count")
+  bar: Int
+)
 ```
-
-with `--help` option prints:
-```
-MyApp
-Usage: my-app [options]
-  --foo  <value>
-  --bar  <value>
-
-```
-
-App name and version in the help message can be customized, as can the `<value>` argument value descriptors, and
-per option help messages can be specified, e.g.
-```scala
-@AppName("Glorious App")
-@AppVersion("0.1.0")
-case class MyApp(
-  @ValueDescription("a foo") @HelpMessage("Specify some foo") foo: Option[String]
-, bar: Int
-) extends App {
-// ...
-}
-```
-with `--help` option prints:
+whose help message will be:
 ```
 Glorious App 0.1.0
 Usage: my-app [options]
   --foo  <a foo>
         Specify some foo
+  --bar  <bar count>
+        Specify the bar count
+```
+instead of the default
+```
+MyApp
+Usage: my-app [options]
+  --foo  <value>
   --bar  <value>
 ```
 
-### Getting an arguments parser
+## Default supported option types
 
-Argument parsers are also available as is:
+The following types are supported by default: `Boolean`, `Int`, `Long`, `Float`, `Double`,
+`String`, `Calendar` (from `java.util`), `Unit` (ignored flag argument), and `Int @@ Counter` (see above), and
+lists/options of these types.
+
+## User-defined options types
+
+Use your own option types by defining implicit `ArgParser`s for them, like in
 ```scala
-    case class CC(foo: String, bar: Option[Int])
-
-    val parser = implictly[Parser[CC]]
-    parser(args) match {
-      case Success((cc, remainingArgs)) =>
-       // Success: we have a CC
-      case Failure(t) =>
-       // Failed: error is in t
-    }
+implicit val customArgParser: ArgParser[Custom] = ArgParser.value[Custom] { (current, arg) =>
+  // Current is the current value of this option
+  // Return either:
+  //   Success(newValue) if arg contains a valid value for a `Custom`
+  //   Failure(reason)   else
+}
 ```
-
 
 ## Internals
 
-* case-app uses type-level programming - with a slice of reflection - to achieve its goals.
+case-app uses the type class facilities from
+[shapeless](https://github.com/milessabin/shapeless)
+(mainly through `Lazy`). It also uses
+a bit of reflection, mainly to get annotations and
+default values of case classes parameters - macros (and more type classes and type level programming)
+should be used instead in the future.
 
-It validates the option types at compile-time, using the well-known [shapeless](https://github.com/milessabin/shapeless)
-along the way. It roughly processes the
-case-class it is given, looking for an implicit `PreFolder[T]` for each of its variables - a `PreFolder[T]` basically
-parses an option of type `T` out of arguments it is given, once it is given the name(s) of the option. It uses
-shapeless'`LabelledProductTypeClass` mechanism.
-
-* Why the `val ignore = me` ?
-
-This line has to be added in the definitions of an `AppOf[CC]` in order to get some implicits about `CC`. These
-cannot get along the default constructor of `AppOf` (defining `AppOf` like `AppOf[C <: ArgsApp](implicit ... some implicits...)`),
-as one then runs into the same problem as [here](https://issues.scala-lang.org/browse/SI-5000)
-and [here](https://issues.scala-lang.org/browse/SI-7666).
-
-* case-app uses `DelayedInit`, like `scala.App`
-
-It does this in order to delay the execution of the content
-of the classes extending `caseapp.App`. `DelayedInit` is deprecated, but support should
-continue until a viable alternative exists, as mentioned [here](https://github.com/scala/scala/releases/tag/v2.11.0-RC1).
- 
 ## TODO
 
-* Default values with system config (through typesafe-config): if an option was not specified on the command-line and
-  a value for it is available through the config, use the former instead of the default value in the case class definition
-  or one deduced from the option type.
-* Commands à la git or hadoop or like in scopt (called like *app* *command* *command arguments...*), defined as a (shapeless) record type
+* Commands à la git or hadoop or like in scopt (called like *app* *command* *command arguments...*), defined as a (shapeless) union type
   whose keys are command names and values are case classes (as above) of the commands.
  
 ## See also
 
-Eugene Yokota, the author of scopt, and others, compiled a list of command-line argument parsing
-library for Scala, in [this StackOverflow question](http://stackoverflow.com/questions/2315912/scala-best-way-to-parse-command-line-parameters-cli).
+Eugene Yokota, the author of scopt, and others, compiled
+an (eeextremeeeely long) list of command-line argument parsing
+libraries for Scala, in [this StackOverflow question](http://stackoverflow.com/questions/2315912/scala-best-way-to-parse-command-line-parameters-cli).
 
 Unlike [scopt](https://github.com/scopt/scopt), case-app is less monadic / abstract data types based, and more
-descriptive / algebric data types oriented.
+straight-to-the-point and descriptive / algebric data types oriented.
  
 ## Notice
  
-Copyright (c) 2014 Alexandre Archambault. See LICENSE file for more details.
+Copyright (c) 2014-2015 Alexandre Archambault.
+See LICENSE file for more details.
 
 Released under Apache 2.0 license.

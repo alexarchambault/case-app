@@ -56,18 +56,24 @@ package object util {
         val t =
           for {
             t <- Some(tpe.member(sym.name)).filter(_.isMethod)
-            _type <- Some(t.asMethod.typeSignatureIn(tpe).typeSymbol).filter(_.isClass) // FIXME Add a .finalResultType before .typeSymbol in scala 2.11
+            _type <- Some(t.asMethod.typeSignatureIn(tpe).typeSymbol).filter(_.isClass) // FIXME Add a .finalResultType before .typeSymbol in scala 2.11 ?
             c <- Some(_type.asClass).filter(_.isCaseClass)
           } yield c.typeSignature
 
-        sym.name.toString -> ((t match {
-          case Some(c) =>
-            Left(ccRecursiveMembersAnnotationsFoldHelper[A](c, f))
-          case None =>
-            val allAnnotations = tpe.member(sym.name).annotations
-            val annotations = allAnnotations.map(f).collect { case Some(v) => v}
+        val allAnnotations = tpe.member(sym.name).annotations
+        val annotations = allAnnotations.map(f).collect { case Some(v) => v}
+
+        sym.name.toString -> ((
+          if (annotations.nonEmpty)
             Right(annotations)
-        }): Either[CCRecursiveFieldAnnotations[A], List[A]])
+          else
+            t match {
+              case Some(c) =>
+                Left(ccRecursiveMembersAnnotationsFoldHelper[A](c, f))
+              case None =>
+                Right(Nil)
+            }
+        ): Either[CCRecursiveFieldAnnotations[A], List[A]])
       }
     )
   }

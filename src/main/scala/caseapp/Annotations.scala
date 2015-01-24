@@ -40,6 +40,7 @@ import core.util._
 
 /**
  * Provides a name for the annotated case class of arguments
+ * E.g. MyApp
  */
 case class AppName(appName: String) extends annotation.StaticAnnotation {
   private[caseapp] def orElse(other: AppName): AppName = AppName(
@@ -49,6 +50,7 @@ case class AppName(appName: String) extends annotation.StaticAnnotation {
 
 /**
  * Provides a program name for the annotated case class of arguments
+ * E.g. my-app
  */
 case class ProgName(progName: String) extends annotation.StaticAnnotation {
   private[caseapp] def orElse(other: ProgName): ProgName = ProgName(

@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "case-app"
 
-version := "0.1.1-SNAPSHOT"
+version := "0.2.0-SNAPSHOT"
 
 organization := "com.github.alexarchambault"
 
@@ -10,10 +10,7 @@ scalaVersion := "2.11.5"
 
 crossScalaVersions := Seq("2.10.4", "2.11.5")
 
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
+resolvers += Resolver.sonatypeRepo("releases")
 
 libraryDependencies ++= Seq(
   "org.scala-lang"  % "scala-reflect" % scalaVersion.value
@@ -23,14 +20,12 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= {
   if (scalaVersion.value startsWith "2.10.")
     Seq(
-      "com.chuusai" %% "shapeless" % "2.1.0-SNAPSHOT" cross CrossVersion.full,
-      // For shapeless LabelledGeneric to work, you may need to add it
-      // to your own project too...
+      "com.chuusai" %% "shapeless" % "2.1.0-RC1" cross CrossVersion.full,
       compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
     )
   else
     Seq(
-      "com.chuusai" %% "shapeless" % "2.1.0-SNAPSHOT"
+      "com.chuusai" %% "shapeless" % "2.1.0-RC1"
     )
 }
 

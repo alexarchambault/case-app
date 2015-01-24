@@ -7,7 +7,7 @@ import reflect.runtime.universe.{ TypeTag, typeTag }
  * Provides usage and help messages related to `T`
  */
 case class Messages[T : DescriptionsOf : TypeTag : NamesOf : ArgParser]() {
-  private val _parser = ArgParser[T].apply(Left(NamesOf[T].apply()))
+  private val _parser = ArgParser[T].apply((Some(NamesOf[T].apply()), Nil))
   private val desc = _parser.namesInfos.flatMap{
     case desc @ NamesInfo(options, _) => options.map(_ -> desc)
   }.toMap
@@ -55,5 +55,7 @@ case class Messages[T : DescriptionsOf : TypeTag : NamesOf : ArgParser]() {
 }
 
 object Messages {
+  def apply[T](implicit messages: Messages[T]): Messages[T] = messages
+
   implicit def messages[T : DescriptionsOf : TypeTag : NamesOf : ArgParser]: Messages[T] = Messages[T]()
 }
