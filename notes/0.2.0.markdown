@@ -1,0 +1,3 @@
+Type-level & seamless command-line argument parsing for Scala:
+
+* Reworked API
