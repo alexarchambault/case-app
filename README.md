@@ -18,8 +18,8 @@ case class AuthOptions(
 )
 
 case class PathOptions(
-  fooPath: String,
-  barPath: String
+  @ExtraName("f") fooPath: String,
+  @ExtraName("b") barPath: String
 )
 
 case class Options(
@@ -65,7 +65,7 @@ intermediary `scala.App` singleton or a `main` method with
 case class MyApp(
   user: Option[String], // Nested case classes of options like above also accepted
   enableFoo: Boolean,
-  files: List[String]
+  @ExtraName("f") files: List[String]
 ) extends App { // Extending caseapp.App
 
   // core of your app, i.e. what would have been in main
@@ -88,11 +88,11 @@ uses `DelayedInit` under the hood.
 
 `MyApp` can then by run with options, e.g.
 ```
---user aaa --enable-foo extra_arg other_extra_arg
+--user aaa --enable-foo --file some_file extra_arg other_extra_arg
 ```
 or
 ```
---user bbb --file first_file --file second_file
+--user bbb -f first_file -f second_file
 ```
 
 ## Usage
@@ -272,7 +272,7 @@ should be used instead in the future.
 
 ## TODO
 
-* Commands à la git or hadoop or like in scopt (called like *app* *command* *command arguments...*), defined as a (shapeless) union type
+Commands à la git or hadoop or like in scopt (called like *app* *command* *command arguments...*), defined as a (shapeless) union type
   whose keys are command names and values are case classes (as above) of the commands.
  
 ## See also
