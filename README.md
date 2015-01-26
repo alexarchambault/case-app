@@ -272,10 +272,10 @@ implicit val customArgParser: ArgParser[Custom] =
 
 case-app uses the type class facilities from
 [shapeless](https://github.com/milessabin/shapeless)
-(mainly through `Lazy`). It also uses
-a bit of reflection, mainly to get annotations and
-default values of case classes parameters - macros (and more type classes and type level programming)
-should be used instead in the future.
+(mainly through `Lazy`). It also uses a bit of reflection, mainly
+to get annotations and default values of case classes parameters.
+Reflection should be replaced by macros (and more type classes and type level programming)
+at some point.
 
 ## TODO
 
