@@ -99,13 +99,8 @@ or
 
 Add to your `build.sbt`
 ```scala
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
-
 libraryDependencies +=
-  "com.github.alexarchambault" %% "case-app" % "0.2.0-SNAPSHOT"
+  "com.github.alexarchambault" %% "case-app" % "0.2.0"
 ```
 
 Import `caseapp._` (or just `caseapp.CaseApp` if you don't
