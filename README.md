@@ -32,13 +32,16 @@ Parse them with
 ```scala
 CaseApp.parse[Options](args) match {
   case Left(err) =>
-    // Option parsing failed, error description in err
+    // Option parsing failed, error description in
+    //   err: String
   case Right((options, remainingArgs)) =>
-    // Success, we have options and remainingArgs
+    // Success, we have
+    //   options: Options, and
+    //   remainingArgs: Seq[String]
 }
 ```
 
-Alternately, accept help and usage options with
+Alternatively, accept help and usage options with
 ```scala
 CaseApp.parseWithHelp[Options](args) match {
   case Left(err) =>
@@ -243,25 +246,29 @@ Usage: my-app [options]
   --bar  <value>
 ```
 
-## Default supported option types
+### Default supported option types
 
 The following types are supported by default: `Boolean`, `Int`, `Long`, `Float`, `Double`,
 `String`, `Calendar` (from `java.util`), `Unit` (ignored flag argument), and `Int @@ Counter` (see above), and
 lists/options of these types.
 
-## User-defined options types
+### User-defined option types
 
 Use your own option types by defining implicit `ArgParser`s for them, like in
 ```scala
-implicit val customArgParser: ArgParser[Custom] = ArgParser.value[Custom] { (current, arg) =>
-  // Current is the current value of this option
-  // Return either:
-  //   Success(newValue) if arg contains a valid value for a `Custom`
-  //   Failure(reason)   else
-}
+implicit val customArgParser: ArgParser[Custom] =
+  ArgParser.value[Custom] { (current, arg) =>
+    //   current: Current
+    // is the current value of this option,
+    //   arg: String
+    // is the option to parse.
+    // Return either:
+    //   Success(newValue) if arg contains a valid value for a `Custom`
+    //   Failure(reason)   else
+  }
 ```
 
-## Internals
+### Internals
 
 case-app uses the type class facilities from
 [shapeless](https://github.com/milessabin/shapeless)
@@ -272,12 +279,13 @@ should be used instead in the future.
 
 ## TODO
 
-Commands à la git or hadoop or like in scopt (called like *app* *command* *command arguments...*), defined as a (shapeless) union type
-  whose keys are command names and values are case classes (as above) of the commands.
+Commands à la git or hadoop or like in scopt (called like `app command` *command arguments...*),
+described by a (shapeless) union type
+whose keys are command names and values are case classes (as above) of the commands.
  
 ## See also
 
-Eugene Yokota, the author of scopt, and others, compiled
+Eugene Yokota, the current maintainer of scopt, and others, compiled
 an (eeextremeeeely long) list of command-line argument parsing
 libraries for Scala, in [this StackOverflow question](http://stackoverflow.com/questions/2315912/scala-best-way-to-parse-command-line-parameters-cli).
 
