@@ -13,8 +13,8 @@ package object util {
   // See http://stackoverflow.com/questions/15095727/in-scala-2-10-how-do-you-create-a-classtag-given-a-typetag
   // See http://stackoverflow.com/a/14034802/3714539
 
-  def classTagOf[T: TypeTag]: ClassTag[T] =
-    ClassTag[T](runtimeMirror(getClass.getClassLoader) runtimeClass typeTag[T].tpe)
+  private def classTagOf(tpe: Type): ClassTag[_] =
+    ClassTag(runtimeMirror(getClass.getClassLoader) runtimeClass tpe)
 
   def classAnnotationsFold[C : TypeTag, A](f: Annotation => Option[A]): List[A] =
     (typeOf[C].typeSymbol.asClass.annotations :\ List.empty[A]) { (ann, acc) =>
@@ -102,15 +102,17 @@ package object util {
   }
 
 
-  def instantiateCCWithDefaultValues[C <: Product : TypeTag]: C = {
-    val _class = currentMirror.classSymbol(classTagOf[C].runtimeClass)
+  private def instanceMirrorOf(tpe: Type): InstanceMirror = {
+    val _class = currentMirror.classSymbol(classTagOf(tpe).runtimeClass)
     val module = currentMirror.reflectModule(_class.companionSymbol.asModule)
-    val im = currentMirror reflect module.instance
-
-    instantiateCCWithDefaultValuesHelper[C](im)
+    currentMirror reflect module.instance
   }
 
-  private def instantiateCCWithDefaultValuesHelper[C <: Product](im: InstanceMirror): C = {
+  def instantiateCCWithDefaultValues[C <: Product : TypeTag]: C =
+    instantiateCCWithDefaultValuesHelper(typeOf[C]).asInstanceOf[C]
+
+  private def instantiateCCWithDefaultValuesHelper(tpe: Type): Any = {
+    val im = instanceMirrorOf(tpe)
     val typeSignature = im.symbol.typeSignature
     val method = typeSignature.member(newTermName("apply")).asMethod
 
@@ -119,6 +121,7 @@ package object util {
         case NoSymbol =>
           p.typeSignature match {
             case t if t =:= typeOf[Boolean]         => false
+            case t if t =:= typeOf[Unit]         => ()
             case t if t =:= typeOf[String]          => ""
             case t if t =:= typeOf[Int]             => 0
             case t if t =:= typeOf[Int @@ Counter] => Tag.of[Counter](0)
@@ -128,6 +131,7 @@ package object util {
             case t if t =:= typeOf[Float]             => 0.0f
             case t if t =:= typeOf[Double]             => 0.0
             case t if t =:= typeOf[java.util.Calendar]  => new GregorianCalendar()
+            case t if t <:< typeOf[Product]            => instantiateCCWithDefaultValuesHelper(t)
             case t                         => throw new IllegalArgumentException(t.toString)
           }
 
@@ -139,19 +143,19 @@ package object util {
     instantiateCCHelper(im)(args)
   }
 
-  private def instantiateCCHelper[C <: Product](im: InstanceMirror): Seq[Any] => C = {
+  private def instantiateCCHelper(im: InstanceMirror): Seq[Any] => Any = {
     val typeSignature = im.symbol.typeSignature
     val method = typeSignature.member(newTermName("apply")).asMethod
 
-    im.reflectMethod(method)(_: _*).asInstanceOf[C]
+    im.reflectMethod(method)(_: _*)
   }
 
   def instantiateCC[C <: Product : TypeTag]: Seq[Any] => C = {
-    val _class = currentMirror.classSymbol(classTagOf[C].runtimeClass)
+    val _class = currentMirror.classSymbol(classTagOf(typeTag[C].tpe).runtimeClass)
     val module = currentMirror.reflectModule(_class.companionSymbol.asModule)
     val im = currentMirror reflect module.instance
 
-    instantiateCCHelper[C](im)
+    instantiateCCHelper(im)(_).asInstanceOf[C]
   }
 
   // FIXME Lots of deprecated methods in scala 2.11 in the three functions below

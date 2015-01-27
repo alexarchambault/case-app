@@ -17,7 +17,7 @@ object Tests {
   
   case class MoreArgs(
     count  : Int @@ Counter
-  , few    : FewArgs = FewArgs()
+  , few    : FewArgs
   ) extends App
 
   case class WithList(
