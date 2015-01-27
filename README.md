@@ -126,9 +126,6 @@ may be removed in the future - then parsing would simply fail
 with a `Left` if no corresponding option was found in the arguments.
 For now, a default value *must* be provided.)
 
-Nested case classes of options should also be given a default value. (This
-too should not be needed in the future).
-
 ### Extra names
 
 Options can be given several names, by annotating the corresponding variable:
