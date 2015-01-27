@@ -2,7 +2,7 @@ import SonatypeKeys._
 
 name := "case-app"
 
-version := "0.2.0"
+version := "0.2.1"
 
 organization := "com.github.alexarchambault"
 
