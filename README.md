@@ -1,5 +1,7 @@
 # case-app
 
+[![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alexarchambault/case-app?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+
 *Type-level & seamless command-line argument parsing for Scala*
 
 Just put your options in one or several case classes, like in
