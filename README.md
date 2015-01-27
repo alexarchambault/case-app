@@ -102,8 +102,7 @@ or
 
 Add to your `build.sbt`
 ```scala
-libraryDependencies +=
-  "com.github.alexarchambault" %% "case-app" % "0.2.0"
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.2.1"
 ```
 
 Import `caseapp._` (or just `caseapp.CaseApp` if you don't
