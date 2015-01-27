@@ -58,6 +58,26 @@ object Tests {
   CaseApp.parseWithHelp[WithCalendar] _
   CaseApp.parseWithHelp[WithCustom] _
   CaseApp.parseWithHelp[Demo] _
+
+  case class ReadmeOptions1(
+    user: Option[String],
+    enableFoo: Boolean,
+    @ExtraName("f") file: List[String]
+  )
+  case class AuthOptions(
+    user: String,
+    password: String
+  )
+
+  case class PathOptions(
+    @ExtraName("f") fooPath: String,
+    @ExtraName("b") barPath: String
+  )
+
+  case class ReadmeOptions2(
+    auth: AuthOptions,
+    paths: PathOptions
+  )
   
 }
 
@@ -117,6 +137,27 @@ class Tests extends FlatSpec with Matchers {
 
   it should "parse a user-defined argument type" in {
     CaseApp.parse[WithCustom](Seq("--custom", "a")) shouldEqual Right((WithCustom(custom = Custom("a")), Seq.empty))
+  }
+
+  it should "parse first README options" in {
+    CaseApp.parse[ReadmeOptions1](Seq("--user", "aaa", "--enable-foo", "--file", "some_file", "extra_arg", "other_extra_arg")) shouldEqual Right((
+      ReadmeOptions1(Some("aaa"), enableFoo = true, List("some_file")),
+      Seq("extra_arg", "other_extra_arg")
+    ))
+  }
+
+  it should "parse first README options (second args example)" in {
+    CaseApp.parse[ReadmeOptions1](Seq("--user", "bbb", "-f", "first_file", "-f", "second_file")) shouldEqual Right((
+      ReadmeOptions1(Some("bbb"), enableFoo = false, List("first_file", "second_file")),
+      Seq()
+    ))
+  }
+
+  it should "parse second README options" in {
+    CaseApp.parse[ReadmeOptions2](Seq("--user", "aaa", "--password", "pass", "extra", "-b", "bar")) shouldEqual Right((
+      ReadmeOptions2(AuthOptions("aaa", "pass"), PathOptions("", "bar")),
+      Seq("extra")
+    ))
   }
 
 }
