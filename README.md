@@ -105,7 +105,13 @@ Add to your `build.sbt`
 libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.2.1"
 ```
 
-Import `caseapp._` (or just `caseapp.CaseApp` if you don't
+If you are using scala 2.10.x, also add the macro paradise plugin to your build,
+```scala
+libraryDependencies +=
+  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
+```
+
+Then import `caseapp._` (or just `caseapp.CaseApp` if you don't
 need `caseapp.App` and annotations).
 
 See above for usage examples.
