@@ -105,6 +105,13 @@ Add to your `build.sbt`
 libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.2.1"
 ```
 
+For the development version, add instead,
+```scala
+resolvers += Resolver.sonatypeRepo("snapshots")
+
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.2.2-SNAPSHOT"
+```
+
 If you are using scala 2.10.x, also add the macro paradise plugin to your build,
 ```scala
 libraryDependencies +=
