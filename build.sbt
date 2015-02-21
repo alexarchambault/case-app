@@ -2,8 +2,6 @@ import SonatypeKeys._
 
 name := "case-app"
 
-version := "0.2.2-SNAPSHOT"
-
 organization := "com.github.alexarchambault"
 
 scalaVersion := "2.11.5"
@@ -20,18 +18,19 @@ libraryDependencies ++= Seq(
 libraryDependencies ++= {
   if (scalaVersion.value startsWith "2.10.")
     Seq(
-      "com.chuusai" %% "shapeless" % "2.1.0-RC2" cross CrossVersion.full,
+      "com.chuusai" %% "shapeless" % "2.1.0" cross CrossVersion.full,
       compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
     )
   else
     Seq(
-      "com.chuusai" %% "shapeless" % "2.1.0-RC2"
+      "com.chuusai" %% "shapeless" % "2.1.0"
     )
 }
 
 scalacOptions ++= Seq(
-  "-feature"
-, "-deprecation"
+  "-feature",
+  "-deprecation",
+  "-target:jvm-1.7"
 )
 
 
@@ -69,3 +68,8 @@ pomExtra := {
     </developers>
 }
 
+releaseSettings
+
+ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix
+
+sbtrelease.ReleasePlugin.ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
