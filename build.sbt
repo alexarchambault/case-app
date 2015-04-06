@@ -11,20 +11,16 @@ crossScalaVersions := Seq("2.10.5", "2.11.6")
 resolvers += Resolver.sonatypeRepo("releases")
 
 libraryDependencies ++= Seq(
-  "org.scala-lang"  % "scala-reflect" % scalaVersion.value
-, "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
+  "com.chuusai" %% "shapeless" % "2.2.0-RC3",
+  "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
+  "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
 )
 
 libraryDependencies ++= {
   if (scalaVersion.value startsWith "2.10.")
-    Seq(
-      "com.chuusai" %% "shapeless" % "2.2.0-RC1" cross CrossVersion.full,
-      compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
-    )
+    Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
   else
-    Seq(
-      "com.chuusai" %% "shapeless" % "2.2.0-RC1"
-    )
+    Seq()
 }
 
 scalacOptions ++= Seq(
