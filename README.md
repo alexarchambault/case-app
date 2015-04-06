@@ -120,6 +120,8 @@ resolvers ++= Seq(
 libraryDependencies += "com.github.alexarchambault" %% "case-app" % "0.2.3-SNAPSHOT"
 ```
 
+If you are already using shapeless 2.2, replace `0.2.3-SNAPSHOT` by `0.3.0-SNAPSHOT`.
+
 If you are using scala 2.10.x, also add the macro paradise plugin to your build,
 ```scala
 libraryDependencies +=
