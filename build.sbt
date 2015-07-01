@@ -4,14 +4,16 @@ name := "case-app"
 
 organization := "com.github.alexarchambault"
 
-scalaVersion := "2.11.6"
+scalaVersion := "2.11.7"
 
-crossScalaVersions := Seq("2.10.5", "2.11.6")
+crossScalaVersions := Seq("2.10.5", "2.11.7")
 
-resolvers += Resolver.sonatypeRepo("releases")
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases")
+)
 
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.2.0-RC4",
+  "com.chuusai" %% "shapeless" % "2.2.3",
   "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
   "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
 )

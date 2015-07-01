@@ -23,6 +23,7 @@ object Default {
 
   implicit val unitDefault: Default[Unit] = Default.from(())
   implicit val intDefault: Default[Int] = Default.from(0)
+  implicit val booleanDefault: Default[Boolean] = Default.from(false)
   implicit val counterDefault: Default[Int @@ Counter] = Default.from(Tag of 0)
   implicit val stringDefault: Default[String] = Default.from("")
 
