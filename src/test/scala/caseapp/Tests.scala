@@ -28,6 +28,10 @@ object Tests {
     list   : List[String]
   ) extends App
 
+  case class OptBool(
+    opt    : Option[Boolean]
+  ) extends App
+
   case class WithCalendar(
     date   : java.util.Calendar
   ) extends App
@@ -55,6 +59,7 @@ object Tests {
   CaseApp.parseWithHelp[MoreArgs] _
   CaseApp.parseWithHelp[WithList] _
   CaseApp.parseWithHelp[WithTaggedList] _
+  CaseApp.parseWithHelp[OptBool] _
   CaseApp.parseWithHelp[WithCalendar] _
   CaseApp.parseWithHelp[WithCustom] _
   CaseApp.parseWithHelp[Demo] _
