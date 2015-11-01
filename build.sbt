@@ -1,21 +1,18 @@
-import SonatypeKeys._
-
-name := "case-app"
 
 organization := "com.github.alexarchambault"
+name := "case-app"
 
 scalaVersion := "2.11.7"
-
-crossScalaVersions := Seq("2.10.5", "2.11.7")
+crossScalaVersions := Seq("2.10.6", "2.11.7")
 
 resolvers ++= Seq(
   Resolver.sonatypeRepo("releases")
 )
 
 libraryDependencies ++= Seq(
-  "com.chuusai" %% "shapeless" % "2.2.3",
-  "org.scala-lang"  % "scala-reflect" % scalaVersion.value,
-  "org.scalatest" %% "scalatest"     % "2.2.0" % "test"
+  "com.chuusai" %% "shapeless" % "2.2.5",
+  "org.scala-lang" % "scala-reflect" % scalaVersion.value,
+  "org.scalatest" %% "scalatest" % "2.2.0" % "test"
 )
 
 libraryDependencies ++= {
@@ -32,10 +29,7 @@ scalacOptions ++= Seq(
 )
 
 
-xerial.sbt.Sonatype.sonatypeSettings
-
 publishMavenStyle := true
-
 publishTo := {
   val nexus = "https://oss.sonatype.org/"
   if (isSnapshot.value)
@@ -44,26 +38,21 @@ publishTo := {
     Some("releases"  at nexus + "service/local/staging/deploy/maven2")
 }
 
+licenses := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0"))
+homepage := Some(url("https://github.com/alexarchambault/case-app"))
 pomExtra := {
-  <url>https://github.com/alexarchambault/case-app</url>
-    <licenses>
-      <license>
-        <name>Apache 2.0</name>
-        <url>http://opensource.org/licenses/Apache-2.0</url>
-      </license>
-    </licenses>
-    <scm>
-      <connection>scm:git:github.com/alexarchambault/case-app.git</connection>
-      <developerConnection>scm:git:git@github.com:alexarchambault/case-app.git</developerConnection>
-      <url>github.com/alexarchambault/case-app.git</url>
-    </scm>
-    <developers>
-      <developer>
-        <id>alexarchambault</id>
-        <name>Alexandre Archambault</name>
-        <url>https://github.com/alexarchambault</url>
-      </developer>
-    </developers>
+  <scm>
+    <connection>scm:git:github.com/alexarchambault/case-app.git</connection>
+    <developerConnection>scm:git:git@github.com:alexarchambault/case-app.git</developerConnection>
+    <url>github.com/alexarchambault/case-app.git</url>
+  </scm>
+  <developers>
+    <developer>
+      <id>alexarchambault</id>
+      <name>Alexandre Archambault</name>
+      <url>https://github.com/alexarchambault</url>
+    </developer>
+  </developers>
 }
 
 credentials += {
@@ -77,7 +66,5 @@ credentials += {
 
 
 releaseSettings
-
 ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix
-
-sbtrelease.ReleasePlugin.ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
+ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
