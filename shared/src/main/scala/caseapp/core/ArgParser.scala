@@ -46,11 +46,25 @@ object ArgParser extends PlatformArgParsers {
         Left(s"Malformed integer: $s")
       }
     }
+  implicit def long: ArgParser[Long] =
+    instance { s =>
+      try Right(s.toLong)
+      catch { case _: NumberFormatException =>
+        Left(s"Malformed long integer: $s")
+      }
+    }
   implicit def double: ArgParser[Double] =
     instance { s =>
       try Right(s.toDouble)
       catch { case _: NumberFormatException =>
-        Left(s"Malformed double: $s")
+        Left(s"Malformed double float: $s")
+      }
+    }
+  implicit def float: ArgParser[Float] =
+    instance { s =>
+      try Right(s.toFloat)
+      catch { case _: NumberFormatException =>
+        Left(s"Malformed float: $s")
       }
     }
   implicit def bigDecimal: ArgParser[BigDecimal] =

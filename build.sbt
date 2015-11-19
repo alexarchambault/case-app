@@ -2,10 +2,8 @@
 lazy val `case-app` = crossProject.in(file("."))
   .settings(commonSettings: _*)
   .settings(publishSettings: _*)
-  .settings(tutSettings ++ Seq(
-    tutTargetDirectory := baseDirectory.value
-  ): _*)
   .settings(
+    name := "case-app",
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.0-SNAPSHOT",
       "com.github.alexarchambault" %%% "derive" % "0.1.0-SNAPSHOT",
@@ -23,10 +21,19 @@ lazy val `case-app` = crossProject.in(file("."))
 lazy val `case-app-jvm` = `case-app`.jvm
 lazy val `case-app-js` = `case-app`.js
 
+lazy val doc = project
+  .dependsOn(`case-app-jvm`)
+  .settings(commonSettings)
+  .settings(noPublishSettings)
+  .settings(tutSettings)
+  .settings(
+    tutSourceDirectory := baseDirectory.value,
+    tutTargetDirectory := baseDirectory.value / ".."
+  )
+
 
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
-  name := "case-app",
   scalaVersion := "2.11.7",
   crossScalaVersions := Seq("2.10.6", "2.11.7"),
   resolvers ++= Seq(
@@ -76,4 +83,10 @@ lazy val publishSettings = Seq(
   ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix,
   ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
 ) ++ releaseSettings
+
+lazy val noPublishSettings = Seq(
+  publish := (),
+  publishLocal := (),
+  publishArtifact := false
+)
 

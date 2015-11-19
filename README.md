@@ -143,6 +143,9 @@ case class Example(
 }
 ```
 
+
+
+
 Called with the `--help` or `-h` option, would print
 ```
 MyApp 0.1.0
@@ -173,6 +176,9 @@ case class Example(
 }
 ```
 
+
+
+
 `--foo` and `-f`, and `--bar` and `-b` would then be equivalent.
 
 ### Long / short options
@@ -192,6 +198,9 @@ case class Example(
 }
 ```
 
+
+
+
 would accept `--foo bar` and `-a 2` as arguments to set `foo` or `a`.
 
 ### Pascal case conversion
@@ -204,6 +213,9 @@ case class Options(
   fooBar: Double
 )
 ```
+
+
+
 
 would accept arguments like `--foo-bar 2.2`.
 
@@ -239,6 +251,9 @@ case class Second(
 }
 ```
 
+
+
+
 ### Commands
 
 *case-app* has a support for commands.
@@ -268,34 +283,9 @@ object MyApp extends CommandAppOf[DemoCommand]
 - base command
 - ...
 
-
-### Migration from the previous version
-
-Shared options used to be automatic, and now require the `@Recurse`
-annotation on the field corresponding to the shared options.
-
-## Usage
-
-The above documentation applies to the to-be-released 1.0 version. It can
-be used via snapshot artefacts, by adding to your `build.sbt`,
-```scala
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
-
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.0.0-SNAPSHOT"
-```
-
-Note that it depends on shapeless 2.3.0-SNAPSHOT.
-
-If you are using scala 2.10.x, also add the macro paradise plugin to your build,
-```scala
-libraryDependencies +=
-  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
-```
-
 ### Counters
+
+*Needs to be updated*
 
 Some more complex options can be specified multiple times on the command-line and should be
 "accumulated". For example, one would want to define a verbose option like
@@ -326,6 +316,8 @@ was specified in the arguments.
 
 ### User-defined option types
 
+*Needs to be updated*
+
 Use your own option types by defining implicit `ArgParser`s for them, like in
 ```scala
 implicit val customArgParser: ArgParser[Custom] =
@@ -338,6 +330,33 @@ implicit val customArgParser: ArgParser[Custom] =
     //   Success(newValue) if arg contains a valid value for a `Custom`
     //   Failure(reason)   else
   }
+```
+
+
+### Migration from the previous version
+
+Shared options used to be automatic, and now require the `@Recurse`
+annotation on the field corresponding to the shared options.
+
+## Usage
+
+The above documentation applies to the to-be-released 1.0 version. It can
+be used via snapshot artefacts, by adding to your `build.sbt`,
+```scala
+resolvers ++= Seq(
+  Resolver.sonatypeRepo("releases"),
+  Resolver.sonatypeRepo("snapshots")
+)
+
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.0.0-SNAPSHOT"
+```
+
+Note that it depends on shapeless 2.3.0-SNAPSHOT.
+
+If you are using scala 2.10.x, also add the macro paradise plugin to your build,
+```scala
+libraryDependencies +=
+  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 ```
 
 ## See also
