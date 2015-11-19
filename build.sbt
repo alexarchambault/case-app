@@ -9,13 +9,7 @@ lazy val `case-app` = crossProject.in(file("."))
       "com.github.alexarchambault" %%% "derive" % "0.1.0-SNAPSHOT",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
       "org.scalatest" %%% "scalatest" % "3.0.0-M11" % "test"
-    ),
-    libraryDependencies ++= {
-      if (scalaVersion.value startsWith "2.10.")
-        Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
-      else
-        Seq()
-    }
+    )
   )
 
 lazy val `case-app-jvm` = `case-app`.jvm
@@ -44,7 +38,13 @@ lazy val commonSettings = Seq(
     "-feature",
     "-deprecation",
     "-target:jvm-1.7"
-  )
+  ),
+  libraryDependencies ++= {
+    if (scalaVersion.value startsWith "2.10.")
+      Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
+    else
+      Seq()
+  }
 )
 
 lazy val publishSettings = Seq(
