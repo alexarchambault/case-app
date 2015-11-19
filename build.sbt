@@ -1,16 +1,16 @@
 
-lazy val `case-app` = project.in(file("."))
-  .settings(commonSettings)
-  .settings(publishSettings)
+lazy val `case-app` = crossProject.in(file("."))
+  .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
   .settings(tutSettings ++ Seq(
     tutTargetDirectory := baseDirectory.value
-  ))
+  ): _*)
   .settings(
     libraryDependencies ++= Seq(
-      "com.chuusai" %% "shapeless" % "2.3.0-SNAPSHOT",
-      "com.github.alexarchambault" %% "derive" % "0.1.0-SNAPSHOT",
+      "com.chuusai" %%% "shapeless" % "2.3.0-SNAPSHOT",
+      "com.github.alexarchambault" %%% "derive" % "0.1.0-SNAPSHOT",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-      "org.scalatest" %% "scalatest" % "2.2.0" % "test"
+      "org.scalatest" %%% "scalatest" % "3.0.0-M11" % "test"
     ),
     libraryDependencies ++= {
       if (scalaVersion.value startsWith "2.10.")
@@ -19,6 +19,9 @@ lazy val `case-app` = project.in(file("."))
         Seq()
     }
   )
+
+lazy val `case-app-jvm` = `case-app`.jvm
+lazy val `case-app-js` = `case-app`.js
 
 
 lazy val commonSettings = Seq(

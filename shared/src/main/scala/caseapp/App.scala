@@ -156,6 +156,7 @@ case class DefaultBaseCommand() extends Command {
   }
 }
 
+// FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
 abstract class CommandAppOf[T <: ArgsApp](implicit
   commandParser: CommandParser[T],
   commandMessages: CommandsMessages[T],

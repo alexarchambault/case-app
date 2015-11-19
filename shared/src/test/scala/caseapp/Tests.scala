@@ -1,6 +1,5 @@
 package caseapp
 
-import java.util.GregorianCalendar
 import caseapp.core.{ CommandParser, ArgParser }
 import org.scalatest._
 
@@ -30,10 +29,6 @@ object Tests {
     opt    : Option[Boolean]
   ) extends App
 
-  case class WithCalendar(
-    date   : java.util.Calendar
-  ) extends App
-
   case class Custom(s: String)
 
   implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
@@ -58,7 +53,6 @@ object Tests {
   CaseApp.parseWithHelp[WithList] _
   CaseApp.parseWithHelp[WithTaggedList] _
   CaseApp.parseWithHelp[OptBool] _
-  CaseApp.parseWithHelp[WithCalendar] _
   CaseApp.parseWithHelp[WithCustom] _
   CaseApp.parseWithHelp[Demo] _
 
@@ -85,7 +79,6 @@ object Tests {
 }
 
 class Tests extends FlatSpec with Matchers {
-  
   import Tests._
 
   "A parser" should "parse no args" in {
@@ -130,12 +123,6 @@ class Tests extends FlatSpec with Matchers {
 
   it should "parse semi-colon separated list args" in {
     CaseApp.parse[WithTaggedList](Seq("--list", "foo", "--list", "bar", "--list", "other", "extra2")) shouldEqual Right((WithTaggedList(list = List("foo", "bar", "other")), Seq("extra2")))
-  }
-
-  it should "parse a date" in {
-    CaseApp.parse[WithCalendar](Seq("--date", "2014-10-23")) shouldEqual Right((WithCalendar(date = {
-      new GregorianCalendar(2014, 9, 23)
-    }), Seq.empty))
   }
 
   it should "parse a user-defined argument type" in {

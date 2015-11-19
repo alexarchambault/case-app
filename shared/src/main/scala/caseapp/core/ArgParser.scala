@@ -1,16 +1,13 @@
 package caseapp
 package core
 
-import java.text.{ ParseException, SimpleDateFormat }
-import java.util.{ GregorianCalendar, Calendar }
-
 trait ArgParser[T] {
   def apply(current: Option[T], s: String, mandatory: Boolean): Either[String, (Boolean, T)]
   def apply(current: Option[T]): Either[String, T]
   def isFlag: Boolean = false
 }
 
-object ArgParser {
+object ArgParser extends PlatformArgParsers {
   def apply[T](implicit parser: ArgParser[T]): ArgParser[T] = parser
 
   def instance[T](f: String => Either[String, T]): ArgParser[T] =
@@ -121,20 +118,6 @@ object ArgParser {
         case (true, t) =>
           Right(Some(t))
       }
-    }
-
-  implicit def calendar: ArgParser[Calendar] =
-    instance {
-      val fmt = new SimpleDateFormat("yyyy-MM-dd")
-
-      s =>
-        try {
-          val c = new GregorianCalendar
-          c setTime fmt.parse(s)
-          Right(c)
-        } catch { case e: ParseException =>
-          Left(s"Cannot parse date: $s")
-        }
     }
 }
 

@@ -3,7 +3,8 @@ package caseapp.core
 import caseapp.CommandName
 import caseapp.core.util.pascalCaseSplit
 import derive.AnnotationOption
-import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, Strict, Generic, Typeable }
+import shapeless.labelled.{ FieldType, field }
+import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, Strict, LabelledGeneric, Witness }
 
 trait CommandParser[T] {
   def get(command: String): Option[Parser[T]]
@@ -76,33 +77,34 @@ object CommandParser {
   implicit val cnil: CommandParser[CNil] =
     instance(_ => None)
 
-  implicit def ccons[H, T <: Coproduct]
+  implicit def ccons[K <: Symbol, H, T <: Coproduct]
    (implicit
-     typeable: Typeable[H],
+     key: Witness.Aux[K],
      commandName: AnnotationOption[CommandName, H],
      parser: Strict[Parser[H]],
      tail: CommandParser[T]
-   ): CommandParser[H :+: T] =
+   ): CommandParser[FieldType[K, H] :+: T] =
     instance {
       val name = commandName().map(_.commandName).getOrElse {
-        // About the takeWhile: should be handled by Typeable?
-        pascalCaseSplit(typeable.describe.toList.takeWhile(_ != '$'))
+        pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
           .map(_.toLowerCase)
           .mkString("-")
       }
 
-      val tail0 = tail.map(Inr(_): H :+: T)
+            println(s"Command: '$name' (${key.value.name}, ${commandName()})")
+
+      val tail0 = tail.map(Inr(_): FieldType[K, H] :+: T)
 
       c =>
         if (c == name)
-          Some(parser.value.map(h => Inl(h)))
+          Some(parser.value.map(h => Inl(field[K](h))))
         else
           tail0.get(c)
     }
 
   implicit def generic[S, C <: Coproduct]
    (implicit
-     lgen: Generic.Aux[S, C],
+     lgen: LabelledGeneric.Aux[S, C],
      underlying: Strict[CommandParser[C]]
    ): CommandParser[S] =
     underlying.value.map(lgen.from)

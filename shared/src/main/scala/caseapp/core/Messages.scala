@@ -4,6 +4,7 @@ package core
 import derive.AnnotationOption
 import shapeless._
 import caseapp.core.util.pascalCaseSplit
+import shapeless.labelled.FieldType
 
 /**
  * Provides usage and help messages related to `T`
@@ -49,6 +50,7 @@ object Messages {
     } .mkString(Messages.NL)
 
 
+  // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
   implicit def messages[T]
    (implicit
      parser: Parser[T],
@@ -108,18 +110,17 @@ object CommandsMessages {
   implicit val cnil: CommandsMessages[CNil] =
     CommandsMessages[CNil](Nil)
 
-  implicit def ccons[H, T <: Coproduct]
+  implicit def ccons[K <: Symbol, H, T <: Coproduct]
    (implicit
-     typeable: Typeable[H],
+     key: Witness.Aux[K],
      commandName: AnnotationOption[CommandName, H],
      parser: Strict[Parser[H]],
      argsName: AnnotationOption[ArgsName, T],
      tail: CommandsMessages[T]
-   ): CommandsMessages[H :+: T] = {
+   ): CommandsMessages[FieldType[K, H] :+: T] = {
     // FIXME Duplicated in CommandParser.ccons
     val name = commandName().map(_.commandName).getOrElse {
-      // About the takeWhile: should be handled by Typeable?
-      pascalCaseSplit(typeable.describe.toList.takeWhile(_ != '$'))
+      pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
         .map(_.toLowerCase)
         .mkString("-")
     }
@@ -132,7 +133,7 @@ object CommandsMessages {
 
   implicit def generic[S, C <: Coproduct]
    (implicit
-     gen: Generic.Aux[S, C],
+     gen: LabelledGeneric.Aux[S, C],
      underlying: Strict[CommandsMessages[C]]
    ): CommandsMessages[S] =
     CommandsMessages(underlying.value.messages)

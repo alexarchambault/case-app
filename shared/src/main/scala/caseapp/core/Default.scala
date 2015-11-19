@@ -1,7 +1,6 @@
 package caseapp
 package core
 
-import java.util.{ Calendar, GregorianCalendar }
 import shapeless._
 
 /** Type class providing a default value for type `CC` */
@@ -9,7 +8,7 @@ trait Default[CC] {
   def apply(): CC
 }
 
-object Default {
+object Default extends PlatformDefaults {
   def apply[CC](implicit default: Default[CC]): Default[CC] = default
   
   def instance[CC](default: => CC): Default[CC] = new Default[CC] {
@@ -33,7 +32,6 @@ object Default {
   implicit val boolean: Default[Boolean] = Default.instance(false)
   implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
   implicit val string: Default[String] = Default.instance("")
-  implicit val calendar: Default[Calendar] = Default.instance(new GregorianCalendar())
 
   implicit def option[T]: Default[Option[T]] = Default.instance(None)
   implicit def list[T]: Default[List[T]] = Default.instance(Nil)

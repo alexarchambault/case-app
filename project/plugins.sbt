@@ -7,3 +7,4 @@ resolvers += Resolver.url(
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 addSbtPlugin("com.github.gseitz" % "sbt-release" % "0.8.5")
 addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.4.0")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.5")
