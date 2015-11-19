@@ -1,10 +1,8 @@
 package caseapp
 
 import java.util.GregorianCalendar
-import caseapp.core.ArgParser
+import caseapp.core.{ CommandParser, ArgParser }
 import org.scalatest._
-
-import scala.util.Success
 
 object Tests {
 
@@ -17,7 +15,7 @@ object Tests {
   
   case class MoreArgs(
     count  : Int @@ Counter
-  , few    : FewArgs
+  , @Recurse few    : FewArgs
   ) extends App
 
   case class WithList(
@@ -38,8 +36,8 @@ object Tests {
 
   case class Custom(s: String)
 
-  implicit val customArgParser: ArgParser[Custom] = ArgParser.value[Custom] { (current, arg) =>
-    Success(Custom(arg))
+  implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
+    Right(Custom(arg))
   }
 
   case class WithCustom(
@@ -80,10 +78,10 @@ object Tests {
   )
 
   case class ReadmeOptions2(
-    auth: AuthOptions,
-    paths: PathOptions
+    @Recurse auth: AuthOptions,
+    @Recurse paths: PathOptions
   )
-  
+
 }
 
 class Tests extends FlatSpec with Matchers {
@@ -163,6 +161,37 @@ class Tests extends FlatSpec with Matchers {
       ReadmeOptions2(AuthOptions("aaa", "pass"), PathOptions("", "bar")),
       Seq("extra")
     ))
+  }
+
+  it should "parse commands" in {
+    sealed trait Command
+
+    case class First(
+      @ExtraName("f") foo: String,
+      bar: Int
+    ) extends Command
+
+    case class Second(
+      fooh: String,
+      baz: Int
+    ) extends Command
+
+    case class Default0(bah: Double) // = 1.0, wait for fix from shapeless
+
+    val parser = CommandParser[Command]
+
+    parser[Default0](Nil) shouldBe Right((Default0(0.0), Nil, None))
+    parser[Default0](Seq("--wrong")) shouldBe Left(s"Unrecognized argument: --wrong")
+    parser[Default0](Seq("--bah", "2")) shouldBe Right((Default0(2.0), Nil, None))
+    parser[Default0](Seq("--bah", "2", "--", "other", "otherother")) shouldBe Right((Default0(2.0), Seq("other", "otherother"), None))
+    parser[Default0](Seq("first")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Nil))))
+    parser[Default0](Seq("first", "arg", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Seq("arg", "other")))))
+    parser[Default0](Seq("first", "--foo", "bah", "--bar", "4")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("bah", 4), Nil))))
+    parser[Default0](Seq("first", "-f", "bah", "--bar", "4")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("bah", 4), Nil))))
+    parser[Default0](Seq("--bah", "3", "first")) shouldBe Right((Default0(3.0), Nil, Some(Right("first", First("", 0), Nil))))
+    parser[Default0](Seq("second")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 0), Nil))))
+    parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 5), Seq("other")))))
+    parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Left("Unrecognized argument: --bar"))))
   }
 
 }

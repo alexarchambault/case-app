@@ -2,10 +2,11 @@ package caseapp
 package demo
 
 @AppVersion("0.1.0")
+@ArgsName("files")
 case class Demo(
   first: Boolean
-, @ExtraName("V")   value : Option[String]
-, @ExtraName("v") verbose : Int @@ Counter
+, @ExtraName("V") @HelpMessage("Set a value") value : Option[String]
+, @ExtraName("v") @HelpMessage("Be verbose") verbose : Int @@ Counter
 , @ExtraName("S") @ValueDescription("stages")  stages : List[String]
 ) extends App {
 
@@ -22,10 +23,35 @@ case class MyApp(
 // ...
 }
 
-object MyApp extends AppOf[MyApp] {
-  val parser = default
+object MyApp0 extends AppOf[MyApp]
+
+object DemoApp extends AppOf[Demo]
+
+
+@AppName("Demo")
+@AppVersion("1.0.0")
+@ProgName("demo-cli")
+sealed trait DemoCommand extends Command
+
+case class First(
+  @ExtraName("v") verbose: Int @@ Counter,
+  @ValueDescription("a bar") @HelpMessage("Set bar") bar: String = "default-bar"
+) extends DemoCommand {
+
+  Console.err.println(s"First: $this")
+
 }
 
-object Demo extends AppOf[Demo] {
-  val parser = default
+@CommandName("second")
+case class Secondd(
+  extra: List[Int],
+  @ExtraName("S")
+  @ValueDescription("stages")
+    stages : List[String]
+) extends DemoCommand {
+
+  Console.err.println(s"Second: $this")
+
 }
+
+object CommandApp extends CommandAppOf[DemoCommand]

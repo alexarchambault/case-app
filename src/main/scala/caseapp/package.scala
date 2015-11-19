@@ -1,3 +1,5 @@
+import shapeless.{ CNil, :+:, Generic }
+
 package object caseapp {
 
   type ExtraName = Name
@@ -21,5 +23,9 @@ package object caseapp {
   }
 
   sealed trait Counter
+
+  // required for default-default values to be found
+  implicit def optionGeneric[T]: Generic.Aux[Option[T], Some[T] :+: None.type :+: CNil] =
+    derive.optionGeneric
 
 }

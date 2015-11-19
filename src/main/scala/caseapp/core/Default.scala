@@ -1,11 +1,10 @@
 package caseapp
 package core
 
-import reflect.runtime.universe.{ Try => _, _ }
+import java.util.{ Calendar, GregorianCalendar }
+import shapeless._
 
-/**
- * Type class providing a default value for type `CC`
- */
+/** Type class providing a default value for type `CC` */
 trait Default[CC] {
   def apply(): CC
 }
@@ -13,21 +12,66 @@ trait Default[CC] {
 object Default {
   def apply[CC](implicit default: Default[CC]): Default[CC] = default
   
-  def from[CC](default: => CC): Default[CC] = new Default[CC] {
+  def instance[CC](default: => CC): Default[CC] = new Default[CC] {
     def apply() = default
   }
 
-  // FIXME This should use macros instead of reflection
-  implicit def default[CC <: Product : TypeTag]: Default[CC] =
-    Default.from(util.instantiateCCWithDefaultValues[CC])
+  implicit def generic[CC, L <: HList, D <: HList]
+   (implicit
+     gen: Generic.Aux[CC, L],
+     default: Strict[shapeless.Default.Aux[CC, D]],
+     defaultOr: Strict[DefaultOr[L, D]]
+   ): Default[CC] =
+    Default.instance(gen.from(defaultOr.value(default.value())))
 
-  implicit val unitDefault: Default[Unit] = Default.from(())
-  implicit val intDefault: Default[Int] = Default.from(0)
-  implicit val booleanDefault: Default[Boolean] = Default.from(false)
-  implicit val counterDefault: Default[Int @@ Counter] = Default.from(Tag of 0)
-  implicit val stringDefault: Default[String] = Default.from("")
+  implicit val unit: Default[Unit] = Default.instance(())
+  implicit val int: Default[Int] = Default.instance(0)
+  implicit val long: Default[Long] = Default.instance(0L)
+  implicit val float: Default[Float] = Default.instance(0f)
+  implicit val double: Default[Double] = Default.instance(0d)
+  implicit val bigDecimal: Default[BigDecimal] = Default.instance(BigDecimal(0))
+  implicit val boolean: Default[Boolean] = Default.instance(false)
+  implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
+  implicit val string: Default[String] = Default.instance("")
+  implicit val calendar: Default[Calendar] = Default.instance(new GregorianCalendar())
 
-  implicit def optionDefault[T]: Default[Option[T]] = Default.from(None)
-  implicit def listDefault[T]: Default[List[T]] = Default.from(Nil)
+  implicit def option[T]: Default[Option[T]] = Default.instance(None)
+  implicit def list[T]: Default[List[T]] = Default.instance(Nil)
 
+}
+
+trait DefaultOr[L <: HList, D <: HList] {
+  def apply(d: D): L
+}
+
+trait LowPriorityDefaultOr {
+  implicit def hconsNone[H, T <: HList, TD <: HList]
+   (implicit
+     default: Strict[Default[H]],
+     tail: DefaultOr[T, TD]
+   ): DefaultOr[H :: T, None.type :: TD] =
+    DefaultOr.instance { case None :: td =>
+      default.value() :: tail(td)
+    }
+}
+
+object DefaultOr extends LowPriorityDefaultOr {
+  def apply[L <: HList, D <: HList](implicit defaultOr: DefaultOr[L, D]): DefaultOr[L, D] =
+    defaultOr
+
+  def instance[L <: HList, D <: HList](f: D => L): DefaultOr[L, D] =
+    new DefaultOr[L, D] {
+      def apply(d: D) = f(d)
+    }
+
+  implicit val hnil: DefaultOr[HNil, HNil] =
+    instance(_ => HNil)
+
+  implicit def hconsSome[H, T <: HList, TD <: HList]
+   (implicit
+     tail: DefaultOr[T, TD]
+   ): DefaultOr[H :: T, Some[H] :: TD] =
+    instance { case Some(d) :: td =>
+      d :: tail(td)
+    }
 }
