@@ -7,7 +7,7 @@
 
 ### Imports
 
-The code below assumes the content of `caseapp` is imported,
+The code snippets below assume that the content of `caseapp` is imported,
 
 ```scala
 import caseapp._
@@ -55,7 +55,7 @@ CaseApp.parse[Options](Seq()) == Options("default", false)
 
 ### Lists
 
-Some arguments can be specified multiple times on the command-line. These
+Some arguments can be specified several times on the command-line. These
 should be typed as lists, e.g. `file` in
 
 ```scala
@@ -69,6 +69,9 @@ CaseApp.parse[Options](
   Seq("--file", "a", "--file", "b")
 ) == Options(None, false, List("a", "b"))
 ```
+
+If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
+see below), the final value of its corresponding field is the last provided in the arguments.
 
 ### Whole application with argument parsing
 
@@ -205,7 +208,7 @@ would accept `--foo bar` and `-a 2` as arguments to set `foo` or `a`.
 
 ### Pascal case conversion
 
-Field names or extra names as above written in pascal case, are split
+Field names or extra names as above, written in pascal case, are split
 and hyphenized.
 
 ```scala
