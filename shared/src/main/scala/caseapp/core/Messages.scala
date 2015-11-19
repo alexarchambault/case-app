@@ -31,6 +31,16 @@ case class Messages[T](
     b ++= Messages.NL
     b.result()
   }
+
+  /**
+   * Add help and usage options to the messages.
+   */
+  def withHelp: Messages[WithHelp[T]] = {
+    case class Dummy()
+    val helpArgs = Parser[WithHelp[Dummy]].args
+
+    copy(args = helpArgs ++ args)
+  }
 }
 
 object Messages {
@@ -101,7 +111,7 @@ case class CommandMessages(
 case class CommandsMessages[T](
   messages: Seq[(String, CommandMessages)]
 ) {
-  lazy val map = messages.toMap
+  lazy val messagesMap = messages.toMap
 }
 
 object CommandsMessages {

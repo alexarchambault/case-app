@@ -265,6 +265,8 @@ case class Second(
 sealed trait DemoCommand extends Command
 
 case class First(
+  foo: Int,
+  bar: String
 ) extends DemoCommand {
 
   // ...
@@ -272,6 +274,7 @@ case class First(
 }
 
 case class Second(
+  baz: Double
 ) extends DemoCommand {
 
   // ...

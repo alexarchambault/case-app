@@ -24,7 +24,7 @@ package object caseapp {
 
   sealed trait Counter
 
-  // required for default-default values to be found
+  // required for the implicits involved in default values to be fine
   implicit def optionGeneric[T]: Generic.Aux[Option[T], Some[T] :+: None.type :+: CNil] =
     derive.optionGeneric
 

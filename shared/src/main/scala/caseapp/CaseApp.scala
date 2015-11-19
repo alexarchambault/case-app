@@ -7,14 +7,11 @@ object CaseApp {
   def parse[T: Parser](args: Seq[String]): Either[String, (T, Seq[String])] =
     Parser[T].apply(args)
 
-  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (T, Boolean, Boolean, Seq[String])] = {
-    implicit val parser0 = parser.withHelp
-
-    parse[WithHelp[T]](args).right map {
+  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (T, Boolean, Boolean, Seq[String])] =
+    parser.withHelp(args).right map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
-  }
 
   def helpMessage[T: Messages]: String =
     Messages[T].helpMessage
@@ -23,9 +20,9 @@ object CaseApp {
     Messages[T].usageMessage
 
   def printHelp[T: Messages](err: Boolean = false): Unit =
-    (if (err) Console.err else Console.out) println helpMessage[T]
+    (if (err) Console.err else Console.out) println Messages[T].helpMessage
 
   def printUsage[T: Messages](err: Boolean = false): Unit =
-    (if (err) Console.err else Console.out) println usageMessage[T]
+    (if (err) Console.err else Console.out) println Messages[T].usageMessage
 
 }

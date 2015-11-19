@@ -9,28 +9,32 @@ import shapeless.Typeable
 import scala.collection.mutable.ListBuffer
 
 
-trait DefaultArgsApp extends ArgsApp {
-  private var remainingArgs0 = Seq.empty[String]
-
-  def setRemainingArgs(remainingArgs: Seq[String]): Unit =
-    remainingArgs0 = remainingArgs
-
-  def remainingArgs: Seq[String] = remainingArgs0
-}
-
-trait DefaultCommandArgsApp extends DefaultArgsApp with CommandArgsApp {
-  private var command0 = Option.empty[Either[String, String]]
-
-  def setCommand(cmd: Option[Either[String, String]]): Unit = {
-    command0 = cmd
-  }
-
-  def command: Option[Either[String, String]] = command0
-}
-
-/*
- * DelayedInit à la scala.App
- * Using it in spite of https://github.com/scala/scala/pull/3563
+/**
+ * Have a case class extend this trait for its fields to become command line arguments,
+ * and its body the core of your app using these.
+ *
+ * Extends `DelayedInit`, so that the body of the case class gets called later.
+ *
+ * Remaining arguments are accessible via the method `remainingArgs`.
+ *
+ * Example
+ * {{{
+ *   case class Foo(
+ *     i: Int,
+ *     foo: String
+ *   ) extends App {
+ *
+ *     // core of your app, using the fields above
+ *
+ *   }
+ *
+ *   object FooApp extends AppOf[Foo]
+ * }}}
+ *
+ * In the example above, `FooApp` now has a `main` method, that parses the arguments it is given,
+ * and matches these to the fields `i` (`-i 2` gives `i` the value `2`) and `foo` (`--foo ab`
+ * gives `foo` the value `"ab"`) of `Foo`. It also accepts `--help` / `-h` / `--usage` arguments,
+ * and prints help or usage messages when these are present.
  */
 trait App extends DefaultArgsApp with DelayedInit {
   private val initCode = new ListBuffer[() => Unit]
@@ -44,9 +48,43 @@ trait App extends DefaultArgsApp with DelayedInit {
   }
 }
 
-// FIXME Could the content of that be de-duplicated with App above?
-// Wouldn't this break delayed initialization?
+/**
+ * Have a sealed trait extend this for its case class children to become commands.
+ *
+ * Extends `DelayedInit` like `App` does.
+ *
+ * Like with `App`, the remaining arguments are accessible with the method `remainingArgs`.
+ *
+ * Example
+ * {{{
+ *   sealed trait DemoCommand extends Command
+ *
+ *   case class First(
+ *   ) extends DemoCommand {
+ *
+ *     // ...
+ *
+ *   }
+ *
+ *   case class Second(
+ *   ) extends DemoCommand {
+ *
+ *     // ...
+ *
+ *   }
+ *
+ *   object MyApp extends CommandAppOf[DemoCommand]
+ * }}}
+ *
+ * In the example above, `MyApp` now has a `main` method, that accepts arguments
+ * like `first a b` or `second c d`. In the first case, it will create a `First`, and
+ * call its body (whose initialization is delayed thanks to delayed initialization). In the
+ * second case, it will create a `Second` instead, and call its body too.
+ */
 trait Command extends DefaultCommandArgsApp with DelayedInit {
+  // FIXME Could the content of that be de-duplicated with App above?
+  // Wouldn't this break delayed initialization?
+
   private val initCode = new ListBuffer[() => Unit]
 
   override def delayedInit(body: => Unit): Unit =
@@ -63,19 +101,19 @@ trait Command extends DefaultCommandArgsApp with DelayedInit {
  */
 abstract class AppOf[T <: ArgsApp : Parser : Messages] {
   def main(args: Array[String]): Unit =
-    CaseApp.parseWithHelp[T](args) match {
+    Parser[T].withHelp(args) match {
       case Left(err) =>
         Console.err.println(err)
         sys.exit(1)
 
-      case Right((t, help, usage, remainingArgs)) =>
+      case Right((WithHelp(usage, help, t), remainingArgs)) =>
         if (help) {
-          CaseApp.printHelp[T]()
+          println(Messages[T].withHelp.helpMessage)
           sys.exit(0)
         }
 
         if (usage) {
-          CaseApp.printUsage[T]()
+          println(Messages[T].withHelp.usageMessage)
           sys.exit(0)
         }
 
@@ -129,12 +167,12 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
             sys.exit(255)
           case Right((c, WithHelp(usage, help, t), args)) =>
             if (help) {
-              println(CommandsMessages[T].map(c).helpMessage(messages.progName, c))
+              println(CommandsMessages[T].messagesMap(c).helpMessage(messages.progName, c))
               sys.exit(0)
             }
 
             if (usage) {
-              println(CommandsMessages[T].map(c).usageMessage(messages.progName, c))
+              println(CommandsMessages[T].messagesMap(c).usageMessage(messages.progName, c))
               sys.exit(0)
             }
 
@@ -142,17 +180,6 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
             t()
         }
     }
-  }
-}
-
-case class DefaultBaseCommand() extends Command {
-  override def setCommand(cmd: Option[Either[String, String]]): Unit = {
-    if (cmd.isEmpty) {
-      // FIXME Print available commands too?
-      Console.err.println("Error: no command specified")
-      sys.exit(255)
-    }
-    super.setCommand(cmd)
   }
 }
 

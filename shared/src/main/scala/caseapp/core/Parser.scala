@@ -12,6 +12,8 @@ trait Parser[T] { self =>
 
   def args: Seq[Arg]
 
+  def parse(args: Seq[String]): Either[String, (T, Seq[String])] =
+    apply(args)
 
   def apply(args: Seq[String]): Either[String, (T, Seq[String])] = {
     import scala.::
