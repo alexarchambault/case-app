@@ -4,6 +4,12 @@ package object caseapp {
 
   type ExtraName = Name
 
+  type Parser[T] = core.Parser[T]
+  val Parser = core.Parser
+
+  type CommandParser[T] = core.CommandParser[T]
+  val CommandParser = core.CommandParser
+
   // Running into weird errors with this one when using Tag.of, so let's use newtype below instead
   // type @@[+T, Tag] = shapeless.tag.@@[T, Tag]
   // object Tag {

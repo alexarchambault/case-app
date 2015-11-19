@@ -4,7 +4,7 @@ import core.util._
 import scala.annotation.StaticAnnotation
 
 /**
- * Provides an extra name for the annotated argument
+ * Extra name for the annotated argument
  */
 case class Name(name: String) extends StaticAnnotation {
   private def isShort = name.length == 1
@@ -35,25 +35,25 @@ case class Name(name: String) extends StaticAnnotation {
 }
 
 /**
- * Provides a description of the value of the annotated argument
+ * Description of the value of the annotated argument
  */
 case class ValueDescription(description: String) extends StaticAnnotation {
   def message: String = s"<$description>"
 }
 
 /**
- * Provides a help message for the annotated argument
+ * Help message for the annotated argument
  */
 case class HelpMessage(message: String) extends StaticAnnotation
 
 /**
- * Provides a name for the annotated case class of arguments
+ * Name for the annotated case class of arguments
  * E.g. MyApp
  */
 case class AppName(appName: String) extends StaticAnnotation
 
 /**
- * Provides a program name for the annotated case class of arguments
+ * Program name for the annotated case class of arguments
  * E.g. my-app
  */
 case class ProgName(progName: String) extends StaticAnnotation
@@ -65,12 +65,12 @@ case class ProgName(progName: String) extends StaticAnnotation
 case class CommandName(commandName: String) extends StaticAnnotation
 
 /**
- * Provides the app version for the annotated case class of arguments
+ * App version for the annotated case class of arguments
  */
 case class AppVersion(appVersion: String) extends StaticAnnotation
 
 /**
- * Provides a name for the extra arguments of the annotated case class of arguments
+ * Name for the extra arguments of the annotated case class of arguments
  */
 case class ArgsName(argsName: String) extends StaticAnnotation
 
