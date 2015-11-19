@@ -70,3 +70,7 @@ credentials += {
 releaseSettings
 ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix
 ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
+
+tutSettings
+
+tutTargetDirectory := baseDirectory.value

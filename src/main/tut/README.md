@@ -9,13 +9,13 @@
 
 The code below assumes the content of `caseapp` is imported,
 
-```scala
+```tut:silent
 import caseapp._
 ```
 
 ### Parse a simple set of options
 
-```scala
+```tut:silent
 case class Options(
   user: Option[String],
   enableFoo: Boolean,
@@ -33,7 +33,7 @@ Most primitive types have default values, like `0` for `Int`, or `false`
 for `Double`. Options default to `None`, and sequences to `Nil`.
 Full list in the [source](https://github.com/alexarchambault/case-app/blob/master/src/main/scala/caseapp/core/Default.scala).
 
-```scala
+```tut:silent
 case class Options(
   user: Option[String],
   enableFoo: Boolean,
@@ -44,7 +44,7 @@ CaseApp.parse[Options](Seq()) == Options(None, false, Nil)
 ```
 
 Alternatively, default values can be manually specified, like
-```scala
+```tut:silent
 case class Options(
   user: String = "default",
   enableFoo: Boolean = true
@@ -58,7 +58,7 @@ CaseApp.parse[Options](Seq()) == Options("default", false)
 Some arguments can be specified multiple times on the command-line. These
 should be typed as lists, e.g. `file` in
 
-```scala
+```tut:silent
 case class Options(
   user: Option[String],
   enableFoo: Boolean,
@@ -75,7 +75,7 @@ CaseApp.parse[Options](
 *case-app* can take care of the creation of the `main` method parsing
 command-line arguments.
 
-```scala
+```tut:silent
 import caseapp._
 
 case class Example(
@@ -124,7 +124,7 @@ Usage: example [options]
 Several parts of the above help message can be customized by annotating
 `Example` or its fields:
 
-```scala
+```tut:silent
 @AppName("MyApp")
 @AppVersion("0.1.0")
 @ProgName("my-app-cli")
@@ -160,7 +160,7 @@ Lastly, the options value descriptions (`<foo>` and `<bar>`) and help messages
 ### Extra option names
 
 Alternative option names can be specified, like
-```scala
+```tut:silent
 case class Example(
   @ExtraName("f")
     foo: String,
@@ -181,7 +181,7 @@ Field names, or extra names as above, longer than one letter are considered
 long options, prefixed with `--`. One letter long names are short options,
 prefixed with a single `-`.
 
-```scala
+```tut:silent
 case class Example(
   a: Int,
   foo: String
@@ -199,7 +199,7 @@ would accept `--foo bar` and `-a 2` as arguments to set `foo` or `a`.
 Field names or extra names as above written in pascal case, are split
 and hyphenized.
 
-```scala
+```tut:silent
 case class Options(
   fooBar: Double
 )
@@ -212,7 +212,7 @@ would accept arguments like `--foo-bar 2.2`.
 
 Sets of options can be shared between applications:
 
-```scala
+```tut:silent
 case class CommonOptions(
   foo: String,
   bar: Int
@@ -243,7 +243,7 @@ case class Second(
 
 *case-app* has a support for commands.
 
-```scala
+```tut:silent
 sealed trait DemoCommand extends Command
 
 case class First(
@@ -299,7 +299,7 @@ libraryDependencies +=
 
 Some more complex options can be specified multiple times on the command-line and should be
 "accumulated". For example, one would want to define a verbose option like
-```scala
+```tut:silent
 case class Options(
   @ExtraName("v") verbose: Int
 )
@@ -309,7 +309,7 @@ Verbosity would then have be specified on the command-line like `--verbose 3`.
 But the usual preferred way of increasing verbosity is to repeat the verbosity
 option, like in `-v -v -v`. To accept the latter,
 tag `verbose` type with `Counter`:
-```scala
+```tut:silent
 case class Options(
   @ExtraName("v") verbose: Int @@ Counter
 )
