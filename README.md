@@ -5,6 +5,9 @@
 [![Build Status](https://travis-ci.org/alexarchambault/case-app.svg)](https://travis-ci.org/alexarchambault/case-app)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alexarchambault/case-app?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
+This README now documents the current development version (`1.0.0-SNAPSHOT`)
+of case-app. See [the `0.3.x` branch](https://github.com/alexarchambault/case-app/tree/0.3.x) for the stable version.
+
 ### Imports
 
 The code snippets below assume that the content of `caseapp` is imported,
