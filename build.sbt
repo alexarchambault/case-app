@@ -90,3 +90,7 @@ lazy val noPublishSettings = Seq(
   publishArtifact := false
 )
 
+addCommandAlias("validate", Seq(
+  "test",
+  "tut"
+).mkString(";", ";", ""))
