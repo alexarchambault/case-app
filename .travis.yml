@@ -5,7 +5,7 @@ scala:
 jdk:
 - oraclejdk7
 - oraclejdk8
-script: sbt ++${TRAVIS_SCALA_VERSION} test $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
+script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
   && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
   ]]; then echo "publish"; fi)
 sudo: false
