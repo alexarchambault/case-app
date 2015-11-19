@@ -284,6 +284,12 @@ case class Second(
 object MyApp extends CommandAppOf[DemoCommand]
 ```
 
+`MyApp` can then be called with arguments like
+```
+my-app first --foo 2 --bar a
+my-app second --baz 2.4
+```
+
 - help messages
 - customization
 - base command
@@ -300,6 +306,9 @@ case class Options(
   @ExtraName("v") verbose: Int
 )
 ```
+
+
+
 
 Verbosity would then have be specified on the command-line like `--verbose 3`.
 But the usual preferred way of increasing verbosity is to repeat the verbosity
@@ -326,23 +335,36 @@ was specified in the arguments.
 
 Use your own option types by defining implicit `ArgParser`s for them, like in
 ```scala
+import caseapp.core.ArgParser
+
+trait Custom
+
 implicit val customArgParser: ArgParser[Custom] =
-  ArgParser.value[Custom] { (current, arg) =>
-    //   current: Current
-    // is the current value of this option,
-    //   arg: String
-    // is the option to parse.
-    // Return either:
-    //   Success(newValue) if arg contains a valid value for a `Custom`
-    //   Failure(reason)   else
+  ArgParser.instance[Custom] { s =>
+    // parse s
+    // return
+    // - Left("error message") in case of error
+    // - Right(custom) in case of success
+    ???
   }
 ```
+
+Then use them like
+```scala
+case class Options(
+  custom: Custom,
+  foo: String
+)
+```
+
+
 
 
 ### Migration from the previous version
 
 Shared options used to be automatic, and now require the `@Recurse`
-annotation on the field corresponding to the shared options.
+annotation on the field corresponding to the shared options. This prevents
+ambiguities with custom types as above.
 
 ## Usage
 
