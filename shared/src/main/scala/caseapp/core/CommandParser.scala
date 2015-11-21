@@ -91,8 +91,6 @@ object CommandParser {
           .mkString("-")
       }
 
-            println(s"Command: '$name' (${key.value.name}, ${commandName()})")
-
       val tail0 = tail.map(Inr(_): FieldType[K, H] :+: T)
 
       c =>
