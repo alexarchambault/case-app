@@ -82,7 +82,7 @@ object Messages {
   }
 
   // From scopt
-  val NL = System.getProperty("line.separator")
+  val NL = PlatformUtil.NL
   val WW = "  "
   val TB = "        "
 
