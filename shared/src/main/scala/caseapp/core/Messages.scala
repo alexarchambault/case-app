@@ -47,7 +47,7 @@ object Messages {
   def apply[T](implicit messages: Messages[T]): Messages[T] = messages
 
   def optionsMessage(args: Seq[Arg]): String =
-    args.map { arg =>
+    args.collect { case arg if !arg.noHelp =>
       val names = Name(arg.name) +: arg.extraNames
       // FIXME Flags that accept no value are not given the right help message here
       val valueDescription = arg.valueDescription.orElse(if (!arg.isFlag) Some(ValueDescription("value")) else None)
@@ -82,7 +82,7 @@ object Messages {
   }
 
   // From scopt
-  val NL = System.getProperty("line.separator")
+  val NL = PlatformUtil.NL
   val WW = "  "
   val TB = "        "
 

@@ -75,3 +75,8 @@ case class AppVersion(appVersion: String) extends StaticAnnotation
 case class ArgsName(argsName: String) extends StaticAnnotation
 
 class Recurse extends StaticAnnotation
+
+/**
+ * Do not include this field / argument in the help message
+ */
+class Hidden extends StaticAnnotation

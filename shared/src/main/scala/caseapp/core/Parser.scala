@@ -68,16 +68,17 @@ object Parser {
 
   type Aux[T, D0] = Parser[T] { type D = D0 }
 
-  implicit def generic[CC, L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, R <: HList, P <: HList]
+  implicit def generic[CC, L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList, P <: HList]
    (implicit
-     gen: LabelledGeneric.Aux[CC, L],
-     defaults: shapeless.Default.AsOptions.Aux[CC, D],
-     names: AnnotationList.Aux[Name, CC, N],
-     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
-     helpMessages: Annotations.Aux[HelpMessage, CC, M],
-     recurse: Annotations.Aux[Recurse, CC, R],
-     parser: Strict[HListParser.Aux[L, D, N, V, M, R, P]]
+    gen: LabelledGeneric.Aux[CC, L],
+    defaults: shapeless.Default.AsOptions.Aux[CC, D],
+    names: AnnotationList.Aux[Name, CC, N],
+    valuesDesc: Annotations.Aux[ValueDescription, CC, V],
+    helpMessages: Annotations.Aux[HelpMessage, CC, M],
+    noHelp: Annotations.Aux[Hidden, CC, H],
+    recurse: Annotations.Aux[Recurse, CC, R],
+    parser: Strict[HListParser.Aux[L, D, N, V, M, H, R, P]]
    ): Aux[CC, P] =
-    parser.value(defaults(), names(), valuesDesc(), helpMessages()).map(gen.from)
+    parser.value(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
 }
 

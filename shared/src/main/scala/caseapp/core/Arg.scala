@@ -6,6 +6,7 @@ case class Arg(
   extraNames: Seq[Name],
   valueDescription: Option[ValueDescription],
   helpMessage: Option[HelpMessage],
+  noHelp: Boolean,
   isFlag: Boolean
 )
 
