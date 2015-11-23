@@ -1,6 +1,7 @@
 package caseapp
 
-import caseapp.core.{ Parser, CommandParser, ArgParser }
+import caseapp.core.{ Messages, ArgParser }
+
 import org.scalatest._
 
 object Tests {
@@ -179,6 +180,19 @@ class Tests extends FlatSpec with Matchers {
     parser[Default0](Seq("second")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 0), Nil))))
     parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 5), Seq("other")))))
     parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Left("Unrecognized argument: --bar"))))
+  }
+
+  it should "not add a help message for fields annotated with @Hidden" in {
+    case class Options(
+      first: Int,
+      @Hidden
+        second: String
+    )
+
+    val helpLines = Messages[Options].helpMessage.linesIterator.toVector
+
+    helpLines.count(_.contains("--first")) shouldBe 1
+    helpLines.count(_.contains("--second")) shouldBe 0
   }
 
 }

@@ -5,25 +5,25 @@ import shapeless._
 import shapeless.labelled.{ FieldType, field }
 import derive._
 
-trait HListParser[L <: HList, D <: HList, -N <: HList, -V <: HList, -M <: HList, R <: HList] {
+trait HListParser[L <: HList, D <: HList, -N <: HList, -V <: HList, -M <: HList, -H <: HList, R <: HList] {
   type P <: HList
-  def apply(default: D, names: N, valueDescriptions: V, helpMessages: M): Parser.Aux[L, P]
+  def apply(default: D, names: N, valueDescriptions: V, helpMessages: M, noHelp: H): Parser.Aux[L, P]
 }
 
 object HListParser {
-  def apply[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, R <: HList](implicit args: HListParser[L, D, N, V, M, R]): Aux[L, D, N, V, M, R, args.P] = args
+  def apply[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList](implicit args: HListParser[L, D, N, V, M, H, R]): Aux[L, D, N, V, M, H, R, args.P] = args
 
-  type Aux[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, R <: HList, P0 <: HList] =
-    HListParser[L, D, N, V, M, R] { type P = P0 }
+  type Aux[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList, P0 <: HList] =
+    HListParser[L, D, N, V, M, H, R] { type P = P0 }
 
-  def instance[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, R <: HList, P0 <: HList](p: (D, N, V, M) => Parser.Aux[L, P0]): Aux[L, D, N, V, M, R, P0] =
-    new HListParser[L, D, N, V, M, R] {
+  def instance[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList, P0 <: HList](p: (D, N, V, M, H) => Parser.Aux[L, P0]): Aux[L, D, N, V, M, H, R, P0] =
+    new HListParser[L, D, N, V, M, H, R] {
       type P = P0
-      def apply(default: D, names: N, valueDescriptions: V, helpMessages: M) = p(default, names, valueDescriptions, helpMessages)
+      def apply(default: D, names: N, valueDescriptions: V, helpMessages: M, noHelp: H) = p(default, names, valueDescriptions, helpMessages, noHelp)
     }
 
-  implicit val hnil: Aux[HNil, HNil, HNil, HNil, HNil, HNil, HNil] =
-    instance { (_, _, _, _) =>
+  implicit val hnil: Aux[HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil] =
+    instance { (_, _, _, _, _) =>
       new Parser[HNil] {
         type D = HNil
         def init = HNil
@@ -33,31 +33,31 @@ object HListParser {
       }
     }
 
-  implicit def hconsTaggedDefault[K <: Symbol, Tag, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, RT <: HList]
+  implicit def hconsTaggedDefault[K <: Symbol, Tag, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
     headDefault: Implicit[Option[Default[H @@ Tag]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, RT, PT]]
-   ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, None.type :: RT, Option[H @@ Tag] :: PT] =
-    hconsDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, RT]
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+   ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H @@ Tag] :: PT] =
+    hconsDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, HT, RT]
 
-  implicit def hconsDefault[K <: Symbol, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, RT <: HList]
+  implicit def hconsDefault[K <: Symbol, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
     headDefault: Implicit[Option[Default[H]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, RT, PT]]
-   ): Aux[FieldType[K, H] :: T, Option[H] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, None.type :: RT, Option[H] :: PT] =
-    instance { (default0, names, valueDescriptions, helpMessages) =>
-      val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail)
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+   ): Aux[FieldType[K, H] :: T, Option[H] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H] :: PT] =
+    instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
+      val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
       val headNames = Name(name.value.name) :: names.head
       val headDescriptions = valueDescriptions.head
       val headDefault0 = default0.head
 
       new Parser[FieldType[K, H] :: T] {
         val args =
-          Arg(name.value.name, headNames, headDescriptions, helpMessages.head, argParser.value.isFlag) +: tailParser.args
+          Arg(name.value.name, headNames, headDescriptions, helpMessages.head, noHelp.head.nonEmpty, argParser.value.isFlag) +: tailParser.args
 
         type D = Option[H] :: PT
         def init = None :: tailParser.init
@@ -102,13 +102,13 @@ object HListParser {
       }
     }
 
-  implicit def hconsRecursive[K <: Symbol, H, HD, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, RT <: HList]
+  implicit def hconsRecursive[K <: Symbol, H, HD, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
      headParser: Strict[Parser.Aux[H, HD]],
-     tail: Aux[T, DT, NT, VT, MT, RT, PT]
-   ): Aux[FieldType[K, H] :: T, Option[H] :: DT, Nil.type :: NT, None.type :: VT, None.type :: MT, Some[Recurse] :: RT, HD :: PT] =
-    instance { (default0, names, valueDescriptions, helpMessages) =>
-      val tailParser = tail(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail)
+     tail: Aux[T, DT, NT, VT, MT, HT, RT, PT]
+   ): Aux[FieldType[K, H] :: T, Option[H] :: DT, Nil.type :: NT, None.type :: VT, None.type :: MT, None.type :: HT, Some[Recurse] :: RT, HD :: PT] =
+    instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
+      val tailParser = tail(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
 
       new Parser[FieldType[K, H] :: T] {
         val args = headParser.value.args ++ tailParser.args
