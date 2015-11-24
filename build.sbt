@@ -1,5 +1,14 @@
 
-lazy val `case-app` = crossProject.in(file("."))
+lazy val `case-app` = project.in(file("."))
+  .aggregate(coreJVM, coreJS, doc)
+  .dependsOn(coreJVM)
+  .settings(commonSettings)
+  .settings(noPublishSettings)
+  .settings(
+    name := "case-app-root"
+  )
+
+lazy val core = crossProject
   .settings(commonSettings: _*)
   .settings(publishSettings: _*)
   .settings(
@@ -12,11 +21,11 @@ lazy val `case-app` = crossProject.in(file("."))
     )
   )
 
-lazy val `case-app-jvm` = `case-app`.jvm
-lazy val `case-app-js` = `case-app`.js
+lazy val coreJVM = core.jvm
+lazy val coreJS = core.js
 
 lazy val doc = project
-  .dependsOn(`case-app-jvm`)
+  .dependsOn(coreJVM)
   .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(tutSettings)
