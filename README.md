@@ -53,7 +53,7 @@ case class Options(
   enableFoo: Boolean = true
 )
 
-CaseApp.parse[Options](Seq()) == Options("default", false)
+CaseApp.parse[Options](Seq()) == Options("default", true)
 ```
 
 ### Lists
