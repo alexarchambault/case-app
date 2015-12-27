@@ -18,8 +18,8 @@ object Default extends PlatformDefaults {
   implicit def generic[CC, L <: HList, D <: HList]
    (implicit
      gen: Generic.Aux[CC, L],
-     default: Strict[shapeless.Default.Aux[CC, D]],
-     defaultOr: Strict[DefaultOr[L, D]]
+     default: Lazy[caseapp.util.Default.Aux[CC, D]],
+     defaultOr: Lazy[DefaultOr[L, D]]
    ): Default[CC] =
     Default.instance(gen.from(defaultOr.value(default.value())))
 
@@ -45,7 +45,7 @@ trait DefaultOr[L <: HList, D <: HList] {
 trait LowPriorityDefaultOr {
   implicit def hconsNone[H, T <: HList, TD <: HList]
    (implicit
-     default: Strict[Default[H]],
+     default: Lazy[Default[H]],
      tail: DefaultOr[T, TD]
    ): DefaultOr[H :: T, None.type :: TD] =
     DefaultOr.instance { case None :: td =>

@@ -3,7 +3,7 @@ package caseapp
 import caseapp.core._
 import caseapp.core.util._
 
-import derive.AnnotationOption
+import caseapp.util.AnnotationOption
 import shapeless.Typeable
 
 import scala.collection.mutable.ListBuffer
