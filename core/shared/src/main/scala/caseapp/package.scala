@@ -1,4 +1,4 @@
-import shapeless.{ CNil, :+:, Generic }
+import shapeless.{ CNil, :+:, Inl, Inr, Generic }
 
 package object caseapp {
 
@@ -32,6 +32,13 @@ package object caseapp {
 
   // required for the implicits involved in default values to be fine
   implicit def optionGeneric[T]: Generic.Aux[Option[T], Some[T] :+: None.type :+: CNil] =
-    derive.optionGeneric
+    new Generic[Option[T]] {
+      type Repr = Some[T] :+: None.type :+: CNil
+      def from(r: Repr) = r.unify
+      def to(opt: Option[T]) = opt match {
+        case None => Inr(Inl(None))
+        case s @ Some(_) => Inl(s)
+      }
+    }
 
 }

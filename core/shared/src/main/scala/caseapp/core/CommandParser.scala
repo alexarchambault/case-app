@@ -2,9 +2,9 @@ package caseapp.core
 
 import caseapp.CommandName
 import caseapp.core.util.pascalCaseSplit
-import derive.AnnotationOption
+import caseapp.util.AnnotationOption
 import shapeless.labelled.{ FieldType, field }
-import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, Strict, LabelledGeneric, Witness }
+import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, Lazy, LabelledGeneric, Witness }
 
 trait CommandParser[T] {
   def get(command: String): Option[Parser[T]]
@@ -81,7 +81,7 @@ object CommandParser {
    (implicit
      key: Witness.Aux[K],
      commandName: AnnotationOption[CommandName, H],
-     parser: Strict[Parser[H]],
+     parser: Lazy[Parser[H]],
      tail: CommandParser[T]
    ): CommandParser[FieldType[K, H] :+: T] =
     instance {
@@ -103,7 +103,7 @@ object CommandParser {
   implicit def generic[S, C <: Coproduct]
    (implicit
      lgen: LabelledGeneric.Aux[S, C],
-     underlying: Strict[CommandParser[C]]
+     underlying: Lazy[CommandParser[C]]
    ): CommandParser[S] =
     underlying.value.map(lgen.from)
 }

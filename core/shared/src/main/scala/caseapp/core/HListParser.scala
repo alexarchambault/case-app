@@ -3,7 +3,8 @@ package core
 
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
-import derive._
+
+import caseapp.util.Implicit
 
 trait HListParser[L <: HList, D <: HList, -N <: HList, -V <: HList, -M <: HList, -H <: HList, R <: HList] {
   type P <: HList
@@ -36,18 +37,18 @@ object HListParser {
   implicit def hconsTaggedDefault[K <: Symbol, Tag, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
     name: Witness.Aux[K],
-    argParser: Strict[ArgParser[H @@ Tag]],
+    argParser: Lazy[ArgParser[H @@ Tag]],
     headDefault: Implicit[Option[Default[H @@ Tag]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+    tail: Lazy[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
    ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H @@ Tag] :: PT] =
     hconsDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, HT, RT]
 
   implicit def hconsDefault[K <: Symbol, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
     name: Witness.Aux[K],
-    argParser: Strict[ArgParser[H]],
+    argParser: Lazy[ArgParser[H]],
     headDefault: Implicit[Option[Default[H]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+    tail: Lazy[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
    ): Aux[FieldType[K, H] :: T, Option[H] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H] :: PT] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
       val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
@@ -104,7 +105,7 @@ object HListParser {
 
   implicit def hconsRecursive[K <: Symbol, H, HD, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
-     headParser: Strict[Parser.Aux[H, HD]],
+     headParser: Lazy[Parser.Aux[H, HD]],
      tail: Aux[T, DT, NT, VT, MT, HT, RT, PT]
    ): Aux[FieldType[K, H] :: T, Option[H] :: DT, Nil.type :: NT, None.type :: VT, None.type :: MT, None.type :: HT, Some[Recurse] :: RT, HD :: PT] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>

@@ -1,22 +1,35 @@
 
 lazy val `case-app` = project.in(file("."))
-  .aggregate(coreJVM, coreJS, doc)
-  .dependsOn(coreJVM)
+  .aggregate(utilJVM, utilJS, coreJVM, coreJS, doc)
+  .dependsOn(utilJVM, coreJVM)
   .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(
     name := "case-app-root"
   )
 
+lazy val util = crossProject
+  .settings(commonSettings: _*)
+  .settings(publishSettings: _*)
+  .settings(
+    name := "case-app-util",
+    libraryDependencies ++= Seq(
+      "com.chuusai" %%% "shapeless" % "2.2.5",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
+    )
+  )
+
+lazy val utilJVM = util.jvm
+lazy val utilJS = util.js
+
 lazy val core = crossProject
+  .dependsOn(util)
   .settings(commonSettings: _*)
   .settings(publishSettings: _*)
   .settings(
     name := "case-app",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.3.0-SNAPSHOT",
-      "com.github.alexarchambault" %%% "derive" % "0.1.0-SNAPSHOT",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      "com.chuusai" %%% "shapeless" % "2.2.5",
       "org.scalatest" %%% "scalatest" % "3.0.0-M11" % "test"
     )
   )
@@ -38,10 +51,10 @@ lazy val doc = project
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
   scalaVersion := "2.11.7",
-  crossScalaVersions := Seq("2.10.6", "2.11.7"),
+  // re-enable when switching to shapeless 2.3
+  // crossScalaVersions := Seq("2.10.6", "2.11.7"),
   resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases"),
-    Resolver.sonatypeRepo("snapshots")
+    Resolver.sonatypeRepo("releases")
   ),
   scalacOptions ++= Seq(
     "-feature",
