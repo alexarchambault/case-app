@@ -10,7 +10,6 @@ lazy val `case-app` = project.in(file("."))
 
 lazy val util = crossProject
   .settings(commonSettings: _*)
-  .settings(publishSettings: _*)
   .settings(
     name := "case-app-util",
     libraryDependencies ++= Seq(
@@ -25,7 +24,6 @@ lazy val utilJS = util.js
 lazy val core = crossProject
   .dependsOn(util)
   .settings(commonSettings: _*)
-  .settings(publishSettings: _*)
   .settings(
     name := "case-app",
     libraryDependencies ++= Seq(
@@ -67,9 +65,9 @@ lazy val commonSettings = Seq(
     else
       Seq()
   }
-)
+) ++ fullReleaseSettings
 
-lazy val publishSettings = Seq(
+lazy val fullReleaseSettings = Seq(
   publishMavenStyle := true,
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
@@ -101,10 +99,11 @@ lazy val publishSettings = Seq(
       case _ =>
         Credentials(Path.userHome / ".ivy2" / ".credentials")
     }
-  },
+  }
+) ++ releaseSettings ++ Seq(
   ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix,
   ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
-) ++ releaseSettings
+)
 
 lazy val noPublishSettings = Seq(
   publish := (),
