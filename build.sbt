@@ -14,8 +14,11 @@ lazy val util = crossProject
     name := "case-app-util",
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.2.5",
+      "com.github.alexarchambault" %%% "shapeless-compat" % "1.0.0-M2",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
-    )
+    ),
+    unmanagedSourceDirectories in Compile +=
+      baseDirectory.value / ".." / "shared" / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
   )
 
 lazy val utilJVM = util.jvm
@@ -27,7 +30,6 @@ lazy val core = crossProject
   .settings(
     name := "case-app",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.2.5",
       "org.scalatest" %%% "scalatest" % "3.0.0-M11" % "test"
     )
   )

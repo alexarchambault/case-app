@@ -18,7 +18,7 @@ object Default extends PlatformDefaults {
   implicit def generic[CC, L <: HList, D <: HList]
    (implicit
      gen: Generic.Aux[CC, L],
-     default: Lazy[caseapp.util.Default.Aux[CC, D]],
+     default: Lazy[shapeless.compat.Default.Aux[CC, D]],
      defaultOr: Lazy[DefaultOr[L, D]]
    ): Default[CC] =
     Default.instance(gen.from(defaultOr.value(default.value())))
