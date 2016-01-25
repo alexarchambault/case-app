@@ -27,8 +27,11 @@ case class Options(
 
 CaseApp.parse[Options](
   Seq("--user", "alice", "--file", "a", "--file", "b")
-).right.get._1 == Options(Some("alice"), false, List("a", "b"))
+) == Right((Options(Some("alice"), false, List("a", "b")), Seq.empty))
 ```
+
+
+
 
 ### Default values
 
@@ -43,8 +46,11 @@ case class Options(
   file: List[String]
 )
 
-CaseApp.parse[Options](Seq()).right.get._1 == Options(None, false, Nil)
+CaseApp.parse[Options](Seq()) == Right((Options(None, false, Nil), Seq.empty))
 ```
+
+
+
 
 Alternatively, default values can be manually specified, like
 ```scala
@@ -53,8 +59,11 @@ case class Options(
   enableFoo: Boolean = true
 )
 
-CaseApp.parse[Options](Seq()).right.get._1 == Options("default", true)
+CaseApp.parse[Options](Seq()) == Right((Options("default", true), Seq.empty))
 ```
+
+
+
 
 ### Lists
 
@@ -70,8 +79,11 @@ case class Options(
 
 CaseApp.parse[Options](
   Seq("--file", "a", "--file", "b")
-).right.get._1 == Options(None, false, List("a", "b"))
+) == Right((Options(None, false, List("a", "b")), Seq.empty))
 ```
+
+
+
 
 If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
 see below), the final value of its corresponding field is the last provided in the arguments.
