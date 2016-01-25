@@ -27,7 +27,7 @@ case class Options(
 
 CaseApp.parse[Options](
   Seq("--user", "alice", "--file", "a", "--file", "b")
-) == Options(Some("alice"), false, List("a", "b"))
+).right.get._1 == Options(Some("alice"), false, List("a", "b"))
 ```
 
 ### Default values
@@ -43,7 +43,7 @@ case class Options(
   file: List[String]
 )
 
-CaseApp.parse[Options](Seq()) == Options(None, false, Nil)
+CaseApp.parse[Options](Seq()).right.get._1 == Options(None, false, Nil)
 ```
 
 Alternatively, default values can be manually specified, like
@@ -53,7 +53,7 @@ case class Options(
   enableFoo: Boolean = true
 )
 
-CaseApp.parse[Options](Seq()) == Options("default", true)
+CaseApp.parse[Options](Seq()).right.get._1 == Options("default", true)
 ```
 
 ### Lists
@@ -70,7 +70,7 @@ case class Options(
 
 CaseApp.parse[Options](
   Seq("--file", "a", "--file", "b")
-) == Options(None, false, List("a", "b"))
+).right.get._1 == Options(None, false, List("a", "b"))
 ```
 
 If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
