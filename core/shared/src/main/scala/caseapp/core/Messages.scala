@@ -2,8 +2,10 @@ package caseapp
 package core
 
 import caseapp.util.AnnotationOption
-import shapeless._
 import caseapp.core.util.pascalCaseSplit
+
+import shapeless._
+import shapeless.compat.Strict
 import shapeless.labelled.FieldType
 
 /**
@@ -124,7 +126,7 @@ object CommandsMessages {
    (implicit
      key: Witness.Aux[K],
      commandName: AnnotationOption[CommandName, H],
-     parser: Lazy[Parser[H]],
+     parser: Strict[Parser[H]],
      argsName: AnnotationOption[ArgsName, T],
      tail: CommandsMessages[T]
    ): CommandsMessages[FieldType[K, H] :+: T] = {
@@ -144,7 +146,7 @@ object CommandsMessages {
   implicit def generic[S, C <: Coproduct]
    (implicit
      gen: LabelledGeneric.Aux[S, C],
-     underlying: Lazy[CommandsMessages[C]]
+     underlying: Strict[CommandsMessages[C]]
    ): CommandsMessages[S] =
     CommandsMessages(underlying.value.messages)
 }

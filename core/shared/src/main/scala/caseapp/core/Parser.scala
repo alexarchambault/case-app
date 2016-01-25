@@ -2,7 +2,9 @@ package caseapp
 package core
 
 import shapeless._
-import caseapp.util.{ Annotations, AnnotationList }
+import shapeless.compat.{ Annotations, Strict }
+
+import caseapp.util.AnnotationList
 
 trait Parser[T] { self =>
   type D
@@ -71,13 +73,13 @@ object Parser {
   implicit def generic[CC, L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList, P <: HList]
    (implicit
     gen: LabelledGeneric.Aux[CC, L],
-    defaults: caseapp.util.Default.AsOptions.Aux[CC, D],
+    defaults: shapeless.compat.Default.AsOptions.Aux[CC, D],
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Lazy[HListParser.Aux[L, D, N, V, M, H, R, P]]
+    parser: Strict[HListParser.Aux[L, D, N, V, M, H, R, P]]
    ): Aux[CC, P] =
     parser.value(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
 }

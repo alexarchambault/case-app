@@ -2,6 +2,7 @@ package caseapp
 package core
 
 import shapeless._
+import shapeless.compat.Strict
 
 /** Type class providing a default value for type `CC` */
 trait Default[CC] {
@@ -18,8 +19,8 @@ object Default extends PlatformDefaults {
   implicit def generic[CC, L <: HList, D <: HList]
    (implicit
      gen: Generic.Aux[CC, L],
-     default: Lazy[caseapp.util.Default.Aux[CC, D]],
-     defaultOr: Lazy[DefaultOr[L, D]]
+     default: Strict[shapeless.compat.Default.Aux[CC, D]],
+     defaultOr: Strict[DefaultOr[L, D]]
    ): Default[CC] =
     Default.instance(gen.from(defaultOr.value(default.value())))
 
@@ -45,7 +46,7 @@ trait DefaultOr[L <: HList, D <: HList] {
 trait LowPriorityDefaultOr {
   implicit def hconsNone[H, T <: HList, TD <: HList]
    (implicit
-     default: Lazy[Default[H]],
+     default: Strict[Default[H]],
      tail: DefaultOr[T, TD]
    ): DefaultOr[H :: T, None.type :: TD] =
     DefaultOr.instance { case None :: td =>

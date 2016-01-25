@@ -1,5 +1,7 @@
 package caseapp.util
 
+import shapeless.compat.Annotation
+
 trait AnnotationOption[A, T] {
   def apply(): Option[A]
 }
