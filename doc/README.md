@@ -197,8 +197,21 @@ Called with the `--help` or `-h` option, would print
 ```
 MyApp 0.1.0
 Usage: my-app-cli [options]
-  --foo <foo>: the foo
-  --bar <bar>: the bar
+  --foo  <foo>: the foo
+  --bar  <bar>: the bar
+```
+
+```tut:invisible
+assert(
+  lines(CaseApp.helpMessage[Example]) == lines(
+  """MyApp 0.1.0
+    |Usage: my-app-cli [options]
+    |  --foo  <foo>
+    |        the foo
+    |  --bar  <bar>
+    |        the bar""".stripMargin
+  )
+)
 ```
 
 Note the application name that changed, on the first line. Note also the version
