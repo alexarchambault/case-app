@@ -100,9 +100,6 @@ lazy val fullReleaseSettings = Seq(
         Credentials(Path.userHome / ".ivy2" / ".credentials")
     }
   }
-) ++ releaseSettings ++ Seq(
-  ReleaseKeys.versionBump := sbtrelease.Version.Bump.Bugfix,
-  ReleaseKeys.publishArtifactsAction := PgpKeys.publishSigned.value
 )
 
 lazy val noPublishSettings = Seq(
