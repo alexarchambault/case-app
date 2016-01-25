@@ -172,6 +172,7 @@ class Tests extends FlatSpec with Matchers {
     parser[Default0](Seq("--wrong")) shouldBe Left(s"Unrecognized argument: --wrong")
     parser[Default0](Seq("--bah", "2")) shouldBe Right((Default0(2.0), Nil, None))
     parser[Default0](Seq("--bah", "2", "--", "other", "otherother")) shouldBe Right((Default0(2.0), Seq("other", "otherother"), None))
+    parser[Default0](Seq("--bah", "2", "--", "other", "--bah")) shouldBe Right((Default0(2.0), Seq("other", "--bah"), None))
     parser[Default0](Seq("first")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Nil))))
     parser[Default0](Seq("first", "arg", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Seq("arg", "other")))))
     parser[Default0](Seq("first", "--foo", "bah", "--bar", "4")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("bah", 4), Nil))))
