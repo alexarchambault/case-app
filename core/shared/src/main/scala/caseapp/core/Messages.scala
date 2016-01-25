@@ -20,13 +20,21 @@ case class Messages[T](
   optionsDesc: String = "[options]"
 ) {
   def usageMessage: String =
-    s"Usage: $progName $optionsDesc ${argsNameOption.map("<" + _ + ">").mkString}"
+    Seq(
+      "Usage:",
+      progName,
+      optionsDesc,
+      argsNameOption.fold("")("<" + _ + ">")
+    ).filter(_.nonEmpty).mkString(" ")
 
   def optionsMessage: String = Messages.optionsMessage(args)
 
   def helpMessage = {
     val b = new StringBuilder
-    b ++= s"$appName $appVersion${Messages.NL}"
+    b ++= appName
+    if (appVersion.nonEmpty)
+      b ++= s" $appVersion"
+    b ++= Messages.NL
     b ++= usageMessage
     b ++= Messages.NL
     b ++= optionsMessage
@@ -50,7 +58,7 @@ object Messages {
 
   def optionsMessage(args: Seq[Arg]): String =
     args.collect { case arg if !arg.noHelp =>
-      val names = Name(arg.name) +: arg.extraNames
+      val names = (Name(arg.name) +: arg.extraNames).distinct
       // FIXME Flags that accept no value are not given the right help message here
       val valueDescription = arg.valueDescription.orElse(if (!arg.isFlag) Some(ValueDescription("value")) else None)
 

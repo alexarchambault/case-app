@@ -144,8 +144,20 @@ of the form
 ```
 Example
 Usage: example [options]
-  --foo <value>
-  --bar <value>
+  --foo  <value>
+  --bar  <value>
+```
+
+```tut:invisible
+def lines(s: String) = s.linesIterator.toVector
+assert(
+  lines(CaseApp.helpMessage[Example]).drop(2) == lines(
+  """Example
+    |Usage: example [options]
+    |  --foo  <value>
+    |  --bar  <value>""".stripMargin
+  ).drop(2)
+)
 ```
 
 Calling it with the `--usage` option will print

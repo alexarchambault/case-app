@@ -75,4 +75,8 @@ object Definitions {
     @Recurse paths: PathOptions
   )
 
+  case class Example(
+    foo: String,
+    bar: Int
+  )
 }

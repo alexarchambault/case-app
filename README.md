@@ -128,9 +128,12 @@ of the form
 ```
 Example
 Usage: example [options]
-  --foo <value>
-  --bar <value>
+  --foo  <value>
+  --bar  <value>
 ```
+
+
+
 
 Calling it with the `--usage` option will print
 ```
