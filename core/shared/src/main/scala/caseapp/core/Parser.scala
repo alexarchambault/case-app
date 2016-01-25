@@ -2,7 +2,7 @@ package caseapp
 package core
 
 import shapeless._
-import shapeless.compat.Annotations
+import shapeless.compat.{ Annotations, Strict }
 
 import caseapp.util.AnnotationList
 
@@ -79,7 +79,7 @@ object Parser {
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Lazy[HListParser.Aux[L, D, N, V, M, H, R, P]]
+    parser: Strict[HListParser.Aux[L, D, N, V, M, H, R, P]]
    ): Aux[CC, P] =
     parser.value(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
 }
