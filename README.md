@@ -128,9 +128,12 @@ of the form
 ```
 Example
 Usage: example [options]
-  --foo <value>
-  --bar <value>
+  --foo  <value>
+  --bar  <value>
 ```
+
+
+
 
 Calling it with the `--usage` option will print
 ```
@@ -168,9 +171,12 @@ Called with the `--help` or `-h` option, would print
 ```
 MyApp 0.1.0
 Usage: my-app-cli [options]
-  --foo <foo>: the foo
-  --bar <bar>: the bar
+  --foo  <foo>: the foo
+  --bar  <bar>: the bar
 ```
+
+
+
 
 Note the application name that changed, on the first line. Note also the version
 number appended next to it. The program name, after `Usage: `, was changed too.

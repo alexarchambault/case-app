@@ -4,83 +4,9 @@ import caseapp.core.{ Messages, ArgParser }
 
 import org.scalatest._
 
-object Tests {
-
-  case class NoArgs() extends App
-  
-  case class FewArgs(
-    value  : String = "default"
-  , numFoo : Int = -10
-  ) extends App
-  
-  case class MoreArgs(
-    count  : Int @@ Counter
-  , @Recurse few    : FewArgs
-  ) extends App
-
-  case class WithList(
-    list   : List[Int]
-  ) extends App
-
-  case class WithTaggedList(
-    list   : List[String]
-  ) extends App
-
-  case class OptBool(
-    opt    : Option[Boolean]
-  ) extends App
-
-  case class Custom(s: String)
-
-  implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
-    Right(Custom(arg))
-  }
-
-  case class WithCustom(
-    custom   : Custom = Custom("")
-  ) extends App
-
-  case class Demo(
-    first: Boolean = false
-  , @ExtraName("V") value: Option[String] = None
-  , @ExtraName("v") verbose: Int @@ Counter
-  , @ExtraName("S") stages: List[String]
-  ) extends App
-
-
-  Parser[NoArgs]
-  Parser[FewArgs]
-  Parser[MoreArgs]
-  Parser[WithList]
-  Parser[WithTaggedList]
-  Parser[OptBool]
-  Parser[WithCustom]
-  Parser[Demo]
-
-  case class ReadmeOptions1(
-    user: Option[String],
-    enableFoo: Boolean,
-    @ExtraName("f") file: List[String]
-  )
-  case class AuthOptions(
-    user: String,
-    password: String
-  )
-
-  case class PathOptions(
-    @ExtraName("f") fooPath: String,
-    @ExtraName("b") barPath: String
-  )
-
-  case class ReadmeOptions2(
-    @Recurse auth: AuthOptions,
-    @Recurse paths: PathOptions
-  )
-
-}
 
 class Tests extends FlatSpec with Matchers {
-  import Tests._
+  import Definitions._
 
   "A parser" should "parse no args" in {
     Parser[NoArgs].apply(Seq.empty) shouldEqual Right((NoArgs(), Seq.empty))
@@ -181,19 +107,6 @@ class Tests extends FlatSpec with Matchers {
     parser[Default0](Seq("second")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 0), Nil))))
     parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 5), Seq("other")))))
     parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Left("Unrecognized argument: --bar"))))
-  }
-
-  it should "not add a help message for fields annotated with @Hidden" in {
-    case class Options(
-      first: Int,
-      @Hidden
-        second: String
-    )
-
-    val helpLines = Messages[Options].helpMessage.linesIterator.toVector
-
-    helpLines.count(_.contains("--first")) shouldBe 1
-    helpLines.count(_.contains("--second")) shouldBe 0
   }
 
 }
