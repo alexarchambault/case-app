@@ -59,7 +59,7 @@ lazy val commonSettings = Seq(
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
-    "-target:jvm-1.7"
+    "-target:jvm-1.6"
   ),
   libraryDependencies ++= {
     if (scalaVersion.value startsWith "2.10.")
