@@ -3,7 +3,6 @@ scala:
 - 2.11.7
 - 2.10.6
 jdk:
-- oraclejdk7
 - oraclejdk8
 script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
   && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
