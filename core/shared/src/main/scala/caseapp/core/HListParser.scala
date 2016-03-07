@@ -3,7 +3,6 @@ package core
 
 import shapeless._
 import shapeless.labelled.{ FieldType, field }
-import shapeless.compat.Strict
 
 import caseapp.util.Implicit
 
