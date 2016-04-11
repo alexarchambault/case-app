@@ -17,7 +17,7 @@ class Tests extends FlatSpec with Matchers {
   }
 
   it should "handle extra user arguments" in {
-    Parser[NoArgs].parse(Seq("--", "b", "-a", "--other")) shouldEqual Right((NoArgs(), Seq("b", "-a", "--other")))
+    Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other")) shouldEqual Right((NoArgs(), Seq(), Seq("b", "-a", "--other")))
   }
 
   it should "give remaining args as is" in {
