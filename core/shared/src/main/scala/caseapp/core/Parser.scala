@@ -15,24 +15,31 @@ trait Parser[T] { self =>
   def args: Seq[Arg]
 
   def parse(args: Seq[String]): Either[String, (T, Seq[String])] =
-    apply(args)
+    detailedParse(args).right.map {
+      case (t, rem, extra) =>
+        (t, rem ++ extra)
+    }
 
-  def apply(args: Seq[String]): Either[String, (T, Seq[String])] = {
+  def apply(args: Seq[String]): Either[String, (T, Seq[String])] =
+    parse(args)
+
+  /** Keeps the remaining args before and after a possible -- separated */
+  def detailedParse(args: Seq[String]): Either[String, (T, Seq[String], Seq[String])] = {
     import scala.::
 
     def helper(
       current: D,
       args: Seq[String],
       extraArgsReverse: List[String]
-    ): Either[String, (T, List[String])] =
+    ): Either[String, (T, List[String], List[String])] =
       if (args.isEmpty)
-        get(current).right.map((_, extraArgsReverse.reverse))
+        get(current).right.map((_, extraArgsReverse.reverse, Nil))
       else
         step(args, current) match {
           case Right(None) =>
             args match {
               case "--" :: t =>
-                helper(current, Nil, (extraArgsReverse /: t)(_.::(_)))
+                get(current).right.map((_, extraArgsReverse.reverse, t))
               case opt :: _ if opt startsWith "-" =>
                 Left(s"Unrecognized argument: $opt")
               case userArg :: rem =>
