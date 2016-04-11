@@ -15,7 +15,16 @@ trait CommandParser[T] {
       get(c).map(_.withHelp)
     }
 
-  def apply[D: Parser](args: Seq[String]): Either[String, (D, Seq[String], Option[Either[String, (String, T, Seq[String])]])] = {
+  def apply[D: Parser](args: Seq[String]): Either[String, (D, Seq[String], Option[Either[String, (String, T, Seq[String])]])] =
+    detailedParse(args).right.map {
+      case (d, args, cmdOpt) =>
+        (d, args, cmdOpt.map(_.right.map {
+          case (cmd, t, rem, extra) =>
+            (cmd, t, rem ++ extra)
+        }))
+    }
+
+  def detailedParse[D: Parser](args: Seq[String]): Either[String, (D, Seq[String], Option[Either[String, (String, T, Seq[String], Seq[String])]])] = {
     val dp = Parser[D]
 
     def helper(
@@ -51,7 +60,7 @@ trait CommandParser[T] {
             case None =>
               Some(Left(s"Command not found: $c"))
             case Some(p) =>
-              Some(p(rem0).right.map { case (t, trem) => (c, t, trem) })
+              Some(p.detailedParse(rem0).right.map { case (t, trem, trem0) => (c, t, trem, trem0) })
           }
         case Nil =>
           None
