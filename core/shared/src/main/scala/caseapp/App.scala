@@ -101,12 +101,12 @@ trait Command extends DefaultCommandArgsApp with DelayedInit {
  */
 abstract class AppOf[T <: ArgsApp : Parser : Messages] {
   def main(args: Array[String]): Unit =
-    Parser[T].withHelp(args) match {
+    Parser[T].withHelp.detailedParse(args) match {
       case Left(err) =>
         Console.err.println(err)
         sys.exit(1)
 
-      case Right((WithHelp(usage, help, t), remainingArgs)) =>
+      case Right((WithHelp(usage, help, t), remainingArgs, extraArgs)) =>
         if (help) {
           println(Messages[T].withHelp.helpMessage)
           sys.exit(0)
@@ -117,7 +117,7 @@ abstract class AppOf[T <: ArgsApp : Parser : Messages] {
           sys.exit(0)
         }
 
-        t.setRemainingArgs(remainingArgs)
+        t.setRemainingArgs(remainingArgs, extraArgs)
         t()
     }
 }
@@ -135,7 +135,7 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
       optionsDesc = s"[options] [command] [command-options]"
     )
 
-    CommandParser[T].withHelp.apply(args)(Parser[D].withHelp) match {
+    CommandParser[T].withHelp.detailedParse(args)(Parser[D].withHelp) match {
       case Left(err) =>
         Console.err.println(err)
         sys.exit(255)
@@ -157,15 +157,15 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
           sys.exit(0)
         }
 
-        d.setRemainingArgs(dArgs)
-        d.setCommand(optCmd.map(_.right.map { case (c, _, _) => c }))
+        d.setRemainingArgs(dArgs, Nil)
+        d.setCommand(optCmd.map(_.right.map { case (c, _, _, _) => c }))
         d()
 
         optCmd.foreach {
           case Left(err) =>
             Console.err.println(err)
             sys.exit(255)
-          case Right((c, WithHelp(usage, help, t), args)) =>
+          case Right((c, WithHelp(usage, help, t), args, args0)) =>
             if (help) {
               println(CommandsMessages[T].messagesMap(c).helpMessage(messages.progName, c))
               sys.exit(0)
@@ -176,7 +176,7 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
               sys.exit(0)
             }
 
-            t.setRemainingArgs(args)
+            t.setRemainingArgs(args, args0)
             t()
         }
     }
