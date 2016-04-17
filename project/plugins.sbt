@@ -4,8 +4,10 @@ resolvers += Resolver.url(
   Resolver.ivyStylePatterns
 )
 
+resolvers += Resolver.sonatypeRepo("staging")
+
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.4.0")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.8")
 
-addSbtPlugin("com.github.alexarchambault" % "coursier-sbt-plugin" % "1.0.0-M10")
+addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M11")
