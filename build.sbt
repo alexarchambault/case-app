@@ -16,9 +16,7 @@ lazy val util = crossProject
       "com.chuusai" %%% "shapeless" % "2.2.5",
       "com.github.alexarchambault" %%% "shapeless-compat" % "1.0.0-M3",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
-    ),
-    unmanagedSourceDirectories in Compile +=
-      baseDirectory.value / ".." / "shared" / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
+    )
   )
 
 lazy val utilJVM = util.jvm
@@ -50,9 +48,7 @@ lazy val doc = project
 
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
-  scalaVersion := "2.11.7",
-  // re-enable when switching to shapeless 2.3
-  // crossScalaVersions := Seq("2.10.6", "2.11.7"),
+  scalaVersion := "2.11.8",
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases")
   ),
