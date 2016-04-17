@@ -16,9 +16,7 @@ lazy val util = crossProject
       "com.chuusai" %%% "shapeless" % "2.2.5",
       "com.github.alexarchambault" %%% "shapeless-compat" % "1.0.0-M3",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
-    ),
-    unmanagedSourceDirectories in Compile +=
-      baseDirectory.value / ".." / "shared" / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
+    )
   )
 
 lazy val utilJVM = util.jvm
