@@ -18,9 +18,7 @@ lazy val util = crossProject
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
       "org.typelevel" %% "macro-compat" % "1.1.1",
       compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-    ),
-    unmanagedSourceDirectories in Compile +=
-      baseDirectory.value / ".." / "shared" / "src" / "main" / s"scala-${scalaBinaryVersion.value}"
+    )
   )
 
 lazy val utilJVM = util.jvm
@@ -52,7 +50,7 @@ lazy val doc = project
 
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
-  scalaVersion := "2.11.7",
+  scalaVersion := "2.11.8",
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases")
   ),
