@@ -1,12 +1,21 @@
 
 lazy val `case-app` = project.in(file("."))
-  .aggregate(utilJVM, utilJS, coreJVM, coreJS, doc)
-  .dependsOn(utilJVM, coreJVM)
+  .aggregate(utilJVM, utilJS, annotationsJVM, annotationsJS, coreJVM, coreJS, doc)
+  .dependsOn(utilJVM, annotationsJVM, coreJVM)
   .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(
     name := "case-app-root"
   )
+
+lazy val annotations = crossProject
+  .settings(commonSettings: _*)
+  .settings(
+    name := "case-app-annotations"
+  )
+
+lazy val annotationsJVM = annotations.jvm
+lazy val annotationsJS = annotations.js
 
 lazy val util = crossProject
   .settings(commonSettings: _*)
@@ -25,7 +34,7 @@ lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
 
 lazy val core = crossProject
-  .dependsOn(util)
+  .dependsOn(annotations, util)
   .settings(commonSettings: _*)
   .settings(
     name := "case-app",
@@ -92,12 +101,12 @@ lazy val fullReleaseSettings = Seq(
       </developer>
     </developers>
   },
-  credentials += {
+  credentials ++= {
     Seq("SONATYPE_USER", "SONATYPE_PASS").map(sys.env.get) match {
       case Seq(Some(user), Some(pass)) =>
-        Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass)
+        Seq(Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass))
       case _ =>
-        Credentials(Path.userHome / ".ivy2" / ".credentials")
+        Seq.empty
     }
   }
 )
