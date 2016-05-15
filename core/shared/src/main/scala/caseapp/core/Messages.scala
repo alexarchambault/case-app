@@ -5,7 +5,6 @@ import caseapp.util.AnnotationOption
 import caseapp.core.util.pascalCaseSplit
 
 import shapeless._
-import shapeless.compat.Strict
 import shapeless.labelled.FieldType
 
 /**

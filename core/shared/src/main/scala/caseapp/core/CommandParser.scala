@@ -5,8 +5,7 @@ import caseapp.core.util.pascalCaseSplit
 import caseapp.util.AnnotationOption
 
 import shapeless.labelled.{ FieldType, field }
-import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, LabelledGeneric, Witness }
-import shapeless.compat.Strict
+import shapeless.{ :+:, Inl, Inr, Coproduct, CNil, LabelledGeneric, Witness, Strict }
 
 trait CommandParser[T] {
   def get(command: String): Option[Parser[T]]

@@ -22,9 +22,11 @@ lazy val util = crossProject
   .settings(
     name := "case-app-util",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.2.5",
-      "com.github.alexarchambault" %%% "shapeless-compat" % "1.0.0-M3",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided"
+      "com.chuusai" %%% "shapeless" % "2.3.1",
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      "org.typelevel" %% "macro-compat" % "1.1.1",
+      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
     )
   )
 
