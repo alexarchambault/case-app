@@ -2,8 +2,6 @@ package caseapp
 
 import java.util.GregorianCalendar
 
-import caseapp.core.Parser
-
 import org.scalatest.{ Matchers, FlatSpec }
 
 object PlatformTests {
