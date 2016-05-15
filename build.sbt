@@ -1,12 +1,21 @@
 
 lazy val `case-app` = project.in(file("."))
-  .aggregate(utilJVM, utilJS, coreJVM, coreJS, doc)
-  .dependsOn(utilJVM, coreJVM)
+  .aggregate(utilJVM, utilJS, annotationsJVM, annotationsJS, coreJVM, coreJS, doc)
+  .dependsOn(utilJVM, annotationsJVM, coreJVM)
   .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(
     name := "case-app-root"
   )
+
+lazy val annotations = crossProject
+  .settings(commonSettings: _*)
+  .settings(
+    name := "case-app-annotations"
+  )
+
+lazy val annotationsJVM = annotations.jvm
+lazy val annotationsJS = annotations.js
 
 lazy val util = crossProject
   .settings(commonSettings: _*)
@@ -23,7 +32,7 @@ lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
 
 lazy val core = crossProject
-  .dependsOn(util)
+  .dependsOn(annotations, util)
   .settings(commonSettings: _*)
   .settings(
     name := "case-app",
