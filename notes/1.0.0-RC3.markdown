@@ -1,0 +1,1 @@
+See the release notes for [1.1.0-RC3](https://github.com/alexarchambault/case-app/blob/master/notes/1.1.0-RC3.markdown)
