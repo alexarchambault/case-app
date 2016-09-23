@@ -18,7 +18,7 @@ class HelpTests extends FlatSpec with Matchers {
         |  --foo  <value>
         |  --bar  <value>""".stripMargin
 
-    def lines(s: String) = s.linesIterator.toVector
+    def lines(s: String) = s.lines.toVector
 
     println((lines(message) zip lines(expectedMessage)).filter {
       case (a, b) =>
@@ -35,7 +35,7 @@ class HelpTests extends FlatSpec with Matchers {
       second: String
     )
 
-    val helpLines = Messages[Options].helpMessage.linesIterator.toVector
+    val helpLines = Messages[Options].helpMessage.lines.toVector
 
     helpLines.count(_.contains("--first")) shouldBe 1
     helpLines.count(_.contains("--second")) shouldBe 0
