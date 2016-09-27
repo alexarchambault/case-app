@@ -22,11 +22,10 @@ lazy val util = crossProject
   .settings(
     name := "case-app-util",
     libraryDependencies ++= Seq(
-      "com.chuusai" %%% "shapeless" % "2.3.1",
-      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
-      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided",
+      "com.chuusai" %%% "shapeless" % "2.3.2",
       "org.typelevel" %% "macro-compat" % "1.1.1",
-      compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+      "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
+      "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
     )
   )
 
@@ -39,7 +38,7 @@ lazy val core = crossProject
   .settings(
     name := "case-app",
     libraryDependencies ++= Seq(
-      "org.scalatest" %%% "scalatest" % "3.0.0-M11" % "test"
+      "org.scalatest" %%% "scalatest" % "3.0.0" % "test"
     )
   )
 
@@ -60,6 +59,7 @@ lazy val doc = project
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
   scalaVersion := "2.11.8",
+  crossScalaVersions := Seq("2.10.6", "2.11.8", "2.12.0-M5"),
   resolvers ++= Seq(
     Resolver.sonatypeRepo("releases")
   ),
@@ -68,12 +68,7 @@ lazy val commonSettings = Seq(
     "-deprecation",
     "-target:jvm-1.6"
   ),
-  libraryDependencies ++= {
-    if (scalaVersion.value startsWith "2.10.")
-      Seq(compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full))
-    else
-      Seq()
-  }
+  libraryDependencies += compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
 ) ++ fullReleaseSettings
 
 lazy val fullReleaseSettings = Seq(
