@@ -1,0 +1,8 @@
+### Changes
+
+* Move annotations to a separate project ([#35])
+* Switch to scala-js 0.6.9 ([#35])
+* Switch to shapeless 2.3.1 (1.1.x branch only, [#37])
+
+[#35]: https://github.com/alexarchambault/case-app/pull/35
+[#37]: https://github.com/alexarchambault/case-app/pull/37
