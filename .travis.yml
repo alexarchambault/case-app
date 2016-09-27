@@ -6,7 +6,7 @@ scala:
 jdk:
 - oraclejdk8
 script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
-  && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "1.1.x"
+  && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
   ]]; then echo "publish"; fi)
 sudo: false
 env:
@@ -16,4 +16,4 @@ env:
   - secure: iAA98AVcqwTd11RjJaA133t38gqoGDsnLP2m1Hm2PFrUGE1AXg1/0wX6bXmFCnj+NIfb2ItC9cyuepcvrfAfV4ukU66Yyh6DCgYaup6IhrgSCdck5zZcc2KrxsLyWVAyuClu7TG6xbjHc4os0hZZ0w95pUIG2sOyr4faH1GbeUQ=
 branches:
   only:
-  - 1.1.x
+  - master
