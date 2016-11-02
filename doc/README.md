@@ -4,8 +4,8 @@
 
 [![Build Status](https://travis-ci.org/alexarchambault/case-app.svg)](https://travis-ci.org/alexarchambault/case-app)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alexarchambault/case-app?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-[![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_2.11.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_2.11)
-[![Scaladoc](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.11)
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_2.12.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_2.12)
+[![Scaladoc](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.12.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.12)
 
 ### Imports
 
@@ -434,12 +434,12 @@ ambiguities with custom types as above.
 Add to your `build.sbt`
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.1.1"
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.1.3"
 ```
 
 Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
 
-The `1.1.1` version is also built against scala `2.12.0-M5` (rather than `2.12.0-RC1`, because of regressions in the latter preventing building shapeless, that case-app depends on).
+It is built against scala 2.10, 2.11, and 2.12.
 
 If you are using scala 2.10.x, also add the macro paradise plugin to your build,
 ```scala
