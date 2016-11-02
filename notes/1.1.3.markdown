@@ -1,0 +1,5 @@
+### Changes
+
+- Publish for scala `2.12.0` ([#43])
+
+[#43]: https://github.com/alexarchambault/case-app/pull/43
