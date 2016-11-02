@@ -4,9 +4,8 @@
 
 [![Build Status](https://travis-ci.org/alexarchambault/case-app.svg)](https://travis-ci.org/alexarchambault/case-app)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/alexarchambault/case-app?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
-
-This README now documents the current development version (`1.0.0-SNAPSHOT`)
-of case-app. See [the `0.3.x` branch](https://github.com/alexarchambault/case-app/tree/0.3.x) for the stable version.
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_2.11.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_2.11)
+[![Scaladoc](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.11.svg?label=scaladoc)](http://javadoc-badge.appspot.com/com.github.alexarchambault/case-app_2.11)
 
 ### Imports
 
@@ -389,24 +388,27 @@ ambiguities with custom types as above.
 
 ## Usage
 
-The above documentation applies to the to-be-released 1.0 version. It can
-be used via snapshot artefacts, by adding to your `build.sbt`,
+Add to your `build.sbt`
 ```scala
-resolvers ++= Seq(
-  Resolver.sonatypeRepo("releases"),
-  Resolver.sonatypeRepo("snapshots")
-)
-
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.0.0-SNAPSHOT"
+resolvers += Resolver.sonatypeRepo("releases")
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.1.1"
 ```
 
-Note that it depends on shapeless 2.3.0-SNAPSHOT.
+Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
+
+The `1.1.1` version is also built against scala `2.12.0-M5` (rather than `2.12.0-RC1`, because of regressions in the latter preventing building shapeless, that case-app depends on).
 
 If you are using scala 2.10.x, also add the macro paradise plugin to your build,
 ```scala
 libraryDependencies +=
   compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
 ```
+
+## Contributors
+
+* Lars Hupel [@larsrh](https://github.com/larsrh)
+* Martin Mauch [@nightscape](https://github.com/nightscape)
+* Your name here :-)
 
 ## See also
 
