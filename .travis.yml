@@ -9,6 +9,11 @@ script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" 
   && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
   ]]; then echo "publish"; fi)
 sudo: false
+cache:
+  directories:
+  - $HOME/.coursier
+  - $HOME/.ivy2/cache
+  - $HOME/.sbt
 env:
   global:
   - COURSIER_NO_TERM=1
