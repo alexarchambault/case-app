@@ -1,7 +1,7 @@
 
-lazy val `case-app` = project.in(file("."))
+lazy val `case-app` = project
+  .in(file("."))
   .aggregate(utilJVM, utilJS, annotationsJVM, annotationsJS, coreJVM, coreJS, doc)
-  .dependsOn(utilJVM, annotationsJVM, coreJVM)
   .settings(commonSettings)
   .settings(noPublishSettings)
   .settings(
@@ -9,7 +9,7 @@ lazy val `case-app` = project.in(file("."))
   )
 
 lazy val annotations = crossProject
-  .settings(commonSettings: _*)
+  .settings(commonSettings)
   .settings(
     name := "case-app-annotations"
   )
@@ -18,7 +18,7 @@ lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
 
 lazy val util = crossProject
-  .settings(commonSettings: _*)
+  .settings(commonSettings)
   .settings(
     name := "case-app-util",
     libraryDependencies ++= Seq(
@@ -34,7 +34,7 @@ lazy val utilJS = util.js
 
 lazy val core = crossProject
   .dependsOn(annotations, util)
-  .settings(commonSettings: _*)
+  .settings(commonSettings)
   .settings(
     name := "case-app",
     libraryDependencies ++= Seq(
@@ -80,12 +80,12 @@ lazy val fullReleaseSettings = Seq(
   },
   licenses := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
   homepage := Some(url("https://github.com/alexarchambault/case-app")),
+  scmInfo := Some(ScmInfo(
+    url("https://github.com/alexarchambault/case-app.git"),
+    "scm:git:github.com/alexarchambault/case-app.git",
+    Some("scm:git:git@github.com:alexarchambault/case-app.git")
+  )),
   pomExtra := {
-    <scm>
-      <connection>scm:git:github.com/alexarchambault/case-app.git</connection>
-      <developerConnection>scm:git:git@github.com:alexarchambault/case-app.git</developerConnection>
-      <url>github.com/alexarchambault/case-app.git</url>
-    </scm>
     <developers>
       <developer>
         <id>alexarchambault</id>
