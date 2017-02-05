@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.ArgParser
+import caseapp.core.{ArgHint, ArgParser}
 
 object Definitions {
 
@@ -33,6 +33,7 @@ object Definitions {
   implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
     Right(Custom(arg))
   }
+  implicit val customArgHint: ArgHint[Custom] = ArgHint.hint("custom")
 
   case class WithCustom(
     custom   : Custom = Custom("")

@@ -1,10 +1,9 @@
 package caseapp
 package core
 
-import shapeless._
-import shapeless.labelled.{ FieldType, field }
-
 import caseapp.util.Implicit
+import shapeless._
+import shapeless.labelled.{FieldType, field}
 
 trait HListParser[L <: HList, D <: HList, -N <: HList, -V <: HList, -M <: HList, -H <: HList, R <: HList] {
   type P <: HList
@@ -39,16 +38,19 @@ object HListParser {
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
     headDefault: Implicit[Option[Default[H @@ Tag]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
-   ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H @@ Tag] :: PT] =
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]],
+    ah: Strict[ArgHint[H @@ Tag]]
+   ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H @@ Tag] :: PT] = {
     hconsDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, HT, RT]
+  }
 
   implicit def hconsDefault[K <: Symbol, H, T <: HList, PT <: HList, DT <: HList, NT <: HList, VT <: HList, MT <: HList, HT <: HList, RT <: HList]
    (implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
     headDefault: Implicit[Option[Default[H]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]],
+    ah: Strict[ArgHint[H]]
    ): Aux[FieldType[K, H] :: T, Option[H] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H] :: PT] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
       val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
@@ -57,8 +59,17 @@ object HListParser {
       val headDefault0 = default0.head
 
       new Parser[FieldType[K, H] :: T] {
-        val args =
-          Arg(name.value.name, headNames, headDescriptions, helpMessages.head, noHelp.head.nonEmpty, argParser.value.isFlag) +: tailParser.args
+        val args = Arg(
+          name.value.name,
+          headNames,
+          headDescriptions,
+          helpMessages.head,
+          noHelp.head.nonEmpty,
+          argParser.value.isFlag,
+          Some(ah.value.description),
+          ah.value.isRequired,
+          headDefault0.map(_.toString)
+        ) +: tailParser.args
 
         type D = Option[H] :: PT
         def init = None :: tailParser.init
@@ -132,4 +143,3 @@ object HListParser {
       }
     }
 }
-
