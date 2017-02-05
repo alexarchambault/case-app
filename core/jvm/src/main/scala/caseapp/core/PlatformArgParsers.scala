@@ -6,7 +6,7 @@ import java.util.{ Calendar, GregorianCalendar }
 trait PlatformArgParsers {
 
   implicit def calendar: ArgParser[Calendar] =
-    ArgParser.instance {
+    ArgParser.instance("yyyy-MM-dd") {
       val fmt = new SimpleDateFormat("yyyy-MM-dd")
 
       s =>

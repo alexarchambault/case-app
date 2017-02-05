@@ -30,8 +30,10 @@ object Definitions {
 
   case class Custom(s: String)
 
-  implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
-    Right(Custom(arg))
+  implicit val customArgParser: ArgParser[Custom] = {
+    ArgParser.instance("custom parameter") { arg =>
+      Right(Custom(arg))
+    }
   }
 
   case class WithCustom(

@@ -5,82 +5,87 @@ trait ArgParser[T] {
   def apply(current: Option[T], s: String, mandatory: Boolean): Either[String, (Boolean, T)]
   def apply(current: Option[T]): Either[String, T]
   def isFlag: Boolean = false
+  def description: String
 }
 
 object ArgParser extends PlatformArgParsers {
   def apply[T](implicit parser: ArgParser[T]): ArgParser[T] = parser
 
-  def instance[T](f: String => Either[String, T]): ArgParser[T] =
+  def instance[T](hintDescription: String)(f: String => Either[String, T]): ArgParser[T] =
     new ArgParser[T] {
       def apply(current: Option[T], s: String, mandatory: Boolean) = f(s).right.map((true, _))
       def apply(current: Option[T]) = Left("argument missing")
+      def description = hintDescription
     }
 
-  def flag[T](f: Option[String] => Either[String, T]): ArgParser[T] =
+  def flag[T](hintDescription: String)(f: Option[String] => Either[String, T]): ArgParser[T] =
     new ArgParser[T] {
       def apply(current: Option[T], s: String, mandatory: Boolean) =
         f(if (mandatory) Some(s) else None).right.map((mandatory, _))
       def apply(current: Option[T]) = f(None)
       override def isFlag = true
+      def description = hintDescription
     }
 
-  def accumulator[T](f: (Option[T], String) => Either[String, T]): ArgParser[T] =
+  def accumulator[T](hintDescription: String)(f: (Option[T], String) => Either[String, T]): ArgParser[T] =
     new ArgParser[T] {
       def apply(current: Option[T], s: String, mandatory: Boolean) =
         f(current, s).right.map((true, _))
       def apply(current: Option[T]) = Left("argument missing")
+      def description = hintDescription
     }
 
-  def flagAccumulator[T](f: (Option[T], Option[String]) => Either[String, T]): ArgParser[T] =
+  def flagAccumulator[T](hintDescription: String)(f: (Option[T], Option[String]) => Either[String, T]): ArgParser[T] =
     new ArgParser[T] {
       def apply(current: Option[T], s: String, mandatory: Boolean) =
         f(current, if (mandatory) Some(s) else None).right.map((mandatory, _))
       def apply(current: Option[T]) = f(current, None)
       override def isFlag = true
+      def description = hintDescription
     }
 
   implicit def int: ArgParser[Int] =
-    instance { s =>
+    instance("int") { s =>
       try Right(s.toInt)
       catch { case _: NumberFormatException =>
         Left(s"Malformed integer: $s")
       }
     }
   implicit def long: ArgParser[Long] =
-    instance { s =>
+    instance("long") { s =>
       try Right(s.toLong)
       catch { case _: NumberFormatException =>
         Left(s"Malformed long integer: $s")
       }
     }
   implicit def double: ArgParser[Double] =
-    instance { s =>
+    instance("double") { s =>
       try Right(s.toDouble)
       catch { case _: NumberFormatException =>
         Left(s"Malformed double float: $s")
       }
     }
   implicit def float: ArgParser[Float] =
-    instance { s =>
+    instance("float") { s =>
       try Right(s.toFloat)
       catch { case _: NumberFormatException =>
         Left(s"Malformed float: $s")
       }
     }
   implicit def bigDecimal: ArgParser[BigDecimal] =
-    instance { s =>
+    instance("decimal") { s =>
       try Right(BigDecimal(s))
       catch { case _: NumberFormatException =>
         Left(s"Malformed decimal: $s")
       }
     }
   implicit def string: ArgParser[String] =
-    instance(Right(_))
+    instance("string")(Right(_))
   implicit def unit: ArgParser[Unit] = {
     val trues = Set("true", "1")
     val falses = Set("false", "0")
 
-    flag {
+    flag("flag/unit") {
       case None => Right(())
       case Some(s) =>
         if (trues(s))
@@ -95,7 +100,7 @@ object ArgParser extends PlatformArgParsers {
     val trues = Set("true", "1")
     val falses = Set("false", "0")
 
-    flag {
+    flag("bool") {
       case None => Right(true)
       case Some(s) =>
         if (trues(s))
@@ -107,14 +112,15 @@ object ArgParser extends PlatformArgParsers {
     }
   }
   implicit def counter: ArgParser[Int @@ Counter] =
-    flagAccumulator { (prevOpt, s) =>
+    flagAccumulator("counter") { (prevOpt, s) =>
       Right(Tag.of(prevOpt.fold(0)(Tag.unwrap) + 1))
     }
 
   // FIXME list and option below may not be fine with lists/options of flags
-  implicit def list[T: ArgParser]: ArgParser[List[T]] =
-    accumulator { (prevOpt, s) =>
-      ArgParser[T].apply(None, s, mandatory = true).right.flatMap {
+  implicit def list[T: ArgParser]: ArgParser[List[T]] = {
+    val parser = ArgParser[T]
+    accumulator(s"${parser.description}*") { (prevOpt, s) =>
+      parser.apply(None, s, mandatory = true).right.flatMap {
         case (false, _) =>
           // should not happen
           Left(s"Unrecognized value: $s")
@@ -123,9 +129,11 @@ object ArgParser extends PlatformArgParsers {
           Right(prevOpt.getOrElse(Nil) :+ t)
       }
     }
-  implicit def option[T: ArgParser]: ArgParser[Option[T]] =
-    accumulator { (prevOpt, s) =>
-      ArgParser[T].apply(prevOpt.flatten, s, mandatory = true).right.flatMap {
+  }
+  implicit def option[T: ArgParser]: ArgParser[Option[T]] = {
+    val parser = ArgParser[T]
+    accumulator(s"${parser.description}?") { (prevOpt, s) =>
+      parser.apply(prevOpt.flatten, s, mandatory = true).right.flatMap {
         case (false, _) =>
           // should not happen
           Left(s"Unrecognized value: $s")
@@ -133,5 +141,6 @@ object ArgParser extends PlatformArgParsers {
           Right(Some(t))
       }
     }
+  }
 }
 
