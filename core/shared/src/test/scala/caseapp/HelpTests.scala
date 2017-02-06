@@ -1,7 +1,8 @@
 package caseapp
 
-import caseapp.core.Messages
-
+import java.time.Instant
+import scala.util.Try
+import caseapp.core.{ArgHint, ArgParser, Messages}
 import org.scalatest._
 
 class HelpTests extends FlatSpec with Matchers {
@@ -15,8 +16,8 @@ class HelpTests extends FlatSpec with Matchers {
     val expectedMessage =
       """Example
         |Usage: example [options]
-        |  --foo  <string>  [required]
-        |  --bar  <int>  [required]""".stripMargin
+        |  --foo  <string>  <default: [""]>
+        |  --bar  <int>  <default: [0]>""".stripMargin
     check(message, expectedMessage)
   }
 
@@ -38,7 +39,7 @@ class HelpTests extends FlatSpec with Matchers {
     val expected =
       """WithList
         |Usage: with-list [options]
-        |  --list  <int*>  [required]""".stripMargin
+        |  --list  <int*>  <default: [List()]>""".stripMargin
     check(message, expected)
   }
 
@@ -48,7 +49,7 @@ class HelpTests extends FlatSpec with Matchers {
     val expected =
       """OptBool
         |Usage: opt-bool [options]
-        |  --opt  <bool?>  [required]""".stripMargin
+        |  --opt  <bool?>  <default: [None]>""".stripMargin
     check(message, expected)
   }
 
@@ -57,9 +58,18 @@ class HelpTests extends FlatSpec with Matchers {
     val expected =
       """MoreArgs
         |Usage: more-args [options]
-        |  --count  [required]
-        |  --value  <string>  [required]  [default: default]
-        |  --num-foo  <int>  [required]  [default: -10]""".stripMargin
+        |  --count  <default: [0]>
+        |  --value  <string>  <default: ["default"]>
+        |  --num-foo  <int>  <default: [-10]>""".stripMargin
+    check(message, expected)
+  }
+
+  it should "render 'required' when no Default instance is defined" in {
+    val message = CaseApp.helpMessage[ReqOpt]
+    val expected =
+      """ReqOpt
+        |Usage: req-opt [options]
+        |  --no-default  <has-no-default-value (no sense either)>  <required>""".stripMargin
     check(message, expected)
   }
 

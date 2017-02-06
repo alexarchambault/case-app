@@ -7,9 +7,11 @@ trait ArgHint[A] {
 }
 
 object ArgHint extends PlatformArgHints {
-  def hint[A](desc: String, required: Boolean = true) = new ArgHint[A] {
-    override def description: String = desc
-    override def isRequired: Boolean = required
+  def hint[A](desc: String, required: Boolean = true): ArgHint[A] = {
+    new ArgHint[A] {
+      override def description: String = desc
+      override def isRequired: Boolean = required
+    }
   }
 
   def apply[A](implicit ah: ArgHint[A]): ArgHint[A] = ah

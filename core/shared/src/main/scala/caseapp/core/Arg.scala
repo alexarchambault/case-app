@@ -8,7 +8,6 @@ case class Arg(
   helpMessage: Option[HelpMessage],
   noHelp: Boolean,
   isFlag: Boolean,
-  typeHint: Option[String],
-  isRequired: Boolean,
-  defaultValue: Option[String]
+  hint: ArgHint[_],
+  defaultDescription: Option[String]
 )
