@@ -76,10 +76,13 @@ class HelpTests extends FlatSpec with Matchers {
   private def check(message: String, expectedMessage: String) = {
     def lines(s: String) = s.lines.toVector
 
-    println((lines(message) zip lines(expectedMessage)).filter {
+    val diff = (lines(message) zip lines(expectedMessage)).filter {
       case (a, b) =>
         a != b
-    })
+    }
+    if (diff.nonEmpty) {
+      println(diff)
+    }
 
     lines(message) shouldBe lines(expectedMessage)
   }
