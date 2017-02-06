@@ -61,15 +61,17 @@ object Messages {
       // FIXME Flags that accept no value are not given the right help message here
       val valueDescription = arg.valueDescription.orElse {
         if (!arg.isFlag) {
-          Some(ValueDescription(arg.hint.description))
+          Some(ValueDescription(arg.hintDescription))
         } else {
           None
         }
       }
 
-      val reqAndDesc =
-        Some("<required>").filter(_ => arg.hint.isRequired && arg.defaultDescription.isEmpty).toList ++
-          arg.defaultDescription.map(d => s"""<default: [$d]>""").toList
+      val reqAndDesc = Some({
+        val req = List("required").filter(_ => arg.defaultDescription.isEmpty)
+        val deflt = arg.defaultDescription.map(d => s"default: $d")
+        req ++ deflt
+      }).filterNot(_.isEmpty).map(_.mkString("[",",","]"))
 
       val message = arg.helpMessage.map(Messages.TB + _.message)
 

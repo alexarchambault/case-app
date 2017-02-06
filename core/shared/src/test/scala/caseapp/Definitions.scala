@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.{ArgHint, ArgParser}
+import caseapp.core.ArgParser
 
 object Definitions {
 
@@ -30,10 +30,11 @@ object Definitions {
 
   case class Custom(s: String)
 
-  implicit val customArgParser: ArgParser[Custom] = ArgParser.instance[Custom] { arg =>
-    Right(Custom(arg))
+  implicit val customArgParser: ArgParser[Custom] = {
+    ArgParser.instance("custom parameter") { arg =>
+      Right(Custom(arg))
+    }
   }
-  implicit val customArgHint: ArgHint[Custom] = ArgHint.hint("custom")
 
   case class WithCustom(
     custom   : Custom = Custom("")
@@ -49,11 +50,10 @@ object Definitions {
   // won't have a default value, used to test for 'required' rendering
   trait NoDefault
   case class ReqOpt(noDefault: NoDefault) extends App
-  implicit val reqOptArgParser: ArgParser[NoDefault] = ArgParser.instance[NoDefault](
-    _ => Right(new NoDefault{})
-  )
-  implicit val reqOptArgHint: ArgHint[NoDefault] = {
-    ArgHint.hint("has-no-default-value (no sense either)")
+  implicit val reqOptArgParser: ArgParser[NoDefault] = {
+    ArgParser.instance("has-no-default-value (no sense either)") {
+      _ => Right(new NoDefault {})
+    }
   }
 
   Parser[NoArgs]

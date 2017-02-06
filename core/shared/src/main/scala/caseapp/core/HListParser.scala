@@ -38,8 +38,7 @@ object HListParser {
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
     headDefault: Implicit[Option[Default[H @@ Tag]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]],
-    ah: Strict[ArgHint[H @@ Tag]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
    ): Aux[FieldType[K, H @@ Tag] :: T, Option[H @@ Tag] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H @@ Tag] :: PT] = {
     hconsDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, HT, RT]
   }
@@ -49,8 +48,7 @@ object HListParser {
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
     headDefault: Implicit[Option[Default[H]]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]],
-    ah: Strict[ArgHint[H]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
    ): Aux[FieldType[K, H] :: T, Option[H] :: DT, List[Name] :: NT, Option[ValueDescription] :: VT, Option[HelpMessage] :: MT, Option[Hidden] :: HT, None.type :: RT, Option[H] :: PT] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
       val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
@@ -67,7 +65,7 @@ object HListParser {
           helpMessages.head,
           noHelp.head.nonEmpty,
           argParser.value.isFlag,
-          ah.value,
+          argParser.value.description,
           for (dv <- headDefault.value; dvp <- defaultValuePreset) yield dv.describe(dvp)
         ) +: tailParser.args
 
