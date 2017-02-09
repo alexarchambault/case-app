@@ -55,10 +55,19 @@ object HListParser {
       val headNames = Name(name.value.name) :: names.head
       val headDescriptions = valueDescriptions.head
       val headDefault0 = default0.head
+      val defaultValuePreset = headDefault0.orElse(headDefault.value.map(_()))
 
       new Parser[FieldType[K, H] :: T] {
-        val args =
-          Arg(name.value.name, headNames, headDescriptions, helpMessages.head, noHelp.head.nonEmpty, argParser.value.isFlag) +: tailParser.args
+        val args = Arg(
+          name.value.name,
+          headNames,
+          headDescriptions,
+          helpMessages.head,
+          noHelp.head.nonEmpty,
+          argParser.value.isFlag,
+          argParser.value.description,
+          for (dv <- headDefault.value; dvp <- defaultValuePreset) yield dv.describe(dvp)
+        ) +: tailParser.args
 
         type D = Option[H] :: PT
         def init = None :: tailParser.init
@@ -92,8 +101,7 @@ object HListParser {
         }
         def get(d: Option[H] :: PT) = {
           val maybeHead = d.head
-            .orElse(headDefault0)
-            .orElse(headDefault.value.map(_()))
+            .orElse(defaultValuePreset)
             .toRight(s"Required option ${name.value.name} / $headNames not specified")
           for {
             h <- maybeHead.right

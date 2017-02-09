@@ -6,13 +6,16 @@ import shapeless._
 /** Type class providing a default value for type `CC` */
 trait Default[CC] {
   def apply(): CC
+  def describe(cc: CC): String
 }
 
 object Default extends PlatformDefaults {
   def apply[CC](implicit default: Default[CC]): Default[CC] = default
   
-  def instance[CC](default: => CC): Default[CC] = new Default[CC] {
+  def instance[CC](default: => CC,
+                   describeFn: CC => String = (c: CC) => c.toString): Default[CC] = new Default[CC] {
     def apply() = default
+    def describe(cc: CC) = describeFn(cc)
   }
 
   implicit def generic[CC, L <: HList, D <: HList]
@@ -31,10 +34,10 @@ object Default extends PlatformDefaults {
   implicit val bigDecimal: Default[BigDecimal] = Default.instance(BigDecimal(0))
   implicit val boolean: Default[Boolean] = Default.instance(false)
   implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
-  implicit val string: Default[String] = Default.instance("")
+  implicit val string: Default[String] = Default.instance("", str => s""""$str"""")
 
-  implicit def option[T]: Default[Option[T]] = Default.instance(None)
-  implicit def list[T]: Default[List[T]] = Default.instance(Nil)
+  implicit def option[T]: Default[Option[T]] = Default.instance[Option[T]](None)
+  implicit def list[T]: Default[List[T]] = Default.instance[List[T]](Nil)
 
 }
 

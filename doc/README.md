@@ -402,7 +402,7 @@ import caseapp.core.ArgParser
 trait Custom
 
 implicit val customArgParser: ArgParser[Custom] =
-  ArgParser.instance[Custom] { s =>
+  ArgParser.instance[Custom]("custom") { s =>
     // parse s
     // return
     // - Left("error message") in case of error
