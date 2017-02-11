@@ -59,14 +59,18 @@ lazy val doc = project
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
   resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases")
+    Resolver.sonatypeRepo("releases"),
+    Resolver.bintrayRepo("tek", "maven")
   ),
   scalacOptions ++= Seq(
     "-feature",
     "-deprecation",
     "-target:jvm-1.6"
   ),
-  libraryDependencies += compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
+  libraryDependencies ++= Seq(
+    compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full),
+    compilerPlugin("tryp" %% "splain" % "0.1.20")
+  )
 ) ++ fullReleaseSettings
 
 lazy val fullReleaseSettings = Seq(

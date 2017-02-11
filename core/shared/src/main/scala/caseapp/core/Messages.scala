@@ -59,14 +59,28 @@ object Messages {
     args.collect { case arg if !arg.noHelp =>
       val names = (Name(arg.name) +: arg.extraNames).distinct
       // FIXME Flags that accept no value are not given the right help message here
-      val valueDescription = arg.valueDescription.orElse(if (!arg.isFlag) Some(ValueDescription("value")) else None)
+      val valueDescription = arg.valueDescription.orElse {
+        if (!arg.isFlag) {
+          Some(ValueDescription(arg.hintDescription))
+        } else {
+          None
+        }
+      }
+
+      val reqAndDesc = Some({
+        val req = List("required").filter(_ => arg.defaultDescription.isEmpty)
+        val deflt = arg.defaultDescription.map(d => s"default: $d")
+        req ++ deflt
+      }).filterNot(_.isEmpty).map(_.mkString("[",",","]"))
 
       val message = arg.helpMessage.map(Messages.TB + _.message)
 
-      val usage = s"${Messages.WW}${names.map(_.option) mkString " | "}  ${valueDescription.map(_.message).mkString}"
+      val namesDesc = names.map(_.option).mkString(" | ")
+      val valueDesc = valueDescription.map(_.message).toList
+      val usage = (namesDesc :: (valueDesc ++ reqAndDesc)).mkString(Messages.WW, Messages.WW, "")
 
       (usage :: message.toList) mkString Messages.NL
-    } .mkString(Messages.NL)
+    }.mkString(Messages.NL)
 
 
   // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else

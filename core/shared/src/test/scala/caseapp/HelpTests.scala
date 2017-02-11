@@ -1,7 +1,6 @@
 package caseapp
 
 import caseapp.core.Messages
-
 import org.scalatest._
 
 class HelpTests extends FlatSpec with Matchers {
@@ -15,17 +14,9 @@ class HelpTests extends FlatSpec with Matchers {
     val expectedMessage =
       """Example
         |Usage: example [options]
-        |  --foo  <value>
-        |  --bar  <value>""".stripMargin
-
-    def lines(s: String) = s.lines.toVector
-
-    println((lines(message) zip lines(expectedMessage)).filter {
-      case (a, b) =>
-        a != b
-    })
-
-    lines(message) shouldBe lines(expectedMessage)
+        |  --foo  <string>  [default: ""]
+        |  --bar  <int>  [default: 0]""".stripMargin
+    check(message, expectedMessage)
   }
 
   it should "not add a help message for fields annotated with @Hidden" in {
@@ -41,4 +32,55 @@ class HelpTests extends FlatSpec with Matchers {
     helpLines.count(_.contains("--second")) shouldBe 0
   }
 
+  it should "render * for repeated args" in {
+    val message = CaseApp.helpMessage[WithList]
+    val expected =
+      """WithList
+        |Usage: with-list [options]
+        |  --list  <int*>  [default: List()]""".stripMargin
+    check(message, expected)
+  }
+
+  it should "render required/optional state of args" in {
+    val message = CaseApp.helpMessage[OptBool]
+    val expected =
+      """OptBool
+        |Usage: opt-bool [options]
+        |  --opt  <bool?>  [default: None]""".stripMargin
+    check(message, expected)
+  }
+
+  it should "render default args' values" in {
+    val message = CaseApp.helpMessage[MoreArgs]
+    val expected =
+      """MoreArgs
+        |Usage: more-args [options]
+        |  --count  [default: 0]
+        |  --value  <string>  [default: "default"]
+        |  --num-foo  <int>  [default: -10]""".stripMargin
+    check(message, expected)
+  }
+
+  it should "render 'required' when no Default instance is defined" in {
+    val message = CaseApp.helpMessage[ReqOpt]
+    val expected =
+      """ReqOpt
+        |Usage: req-opt [options]
+        |  --no-default  <has-no-default-value (no sense either)>  [required]""".stripMargin
+    check(message, expected)
+  }
+
+  private def check(message: String, expectedMessage: String) = {
+    def lines(s: String) = s.lines.toVector
+
+    val diff = (lines(message) zip lines(expectedMessage)).filter {
+      case (a, b) =>
+        a != b
+    }
+    if (diff.nonEmpty) {
+      println(diff)
+    }
+
+    lines(message) shouldBe lines(expectedMessage)
+  }
 }

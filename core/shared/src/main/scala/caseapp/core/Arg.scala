@@ -11,4 +11,3 @@ case class Arg(
   hintDescription: String,
   defaultDescription: Option[String]
 )
-

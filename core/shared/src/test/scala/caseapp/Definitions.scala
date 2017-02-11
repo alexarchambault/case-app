@@ -47,6 +47,14 @@ object Definitions {
     @ExtraName("S") stages: List[String]
   ) extends App
 
+  // won't have a default value, used to test for 'required' rendering
+  trait NoDefault
+  case class ReqOpt(noDefault: NoDefault) extends App
+  implicit val reqOptArgParser: ArgParser[NoDefault] = {
+    ArgParser.instance("has-no-default-value (no sense either)") {
+      _ => Right(new NoDefault {})
+    }
+  }
 
   Parser[NoArgs]
   Parser[FewArgs]
@@ -56,6 +64,7 @@ object Definitions {
   Parser[OptBool]
   Parser[WithCustom]
   Parser[Demo]
+  Parser[ReqOpt]
 
   case class ReadmeOptions1(
     user: Option[String],
