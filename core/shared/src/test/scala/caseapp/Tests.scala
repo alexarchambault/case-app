@@ -1,7 +1,5 @@
 package caseapp
 
-import caseapp.core.{ Messages, ArgParser }
-
 import org.scalatest._
 
 
@@ -37,11 +35,11 @@ class Tests extends FlatSpec with Matchers {
   }
   
   it should "parse args" in {
-    Parser[demo.Demo].parse(Seq("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first")) shouldEqual Right((demo.Demo(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
+    Parser[demo.DemoOptions].parse(Seq("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first")) shouldEqual Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
   }
 
   it should "parse short args" in {
-    Parser[demo.Demo].parse(Seq("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first")) shouldEqual Right((demo.Demo(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
+    Parser[demo.DemoOptions].parse(Seq("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first")) shouldEqual Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
   }
 
   it should "parse list args" in {

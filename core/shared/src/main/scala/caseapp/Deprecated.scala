@@ -36,6 +36,7 @@ import scala.collection.mutable.ListBuffer
  * gives `foo` the value `"ab"`) of `Foo`. It also accepts `--help` / `-h` / `--usage` arguments,
  * and prints help or usage messages when these are present.
  */
+@deprecated("See CaseApp instead", "1.2.0-M2")
 trait App extends DefaultArgsApp with DelayedInit {
   private val initCode = new ListBuffer[() => Unit]
 
@@ -81,6 +82,7 @@ trait App extends DefaultArgsApp with DelayedInit {
  * call its body (whose initialization is delayed thanks to delayed initialization). In the
  * second case, it will create a `Second` instead, and call its body too.
  */
+@deprecated("See CommandApp instead", "1.2.0-M2")
 trait Command extends DefaultCommandArgsApp with DelayedInit {
   // FIXME Could the content of that be de-duplicated with App above?
   // Wouldn't this break delayed initialization?
@@ -99,6 +101,7 @@ trait Command extends DefaultCommandArgsApp with DelayedInit {
 /**
  * Have a singleton extends this class to get a class with a main method for the app of `T`
  */
+@deprecated("Use CaseApp instead", "1.2.0-M2")
 abstract class AppOf[T <: ArgsApp : Parser : Messages] {
   def main(args: Array[String]): Unit =
     Parser[T].withHelp.detailedParse(args) match {
@@ -122,6 +125,7 @@ abstract class AppOf[T <: ArgsApp : Parser : Messages] {
     }
 }
 
+@deprecated("Use CommandAppWithPreCommand instead", "1.2.0-M2")
 abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <: ArgsApp : CommandParser : CommandsMessages] {
   def appName: String = Messages[D].appName
   def appVersion: String = Messages[D].appVersion
@@ -184,6 +188,7 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
 }
 
 // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
+@deprecated("Use CommandApp instead", "1.2.0-M2")
 abstract class CommandAppOf[T <: ArgsApp](implicit
   commandParser: CommandParser[T],
   commandMessages: CommandsMessages[T],
