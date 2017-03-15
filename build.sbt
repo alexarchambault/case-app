@@ -1,13 +1,4 @@
 
-lazy val `case-app` = project
-  .in(file("."))
-  .aggregate(utilJVM, utilJS, annotationsJVM, annotationsJS, coreJVM, coreJS, doc)
-  .settings(commonSettings)
-  .settings(noPublishSettings)
-  .settings(
-    name := "case-app-root"
-  )
-
 lazy val annotations = crossProject
   .settings(commonSettings)
   .settings(
@@ -55,22 +46,42 @@ lazy val doc = project
     tutTargetDirectory := baseDirectory.value / ".."
   )
 
+lazy val `case-app` = project
+  .in(file("."))
+  .aggregate(
+    utilJVM,
+    utilJS,
+    annotationsJVM,
+    annotationsJS,
+    coreJVM,
+    coreJS,
+    doc
+  )
+  .settings(commonSettings)
+  .settings(noPublishSettings)
+  .settings(
+    name := "case-app-root"
+  )
+
 
 lazy val commonSettings = Seq(
   organization := "com.github.alexarchambault",
-  resolvers ++= Seq(
-    Resolver.sonatypeRepo("releases")
-  ),
+  resolvers += Resolver.sonatypeRepo("releases"),
   scalacOptions ++= Seq(
     "-feature",
-    "-deprecation",
-    "-target:jvm-1.6"
+    "-deprecation"
   ),
-  libraryDependencies += compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.full)
-) ++ fullReleaseSettings
-
-lazy val fullReleaseSettings = Seq(
+  scalacOptions ++= {
+    scalaBinaryVersion.value match {
+      case "2.10" | "2.11" =>
+        Seq("-target:jvm-1.6")
+      case _ =>
+        Nil
+    }
+  },
+  libraryDependencies += compilerPlugin("org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch),
   publishMavenStyle := true,
+  pomIncludeRepository := { _ => false },
   publishTo := {
     val nexus = "https://oss.sonatype.org/"
     if (isSnapshot.value)
@@ -85,15 +96,12 @@ lazy val fullReleaseSettings = Seq(
     "scm:git:github.com/alexarchambault/case-app.git",
     Some("scm:git:git@github.com:alexarchambault/case-app.git")
   )),
-  pomExtra := {
-    <developers>
-      <developer>
-        <id>alexarchambault</id>
-        <name>Alexandre Archambault</name>
-        <url>https://github.com/alexarchambault</url>
-      </developer>
-    </developers>
-  },
+  developers := List(Developer(
+    "alexarchambault",
+    "Alexandre Archambault",
+    "",
+    url("https://github.com/alexarchambault")
+  )),
   credentials ++= {
     Seq("SONATYPE_USER", "SONATYPE_PASS").map(sys.env.get) match {
       case Seq(Some(user), Some(pass)) =>
