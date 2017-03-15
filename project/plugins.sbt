@@ -1,6 +1,6 @@
 resolvers += Resolver.url(
   "tpolecat-sbt-plugin-releases",
-  url("http://dl.bintray.com/content/tpolecat/sbt-plugin-releases") )(
+  url("https://dl.bintray.com/content/tpolecat/sbt-plugin-releases") )(
   Resolver.ivyStylePatterns
 )
 
