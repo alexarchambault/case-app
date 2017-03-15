@@ -464,7 +464,7 @@ straight-to-the-point and descriptive / algebric data types oriented.
  
 ## Notice
  
-Copyright (c) 2014-2015 Alexandre Archambault.
+Copyright (c) 2014-2017 Alexandre Archambault and contributors.
 See LICENSE file for more details.
 
 Released under Apache 2.0 license.
