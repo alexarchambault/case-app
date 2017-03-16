@@ -3,55 +3,56 @@ package demo
 
 @AppVersion("0.1.0")
 @ArgsName("files")
-case class Demo(
-  first: Boolean
-, @ExtraName("V") @HelpMessage("Set a value") value : Option[String]
-, @ExtraName("v") @HelpMessage("Be verbose") verbose : Int @@ Counter
-, @ExtraName("S") @ValueDescription("stages")  stages : List[String]
-) extends App {
+final case class DemoOptions(
+  first: Boolean,
+  @ExtraName("V") @HelpMessage("Set a value") value : Option[String],
+  @ExtraName("v") @HelpMessage("Be verbose") verbose : Int @@ Counter,
+  @ExtraName("S") @ValueDescription("stages")  stages : List[String]
+)
 
-  Console.err.println(this)
+object Demo extends CaseApp[DemoOptions] {
 
+  def run(options: DemoOptions, remainingArgs: RemainingArgs) =
+    Console.err.println(this)
 }
 
 @AppName("Glorious App")
 @AppVersion("0.1.0")
-case class MyApp(
-  @ValueDescription("a foo") @HelpMessage("Specify some foo") foo: Option[String]
-, bar: Int
-) extends App {
-// ...
+final case class MyAppOptions(
+  @ValueDescription("a foo") @HelpMessage("Specify some foo") foo: Option[String],
+  bar: Int
+)
+
+object MyApp extends CaseApp[MyAppOptions] {
+  def run(options: MyAppOptions, remainingArgs: RemainingArgs) = {}
 }
-
-object MyApp0 extends AppOf[MyApp]
-
-object DemoApp extends AppOf[Demo]
 
 
 @AppName("Demo")
 @AppVersion("1.0.0")
 @ProgName("demo-cli")
-sealed trait DemoCommand extends Command
+sealed abstract class DemoCommand extends Product with Serializable
 
-case class First(
+final case class First(
   @ExtraName("v") verbose: Int @@ Counter,
   @ValueDescription("a bar") @HelpMessage("Set bar") bar: String = "default-bar"
-) extends DemoCommand {
-
-  Console.err.println(s"First: $this")
-
-}
+) extends DemoCommand
 
 @CommandName("second")
-case class Secondd(
+final case class Secondd(
   extra: List[Int],
   @ExtraName("S")
   @ValueDescription("stages")
     stages : List[String]
-) extends DemoCommand {
+) extends DemoCommand
 
-  Console.err.println(s"Second: $this")
+object CommandAppTest extends CommandApp[DemoCommand] {
 
+  def run(options: DemoCommand, remainingArgs: RemainingArgs): Unit =
+    options match {
+      case _: First =>
+        Console.err.println(s"First: $this")
+      case _: Secondd =>
+        Console.err.println(s"Second: $this")
+    }
 }
-
-object CommandApp extends CommandAppOf[DemoCommand]

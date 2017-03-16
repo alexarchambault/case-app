@@ -4,31 +4,31 @@ import caseapp.core.ArgParser
 
 object Definitions {
 
-  case class NoArgs() extends App
+  final case class NoArgs()
 
-  case class FewArgs(
+  final case class FewArgs(
     value  : String = "default",
     numFoo : Int = -10
-  ) extends App
+  )
 
-  case class MoreArgs(
+  final case class MoreArgs(
     count  : Int @@ Counter,
     @Recurse few    : FewArgs
-  ) extends App
+  )
 
-  case class WithList(
+  final case class WithList(
     list   : List[Int]
-  ) extends App
+  )
 
-  case class WithTaggedList(
+  final case class WithTaggedList(
     list   : List[String]
-  ) extends App
+  )
 
-  case class OptBool(
+  final case class OptBool(
     opt    : Option[Boolean]
-  ) extends App
+  )
 
-  case class Custom(s: String)
+  final case class Custom(s: String)
 
   implicit val customArgParser: ArgParser[Custom] = {
     ArgParser.instance("custom parameter") { arg =>
@@ -36,16 +36,16 @@ object Definitions {
     }
   }
 
-  case class WithCustom(
+  final case class WithCustom(
     custom   : Custom = Custom("")
-  ) extends App
+  )
 
-  case class Demo(
+  final case class Demo(
     first: Boolean = false,
     @ExtraName("V") value: Option[String] = None,
     @ExtraName("v") verbose: Int @@ Counter,
     @ExtraName("S") stages: List[String]
-  ) extends App
+  )
 
 
   Parser[NoArgs]
@@ -57,27 +57,27 @@ object Definitions {
   Parser[WithCustom]
   Parser[Demo]
 
-  case class ReadmeOptions1(
+  final case class ReadmeOptions1(
     user: Option[String],
     enableFoo: Boolean,
     @ExtraName("f") file: List[String]
   )
-  case class AuthOptions(
+  final case class AuthOptions(
     user: String,
     password: String
   )
 
-  case class PathOptions(
+  final case class PathOptions(
     @ExtraName("f") fooPath: String,
     @ExtraName("b") barPath: String
   )
 
-  case class ReadmeOptions2(
+  final case class ReadmeOptions2(
     @Recurse auth: AuthOptions,
     @Recurse paths: PathOptions
   )
 
-  case class Example(
+  final case class Example(
     foo: String,
     bar: Int
   )

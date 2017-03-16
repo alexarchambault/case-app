@@ -6,9 +6,9 @@ import org.scalatest.{ Matchers, FlatSpec }
 
 object PlatformTests {
 
-  case class WithCalendar(
+  final case class WithCalendar(
     date   : java.util.Calendar
-  ) extends App
+  )
 
   CaseApp.parseWithHelp[WithCalendar] _
 

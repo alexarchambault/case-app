@@ -2,6 +2,45 @@ package caseapp
 
 import caseapp.core._
 
+abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Messages[T]) {
+
+  def run(options: T, remainingArgs: RemainingArgs): Unit
+
+  def exit(code: Int): Unit =
+    sys.exit(code)
+
+  def error(message: String): Unit = {
+    Console.err.println(message)
+    exit(1)
+  }
+
+  def helpAsked(): Unit = {
+    println(messages.withHelp.helpMessage)
+    exit(0)
+  }
+
+  def usageAsked(): Unit = {
+    println(messages.withHelp.usageMessage)
+    exit(0)
+  }
+
+  def main(args: Array[String]): Unit =
+    parser.withHelp.detailedParse(args) match {
+      case Left(err) =>
+        error(err)
+
+      case Right((WithHelp(usage, help, t), remainingArgs, extraArgs)) =>
+
+        if (help)
+          helpAsked()
+
+        if (usage)
+          usageAsked()
+
+        run(t, RemainingArgs(remainingArgs, extraArgs))
+    }
+}
+
 object CaseApp {
 
   def parse[T: Parser](args: Seq[String]): Either[String, (T, Seq[String])] =
