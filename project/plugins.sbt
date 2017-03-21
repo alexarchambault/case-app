@@ -6,7 +6,7 @@ resolvers += Resolver.url(
 
 addSbtPlugin("com.jsuereth" % "sbt-pgp" % "1.0.0")
 addSbtPlugin("org.tpolecat" % "tut-plugin" % "0.4.8")
-addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.14")
+addSbtPlugin("org.scala-js" % "sbt-scalajs" % "0.6.15")
 addSbtPlugin("com.dwijnand" % "sbt-travisci" % "1.1.0")
 
 addSbtPlugin("io.get-coursier" % "sbt-coursier" % "1.0.0-M15-5")
