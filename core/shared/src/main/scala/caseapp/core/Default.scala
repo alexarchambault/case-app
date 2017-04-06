@@ -25,20 +25,6 @@ object Default extends PlatformDefaults {
      defaultOr: Strict[DefaultOr[L, D]]
    ): Default[CC] =
     Default.instance(gen.from(defaultOr.value(default.value())))
-
-  implicit val unit: Default[Unit] = Default.instance(())
-  implicit val int: Default[Int] = Default.instance(0)
-  implicit val long: Default[Long] = Default.instance(0L)
-  implicit val float: Default[Float] = Default.instance(0f)
-  implicit val double: Default[Double] = Default.instance(0d)
-  implicit val bigDecimal: Default[BigDecimal] = Default.instance(BigDecimal(0))
-  implicit val boolean: Default[Boolean] = Default.instance(false)
-  implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
-  implicit val string: Default[String] = Default.instance("", str => s""""$str"""")
-
-  implicit def option[T]: Default[Option[T]] = Default.instance[Option[T]](None)
-  implicit def list[T]: Default[List[T]] = Default.instance[List[T]](Nil)
-
 }
 
 trait DefaultOr[L <: HList, D <: HList] {
@@ -75,4 +61,19 @@ object DefaultOr extends LowPriorityDefaultOr {
     instance { case Some(d) :: td =>
       d :: tail(td)
     }
+}
+
+object Defaults {
+  implicit val unit: Default[Unit] = Default.instance(())
+  implicit val int: Default[Int] = Default.instance(0)
+  implicit val long: Default[Long] = Default.instance(0L)
+  implicit val float: Default[Float] = Default.instance(0f)
+  implicit val double: Default[Double] = Default.instance(0d)
+  implicit val bigDecimal: Default[BigDecimal] = Default.instance(BigDecimal(0))
+  implicit val boolean: Default[Boolean] = Default.instance(false)
+  implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
+  implicit val string: Default[String] = Default.instance("", str => s""""$str"""")
+
+  implicit def option[T]: Default[Option[T]] = Default.instance[Option[T]](None)
+  implicit def list[T]: Default[List[T]] = Default.instance[List[T]](Nil)
 }
