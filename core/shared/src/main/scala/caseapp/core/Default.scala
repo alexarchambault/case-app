@@ -25,6 +25,8 @@ object Default extends PlatformDefaults {
      defaultOr: Strict[DefaultOr[L, D]]
    ): Default[CC] =
     Default.instance(gen.from(defaultOr.value(default.value())))
+
+  implicit def option[T]: Default[Option[T]] = Default.instance[Option[T]](None)
 }
 
 trait DefaultOr[L <: HList, D <: HList] {
@@ -74,6 +76,5 @@ object Defaults {
   implicit val counter: Default[Int @@ Counter] = Default.instance(Tag of 0)
   implicit val string: Default[String] = Default.instance("", str => s""""$str"""")
 
-  implicit def option[T]: Default[Option[T]] = Default.instance[Option[T]](None)
   implicit def list[T]: Default[List[T]] = Default.instance[List[T]](Nil)
 }
