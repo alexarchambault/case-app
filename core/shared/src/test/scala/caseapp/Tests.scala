@@ -5,6 +5,7 @@ import org.scalatest._
 
 class Tests extends FlatSpec with Matchers {
   import Definitions._
+  import core.Defaults._
 
   "A parser" should "parse no args" in {
     Parser[NoArgs].apply(Seq.empty) shouldEqual Right((NoArgs(), Seq.empty))

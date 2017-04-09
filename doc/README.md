@@ -20,7 +20,7 @@ import caseapp._
 ```tut:silent
 case class Options(
   user: Option[String],
-  enableFoo: Boolean,
+  enableFoo: Boolean = false,
   file: List[String]
 )
 
@@ -37,17 +37,22 @@ assert(
 )
 ```
 
-### Default values
+### Required and optional arguments
 
-Most primitive types have default values, like `0` for `Int`, or `false`
-for `Double`. Options default to `None`, and sequences to `Nil`.
-Full list in the [source](https://github.com/alexarchambault/case-app/blob/master/src/main/scala/caseapp/core/Default.scala).
+All arguments are required by default. To define an optional argument simply
+wrap its type into `Option[T]`.
+
+Optional arguments can also be defined by providing a default value.
+There are two ways to do that:
+- providing default value ad hoc in the case class definition
+- defining default value for a type with [Default](https://github.com/alexarchambault/case-app/blob/master/core/shared/src/main/scala/caseapp/core/Default.scala) 
+type class
 
 ```tut:silent
 case class Options(
   user: Option[String],
-  enableFoo: Boolean,
-  file: List[String]
+  enableFoo: Boolean = false,
+  file: List[String] = Nil
 )
 
 CaseApp.parse[Options](Seq()) == Right((Options(None, false, Nil), Seq.empty))
@@ -59,22 +64,6 @@ assert(
 )
 ```
 
-Alternatively, default values can be manually specified, like
-```tut:silent
-case class Options(
-  user: String = "default",
-  enableFoo: Boolean = true
-)
-
-CaseApp.parse[Options](Seq()) == Right((Options("default", true), Seq.empty))
-```
-
-```tut:invisible
-assert(
-  CaseApp.parse[Options](Seq()) == Right((Options("default", true), Seq.empty))
-)
-```
-
 ### Lists
 
 Some arguments can be specified several times on the command-line. These
@@ -83,7 +72,7 @@ should be typed as lists, e.g. `file` in
 ```tut:silent
 case class Options(
   user: Option[String],
-  enableFoo: Boolean,
+  enableFoo: Boolean = false,
   file: List[String]
 )
 
