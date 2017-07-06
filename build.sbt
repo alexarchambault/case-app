@@ -1,8 +1,10 @@
 
+import sbtcrossproject.CrossPlugin.autoImport.crossProject
+
 import Aliases._
 import Settings._
 
-lazy val annotations = crossProject
+lazy val annotations = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     caseAppPrefix
@@ -11,7 +13,7 @@ lazy val annotations = crossProject
 lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
 
-lazy val util = crossProject
+lazy val util = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     caseAppPrefix,
@@ -26,7 +28,7 @@ lazy val util = crossProject
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
 
-lazy val core = crossProject
+lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(annotations, util)
   .settings(
     shared,

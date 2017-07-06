@@ -2,7 +2,7 @@
 import sbt._
 import sbt.Keys._
 
-import org.scalajs.sbtplugin.ScalaJSPlugin.autoImport._
+import sbtcrossproject.CrossPlugin.autoImport._
 
 object Deps {
 
