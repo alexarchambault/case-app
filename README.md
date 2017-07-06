@@ -358,7 +358,7 @@ ambiguities with custom types as above.
 Add to your `build.sbt`
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.2.0-M2"
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.2.0-M3"
 ```
 
 Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
