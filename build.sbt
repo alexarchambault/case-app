@@ -32,12 +32,23 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(annotations, util)
   .settings(
     shared,
-    name := "case-app",
-    libs += Deps.scalaTest.value % "test"
+    name := "case-app"
   )
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+
+lazy val tests = crossProject(JSPlatform, JVMPlatform)
+  .dependsOn(core)
+  .settings(
+    shared,
+    caseAppPrefix,
+    dontPublish,
+    libs += Deps.scalaTest.value % "test"
+  )
+
+lazy val testsJVM = tests.jvm
+lazy val testsJS = tests.js
 
 lazy val doc = project
   .dependsOn(coreJVM)
@@ -58,6 +69,8 @@ lazy val `case-app` = project
     annotationsJS,
     coreJVM,
     coreJS,
+    testsJVM,
+    testsJS,
     doc
   )
   .settings(
