@@ -6,7 +6,15 @@ import shapeless.labelled.{ FieldType, field }
 
 import caseapp.util.Implicit
 
-trait HListParser[L <: HList, D <: HList, -N <: HList, -V <: HList, -M <: HList, -H <: HList, R <: HList] {
+trait HListParser[
+   L <: HList,
+   D <: HList,
+  -N <: HList,
+  -V <: HList,
+  -M <: HList,
+  -H <: HList,
+  R <: HList
+] {
   type P <: HList
   def apply(default: D, names: N, valueDescriptions: V, helpMessages: M, noHelp: H): Parser.Aux[L, P]
 }
