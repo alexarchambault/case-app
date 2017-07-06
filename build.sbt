@@ -52,12 +52,12 @@ lazy val testsJS = tests.js
 
 lazy val doc = project
   .dependsOn(coreJVM)
+  .enablePlugins(TutPlugin)
   .settings(
     shared,
     dontPublish,
-    tutSettings,
     tutSourceDirectory := baseDirectory.value,
-    tutTargetDirectory := baseDirectory.value / ".."
+    tutTargetDirectory := baseDirectory.in(LocalRootProject).value
   )
 
 lazy val `case-app` = project
