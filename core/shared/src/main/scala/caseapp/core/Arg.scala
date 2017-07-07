@@ -1,7 +1,7 @@
 package caseapp
 package core
 
-case class Arg(
+final case class Arg(
   name: String,
   extraNames: Seq[Name],
   valueDescription: Option[ValueDescription],

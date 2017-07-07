@@ -20,7 +20,7 @@ package object caseapp {
   // Custom tag implementation, see above for more details
   type @@[T, Tag] = shapeless.newtype.Newtype[T, Tag]
   object Tag {
-    case class TagBuilder[Tag]() {
+    final case class TagBuilder[Tag]() {
       def apply[T](t: T): T @@ Tag = t.asInstanceOf[T @@ Tag]
     }
 

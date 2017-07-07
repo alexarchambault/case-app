@@ -1,7 +1,7 @@
 package caseapp
 package core
 
-case class WithHelp[T](
+final case class WithHelp[T](
   @HelpMessage("Print usage and exit")
     usage: Boolean = false,
   @HelpMessage("Print help message and exit")
