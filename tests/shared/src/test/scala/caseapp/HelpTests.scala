@@ -2,13 +2,13 @@ package caseapp
 
 import caseapp.core.Messages
 
-import org.scalatest._
+import org.scalatest.{Matchers, PropSpec}
 
-class HelpTests extends FlatSpec with Matchers {
+class HelpTests extends PropSpec with Matchers {
 
   import Definitions._
 
-  "case-app" should "generate a help message" in {
+  property("generate a help message") {
 
     val message = CaseApp.helpMessage[Example]
 
@@ -26,7 +26,7 @@ class HelpTests extends FlatSpec with Matchers {
     lines(message) shouldBe lines(expectedMessage)
   }
 
-  it should "not add a help message for fields annotated with @Hidden" in {
+  property("don't add a help message for fields annotated with @Hidden") {
     case class Options(
       first: Int,
       @Hidden
