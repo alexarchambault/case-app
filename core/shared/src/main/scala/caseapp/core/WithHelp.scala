@@ -8,8 +8,8 @@ case class WithHelp[T](
   @ExtraName("h")
     help: Boolean = false,
   @Recurse
-    base: T
+    baseOrError: Either[String, T]
 ) {
   def map[U](f: T => U): WithHelp[U] =
-    copy(base = f(base))
+    copy(baseOrError = baseOrError.right.map(f))
 }

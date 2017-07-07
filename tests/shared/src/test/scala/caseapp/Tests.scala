@@ -1,5 +1,6 @@
 package caseapp
 
+import caseapp.core.WithHelp
 import org.scalatest._
 
 
@@ -86,6 +87,23 @@ class Tests extends FlatSpec with Matchers {
     Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar")) shouldEqual Right((
       ReadmeOptions4(Left("Required option password / List(Name(password)) not specified"), PathOptions("", "bar")),
       Seq("extra")
+    ))
+  }
+
+  it should "print help despite missing mandatory arguments" in {
+
+    val parser = Parser[ReadmeOptions2].withHelp
+
+    val args = Seq("--user", "aaa", "extra", "-b", "bar")
+
+    parser.parse(args) shouldEqual Right((
+      WithHelp(usage = false, help = false, Left("Required option --password not specified")),
+      List("extra")
+    ))
+
+    parser.parse(args :+ "--help") shouldEqual Right((
+      WithHelp(usage = false, help = true, Left("Required option --password not specified")),
+      List("extra")
     ))
   }
 

@@ -37,7 +37,12 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Messages
         if (usage)
           usageAsked()
 
-        run(t, RemainingArgs(remainingArgs, extraArgs))
+        t match {
+          case Left(err) =>
+            error(err)
+          case Right(u) =>
+            run(u, RemainingArgs(remainingArgs, extraArgs))
+        }
     }
 }
 
@@ -49,13 +54,13 @@ object CaseApp {
   def detailedParse[T: Parser](args: Seq[String]): Either[String, (T, Seq[String], Seq[String])] =
     Parser[T].detailedParse(args)
 
-  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (T, Boolean, Boolean, Seq[String])] =
-    parser.withHelp.parse(args).right map {
+  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (Either[String, T], Boolean, Boolean, Seq[String])] =
+    parser.withHelp.parse(args).right.map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
 
-  def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (T, Boolean, Boolean, Seq[String], Seq[String])] =
+  def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[String, (Either[String, T], Boolean, Boolean, Seq[String], Seq[String])] =
     parser.withHelp.detailedParse(args).right map {
       case (WithHelp(usage, help, base), rem, extra) =>
         (base, help, usage, rem, extra)

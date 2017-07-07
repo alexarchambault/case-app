@@ -72,7 +72,12 @@ abstract class CommandAppWithPreCommand[D, T](implicit
         if (usage)
           usageAsked()
 
-        beforeCommand(d, dArgs)
+        d match {
+          case Left(err) =>
+            error(err)
+          case Right(d0) =>
+            beforeCommand(d0, dArgs)
+        }
 
         optCmd.foreach {
           case Left(err) =>
@@ -85,7 +90,12 @@ abstract class CommandAppWithPreCommand[D, T](implicit
             if (commandUsage)
               commandUsageAsked(c)
 
-            run(t, RemainingArgs(commandArgs, commandArgs0))
+            t match {
+              case Left(err) =>
+                error(err)
+              case Right(t0) =>
+                run(t0, RemainingArgs(commandArgs, commandArgs0))
+            }
         }
     }
 
