@@ -3,9 +3,10 @@ scala:
 - 2.10.6
 - 2.11.11
 - 2.12.2
+- 2.13.0-M1
 jdk:
 - oraclejdk8
-script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
+script: sbt ++${TRAVIS_SCALA_VERSION} $(if [[ "${TRAVIS_SCALA_VERSION}" == 2.13.* ]]; then echo "testsJVM/test testsJS/test"; else echo validate; fi) $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
   && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
   ]]; then echo "publish"; fi)
 sudo: false
