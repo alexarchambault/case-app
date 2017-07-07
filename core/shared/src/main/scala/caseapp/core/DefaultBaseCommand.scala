@@ -1,7 +1,7 @@
 package caseapp
 package core
 
-case class DefaultBaseCommand() extends Command {
+final case class DefaultBaseCommand() extends Command {
   override def setCommand(cmd: Option[Either[String, String]]): Unit = {
     if (cmd.isEmpty) {
       // FIXME Print available commands too?

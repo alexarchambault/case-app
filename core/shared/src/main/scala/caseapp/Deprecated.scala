@@ -120,8 +120,14 @@ abstract class AppOf[T <: ArgsApp : Parser : Messages] {
           sys.exit(0)
         }
 
-        t.setRemainingArgs(remainingArgs, extraArgs)
-        t()
+        t match {
+          case Left(err) =>
+            Console.err.println(err)
+            sys.exit(1)
+          case Right(t0) =>
+            t0.setRemainingArgs(remainingArgs, extraArgs)
+            t0()
+        }
     }
 }
 
@@ -161,9 +167,15 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
           sys.exit(0)
         }
 
-        d.setRemainingArgs(dArgs, Nil)
-        d.setCommand(optCmd.map(_.right.map { case (c, _, _, _) => c }))
-        d()
+        d match {
+          case Left(err) =>
+            Console.err.println(err)
+            sys.exit(255)
+          case Right(d0) =>
+            d0.setRemainingArgs(dArgs, Nil)
+            d0.setCommand(optCmd.map(_.right.map { case (c, _, _, _) => c }))
+            d0()
+        }
 
         optCmd.foreach {
           case Left(err) =>
@@ -180,8 +192,14 @@ abstract class CommandAppOfWithBase[D <: CommandArgsApp : Parser : Messages, T <
               sys.exit(0)
             }
 
-            t.setRemainingArgs(args, args0)
-            t()
+            t match {
+              case Left(err) =>
+                Console.err.println(err)
+                sys.exit(255)
+              case Right(t0) =>
+                t0.setRemainingArgs(args, args0)
+                t0()
+            }
         }
     }
   }

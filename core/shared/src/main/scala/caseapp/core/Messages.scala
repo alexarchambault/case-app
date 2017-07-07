@@ -10,7 +10,7 @@ import shapeless.labelled.FieldType
 /**
  * Provides usage and help messages related to `T`
  */
-case class Messages[T](
+final case class Messages[T](
   args: Seq[Arg],
   appName: String,
   appVersion: String,
@@ -45,7 +45,7 @@ case class Messages[T](
    * Add help and usage options to the messages.
    */
   def withHelp: Messages[WithHelp[T]] = {
-    case class Dummy()
+    final case class Dummy()
     val helpArgs = Parser[WithHelp[Dummy]].args
 
     copy(args = helpArgs ++ args)
@@ -97,7 +97,7 @@ object Messages {
 
 }
 
-case class CommandMessages(
+final case class CommandMessages(
   args: Seq[Arg],
   argsNameOption: Option[String]
 ) {
@@ -117,7 +117,7 @@ case class CommandMessages(
   }
 }
 
-case class CommandsMessages[T](
+final case class CommandsMessages[T](
   messages: Seq[(String, CommandMessages)]
 ) {
   lazy val messagesMap = messages.toMap
