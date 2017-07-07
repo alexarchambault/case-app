@@ -110,7 +110,16 @@ object HListParser {
         def get(d: Option[H] :: PT) = {
           val maybeHead = d.head
             .orElse(defaultValuePreset)
-            .toRight(s"Required option ${name.value.name} / $headNames not specified")
+            .toRight {
+              val names = name.value.name +: headNames.map(_.name).filter(_ != name.value.name)
+              val prefixedNames = names.map { name =>
+                if (name.length == 1)
+                  "-" + name
+                else
+                  "--" + name
+              }
+              s"Required option ${prefixedNames.mkString(" / ")} not specified"
+            }
           for {
             h <- maybeHead.right
             t <- tailParser.get(d.tail).right

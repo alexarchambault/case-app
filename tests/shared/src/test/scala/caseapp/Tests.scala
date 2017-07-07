@@ -85,7 +85,7 @@ class Tests extends FlatSpec with Matchers {
 
   it should "parse fourth README options (non mandatory args)" in {
     Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar")) shouldEqual Right((
-      ReadmeOptions4(Left("Required option password / List(Name(password)) not specified"), PathOptions("", "bar")),
+      ReadmeOptions4(Left("Required option --password not specified"), PathOptions("", "bar")),
       Seq("extra")
     ))
   }
