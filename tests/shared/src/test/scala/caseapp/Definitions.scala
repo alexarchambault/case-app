@@ -59,7 +59,7 @@ object Definitions {
 
   final case class ReadmeOptions1(
     user: Option[String],
-    enableFoo: Boolean,
+    enableFoo: Boolean = false,
     @ExtraName("f") file: List[String]
   )
   final case class AuthOptions(
@@ -68,8 +68,8 @@ object Definitions {
   )
 
   final case class PathOptions(
-    @ExtraName("f") fooPath: String,
-    @ExtraName("b") barPath: String
+    @ExtraName("f") fooPath: String = "",
+    @ExtraName("b") barPath: String = ""
   )
 
   final case class ReadmeOptions2(

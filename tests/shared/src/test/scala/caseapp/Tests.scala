@@ -5,7 +5,6 @@ import org.scalatest._
 
 class Tests extends FlatSpec with Matchers {
   import Definitions._
-  import core.Defaults._
 
   "A parser" should "parse no args" in {
     Parser[NoArgs].apply(Seq.empty) shouldEqual Right((NoArgs(), Seq.empty))
@@ -80,32 +79,32 @@ class Tests extends FlatSpec with Matchers {
     sealed trait Command
 
     case class First(
-      @ExtraName("f") foo: String,
-      bar: Int
+      @ExtraName("f") foo: String = "",
+      bar: Int = 0
     ) extends Command
 
     case class Second(
-      fooh: String,
-      baz: Int
+      fooh: String = "",
+      baz: Int = 0
     ) extends Command
 
-    case class Default0(bah: Double) // = 1.0, wait for fix from shapeless
+    case class Default0(bah: Double = 0.0)
 
     val parser = CommandParser[Command]
 
-    parser[Default0](Nil) shouldBe Right((Default0(0.0), Nil, None))
+    parser[Default0](Nil) shouldBe Right((Default0(), Nil, None))
     parser[Default0](Seq("--wrong")) shouldBe Left(s"Unrecognized argument: --wrong")
     parser[Default0](Seq("--bah", "2")) shouldBe Right((Default0(2.0), Nil, None))
     parser[Default0](Seq("--bah", "2", "--", "other", "otherother")) shouldBe Right((Default0(2.0), Seq("other", "otherother"), None))
     parser[Default0](Seq("--bah", "2", "--", "other", "--bah")) shouldBe Right((Default0(2.0), Seq("other", "--bah"), None))
-    parser[Default0](Seq("first")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Nil))))
-    parser[Default0](Seq("first", "arg", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("", 0), Seq("arg", "other")))))
-    parser[Default0](Seq("first", "--foo", "bah", "--bar", "4")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("bah", 4), Nil))))
-    parser[Default0](Seq("first", "-f", "bah", "--bar", "4")) shouldBe Right((Default0(0.0), Nil, Some(Right("first", First("bah", 4), Nil))))
-    parser[Default0](Seq("--bah", "3", "first")) shouldBe Right((Default0(3.0), Nil, Some(Right("first", First("", 0), Nil))))
-    parser[Default0](Seq("second")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 0), Nil))))
-    parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Right("second", Second("", 5), Seq("other")))))
-    parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(0.0), Nil, Some(Left("Unrecognized argument: --bar"))))
+    parser[Default0](Seq("first")) shouldBe Right((Default0(), Nil, Some(Right("first", First("", 0), Nil))))
+    parser[Default0](Seq("first", "arg", "other")) shouldBe Right((Default0(), Nil, Some(Right("first", First(), Seq("arg", "other")))))
+    parser[Default0](Seq("first", "--foo", "bah", "--bar", "4")) shouldBe Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+    parser[Default0](Seq("first", "-f", "bah", "--bar", "4")) shouldBe Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+    parser[Default0](Seq("--bah", "3", "first")) shouldBe Right((Default0(3.0), Nil, Some(Right("first", First(), Nil))))
+    parser[Default0](Seq("second")) shouldBe Right((Default0(), Nil, Some(Right("second", Second("", 0), Nil))))
+    parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(), Nil, Some(Right("second", Second("", 5), Seq("other")))))
+    parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(), Nil, Some(Left("Unrecognized argument: --bar"))))
   }
 
 }
