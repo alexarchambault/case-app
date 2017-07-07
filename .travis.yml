@@ -3,9 +3,10 @@ scala:
 - 2.10.6
 - 2.11.11
 - 2.12.2
+- 2.13.0-M1
 jdk:
 - oraclejdk8
-script: sbt ++${TRAVIS_SCALA_VERSION} validate $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
+script: sbt ++${TRAVIS_SCALA_VERSION} $(if [[ "${TRAVIS_SCALA_VERSION}" == 2.13.* ]]; then echo "testsJVM/test testsJS/test"; else echo validate; fi) $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
   && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
   ]]; then echo "publish"; fi)
 sudo: false
@@ -16,7 +17,6 @@ cache:
   - $HOME/.sbt
 env:
   global:
-  - COURSIER_NO_TERM=1
   - secure: SHhR2GjIZ5prfuTujGreZAe+9nJkly2Eu1HP9hYQ4ntGFCz+9hcQ9ZDj532Yye3HItDzhE8wUA5HuL58+GivA72w7dbqMgoE9EvRAZrxPDRb1kvNN+HOHo6+t08DUPBh8jfH/VqNGjEKMRT70UjLWA1hi1rEZAi2J4OlTXkKmGc=
   - secure: iAA98AVcqwTd11RjJaA133t38gqoGDsnLP2m1Hm2PFrUGE1AXg1/0wX6bXmFCnj+NIfb2ItC9cyuepcvrfAfV4ukU66Yyh6DCgYaup6IhrgSCdck5zZcc2KrxsLyWVAyuClu7TG6xbjHc4os0hZZ0w95pUIG2sOyr4faH1GbeUQ=
 branches:
