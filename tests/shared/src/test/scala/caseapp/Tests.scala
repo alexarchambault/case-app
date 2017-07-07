@@ -75,6 +75,13 @@ class Tests extends FlatSpec with Matchers {
     ))
   }
 
+  it should "parse third README options (non mandatory args)" in {
+    Parser[ReadmeOptions3].parse(Seq("--user", "aaa", "extra", "-b", "bar")) shouldEqual Right((
+      ReadmeOptions3(None, PathOptions("", "bar")),
+      Seq("extra")
+    ))
+  }
+
   it should "parse commands" in {
     sealed trait Command
 

@@ -71,11 +71,7 @@ trait Parser[T] { self =>
     }
 }
 
-object Parser {
-  def apply[T](implicit parser: Parser[T]): Aux[T, parser.D] = parser
-
-  type Aux[T, D0] = Parser[T] { type D = D0 }
-
+abstract class LowPriorityParserImplicits {
   implicit def generic[CC, L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, H <: HList, R <: HList, P <: HList]
    (implicit
     gen: LabelledGeneric.Aux[CC, L],
@@ -86,7 +82,16 @@ object Parser {
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
     parser: Strict[HListParser.Aux[L, D, N, V, M, H, R, P]]
-   ): Aux[CC, P] =
+   ): Parser.Aux[CC, P] =
     parser.value(defaults(), names(), valuesDesc(), helpMessages(), noHelp()).map(gen.from)
+}
+
+object Parser extends LowPriorityParserImplicits {
+  def apply[T](implicit parser: Parser[T]): Aux[T, parser.D] = parser
+
+  type Aux[T, D0] = Parser[T] { type D = D0 }
+
+  implicit def option[T, D](implicit parser: Aux[T, D]): Parser.Aux[Option[T], D] =
+    ParserOption(parser)
 }
 

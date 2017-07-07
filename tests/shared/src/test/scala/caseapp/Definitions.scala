@@ -77,6 +77,11 @@ object Definitions {
     @Recurse paths: PathOptions
   )
 
+  final case class ReadmeOptions3(
+    @Recurse auth: Option[AuthOptions],
+    @Recurse paths: PathOptions
+  )
+
   final case class Example(
     foo: String,
     bar: Int
