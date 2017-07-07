@@ -20,10 +20,8 @@ class HelpTests extends FlatSpec with Matchers {
 
     def lines(s: String) = s.lines.toVector
 
-    println((lines(message) zip lines(expectedMessage)).filter {
-      case (a, b) =>
-        a != b
-    })
+    for (((a, b), idx) <- lines(message).zip(lines(expectedMessage)).zipWithIndex if a != b)
+      Console.err.println(s"Line $idx, expected '$b', got '$a'")
 
     lines(message) shouldBe lines(expectedMessage)
   }
