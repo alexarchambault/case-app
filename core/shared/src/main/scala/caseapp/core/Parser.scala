@@ -93,5 +93,8 @@ object Parser extends LowPriorityParserImplicits {
 
   implicit def option[T, D](implicit parser: Aux[T, D]): Parser.Aux[Option[T], D] =
     ParserOption(parser)
+
+  implicit def either[T, D](implicit parser: Aux[T, D]): Parser.Aux[Either[String, T], D] =
+    ParserEither(parser)
 }
 
