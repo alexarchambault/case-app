@@ -12,7 +12,7 @@ object Deps {
   def macroParadise = "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
-  def scalaTest = setting("org.scalatest" %%% "scalatest" % "3.0.3")
   def shapeless = setting("com.chuusai" %%% "shapeless" % "2.3.2")
+  def utest = setting("com.lihaoyi" %%% "utest" % "0.4.8")
 
 }

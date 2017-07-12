@@ -44,7 +44,8 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
     shared,
     caseAppPrefix,
     dontPublish,
-    libs += Deps.scalaTest.value % "test"
+    libs += Deps.utest.value % "test",
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
 lazy val testsJVM = tests.jvm

@@ -91,4 +91,20 @@ object Definitions {
     foo: String,
     bar: Int
   )
+
+  sealed trait Command
+
+  case class First(
+    @ExtraName("f")
+      foo: String = "",
+    bar: Int = 0
+  ) extends Command
+
+  case class Second(
+    fooh: String = "",
+    baz: Int = 0
+  ) extends Command
+
+  case class Default0(bah: Double = 0.0)
+
 }
