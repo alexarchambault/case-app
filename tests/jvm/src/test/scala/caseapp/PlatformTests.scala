@@ -1,26 +1,25 @@
 package caseapp
 
-import java.util.GregorianCalendar
+import java.util.{Calendar, GregorianCalendar}
+import utest._
 
-import org.scalatest.{Matchers, PropSpec}
-
-object PlatformTests {
+object PlatformTests extends TestSuite {
 
   final case class WithCalendar(
-    date   : java.util.Calendar
+    date: Calendar
   )
 
   CaseApp.parseWithHelp[WithCalendar] _
 
-}
-
-class PlatformTests extends PropSpec with Matchers {
-  import PlatformTests._
-
-  property("parse a date") {
-    Parser[WithCalendar].parse(Seq("--date", "2014-10-23")) shouldEqual Right((WithCalendar(date = {
-      new GregorianCalendar(2014, 9, 23)
-    }), Seq.empty))
+  val tests = TestSuite {
+    "parse a date" - {
+      val res = Parser[WithCalendar].parse(Seq("--date", "2014-10-23"))
+      val expectedRes = Right((
+        WithCalendar(date = new GregorianCalendar(2014, 9, 23)),
+        Nil
+      ))
+      assert(res == expectedRes)
+    }
   }
 
 }

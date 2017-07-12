@@ -4,7 +4,7 @@ import sbtcrossproject.CrossPlugin.autoImport.crossProject
 import Aliases._
 import Settings._
 
-lazy val annotations = crossProject(JSPlatform, JVMPlatform)
+lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix
@@ -12,8 +12,9 @@ lazy val annotations = crossProject(JSPlatform, JVMPlatform)
 
 lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
+lazy val annotationsNative = annotations.native
 
-lazy val util = crossProject(JSPlatform, JVMPlatform)
+lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
@@ -27,8 +28,9 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
+lazy val utilNative = util.native
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
+lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .dependsOn(annotations, util)
   .settings(
     shared,
@@ -37,18 +39,21 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+lazy val coreNative = core.native
 
-lazy val tests = crossProject(JSPlatform, JVMPlatform)
+lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .dependsOn(core)
   .settings(
     shared,
     caseAppPrefix,
     dontPublish,
-    libs += Deps.scalaTest.value % "test"
+    libs += Deps.utest.value % "test",
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
 lazy val testsJVM = tests.jvm
 lazy val testsJS = tests.js
+lazy val testsNative = tests.native
 
 lazy val doc = project
   .dependsOn(coreJVM)
@@ -77,6 +82,19 @@ lazy val `case-app` = project
     shared,
     dontPublish,
     name := "case-app-root"
+  )
+
+lazy val native = project
+  .in(file("target/native")) // dummy dir
+  .aggregate(
+    utilNative,
+    annotationsNative,
+    coreNative,
+    testsNative
+  )
+  .settings(
+    shared,
+    dontPublish
   )
 
 aliases(

@@ -1,142 +1,227 @@
 package caseapp
 
 import caseapp.core.WithHelp
-import org.scalatest.{Matchers, PropSpec}
+import utest._
 
+object Tests extends TestSuite {
 
-class Tests extends PropSpec with Matchers {
   import Definitions._
 
-  property("parse no args") {
-    Parser[NoArgs].apply(Seq.empty) shouldEqual Right((NoArgs(), Seq.empty))
-  }
 
-  property("find an illegal argument") {
-    Parser[NoArgs].parse(Seq("-a")).isLeft shouldBe true
-  }
+  val tests = TestSuite {
 
-  property("handle extra user arguments") {
-    Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other")) shouldEqual Right((NoArgs(), Seq(), Seq("b", "-a", "--other")))
-  }
+    "parse no args" - {
+      val res = Parser[NoArgs].apply(Seq.empty)
+      val expectedRes = Right((NoArgs(), Seq.empty))
+      assert(res == expectedRes)
+    }
 
-  property("give remaining args as is") {
-    Parser[NoArgs].parse(Seq("user arg", "other user arg")) shouldEqual Right((NoArgs(), Seq("user arg", "other user arg")))
-  }
+    "find an illegal argument" - {
+      val res = Parser[NoArgs].parse(Seq("-a")).isLeft
+      assert(res)
+    }
 
-  property("parse no args and return default values and remaining args") {
-    Parser[FewArgs].parse(Seq("user arg", "other user arg")) shouldEqual Right((FewArgs(), Seq("user arg", "other user arg")))
-  }
+    "handle extra user arguments" - {
+      val res = Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other"))
+      val expectedRes = Right((NoArgs(), Seq(), Seq("b", "-a", "--other")))
+      assert(res == expectedRes)
+    }
 
-  property("parse a few args and return a default value and remaining args") {
-    Parser[FewArgs].parse(Seq("user arg", "--num-foo", "4", "other user arg")) shouldEqual Right((FewArgs(numFoo = 4), Seq("user arg", "other user arg")))
-  }
+    "give remaining args as is" - {
+      val res = Parser[NoArgs].parse(Seq("user arg", "other user arg"))
+      val expectedRes = Right((NoArgs(), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse a args recursively and return a default value and remaining args") {
-    Parser[MoreArgs].parse(Seq("user arg", "--num-foo", "4", "--count", "other user arg", "--count")) shouldEqual Right((MoreArgs(count = Tag of 2, few = FewArgs(numFoo = 4)), Seq("user arg", "other user arg")))
-  }
-  
-  property("parse args") {
-    Parser[demo.DemoOptions].parse(Seq("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first")) shouldEqual Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
-  }
+    "parse no args and return default values and remaining args" - {
+      val res = Parser[FewArgs].parse(Seq("user arg", "other user arg"))
+      val expectedRes = Right((FewArgs(), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse short args") {
-    Parser[demo.DemoOptions].parse(Seq("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first")) shouldEqual Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
-  }
+    "parse a few args and return a default value and remaining args" - {
+      val res = Parser[FewArgs].parse(Seq("user arg", "--num-foo", "4", "other user arg"))
+      val expectedRes = Right((FewArgs(numFoo = 4), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse list args") {
-    Parser[WithList].parse(Seq("--list", "2", "--list", "5", "extra")) shouldEqual Right((WithList(list = List(2, 5)), Seq("extra")))
-  }
+    "parse a args recursively and return a default value and remaining args" - {
+      val res = Parser[MoreArgs].parse(Seq("user arg", "--num-foo", "4", "--count", "other user arg", "--count"))
+      val expectedRes = Right((MoreArgs(count = Tag of 2, few = FewArgs(numFoo = 4)), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse semi-colon separated list args") {
-    Parser[WithTaggedList].parse(Seq("--list", "foo", "--list", "bar", "--list", "other", "extra2")) shouldEqual Right((WithTaggedList(list = List("foo", "bar", "other")), Seq("extra2")))
-  }
+    "parse args" - {
+      val res = Parser[demo.DemoOptions].parse(Seq("user arg", "--stages", "first", "--value", "Some value", "--verbose", "--verbose", "--verbose", "other user arg", "--stages", "second", "--first"))
+      val expectedRes = Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse a user-defined argument type") {
-    Parser[WithCustom].parse(Seq("--custom", "a")) shouldEqual Right((WithCustom(custom = Custom("a")), Seq.empty))
-  }
+    "parse short args" - {
+      val res = Parser[demo.DemoOptions].parse(Seq("user arg", "-S", "first", "--value", "Some value", "-v", "-v", "-v", "other user arg", "-S", "second", "--first"))
+      val expectedRes = Right((demo.DemoOptions(first = true, value = Some("Some value"), verbose = Tag of 3, stages = List("first", "second")), Seq("user arg", "other user arg")))
+      assert(res == expectedRes)
+    }
 
-  property("parse first README options") {
-    Parser[ReadmeOptions1].parse(Seq("--user", "aaa", "--enable-foo", "--file", "some_file", "extra_arg", "other_extra_arg")) shouldEqual Right((
-      ReadmeOptions1(Some("aaa"), enableFoo = true, List("some_file")),
-      Seq("extra_arg", "other_extra_arg")
-    ))
-  }
+    "parse list args" - {
+      val res = Parser[WithList].parse(Seq("--list", "2", "--list", "5", "extra"))
+      val expectedRes = Right((WithList(list = List(2, 5)), Seq("extra")))
+      assert(res == expectedRes)
+    }
 
-  property("parse first README options (second args example)") {
-    Parser[ReadmeOptions1].parse(Seq("--user", "bbb", "-f", "first_file", "-f", "second_file")) shouldEqual Right((
-      ReadmeOptions1(Some("bbb"), enableFoo = false, List("first_file", "second_file")),
-      Seq()
-    ))
-  }
+    "parse semi-colon separated list args" - {
+      val res = Parser[WithTaggedList].parse(Seq("--list", "foo", "--list", "bar", "--list", "other", "extra2"))
+      val expectedRes = Right((WithTaggedList(list = List("foo", "bar", "other")), Seq("extra2")))
+      assert(res == expectedRes)
+    }
 
-  property("parse second README options") {
-    Parser[ReadmeOptions2].parse(Seq("--user", "aaa", "--password", "pass", "extra", "-b", "bar")) shouldEqual Right((
-      ReadmeOptions2(AuthOptions("aaa", "pass"), PathOptions("", "bar")),
-      Seq("extra")
-    ))
-  }
+    "parse a user-defined argument type" - {
+      val res = Parser[WithCustom].parse(Seq("--custom", "a"))
+      val expectedRes = Right((WithCustom(custom = Custom("a")), Seq.empty))
+      assert(res == expectedRes)
+    }
 
-  property("parse third README options (non mandatory args)") {
-    Parser[ReadmeOptions3].parse(Seq("--user", "aaa", "extra", "-b", "bar")) shouldEqual Right((
-      ReadmeOptions3(None, PathOptions("", "bar")),
-      Seq("extra")
-    ))
-  }
+    "parse first README options" - {
+      val res = Parser[ReadmeOptions1].parse(Seq("--user", "aaa", "--enable-foo", "--file", "some_file", "extra_arg", "other_extra_arg"))
+      val expectedRes = Right((
+        ReadmeOptions1(Some("aaa"), enableFoo = true, List("some_file")),
+        Seq("extra_arg", "other_extra_arg")
+      ))
+      assert(res == expectedRes)
+    }
 
-  property("parse fourth README options (non mandatory args)") {
-    Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar")) shouldEqual Right((
-      ReadmeOptions4(Left("Required option --password not specified"), PathOptions("", "bar")),
-      Seq("extra")
-    ))
-  }
+    "parse first README options (second args example)" - {
+      val res = Parser[ReadmeOptions1].parse(Seq("--user", "bbb", "-f", "first_file", "-f", "second_file"))
+      val expectedRes = Right((
+        ReadmeOptions1(Some("bbb"), enableFoo = false, List("first_file", "second_file")),
+        Seq()
+      ))
+      assert(res == expectedRes)
+    }
 
-  property("print help despite missing mandatory arguments") {
+    "parse second README options" - {
+      val res = Parser[ReadmeOptions2].parse(Seq("--user", "aaa", "--password", "pass", "extra", "-b", "bar"))
+      val expectedRes = Right((
+        ReadmeOptions2(AuthOptions("aaa", "pass"), PathOptions("", "bar")),
+        Seq("extra")
+      ))
+      assert(res == expectedRes)
+    }
 
-    val parser = Parser[ReadmeOptions2].withHelp
+    "parse third README options (non mandatory args)" - {
+      val res = Parser[ReadmeOptions3].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
+      val expectedRes = Right((
+        ReadmeOptions3(None, PathOptions("", "bar")),
+        Seq("extra")
+      ))
+      assert(res == expectedRes)
+    }
 
-    val args = Seq("--user", "aaa", "extra", "-b", "bar")
+    "parse fourth README options (non mandatory args)" - {
+      val res = Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
+      val expectedRes = Right((
+        ReadmeOptions4(Left("Required option --password not specified"), PathOptions("", "bar")),
+        Seq("extra")
+      ))
+      assert(res == expectedRes)
+    }
 
-    parser.parse(args) shouldEqual Right((
-      WithHelp(usage = false, help = false, Left("Required option --password not specified")),
-      List("extra")
-    ))
+    "print help despite missing mandatory arguments" - {
 
-    parser.parse(args :+ "--help") shouldEqual Right((
-      WithHelp(usage = false, help = true, Left("Required option --password not specified")),
-      List("extra")
-    ))
-  }
+      val parser = Parser[ReadmeOptions2].withHelp
 
-  property("parse commands") {
-    sealed trait Command
+      val args = Seq("--user", "aaa", "extra", "-b", "bar")
 
-    case class First(
-      @ExtraName("f") foo: String = "",
-      bar: Int = 0
-    ) extends Command
+      * - {
+        val res = parser.parse(args)
+        val expectedRes = Right((
+          WithHelp(usage = false, help = false, Left("Required option --password not specified")),
+          List("extra")
+        ))
+        assert(res == expectedRes)
+      }
 
-    case class Second(
-      fooh: String = "",
-      baz: Int = 0
-    ) extends Command
+      * - {
+        val res = parser.parse(args :+ "--help")
+        val expectedRes = Right((
+          WithHelp(usage = false, help = true, Left("Required option --password not specified")),
+          List("extra")
+        ))
+        assert(res == expectedRes)
+      }
+    }
 
-    case class Default0(bah: Double = 0.0)
+    "parse commands" - {
 
-    val parser = CommandParser[Command]
+      val parser = CommandParser[Command]
 
-    parser[Default0](Nil) shouldBe Right((Default0(), Nil, None))
-    parser[Default0](Seq("--wrong")) shouldBe Left(s"Unrecognized argument: --wrong")
-    parser[Default0](Seq("--bah", "2")) shouldBe Right((Default0(2.0), Nil, None))
-    parser[Default0](Seq("--bah", "2", "--", "other", "otherother")) shouldBe Right((Default0(2.0), Seq("other", "otherother"), None))
-    parser[Default0](Seq("--bah", "2", "--", "other", "--bah")) shouldBe Right((Default0(2.0), Seq("other", "--bah"), None))
-    parser[Default0](Seq("first")) shouldBe Right((Default0(), Nil, Some(Right("first", First("", 0), Nil))))
-    parser[Default0](Seq("first", "arg", "other")) shouldBe Right((Default0(), Nil, Some(Right("first", First(), Seq("arg", "other")))))
-    parser[Default0](Seq("first", "--foo", "bah", "--bar", "4")) shouldBe Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
-    parser[Default0](Seq("first", "-f", "bah", "--bar", "4")) shouldBe Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
-    parser[Default0](Seq("--bah", "3", "first")) shouldBe Right((Default0(3.0), Nil, Some(Right("first", First(), Nil))))
-    parser[Default0](Seq("second")) shouldBe Right((Default0(), Nil, Some(Right("second", Second("", 0), Nil))))
-    parser[Default0](Seq("second", "--baz", "5", "other")) shouldBe Right((Default0(), Nil, Some(Right("second", Second("", 5), Seq("other")))))
-    parser[Default0](Seq("second", "--bar", "5", "other")) shouldBe Right((Default0(), Nil, Some(Left("Unrecognized argument: --bar"))))
+      * - {
+        val res = parser[Default0](Nil)
+        val expectedRes = Right((Default0(), Nil, None))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("--wrong"))
+        val expectedRes = Left(s"Unrecognized argument: --wrong")
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("--bah", "2"))
+        val expectedRes = Right((Default0(2.0), Nil, None))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("--bah", "2", "--", "other", "otherother"))
+        val expectedRes = Right((Default0(2.0), Seq("other", "otherother"), None))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("--bah", "2", "--", "other", "--bah"))
+        val expectedRes = Right((Default0(2.0), Seq("other", "--bah"), None))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("first"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("", 0), Nil))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("first", "arg", "other"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("first", First(), Seq("arg", "other")))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("first", "--foo", "bah", "--bar", "4"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("first", "-f", "bah", "--bar", "4"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("--bah", "3", "first"))
+        val expectedRes = Right((Default0(3.0), Nil, Some(Right("first", First(), Nil))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("second"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 0), Nil))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("second", "--baz", "5", "other"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 5), Seq("other")))))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = parser[Default0](Seq("second", "--bar", "5", "other"))
+        val expectedRes = Right((Default0(), Nil, Some(Left("Unrecognized argument: --bar"))))
+        assert(res == expectedRes)
+      }
+    }
+
   }
 
 }
