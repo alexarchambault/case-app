@@ -6,9 +6,7 @@ scala:
 - 2.13.0-M1
 jdk:
 - oraclejdk8
-script: sbt ++${TRAVIS_SCALA_VERSION} $(if [[ "${TRAVIS_SCALA_VERSION}" == 2.13.* ]]; then echo "testsJVM/test testsJS/test"; else echo validate; fi) $(if [[ "${TRAVIS_PULL_REQUEST}" == "false"
-  && ${JAVA_HOME} == $(jdk_switcher home oraclejdk7) && "${TRAVIS_BRANCH}" == "master"
-  ]]; then echo "publish"; fi)
+script: scripts/travis.sh
 sudo: false
 cache:
   directories:
@@ -22,3 +20,12 @@ env:
 branches:
   only:
   - master
+
+matrix:
+  include:
+  - scala: 2.11.11
+    dist: trusty
+    sudo: required
+    env: NATIVE=1
+    before_install:
+    - curl https://raw.githubusercontent.com/scala-native/scala-native/v0.3.1/bin/travis_setup.sh | bash -x

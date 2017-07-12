@@ -4,6 +4,9 @@ import sbt.Keys._
 
 import Aliases._
 
+import sbtcrossproject.CrossPlugin.AutoImport.crossPlatform
+import scala.scalanative.sbtplugin.NativePlatform
+
 object Settings {
 
   lazy val shared = Seq(
