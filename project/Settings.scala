@@ -64,7 +64,13 @@ object Settings {
   )
 
   lazy val caseAppPrefix = {
-    name := "case-app-" + name.value.stripSuffix("JVM").stripSuffix("JS")
+    name := {
+      val shortenedName = name.value
+        .stripSuffix("JVM")
+        .stripSuffix("JS")
+        .stripSuffix("Native")
+      "case-app-" + shortenedName
+    }
   }
 
 }
