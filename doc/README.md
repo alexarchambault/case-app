@@ -45,7 +45,7 @@ wrap its type into `Option[T]`.
 Optional arguments can also be defined by providing a default value.
 There are two ways to do that:
 - providing default value ad hoc in the case class definition
-- defining default value for a type with [Default](https://github.com/alexarchambault/case-app/blob/master/core/shared/src/main/scala/caseapp/core/Default.scala) 
+- defining default value for a type with [Default](https://github.com/alexarchambault/case-app/blob/master/core/shared/src/main/scala/caseapp/core/Default.scala)
 type class
 
 ```tut:silent
