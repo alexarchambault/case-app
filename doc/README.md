@@ -412,7 +412,7 @@ libraryDependencies += "com.github.alexarchambault" %% "case-app" % "1.2.0-M4"
 
 Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
 
-It is built against scala 2.10, 2.11, and 2.12.
+It is built against scala 2.10, 2.11, and 2.12, and 2.13.0-M1, and supports both scala-js and scala-native.
 
 If you are using scala 2.10.x, also add the macro paradise plugin to your build,
 ```scala
