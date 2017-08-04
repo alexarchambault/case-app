@@ -1,10 +1,9 @@
 package caseapp.util
 
+import scala.language.experimental.macros
 import shapeless.{ HList, DepFn0 }
 
-import scala.language.experimental.macros
-
-trait AnnotationList[A,T] extends DepFn0 with Serializable {
+sealed abstract class AnnotationList[A,T] extends DepFn0 with Serializable {
   type Out <: HList
 }
 

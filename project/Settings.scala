@@ -54,7 +54,8 @@ object Settings {
         case _ =>
           Seq.empty
       }
-    }
+    },
+    autoAPIMappings := true
   )
 
   lazy val dontPublish = Seq(

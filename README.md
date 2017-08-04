@@ -322,15 +322,15 @@ was specified in the arguments.
 
 Use your own option types by defining implicit `ArgParser`s for them, like in
 ```scala
-import caseapp.core.ArgParser
+import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 
 trait Custom
 
 implicit val customArgParser: ArgParser[Custom] =
-  ArgParser.instance[Custom]("custom") { s =>
+  SimpleArgParser.from[Custom]("custom") { s =>
     // parse s
     // return
-    // - Left("error message") in case of error
+    // - Left(a caseapp.core.Error instance) in case of error
     // - Right(custom) in case of success
     ???
   }

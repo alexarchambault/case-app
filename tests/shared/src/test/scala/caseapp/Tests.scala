@@ -1,6 +1,7 @@
 package caseapp
 
-import caseapp.core.WithHelp
+import caseapp.core.Error
+import caseapp.core.help.WithHelp
 import utest._
 
 object Tests extends TestSuite {
@@ -11,7 +12,7 @@ object Tests extends TestSuite {
   val tests = TestSuite {
 
     "parse no args" - {
-      val res = Parser[NoArgs].apply(Seq.empty)
+      val res = Parser[NoArgs].parse(Seq.empty)
       val expectedRes = Right((NoArgs(), Seq.empty))
       assert(res == expectedRes)
     }
@@ -23,7 +24,7 @@ object Tests extends TestSuite {
 
     "handle extra user arguments" - {
       val res = Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other"))
-      val expectedRes = Right((NoArgs(), Seq(), Seq("b", "-a", "--other")))
+      val expectedRes = Right((NoArgs(), RemainingArgs(Seq(), Seq("b", "-a", "--other"))))
       assert(res == expectedRes)
     }
 
@@ -31,6 +32,25 @@ object Tests extends TestSuite {
       val res = Parser[NoArgs].parse(Seq("user arg", "other user arg"))
       val expectedRes = Right((NoArgs(), Seq("user arg", "other user arg")))
       assert(res == expectedRes)
+    }
+
+    "fail if arg specified multiple times" - {
+      * - {
+        val res = Parser[FewArgs].parse(Seq("--num-foo", "2"))
+	val expectedRes = Right((FewArgs(numFoo = 2), Nil))
+        assert(res == expectedRes)
+      }
+      * - {
+        val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
+	val expectedRes = Left(Error.ArgumentAlreadySpecified("???", Nil))
+        assert(res == expectedRes)
+      }
+
+      * - {
+        val res = Parser[FewArgs1].parse(Seq("--num-foo", "2", "--num-foo", "3"))
+	val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
+        assert(res == expectedRes)
+      }
     }
 
     "parse no args and return default values and remaining args" - {
@@ -120,7 +140,7 @@ object Tests extends TestSuite {
     "parse fourth README options (non mandatory args)" - {
       val res = Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
       val expectedRes = Right((
-        ReadmeOptions4(Left("Required option --password not specified"), PathOptions("", "bar")),
+        ReadmeOptions4(Left(Error.RequiredOptionNotSpecified("--password")), PathOptions("", "bar")),
         Seq("extra")
       ))
       assert(res == expectedRes)
@@ -135,7 +155,7 @@ object Tests extends TestSuite {
       * - {
         val res = parser.parse(args)
         val expectedRes = Right((
-          WithHelp(usage = false, help = false, Left("Required option --password not specified")),
+          WithHelp(usage = false, help = false, Left(Error.RequiredOptionNotSpecified("--password"))),
           List("extra")
         ))
         assert(res == expectedRes)
@@ -144,7 +164,7 @@ object Tests extends TestSuite {
       * - {
         val res = parser.parse(args :+ "--help")
         val expectedRes = Right((
-          WithHelp(usage = false, help = true, Left("Required option --password not specified")),
+          WithHelp(usage = false, help = true, Left(Error.RequiredOptionNotSpecified("--password"))),
           List("extra")
         ))
         assert(res == expectedRes)
@@ -156,68 +176,68 @@ object Tests extends TestSuite {
       val parser = CommandParser[Command]
 
       * - {
-        val res = parser[Default0](Nil)
+        val res = parser.parse[Default0](Nil)
         val expectedRes = Right((Default0(), Nil, None))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("--wrong"))
-        val expectedRes = Left(s"Unrecognized argument: --wrong")
+        val res = parser.parse[Default0](Seq("--wrong"))
+        val expectedRes = Left(Error.UnrecognizedArgument("--wrong"))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("--bah", "2"))
+        val res = parser.parse[Default0](Seq("--bah", "2"))
         val expectedRes = Right((Default0(2.0), Nil, None))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("--bah", "2", "--", "other", "otherother"))
+        val res = parser.parse[Default0](Seq("--bah", "2", "--", "other", "otherother"))
         val expectedRes = Right((Default0(2.0), Seq("other", "otherother"), None))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("--bah", "2", "--", "other", "--bah"))
+        val res = parser.parse[Default0](Seq("--bah", "2", "--", "other", "--bah"))
         val expectedRes = Right((Default0(2.0), Seq("other", "--bah"), None))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("first"))
+        val res = parser.parse[Default0](Seq("first"))
         val expectedRes = Right((Default0(), Nil, Some(Right("first", First("", 0), Nil))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("first", "arg", "other"))
+        val res = parser.parse[Default0](Seq("first", "arg", "other"))
         val expectedRes = Right((Default0(), Nil, Some(Right("first", First(), Seq("arg", "other")))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("first", "--foo", "bah", "--bar", "4"))
+        val res = parser.parse[Default0](Seq("first", "--foo", "bah", "--bar", "4"))
         val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("first", "-f", "bah", "--bar", "4"))
+        val res = parser.parse[Default0](Seq("first", "-f", "bah", "--bar", "4"))
         val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("--bah", "3", "first"))
+        val res = parser.parse[Default0](Seq("--bah", "3", "first"))
         val expectedRes = Right((Default0(3.0), Nil, Some(Right("first", First(), Nil))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("second"))
+        val res = parser.parse[Default0](Seq("second"))
         val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 0), Nil))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("second", "--baz", "5", "other"))
+        val res = parser.parse[Default0](Seq("second", "--baz", "5", "other"))
         val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 5), Seq("other")))))
         assert(res == expectedRes)
       }
       * - {
-        val res = parser[Default0](Seq("second", "--bar", "5", "other"))
-        val expectedRes = Right((Default0(), Nil, Some(Left("Unrecognized argument: --bar"))))
+        val res = parser.parse[Default0](Seq("second", "--bar", "5", "other"))
+        val expectedRes = Right((Default0(), Nil, Some(Left(Error.UnrecognizedArgument("--bar")))))
         assert(res == expectedRes)
       }
     }
