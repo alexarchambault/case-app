@@ -55,7 +55,8 @@ lazy val testsJVM = tests.jvm
 lazy val testsJS = tests.js
 lazy val testsNative = tests.native
 
-lazy val doc = project
+lazy val readme = project
+  .underDoc
   .dependsOn(coreJVM)
   .enablePlugins(TutPlugin)
   .settings(
@@ -65,8 +66,25 @@ lazy val doc = project
     tutTargetDirectory := baseDirectory.in(LocalRootProject).value
   )
 
+lazy val site = project
+  .underDoc
+  .enablePlugins(MicrositesPlugin)
+  .settings(
+    shared,
+    dontPublish,
+    micrositeName := "case-app",
+    micrositeDescription := "Type-level argument parsing",
+    micrositeBaseUrl := "/case-app",
+    micrositeDocumentationUrl := "docs",
+    micrositeAuthor := "Alexandre Archambault",
+    micrositeHomepage := "https://alexarchambault.github.io/case-app",
+    micrositeGithubOwner := "alexarchambault",
+    micrositeGithubRepo := "case-app"
+  )
+
 lazy val `case-app` = project
   .in(root)
+  .enablePlugins(ScalaUnidocPlugin)
   .aggregate(
     utilJVM,
     utilJS,
@@ -76,12 +94,26 @@ lazy val `case-app` = project
     coreJS,
     testsJVM,
     testsJS,
-    doc
+    readme,
+    site
   )
   .settings(
     shared,
     dontPublish,
-    name := "case-app-root"
+    name := "case-app-root",
+    addMappingsToSiteDir(mappings.in(ScalaUnidoc, packageDoc), micrositeDocumentationUrl.in(site)),
+    unidocProjectFilter.in(ScalaUnidoc, unidoc) := inAnyProject -- inProjects(
+      utilJS,
+      annotationsJS,
+      coreJS,
+      testsJS,
+      readme,
+      // for w/e reasons, these have to be excluded here, even though these are not included in the aggregation below
+      utilNative,
+      annotationsNative,
+      coreNative,
+      testsNative
+    )
   )
 
 lazy val native = project

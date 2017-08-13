@@ -17,4 +17,12 @@ object Aliases {
   def commandSeq(command: String*) =
     command.mkString(";", ";", "")
 
+
+  implicit class ProjectOps(val proj: Project) extends AnyVal {
+    def underDoc: Project = {
+      val base = proj.base
+      proj.in(base.getParentFile / "doc" / base.getName)
+    }
+  }
+
 }

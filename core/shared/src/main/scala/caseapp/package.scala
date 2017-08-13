@@ -1,14 +1,33 @@
-import shapeless.{ CNil, :+:, Inl, Inr, Generic }
 
+/**
+  * caseapp root package
+  *
+  * Simply importing things directly under this package should make it possible not to have to import things
+  * from [[caseapp.core]].
+  */
 package object caseapp {
 
   type ExtraName = Name
 
-  type Parser[T] = core.Parser[T]
-  val Parser = core.Parser
+  type Parser[T] = core.parser.Parser[T]
+  val Parser = core.parser.Parser
 
-  type CommandParser[T] = core.CommandParser[T]
-  val CommandParser = core.CommandParser
+  type CommandParser[T] = core.commandparser.CommandParser[T]
+  val CommandParser = core.commandparser.CommandParser
+
+
+  type CaseApp[T] = core.app.CaseApp[T]
+  val CaseApp = core.app.CaseApp
+
+  type CommandApp[T] = core.app.CommandApp[T]
+
+
+  type RemainingArgs = core.RemainingArgs
+  val RemainingArgs = core.RemainingArgs
+
+  type Last[T] = core.argparser.Last[T]
+  val Last = core.argparser.Last
+
 
   // Running into weird errors with this one when using Tag.of, so let's use newtype below instead
   // type @@[+T, Tag] = shapeless.tag.@@[T, Tag]
@@ -20,25 +39,14 @@ package object caseapp {
   // Custom tag implementation, see above for more details
   type @@[T, Tag] = shapeless.newtype.Newtype[T, Tag]
   object Tag {
-    final case class TagBuilder[Tag]() {
+    final class TagBuilder[Tag] {
       def apply[T](t: T): T @@ Tag = t.asInstanceOf[T @@ Tag]
     }
 
-    def of[Tag] = TagBuilder[Tag]()
+    def of[Tag]: TagBuilder[Tag] = new TagBuilder[Tag]
     def unwrap[T, Tag](t: T @@ Tag): T = t.asInstanceOf[T]
   }
 
-  sealed trait Counter
-
-  // required for the implicits involved in default values to be fine
-  implicit def optionGeneric[T]: Generic.Aux[Option[T], Some[T] :+: None.type :+: CNil] =
-    new Generic[Option[T]] {
-      type Repr = Some[T] :+: None.type :+: CNil
-      def from(r: Repr) = r.unify
-      def to(opt: Option[T]) = opt match {
-        case None => Inr(Inl(None))
-        case s @ Some(_) => Inl(s)
-      }
-    }
+  type Counter = core.Counter
 
 }

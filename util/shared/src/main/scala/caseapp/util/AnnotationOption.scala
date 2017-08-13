@@ -2,11 +2,11 @@ package caseapp.util
 
 import shapeless.Annotation
 
-trait AnnotationOption[A, T] {
+sealed abstract class AnnotationOption[A, T] extends Serializable {
   def apply(): Option[A]
 }
 
-trait LowPriorityAnnotationOption {
+abstract class LowPriorityAnnotationOption {
   implicit def annotationNotFound[A, T]: AnnotationOption[A, T] =
     new AnnotationOption[A, T] {
       def apply() = None

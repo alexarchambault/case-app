@@ -1,6 +1,7 @@
 package caseapp
 
-import caseapp.core.ArgParser
+import caseapp.core.Error
+import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 
 object Definitions {
 
@@ -9,6 +10,11 @@ object Definitions {
   final case class FewArgs(
     value  : String = "default",
     numFoo : Int = -10
+  )
+
+  final case class FewArgs1(
+    value  : String = "default",
+    numFoo : Last[Int] = Last(-10)
   )
 
   final case class MoreArgs(
@@ -30,11 +36,10 @@ object Definitions {
 
   final case class Custom(s: String)
 
-  implicit val customArgParser: ArgParser[Custom] = {
-    ArgParser.instance("custom parameter") { arg =>
+  implicit val customArgParser: ArgParser[Custom] =
+    SimpleArgParser.from("custom parameter") { arg =>
       Right(Custom(arg))
     }
-  }
 
   final case class WithCustom(
     custom   : Custom = Custom("")
@@ -83,7 +88,7 @@ object Definitions {
   )
 
   final case class ReadmeOptions4(
-    @Recurse auth: Either[String, AuthOptions],
+    @Recurse auth: Either[Error, AuthOptions],
     @Recurse paths: PathOptions
   )
 

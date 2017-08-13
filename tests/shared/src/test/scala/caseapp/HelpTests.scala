@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.Messages
+import caseapp.core.help.Help
 import utest._
 
 object HelpTests extends TestSuite {
@@ -37,7 +37,7 @@ object HelpTests extends TestSuite {
 
     "don't add a help message for fields annotated with @Hidden" - {
 
-      val helpLines = Messages[Options].helpMessage.lines.toVector
+      val helpLines = Help[Options].help.lines.toVector
 
       * - {
         val res = helpLines.count(_.contains("--first"))
