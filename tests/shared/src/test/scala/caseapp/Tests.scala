@@ -146,6 +146,12 @@ object Tests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    "hyphenize printed missing mandatory arguments" - {
+      val res = Parser[ReadmeOptions5].parse(Seq())
+      val expectedRes = Left(Error.RequiredOptionNotSpecified("--foo-bar"))
+      assert(res == expectedRes)
+    }
+
     "print help despite missing mandatory arguments" - {
 
       val parser = Parser[ReadmeOptions2].withHelp

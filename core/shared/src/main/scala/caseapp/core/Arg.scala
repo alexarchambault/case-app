@@ -13,7 +13,7 @@ import caseapp.{HelpMessage, Name, ValueDescription}
   * @param isFlag: if true, passing an actual value to this argument is optional
   */
 final case class Arg(
-  name: String,
+  name: Name,
   extraNames: Seq[Name] = Nil,
   valueDescription: Option[ValueDescription] = None,
   helpMessage: Option[HelpMessage] = None,

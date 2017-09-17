@@ -18,7 +18,7 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
   ): Parser.Aux[H :: T, Option[H] :: D] =
     ConsParser(
       Arg(
-        name,
+        Name(name),
         extraNames,
         valueDescription,
         helpMessage,
