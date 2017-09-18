@@ -92,6 +92,10 @@ object Definitions {
     @Recurse paths: PathOptions
   )
 
+  final case class ReadmeOptions5(
+    fooBar: Double
+  )
+
   final case class Example(
     foo: String,
     bar: Int

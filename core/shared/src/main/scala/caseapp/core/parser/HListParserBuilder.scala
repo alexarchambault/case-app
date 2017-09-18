@@ -121,8 +121,8 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
       val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
 
       val arg = Arg(
-        name.value.name,
-        Name(name.value.name) :: names.head,
+        Name(name.value.name),
+        names.head,
         valueDescriptions.head,
         helpMessages.head,
         noHelp.head.nonEmpty,

@@ -75,7 +75,7 @@ object Help {
       .collect {
         case arg if !arg.noHelp =>
 
-          val names = (Name(arg.name) +: arg.extraNames).distinct
+          val names = (arg.name +: arg.extraNames).distinct
 
           // FIXME Flags that accept no value are not given the right help message here
           val valueDescription = arg

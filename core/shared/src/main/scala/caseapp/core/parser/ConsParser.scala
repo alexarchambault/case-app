@@ -1,6 +1,5 @@
 package caseapp.core.parser
 
-import caseapp.Name
 import caseapp.core.argparser.{ArgParser, Consumed}
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
@@ -24,7 +23,7 @@ final case class ConsParser[H, T <: HList, DT <: HList](
         Right(None)
 
       case firstArg :: rem =>
-        val matchedOpt = (Iterator(Name(arg.name)) ++ arg.extraNames.iterator)
+        val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
           .map(_.apply(firstArg))
           .collectFirst {
             case Right(valueOpt) => valueOpt
@@ -68,15 +67,9 @@ final case class ConsParser[H, T <: HList, DT <: HList](
     val maybeHead = d.head
       .orElse(default)
       .toRight {
-        def prefixed(name: String) =
-          if (name.length == 1)
-            "-" + name
-          else
-            "--" + name
-
         Error.RequiredOptionNotSpecified(
-          prefixed(arg.name),
-          arg.extraNames.map(_.name).filter(_ != arg.name).map(prefixed)
+          arg.name.option,
+          arg.extraNames.map(_.option)
         )
       }
 
