@@ -11,13 +11,13 @@
 
 The code snippets below assume that the content of `caseapp` is imported,
 
-```tut:silent
+```scala
 import caseapp._
 ```
 
 ### Parse a simple set of options
 
-```tut:silent
+```scala
 case class Options(
   user: Option[String],
   enableFoo: Boolean = false,
@@ -29,13 +29,8 @@ CaseApp.parse[Options](
 ) == Right((Options(Some("alice"), false, List("a", "b")), Seq.empty))
 ```
 
-```tut:invisible
-assert(
-  CaseApp.parse[Options](
-    Seq("--user", "alice", "--file", "a", "--file", "b")
-  ) == Right((Options(Some("alice"), false, List("a", "b")), Seq.empty))
-)
-```
+
+
 
 ### Required and optional arguments
 
@@ -45,10 +40,10 @@ wrap its type into `Option[T]`.
 Optional arguments can also be defined by providing a default value.
 There are two ways to do that:
 - providing default value ad hoc in the case class definition
-- defining default value for a type with [Default](https://github.com/alexarchambault/case-app/blob/master/core/shared/src/main/scala/caseapp/core/Default.scala)
+- defining default value for a type with [Default](https://github.com/alexarchambault/case-app/blob/master/core/shared/src/main/scala/caseapp/core/default/Default.scala)
 type class
 
-```tut:silent
+```scala
 case class Options(
   user: Option[String],
   enableFoo: Boolean = false,
@@ -58,18 +53,15 @@ case class Options(
 CaseApp.parse[Options](Seq()) == Right((Options(None, false, Nil), Seq.empty))
 ```
 
-```tut:invisible
-assert(
-  CaseApp.parse[Options](Seq()) == Right((Options(None, false, Nil), Seq.empty))
-)
-```
+
+
 
 ### Lists
 
 Some arguments can be specified several times on the command-line. These
 should be typed as lists, e.g. `file` in
 
-```tut:silent
+```scala
 case class Options(
   user: Option[String],
   enableFoo: Boolean = false,
@@ -81,13 +73,8 @@ CaseApp.parse[Options](
 ) == Right((Options(None, false, List("a", "b")), Seq.empty))
 ```
 
-```tut:invisible
-assert(
-  CaseApp.parse[Options](
-    Seq("--file", "a", "--file", "b")
-  ) == Right((Options(None, false, List("a", "b")), Seq.empty))
-)
-```
+
+
 
 If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
 see below), the final value of its corresponding field is the last provided in the arguments.
@@ -97,7 +84,7 @@ see below), the final value of its corresponding field is the last provided in t
 *case-app* can take care of the creation of the `main` method parsing
 command-line arguments.
 
-```tut:silent
+```scala
 import caseapp._
 
 case class ExampleOptions(
@@ -130,17 +117,8 @@ Usage: example [options]
   --bar  <value>
 ```
 
-```tut:invisible
-def lines(s: String) = s.linesIterator.toVector
-assert(
-  lines(CaseApp.helpMessage[ExampleOptions]).drop(2) == lines(
-  """Example
-    |Usage: example [options]
-    |  --foo  <value>
-    |  --bar  <value>""".stripMargin
-  ).drop(2)
-)
-```
+
+
 
 Calling it with the `--usage` option will print
 ```
@@ -152,7 +130,7 @@ Usage: example [options]
 Several parts of the above help message can be customized by annotating
 `ExampleOptions` or its fields:
 
-```tut:silent
+```scala
 @AppName("MyApp")
 @AppVersion("0.1.0")
 @ProgName("my-app-cli")
@@ -166,14 +144,8 @@ case class ExampleOptions(
 )
 ```
 
-```tut:invisible
-object Example extends CaseApp[ExampleOptions] {
-  def run(options: ExampleOptions, args: RemainingArgs): Unit = {
-    // Core of the app
-    // ...
-  }
-}
-```
+
+
 
 Called with the `--help` or `-h` option, would print
 ```
@@ -183,18 +155,8 @@ Usage: my-app-cli [options]
   --bar  <bar>: the bar
 ```
 
-```tut:invisible
-assert(
-  lines(CaseApp.helpMessage[ExampleOptions]) == lines(
-  """MyApp 0.1.0
-    |Usage: my-app-cli [options]
-    |  --foo  <foo>
-    |        the foo
-    |  --bar  <bar>
-    |        the bar""".stripMargin
-  )
-)
-```
+
+
 
 Note the application name that changed, on the first line. Note also the version
 number appended next to it. The program name, after `Usage: `, was changed too.
@@ -205,7 +167,7 @@ Lastly, the options value descriptions (`<foo>` and `<bar>`) and help messages
 ### Extra option names
 
 Alternative option names can be specified, like
-```tut:silent
+```scala
 case class ExampleOptions(
   @ExtraName("f")
     foo: String,
@@ -214,11 +176,8 @@ case class ExampleOptions(
 )
 ```
 
-```tut:invisible
-object Example extends CaseApp[ExampleOptions] {
-  def run(options: ExampleOptions, args: RemainingArgs): Unit = {}
-}
-```
+
+
 
 `--foo` and `-f`, and `--bar` and `-b` would then be equivalent.
 
@@ -228,18 +187,15 @@ Field names, or extra names as above, longer than one letter are considered
 long options, prefixed with `--`. One letter long names are short options,
 prefixed with a single `-`.
 
-```tut:silent
+```scala
 case class ExampleOptions(
   a: Int,
   foo: String
 )
 ```
 
-```tut:invisible
-object Example extends CaseApp[ExampleOptions] {
-  def run(options: ExampleOptions, args: RemainingArgs): Unit = {}
-}
-```
+
+
 
 would accept `--foo bar` and `-a 2` as arguments to set `foo` or `a`.
 
@@ -248,15 +204,14 @@ would accept `--foo bar` and `-a 2` as arguments to set `foo` or `a`.
 Field names or extra names as above, written in pascal case, are split
 and hyphenized.
 
-```tut:silent
+```scala
 case class Options(
   fooBar: Double
 )
 ```
 
-```tut:invisible
-core.parser.Parser[Options]
-```
+
+
 
 would accept arguments like `--foo-bar 2.2`.
 
@@ -265,7 +220,7 @@ would accept arguments like `--foo-bar 2.2`.
 
 Sets of options can be shared between applications:
 
-```tut:silent
+```scala
 case class CommonOptions(
   foo: String,
   bar: Int
@@ -292,16 +247,14 @@ case class Second(
 }
 ```
 
-```tut:invisible
-core.parser.Parser[First]
-core.parser.Parser[Second]
-```
+
+
 
 ### Commands
 
 *case-app* has a support for commands.
 
-```tut:silent
+```scala
 sealed trait DemoCommand
 
 case class First(
@@ -335,21 +288,20 @@ my-app second --baz 2.4
 
 Some more complex options can be specified multiple times on the command-line and should be
 "accumulated". For example, one would want to define a verbose option like
-```tut:silent
+```scala
 case class Options(
   @ExtraName("v") verbose: Int
 )
 ```
 
-```tut:invisible
-core.parser.Parser[Options]
-```
+
+
 
 Verbosity would then have be specified on the command-line like `--verbose 3`.
 But the usual preferred way of increasing verbosity is to repeat the verbosity
 option, like in `-v -v -v`. To accept the latter,
 tag `verbose` type with `Counter`:
-```tut:silent
+```scala
 case class Options(
   @ExtraName("v") verbose: Int @@ Counter
 )
@@ -369,7 +321,7 @@ was specified in the arguments.
 *Needs to be updated*
 
 Use your own option types by defining implicit `ArgParser`s for them, like in
-```tut:silent
+```scala
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 
 trait Custom
@@ -385,16 +337,15 @@ implicit val customArgParser: ArgParser[Custom] =
 ```
 
 Then use them like
-```tut:silent
+```scala
 case class Options(
   custom: Custom,
   foo: String
 )
 ```
 
-```tut:invisible
-core.parser.Parser[Options]
-```
+
+
 
 ### Migration from the previous version
 
