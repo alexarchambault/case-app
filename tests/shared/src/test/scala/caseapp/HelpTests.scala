@@ -13,7 +13,22 @@ object HelpTests extends TestSuite {
       second: String
   )
 
+  case class WithValueDescription(
+    @ValueDescription("overridden description") value: String
+  )
+
   val tests = TestSuite {
+
+    def lines(s: String) = s.lines.toVector
+    def checkLines(message: String, expectedMessage: String) = {
+      val messageLines = lines(message)
+      val expectedLines = lines(expectedMessage)
+
+      for (((a, b), idx) <- messageLines.zip(expectedLines).zipWithIndex if a != b)
+        Console.err.println(s"Line $idx, expected '$b', got '$a'")
+
+      assert(messageLines == expectedLines)
+    }
 
     "generate a help message" - {
 
@@ -22,17 +37,54 @@ object HelpTests extends TestSuite {
       val expectedMessage =
         """Example
           |Usage: example [options]
-          |  --foo  <value>
-          |  --bar  <value>""".stripMargin
+          |  --foo  <string>
+          |  --bar  <int>""".stripMargin
 
-      def lines(s: String) = s.lines.toVector
+      checkLines(message, expectedMessage)
+    }
 
-      for (((a, b), idx) <- lines(message).zip(lines(expectedMessage)).zipWithIndex if a != b)
-        Console.err.println(s"Line $idx, expected '$b', got '$a'")
+    "mark optional options with ? in help messages" - {
+      val message = CaseApp.helpMessage[OptBool]
 
-      val res = lines(message)
-      val expectedRes = lines(expectedMessage)
-      assert(res == expectedRes)
+      val expectedMessage =
+        """OptBool
+          |Usage: opt-bool [options]
+          |  --opt  <bool?>""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    "mark repeatable options with * in help messages" - {
+      val message = CaseApp.helpMessage[WithList]
+
+      val expectedMessage =
+        """WithList
+          |Usage: with-list [options]
+          |  --list  <int*>""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    "use custom arg parser descriptions in help messages" - {
+      val message = CaseApp.helpMessage[WithCustom]
+
+      val expectedMessage =
+        """WithCustom
+          |Usage: with-custom [options]
+          |  --custom  <custom parameter>""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    "use value descriptions from annotations when given" - {
+      val message = CaseApp.helpMessage[WithValueDescription]
+
+      val expectedMessage =
+        """WithValueDescription
+          |Usage: with-value-description [options]
+          |  --value  <overridden description>""".stripMargin
+
+      checkLines(message, expectedMessage)
     }
 
     "don't add a help message for fields annotated with @Hidden" - {
