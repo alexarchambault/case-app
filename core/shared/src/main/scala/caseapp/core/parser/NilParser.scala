@@ -5,18 +5,18 @@ import shapeless.HNil
 
 case object NilParser extends Parser[HNil] {
 
-  type D = HNil
+  override type D = HNil
 
-  def init: D =
+  override def init: D =
     HNil
 
-  def step(args: List[String], d: HNil): Right[Error, None.type] =
+  override def step(args: List[String], d: HNil): Either[Error, None.type] =
     Right(None)
 
-  def get(d: D): Right[Error, HNil] =
+  override def get(d: D): Either[Seq[Error], HNil] =
     Right(HNil)
 
-  def args: Nil.type =
+  override def args: Nil.type =
     scala.Nil
 
 }

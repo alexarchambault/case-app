@@ -8,12 +8,12 @@ final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   tailParser: Parser.Aux[T, TD]
 ) extends Parser[H :: T] {
 
-  type D = HD :: TD
+  override type D = HD :: TD
 
-  def init: D =
+  override def init: D =
     headParser.init :: tailParser.init
 
-  def step(args: List[String], d: D): Either[Error, Option[(D, List[String])]] =
+  override def step(args: List[String], d: D): Either[Error, Option[(D, List[String])]] =
     headParser
       .step(args, d.head)
       .right
@@ -29,13 +29,19 @@ final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
           Right(Some(h :: d.tail, args))
       }
 
-  def get(d: D): Either[Error, H :: T] =
-    for {
-      h <- headParser.get(d.head).right
-      t <- tailParser.get(d.tail).right
-    } yield h :: t
+  override def get(d: D): Either[Seq[Error], H :: T] = {
+    val maybeHead = headParser.get(d.head)
+    val maybeTail = tailParser.get(d.tail)
 
-  val args = headParser.args ++ tailParser.args
+    (maybeHead, maybeTail) match {
+      case (Left(headErrs), Left(tailErrs)) => Left(headErrs ++ tailErrs)
+      case (Left(headErrs), _) => Left(headErrs)
+      case (_, Left(tailErrs)) => Left(tailErrs)
+      case (Right(h), Right(t)) => Right(h :: t)
+    }
+  }
+
+  override val args = headParser.args ++ tailParser.args
 
   def mapHead[I](f: H => I): Parser.Aux[I :: T, D] =
     map { l =>

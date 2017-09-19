@@ -52,7 +52,7 @@ abstract class Parser[T] {
     * @param d: final intermediate value
     * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def get(d: D): Either[Error, T]
+  def get(d: D): Either[Seq[Error], T]
 
   /**
     * Arguments this parser accepts.
@@ -62,7 +62,7 @@ abstract class Parser[T] {
   def args: Seq[Arg]
 
 
-  final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
+  final def parse(args: Seq[String]): Either[Seq[Error], (T, Seq[String])] =
     detailedParse(args)
       .right
       .map {
@@ -71,13 +71,13 @@ abstract class Parser[T] {
       }
 
   /** Keeps the remaining args before and after a possible -- separated */
-  final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] = {
+  final def detailedParse(args: Seq[String]): Either[Seq[Error], (T, RemainingArgs)] = {
 
     def helper(
       current: D,
       args: List[String],
       extraArgsReverse: List[String]
-    ): Either[Error, (T, RemainingArgs)] =
+    ): Either[Seq[Error], (T, RemainingArgs)] =
       if (args.isEmpty)
         get(current)
           .right
@@ -90,8 +90,11 @@ abstract class Parser[T] {
                 get(current)
                   .right
                   .map((_, RemainingArgs(extraArgsReverse.reverse, t)))
-              case opt :: _ if opt.startsWith("-") =>
-                Left(Error.UnrecognizedArgument(opt))
+              case opt :: rem if opt.startsWith("-") => {
+                val err = Error.UnrecognizedArgument(opt)
+                val remaining: Either[Seq[Error], (T, RemainingArgs)] = helper(current, rem, extraArgsReverse)
+                Left(remaining.fold(errs => err +: errs, _ => Seq(err)))
+              }
               case userArg :: rem =>
                 helper(current, rem, userArg :: extraArgsReverse)
             }
@@ -105,8 +108,10 @@ abstract class Parser[T] {
 
             helper(newC, newArgs.toList, extraArgsReverse)
 
-          case Left(msg) =>
-            Left(msg)
+          case Left(msg) => {
+            val remaining: Either[Seq[Error], (T, RemainingArgs)] = helper(current, args.tail, extraArgsReverse)
+            Left(remaining.fold(errs => msg +: errs, _ => Seq(msg)))
+          }
         }
 
     helper(init, args.toList, Nil)
@@ -144,7 +149,7 @@ object Parser extends LowPriorityParserImplicits {
   implicit def option[T, D](implicit parser: Aux[T, D]): Parser.Aux[Option[T], D] =
     OptionParser(parser)
 
-  implicit def either[T, D](implicit parser: Aux[T, D]): Parser.Aux[Either[Error, T], D] =
+  implicit def either[T, D](implicit parser: Aux[T, D]): Parser.Aux[Either[Seq[Error], T], D] =
     EitherParser(parser)
 
 

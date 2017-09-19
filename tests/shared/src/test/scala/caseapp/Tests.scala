@@ -37,18 +37,18 @@ object Tests extends TestSuite {
     "fail if arg specified multiple times" - {
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2"))
-	val expectedRes = Right((FewArgs(numFoo = 2), Nil))
+        val expectedRes = Right((FewArgs(numFoo = 2), Nil))
         assert(res == expectedRes)
       }
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-	val expectedRes = Left(Error.ArgumentAlreadySpecified("???", Nil))
+        val expectedRes = Left(Seq(Error.ArgumentAlreadySpecified("???", Nil)))
         assert(res == expectedRes)
       }
 
       * - {
         val res = Parser[FewArgs1].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-	val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
+        val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
         assert(res == expectedRes)
       }
     }
@@ -140,7 +140,7 @@ object Tests extends TestSuite {
     "parse fourth README options (non mandatory args)" - {
       val res = Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
       val expectedRes = Right((
-        ReadmeOptions4(Left(Error.RequiredOptionNotSpecified("--password")), PathOptions("", "bar")),
+        ReadmeOptions4(Left(Seq(Error.RequiredOptionNotSpecified("--password"))), PathOptions("", "bar")),
         Seq("extra")
       ))
       assert(res == expectedRes)
@@ -148,7 +148,19 @@ object Tests extends TestSuite {
 
     "hyphenize printed missing mandatory arguments" - {
       val res = Parser[ReadmeOptions5].parse(Seq())
-      val expectedRes = Left(Error.RequiredOptionNotSpecified("--foo-bar"))
+      val expectedRes = Left(Seq(Error.RequiredOptionNotSpecified("--foo-bar")))
+      assert(res == expectedRes)
+    }
+
+    "report all missing mandatory arguments" - {
+      val res = Parser[Example].parse(Seq())
+      val expectedRes = Left(Seq("--foo", "--bar").map(Error.RequiredOptionNotSpecified(_)))
+      assert(res == expectedRes)
+    }
+
+    "report missing args and unknown args together" - {
+      val res = Parser[Example].parse(Seq("--foo", "foo", "--baz", "10"))
+      val expectedRes = Left(Seq(Error.UnrecognizedArgument("--baz"), Error.RequiredOptionNotSpecified("--bar")))
       assert(res == expectedRes)
     }
 
@@ -161,7 +173,7 @@ object Tests extends TestSuite {
       * - {
         val res = parser.parse(args)
         val expectedRes = Right((
-          WithHelp(usage = false, help = false, Left(Error.RequiredOptionNotSpecified("--password"))),
+          WithHelp(usage = false, help = false, Left(Seq(Error.RequiredOptionNotSpecified("--password")))),
           List("extra")
         ))
         assert(res == expectedRes)
@@ -170,7 +182,7 @@ object Tests extends TestSuite {
       * - {
         val res = parser.parse(args :+ "--help")
         val expectedRes = Right((
-          WithHelp(usage = false, help = true, Left(Error.RequiredOptionNotSpecified("--password"))),
+          WithHelp(usage = false, help = true, Left(Seq(Error.RequiredOptionNotSpecified("--password")))),
           List("extra")
         ))
         assert(res == expectedRes)
@@ -188,7 +200,7 @@ object Tests extends TestSuite {
       }
       * - {
         val res = parser.parse[Default0](Seq("--wrong"))
-        val expectedRes = Left(Error.UnrecognizedArgument("--wrong"))
+        val expectedRes = Left(Seq(Error.UnrecognizedArgument("--wrong")))
         assert(res == expectedRes)
       }
       * - {
@@ -243,7 +255,7 @@ object Tests extends TestSuite {
       }
       * - {
         val res = parser.parse[Default0](Seq("second", "--bar", "5", "other"))
-        val expectedRes = Right((Default0(), Nil, Some(Left(Error.UnrecognizedArgument("--bar")))))
+        val expectedRes = Right((Default0(), Nil, Some(Left(Seq(Error.UnrecognizedArgument("--bar"))))))
         assert(res == expectedRes)
       }
     }

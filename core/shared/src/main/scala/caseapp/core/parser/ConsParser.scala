@@ -12,12 +12,12 @@ final case class ConsParser[H, T <: HList, DT <: HList](
   tail: Parser.Aux[T, DT]
 ) extends Parser[H :*: T] {
 
-  type D = Option[H] :*: DT
+  override type D = Option[H] :*: DT
 
-  def init: D =
+  override def init: D =
     None :: tail.init
 
-  def step(args: List[String], d: Option[H] :*: tail.D): Either[Error, Option[(D, List[String])]] =
+  override def step(args: List[String], d: Option[H] :*: tail.D): Either[Error, Option[(D, List[String])]] =
     args match {
       case Nil =>
         Right(None)
@@ -62,7 +62,7 @@ final case class ConsParser[H, T <: HList, DT <: HList](
         }
     }
 
-  def get(d: D): Either[Error, H :*: T] = {
+  override def get(d: D): Either[Seq[Error], H :*: T] = {
 
     val maybeHead = d.head
       .orElse(default)
@@ -73,13 +73,17 @@ final case class ConsParser[H, T <: HList, DT <: HList](
         )
       }
 
-    for {
-      h <- maybeHead.right
-      t <- tail.get(d.tail).right
-    } yield h :: t
+    val maybeTail = tail.get(d.tail)
+
+    (maybeHead, maybeTail) match {
+      case (Left(headErr), Left(tailErrs)) => Left(headErr +: tailErrs)
+      case (Left(headErr), _) => Left(Seq(headErr))
+      case (_, Left(tailErrs)) => Left(tailErrs)
+      case (Right(h), Right(t)) => Right(h :: t)
+    }
   }
 
-  val args: Seq[Arg] =
+  override val args: Seq[Arg] =
     arg +: tail.args
 
   def mapHead[I](f: H => I): Parser.Aux[I :*: T, D] =
