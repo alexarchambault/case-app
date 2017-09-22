@@ -12,8 +12,8 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
   def exit(code: Int): Nothing =
     sys.exit(code)
 
-  def error(messages: Seq[Error]): Nothing = {
-    messages.foreach(message => Console.err.println(message.message))
+  def error(message: Error): Nothing = {
+    Console.err.println(message.message)
     exit(1)
   }
 
@@ -29,8 +29,8 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
 
   def main(args: Array[String]): Unit =
     parser.withHelp.detailedParse(args) match {
-      case Left(errs) =>
-        error(errs)
+      case Left(err) =>
+        error(err)
 
       case Right((WithHelp(usage, help, t), remainingArgs)) =>
 
@@ -49,19 +49,19 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
 
 object CaseApp {
 
-  def parse[T: Parser](args: Seq[String]): Either[Seq[Error], (T, Seq[String])] =
+  def parse[T: Parser](args: Seq[String]): Either[Error, (T, Seq[String])] =
     Parser[T].parse(args)
 
-  def detailedParse[T: Parser](args: Seq[String]): Either[Seq[Error], (T, RemainingArgs)] =
+  def detailedParse[T: Parser](args: Seq[String]): Either[Error, (T, RemainingArgs)] =
     Parser[T].detailedParse(args)
 
-  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Seq[Error], (Either[Seq[Error], T], Boolean, Boolean, Seq[String])] =
+  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, Seq[String])] =
     parser.withHelp.parse(args).right.map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
 
-  def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Seq[Error], (Either[Seq[Error], T], Boolean, Boolean, RemainingArgs)] =
+  def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, RemainingArgs)] =
     parser.withHelp.detailedParse(args).right map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)

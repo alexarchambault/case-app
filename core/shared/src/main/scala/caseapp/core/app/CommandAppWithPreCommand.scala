@@ -20,8 +20,8 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   def exit(code: Int): Nothing =
     sys.exit(code)
 
-  def error(messages: Seq[Error]): Nothing = {
-    messages.foreach(message => Console.err.println(message.message))
+  def error(message: Error): Nothing = {
+    Console.err.println(message.message)
     exit(255)
   }
 
@@ -65,8 +65,8 @@ abstract class CommandAppWithPreCommand[D, T](implicit
 
   def main(args: Array[String]): Unit =
     commandParser.withHelp.detailedParse(args)(beforeCommandParser.withHelp) match {
-      case Left(errs) =>
-        error(errs)
+      case Left(err) =>
+        error(err)
 
       case Right((WithHelp(usage, help, d), dArgs, optCmd)) =>
 
@@ -82,8 +82,8 @@ abstract class CommandAppWithPreCommand[D, T](implicit
         )
 
         optCmd.foreach {
-          case Left(errs) =>
-            error(errs)
+          case Left(err) =>
+            error(err)
 
           case Right((c, WithHelp(commandUsage, commandHelp, t), commandArgs)) =>
 

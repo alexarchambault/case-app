@@ -45,7 +45,7 @@ abstract class CommandParser[T] {
     args: Seq[String]
   )(implicit
     beforeCommandParser: Parser[D]
-  ): Either[Seq[Error], (D, Seq[String], Option[Either[Seq[Error], (String, T, Seq[String])]])] =
+  ): Either[Error, (D, Seq[String], Option[Either[Error, (String, T, Seq[String])]])] =
     detailedParse(args)
       .right
       .map {
@@ -72,12 +72,12 @@ abstract class CommandParser[T] {
     args: Seq[String]
   )(implicit
     beforeCommandParser: Parser[D]
-  ): Either[Seq[Error], (D, Seq[String], Option[Either[Seq[Error], (String, T, RemainingArgs)]])] = {
+  ): Either[Error, (D, Seq[String], Option[Either[Error, (String, T, RemainingArgs)]])] = {
 
     def helper(
       current: beforeCommandParser.D,
       args: List[String]
-    ): Either[Seq[Error], (D, RemainingArgs)] =
+    ): Either[Error, (D, RemainingArgs)] =
       if (args.isEmpty)
         beforeCommandParser
           .get(current)
@@ -91,8 +91,8 @@ abstract class CommandParser[T] {
                 beforeCommandParser.get(current).right.map((_, RemainingArgs(t, Nil)))
               case opt :: rem if opt startsWith "-" => {
                 val err = Error.UnrecognizedArgument(opt)
-                val remaining: Either[Seq[Error], (D, RemainingArgs)] = helper(current, rem)
-                Left(remaining.fold(errs => err +: errs, _ => Seq(err)))
+                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
+                Left(remaining.fold(errs => err.append(errs), _ => err))
               }
               case rem =>
                 beforeCommandParser.get(current).right.map((_, RemainingArgs(Nil, rem)))
@@ -103,8 +103,8 @@ abstract class CommandParser[T] {
             helper(newD, newArgs)
 
           case Left(msg) => {
-            val remaining: Either[Seq[Error], (D, RemainingArgs)] = helper(current, args.tail)
-            Left(remaining.fold(errs => msg +: errs, _ => Seq(msg)))
+            val remaining: Either[Error, (D, RemainingArgs)] = helper(current, args.tail)
+            Left(remaining.fold(errs => msg.append(errs), _ => msg))
           }
         }
 
@@ -116,7 +116,7 @@ abstract class CommandParser[T] {
             case c :: rem0 =>
               get(c) match {
                 case None =>
-                  Some(Left(Seq(Error.CommandNotFound(c))))
+                  Some(Left(Error.CommandNotFound(c)))
                 case Some(p) =>
                   Some(
                     p

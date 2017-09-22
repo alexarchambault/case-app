@@ -18,7 +18,7 @@ final case class WithHelp[T](
   @ExtraName("h")
     help: Boolean = false,
   @Recurse
-    baseOrError: Either[Seq[Error], T]
+    baseOrError: Either[Error, T]
 ) {
   def map[U](f: T => U): WithHelp[U] =
     copy(baseOrError = baseOrError.right.map(f))

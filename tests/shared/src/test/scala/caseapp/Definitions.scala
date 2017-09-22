@@ -89,7 +89,7 @@ object Definitions {
   )
 
   final case class ReadmeOptions4(
-    @Recurse auth: Either[Seq[Error], AuthOptions],
+    @Recurse auth: Either[Error, AuthOptions],
     @Recurse paths: PathOptions
   )
 
