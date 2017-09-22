@@ -10,10 +10,10 @@ case object NilParser extends Parser[HNil] {
   def init: D =
     HNil
 
-  def step(args: List[String], d: HNil): Either[Error, None.type] =
+  def step(args: List[String], d: HNil): Right[Error, None.type] =
     Right(None)
 
-  def get(d: D): Either[Error, HNil] =
+  def get(d: D): Right[Error, HNil] =
     Right(HNil)
 
   def args: Nil.type =
