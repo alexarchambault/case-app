@@ -41,6 +41,7 @@ object Definitions {
       Right(Custom(arg))
     }
 
+  @AppName("WithCustom")
   final case class WithCustom(
     custom   : Custom = Custom("")
   )

@@ -69,7 +69,7 @@ abstract class LowPriorityHListParserBuilder {
       val arg = Arg(
         Name(name.value.name),
         names.head,
-        valueDescriptions.head,
+        valueDescriptions.head.orElse(Some(new ValueDescription(argParser.value.description))),
         helpMessages.head,
         noHelp.head.nonEmpty,
         argParser.value.isFlag
