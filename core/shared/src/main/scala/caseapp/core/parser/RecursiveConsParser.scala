@@ -29,11 +29,17 @@ final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
           Right(Some(h :: d.tail, args))
       }
 
-  def get(d: D): Either[Error, H :: T] =
-    for {
-      h <- headParser.get(d.head).right
-      t <- tailParser.get(d.tail).right
-    } yield h :: t
+  def get(d: D): Either[Error, H :: T] = {
+    val maybeHead = headParser.get(d.head)
+    val maybeTail = tailParser.get(d.tail)
+
+    (maybeHead, maybeTail) match {
+      case (Left(headErrs), Left(tailErrs)) => Left(headErrs.append(tailErrs))
+      case (Left(headErrs), _) => Left(headErrs)
+      case (_, Left(tailErrs)) => Left(tailErrs)
+      case (Right(h), Right(t)) => Right(h :: t)
+    }
+  }
 
   val args = headParser.args ++ tailParser.args
 

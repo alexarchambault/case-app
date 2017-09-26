@@ -73,10 +73,14 @@ final case class ConsParser[H, T <: HList, DT <: HList](
         )
       }
 
-    for {
-      h <- maybeHead.right
-      t <- tail.get(d.tail).right
-    } yield h :: t
+    val maybeTail = tail.get(d.tail)
+
+    (maybeHead, maybeTail) match {
+      case (Left(headErr), Left(tailErrs)) => Left(headErr.append(tailErrs))
+      case (Left(headErr), _) => Left(headErr)
+      case (_, Left(tailErrs)) => Left(tailErrs)
+      case (Right(h), Right(t)) => Right(h :: t)
+    }
   }
 
   val args: Seq[Arg] =

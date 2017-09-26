@@ -90,8 +90,11 @@ abstract class Parser[T] {
                 get(current)
                   .right
                   .map((_, RemainingArgs(extraArgsReverse.reverse, t)))
-              case opt :: _ if opt.startsWith("-") =>
-                Left(Error.UnrecognizedArgument(opt))
+              case opt :: rem if opt.startsWith("-") => {
+                val err = Error.UnrecognizedArgument(opt)
+                val remaining: Either[Error, (T, RemainingArgs)] = helper(current, rem, extraArgsReverse)
+                Left(remaining.fold(errs => err.append(errs), _ => err))
+              }
               case userArg :: rem =>
                 helper(current, rem, userArg :: extraArgsReverse)
             }
@@ -105,8 +108,10 @@ abstract class Parser[T] {
 
             helper(newC, newArgs.toList, extraArgsReverse)
 
-          case Left(msg) =>
-            Left(msg)
+          case Left(msg) => {
+            val remaining: Either[Error, (T, RemainingArgs)] = helper(current, args.tail, extraArgsReverse)
+            Left(remaining.fold(errs => msg.append(errs), _ => msg))
+          }
         }
 
     helper(init, args.toList, Nil)

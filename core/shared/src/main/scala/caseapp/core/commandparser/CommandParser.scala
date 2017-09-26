@@ -23,7 +23,6 @@ abstract class CommandParser[T] {
     */
   def get(command: String): Option[Parser[T]]
 
-
   /**
     * Creates a [[CommandParser]] accepting help / usage arguments, out of this one.
     */
@@ -90,8 +89,11 @@ abstract class CommandParser[T] {
             args match {
               case "--" :: t =>
                 beforeCommandParser.get(current).right.map((_, RemainingArgs(t, Nil)))
-              case opt :: _ if opt startsWith "-" =>
-                Left(Error.UnrecognizedArgument(opt))
+              case opt :: rem if opt startsWith "-" => {
+                val err = Error.UnrecognizedArgument(opt)
+                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
+                Left(remaining.fold(errs => err.append(errs), _ => err))
+              }
               case rem =>
                 beforeCommandParser.get(current).right.map((_, RemainingArgs(Nil, rem)))
             }
@@ -100,15 +102,16 @@ abstract class CommandParser[T] {
             assert(newArgs != args)
             helper(newD, newArgs)
 
-          case Left(msg) =>
-            Left(msg)
+          case Left(msg) => {
+            val remaining: Either[Error, (D, RemainingArgs)] = helper(current, args.tail)
+            Left(remaining.fold(errs => msg.append(errs), _ => msg))
+          }
         }
 
     helper(beforeCommandParser.init, args.toList)
       .right
       .map {
         case (d, dArgs) =>
-
           val cmdOpt = dArgs.unparsed.toList match {
             case c :: rem0 =>
               get(c) match {
@@ -142,7 +145,6 @@ object CommandParser extends AutoCommandParserImplicits {
 
   def apply[T](implicit parser: CommandParser[T]): CommandParser[T] = parser
 
-
   /**
     * An empty [[CommandParser]].
     *
@@ -150,7 +152,6 @@ object CommandParser extends AutoCommandParserImplicits {
     */
   def nil: CommandParser[CNil] =
     NilCommandParser
-
 
   implicit def toCommandParserOps[T <: Coproduct](parser: CommandParser[T]): CommandParserOps[T] =
     new CommandParserOps(parser)

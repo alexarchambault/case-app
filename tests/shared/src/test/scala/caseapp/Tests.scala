@@ -1,6 +1,7 @@
 package caseapp
 
 import caseapp.core.Error
+import caseapp.core.Error.SeveralErrors
 import caseapp.core.help.WithHelp
 import utest._
 
@@ -37,18 +38,18 @@ object Tests extends TestSuite {
     "fail if arg specified multiple times" - {
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2"))
-	val expectedRes = Right((FewArgs(numFoo = 2), Nil))
+        val expectedRes = Right((FewArgs(numFoo = 2), Nil))
         assert(res == expectedRes)
       }
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-	val expectedRes = Left(Error.ArgumentAlreadySpecified("???", Nil))
+        val expectedRes = Left(Error.ArgumentAlreadySpecified("???", Nil))
         assert(res == expectedRes)
       }
 
       * - {
         val res = Parser[FewArgs1].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-	val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
+        val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
         assert(res == expectedRes)
       }
     }
@@ -149,6 +150,18 @@ object Tests extends TestSuite {
     "hyphenize printed missing mandatory arguments" - {
       val res = Parser[ReadmeOptions5].parse(Seq())
       val expectedRes = Left(Error.RequiredOptionNotSpecified("--foo-bar"))
+      assert(res == expectedRes)
+    }
+
+    "report all missing mandatory arguments" - {
+      val res = Parser[Example].parse(Seq())
+      val expectedRes = Left(SeveralErrors(Error.RequiredOptionNotSpecified("--foo"), Seq(Error.RequiredOptionNotSpecified("--bar"))))
+      assert(res == expectedRes)
+    }
+
+    "report missing args and unknown args together" - {
+      val res = Parser[Example].parse(Seq("--foo", "foo", "--baz", "10"))
+      val expectedRes = Left(SeveralErrors(Error.UnrecognizedArgument("--baz"), Seq(Error.RequiredOptionNotSpecified("--bar"))))
       assert(res == expectedRes)
     }
 
