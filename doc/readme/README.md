@@ -373,9 +373,7 @@ libraryDependencies +=
 
 ## Contributors
 
-* Lars Hupel [@larsrh](https://github.com/larsrh)
-* Martin Mauch [@nightscape](https://github.com/nightscape)
-* Your name here :-)
+See the [full list of contributors](https://github.com/alexarchambault/case-app/graphs/contributors) on GitHub.
 
 ## See also
 
