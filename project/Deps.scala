@@ -19,6 +19,6 @@ object Deps {
     else
       "com.chuusai" %%% "shapeless" % "2.3.2"
   }
-  def utest = setting("com.lihaoyi" %%% "utest" % "0.4.8")
+  def utest = setting("com.lihaoyi" %%% "utest" % "0.5.4")
 
 }

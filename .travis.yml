@@ -1,8 +1,8 @@
 language: scala
 scala:
-- 2.10.6
-- 2.11.11
-- 2.12.3
+- 2.10.7
+- 2.11.12
+- 2.12.4
 - 2.13.0-M1
 jdk:
 - oraclejdk8
@@ -32,7 +32,7 @@ install:
 
 matrix:
   include:
-  - scala: 2.11.11
+  - scala: 2.11.12
     dist: trusty
     sudo: required
     env: NATIVE=1
