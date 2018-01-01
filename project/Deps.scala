@@ -2,8 +2,7 @@
 import sbt._
 import sbt.Keys._
 
-import sbtcrossproject.CrossPlugin.autoImport._
-import scala.scalanative.sbtplugin.NativePlatform
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
 object Deps {
 
