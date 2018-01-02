@@ -50,6 +50,10 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libs += Deps.utest.value % "test",
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
+  .nativeSettings(
+    // See https://github.com/lihaoyi/utest/issues/144
+    nativeLinkStubs := true
+  )
 
 lazy val testsJVM = tests.jvm
 lazy val testsJS = tests.js

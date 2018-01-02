@@ -1,9 +1,9 @@
 language: scala
 scala:
-- 2.10.6
-- 2.11.11
-- 2.12.3
-- 2.13.0-M1
+- 2.10.7
+- 2.11.12
+- 2.12.4
+- 2.13.0-M2
 jdk:
 - oraclejdk8
 script: scripts/travis.sh
@@ -21,18 +21,9 @@ branches:
   only:
   - master
 
-# sbt-microsites stuff
-before_install:
- - export PATH=${PATH}:./vendor/bundle
-install:
-  - rvm use 2.2.3 --install --fuzzy
-  - gem update --system
-  - gem install sass
-  - gem install jekyll -v 3.2.1
-
 matrix:
   include:
-  - scala: 2.11.11
+  - scala: 2.11.12
     dist: trusty
     sudo: required
     env: NATIVE=1
