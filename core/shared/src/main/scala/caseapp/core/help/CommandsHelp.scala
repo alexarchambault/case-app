@@ -6,11 +6,16 @@ import caseapp.util.AnnotationOption
 import shapeless.{:+:, CNil, Coproduct, LabelledGeneric, Strict, Witness}
 import shapeless.labelled.FieldType
 
+import scala.language.implicitConversions
+
 
 final case class CommandsHelp[T](
   messages: Seq[(String, CommandHelp)]
 ) {
   lazy val messagesMap = messages.toMap
+
+  def as[U]: CommandsHelp[U] =
+    CommandsHelp(messages)
 }
 
 object CommandsHelp {
@@ -47,4 +52,9 @@ object CommandsHelp {
      underlying: Strict[CommandsHelp[C]]
    ): CommandsHelp[S] =
     CommandsHelp(underlying.value.messages)
+
+
+  implicit def toCommandsHelpOps[T <: Coproduct](commandsHelp: CommandsHelp[T]): CommandsHelpOps[T] =
+    new CommandsHelpOps(commandsHelp)
+
 }

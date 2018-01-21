@@ -3,6 +3,7 @@ package caseapp
 import caseapp.core.Error
 import caseapp.core.Error.SeveralErrors
 import caseapp.core.help.WithHelp
+import caseapp.demo.{Command1Opts, Command2Opts, ManualCommand}
 import utest._
 
 object Tests extends TestSuite {
@@ -257,6 +258,20 @@ object Tests extends TestSuite {
       * - {
         val res = parser.parse[Default0](Seq("second", "--bar", "5", "other"))
         val expectedRes = Right((Default0(), Nil, Some(Left(Error.UnrecognizedArgument("--bar")))))
+        assert(res == expectedRes)
+      }
+    }
+
+    "parse manually defined command" - {
+      * - {
+        val res = ManualCommand.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("c1", Command1Opts("aa"), Nil))))
+        assert(res == expectedRes)
+      }
+
+      * - {
+        val res = ManualCommand.commandParser.parse[Default0](Seq("c2", "-b"))
+        val expectedRes = Right((Default0(), Nil, Some(Right("c2", Command2Opts(true), Nil))))
         assert(res == expectedRes)
       }
     }
