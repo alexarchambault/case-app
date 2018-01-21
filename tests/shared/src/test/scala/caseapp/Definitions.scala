@@ -53,6 +53,15 @@ object Definitions {
     @ExtraName("S") stages: List[String]
   )
 
+  final case class OverriddenParser(n: Int)
+
+  object OverriddenParser {
+    implicit val parser: Parser[OverriddenParser] =
+      Parser.nil
+        .add[Int]("count")
+        .as[OverriddenParser]
+  }
+
 
   Parser[NoArgs]
   Parser[FewArgs]

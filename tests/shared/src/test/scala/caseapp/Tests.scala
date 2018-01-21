@@ -261,6 +261,12 @@ object Tests extends TestSuite {
       }
     }
 
+    "use user defined parser" - {
+      val res = Parser[OverriddenParser].parse(Seq("--count", "2"))
+      val expectedRes = Right((OverriddenParser(2), Nil))
+      assert(res == expectedRes)
+    }
+
   }
 
 }

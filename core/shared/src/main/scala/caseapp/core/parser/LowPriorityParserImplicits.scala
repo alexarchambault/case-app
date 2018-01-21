@@ -17,6 +17,7 @@ abstract class LowPriorityParserImplicits {
     R <: HList,
     P <: HList
   ](implicit
+    lowPriority: caseapp.util.LowPriority,
     gen: LabelledGeneric.Aux[CC, L],
     defaults: shapeless.Default.AsOptions.Aux[CC, D],
     names: AnnotationList.Aux[Name, CC, N],
