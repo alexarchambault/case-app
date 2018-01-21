@@ -17,16 +17,16 @@ object CommandsHelp {
 
   def apply[T](implicit messages: CommandsHelp[T]): CommandsHelp[T] = messages
 
-  implicit val cnil: CommandsHelp[CNil] =
+  implicit val nil: CommandsHelp[CNil] =
     CommandsHelp(Nil)
 
-  implicit def ccons[K <: Symbol, H, T <: Coproduct]
+  implicit def cons[K <: Symbol, H, T <: Coproduct]
    (implicit
-    key: Witness.Aux[K],
-    commandName: AnnotationOption[CommandName, H],
-    parser: Strict[Parser[H]],
-    argsName: AnnotationOption[ArgsName, T],
-    tail: CommandsHelp[T]
+     key: Witness.Aux[K],
+     commandName: AnnotationOption[CommandName, H],
+     parser: Strict[Parser[H]],
+     argsName: AnnotationOption[ArgsName, T],
+     tail: CommandsHelp[T]
    ): CommandsHelp[FieldType[K, H] :+: T] = {
     // FIXME Duplicated in CommandParser.ccons
     val name = commandName().map(_.commandName).getOrElse {
@@ -43,8 +43,8 @@ object CommandsHelp {
 
   implicit def generic[S, C <: Coproduct]
    (implicit
-    gen: LabelledGeneric.Aux[S, C],
-    underlying: Strict[CommandsHelp[C]]
+     gen: LabelledGeneric.Aux[S, C],
+     underlying: Strict[CommandsHelp[C]]
    ): CommandsHelp[S] =
     CommandsHelp(underlying.value.messages)
 }
