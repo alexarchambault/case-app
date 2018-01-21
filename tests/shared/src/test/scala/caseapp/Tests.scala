@@ -274,6 +274,12 @@ object Tests extends TestSuite {
         val expectedRes = Right((Default0(), Nil, Some(Right("c2", Command2Opts(true), Nil))))
         assert(res == expectedRes)
       }
+
+      "find the user-specified name of a command arguments" - {
+        ManualCommand.commandsMessages.messagesMap.get("c1").exists { h =>
+          h.argsNameOption.exists(_ == "c1-stuff")
+        }
+      }
     }
 
     "use user defined parser" - {

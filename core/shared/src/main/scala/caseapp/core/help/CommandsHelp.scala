@@ -30,7 +30,7 @@ object CommandsHelp {
      key: Witness.Aux[K],
      commandName: AnnotationOption[CommandName, H],
      parser: Strict[Parser[H]],
-     argsName: AnnotationOption[ArgsName, T],
+     argsName: AnnotationOption[ArgsName, H],
      tail: CommandsHelp[T]
    ): CommandsHelp[FieldType[K, H] :+: T] = {
     // FIXME Duplicated in CommandParser.ccons
