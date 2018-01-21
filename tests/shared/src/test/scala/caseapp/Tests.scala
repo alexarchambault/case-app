@@ -3,7 +3,8 @@ package caseapp
 import caseapp.core.Error
 import caseapp.core.Error.SeveralErrors
 import caseapp.core.help.WithHelp
-import caseapp.demo.{Command1Opts, Command2Opts, ManualCommand}
+import caseapp.demo._
+import shapeless.{Inl, Inr}
 import utest._
 
 object Tests extends TestSuite {
@@ -263,21 +264,43 @@ object Tests extends TestSuite {
     }
 
     "parse manually defined command" - {
-      * - {
-        val res = ManualCommand.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("c1", Command1Opts("aa"), Nil))))
-        assert(res == expectedRes)
+      "adt" - {
+        * - {
+          val res = ManualCommand.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
+          val expectedRes = Right((Default0(), Nil, Some(Right("c1", Command1Opts("aa"), Nil))))
+          assert(res == expectedRes)
+        }
+
+        * - {
+          val res = ManualCommand.commandParser.parse[Default0](Seq("c2", "-b"))
+          val expectedRes = Right((Default0(), Nil, Some(Right("c2", Command2Opts(true), Nil))))
+          assert(res == expectedRes)
+        }
+
+        "find the user-specified name of a command arguments" - {
+          ManualCommand.commandsMessages.messagesMap.get("c1").exists { h =>
+            h.argsNameOption.exists(_ == "c1-stuff")
+          }
+        }
       }
 
-      * - {
-        val res = ManualCommand.commandParser.parse[Default0](Seq("c2", "-b"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("c2", Command2Opts(true), Nil))))
-        assert(res == expectedRes)
-      }
+      "not adt" - {
+        * - {
+          val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
+          val expectedRes = Right((Default0(), Nil, Some(Right(("c1", Inl(ManualCommandNotAdtOptions.Command1Opts("aa")), Nil)))))
+          assert(res == expectedRes)
+        }
 
-      "find the user-specified name of a command arguments" - {
-        ManualCommand.commandsMessages.messagesMap.get("c1").exists { h =>
-          h.argsNameOption.exists(_ == "c1-stuff")
+        * - {
+          val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c2", "-b"))
+          val expectedRes = Right((Default0(), Nil, Some(Right(("c2", Inr(Inl(ManualCommandNotAdtOptions.Command2Opts(true))), Nil)))))
+          assert(res == expectedRes)
+        }
+
+        "find the user-specified name of a command arguments" - {
+          ManualCommandNotAdt.commandsMessages.messagesMap.get("c1").exists { h =>
+            h.argsNameOption.exists(_ == "c1-stuff")
+          }
         }
       }
     }
