@@ -2,7 +2,7 @@ package caseapp
 
 import caseapp.core.Error
 import caseapp.core.Error.SeveralErrors
-import caseapp.core.help.WithHelp
+import caseapp.core.help.{Help, WithHelp}
 import caseapp.demo._
 import shapeless.{Inl, Inr}
 import utest._
@@ -190,6 +190,12 @@ object Tests extends TestSuite {
         ))
         assert(res == expectedRes)
       }
+    }
+
+    "strip options suffix to get default prog name" - {
+      val help = Help[demo.DemoOptions]
+      val progName = help.progName
+      assert(progName == "demo")
     }
 
     "parse commands" - {

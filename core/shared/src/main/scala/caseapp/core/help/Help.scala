@@ -104,7 +104,7 @@ object Help {
      argsName: AnnotationOption[ArgsName, T]
    ): Help[T] = {
 
-    val appName0 = appName().fold(typeable.describe)(_.appName)
+    val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
 
     Help(
       parser.args,
