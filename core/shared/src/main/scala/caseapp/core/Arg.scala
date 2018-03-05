@@ -9,7 +9,7 @@ import caseapp.{HelpMessage, Name, ValueDescription}
   * @param extraNames: extra names
   * @param valueDescription: description of its value (optional)
   * @param helpMessage: help message for this argument (optional)
-  * @param noHelp: if true, this argument should appear in help messages
+  * @param noHelp: if true, this argument should not appear in help messages
   * @param isFlag: if true, passing an actual value to this argument is optional
   */
 final case class Arg(
