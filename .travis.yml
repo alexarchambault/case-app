@@ -28,4 +28,4 @@ matrix:
     sudo: required
     env: NATIVE=1
     before_install:
-    - curl https://raw.githubusercontent.com/scala-native/scala-native/e9df70ce671c58f34eab530a44875d6f818ba8fe/bin/travis_setup.sh | bash -x
+    - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
