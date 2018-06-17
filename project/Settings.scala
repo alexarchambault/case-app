@@ -4,8 +4,7 @@ import sbt.Keys._
 
 import Aliases._
 
-import sbtcrossproject.CrossPlugin.AutoImport.crossPlatform
-import scala.scalanative.sbtplugin.NativePlatform
+import sbtcrossproject.CrossPlugin.autoImport._
 
 object Settings {
 
