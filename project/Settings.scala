@@ -23,7 +23,16 @@ object Settings {
           Nil
       }
     },
-    libs += compilerPlugin(Deps.macroParadise),
+    libs ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, v)) if v >= 13 =>
+          // if scala 2.13.0-M4 or later, macro annotations merged into scala-reflect
+          // https://github.com/scala/scala/pull/6606
+          Nil
+        case _ =>
+          compilerPlugin(Deps.macroParadise) :: Nil
+      }
+    },
     publishMavenStyle := true,
     pomIncludeRepository := { _ => false },
     publishTo := {
