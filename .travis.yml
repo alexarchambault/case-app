@@ -21,4 +21,4 @@ env:
   - secure: iAA98AVcqwTd11RjJaA133t38gqoGDsnLP2m1Hm2PFrUGE1AXg1/0wX6bXmFCnj+NIfb2ItC9cyuepcvrfAfV4ukU66Yyh6DCgYaup6IhrgSCdck5zZcc2KrxsLyWVAyuClu7TG6xbjHc4os0hZZ0w95pUIG2sOyr4faH1GbeUQ=
 branches:
   only:
-  - master
+  - 1.1.x
