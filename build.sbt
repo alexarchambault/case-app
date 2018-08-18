@@ -23,10 +23,28 @@ lazy val util = crossProject
     name := "case-app-util",
     libraryDependencies ++= Seq(
       "com.chuusai" %%% "shapeless" % "2.3.2",
-      "org.typelevel" %% "macro-compat" % "1.1.1",
       "org.scala-lang" % "scala-reflect" % scalaVersion.value % "provided",
       "org.scala-lang" % "scala-compiler" % scalaVersion.value % "provided"
-    )
+    ),
+    libraryDependencies ++= {
+      CrossVersion.partialVersion(scalaVersion.value) match {
+        case Some((2, 10)) => Seq("org.typelevel" %% "macro-compat" % "1.1.1")
+	case _ => Nil
+      }
+    },
+    unmanagedSourceDirectories.in(Compile) ++= {
+      val current = unmanagedSourceDirectories.in(Compile).value
+      val is211Plus = CrossVersion.partialVersion(scalaVersion.value).exists {
+        case (major, minor) => major == 2 && minor >= 11
+      }
+      if (is211Plus)
+        current.collect {
+	  case dir if dir.getName == "scala" =>
+	    dir.getParentFile / "scala-2.11+"
+        }
+      else
+        Nil
+    }
   )
 
 lazy val utilJVM = util.jvm
