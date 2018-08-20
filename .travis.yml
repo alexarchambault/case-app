@@ -1,30 +1,30 @@
 language: scala
-scala:
-- 2.10.7
-- 2.11.12
-- 2.12.4
 jdk:
 - oraclejdk8
+before_install:
+- git fetch --tags
 script: scripts/travis.sh
 sudo: false
 cache:
   directories:
+  - $HOME/.cache
   - $HOME/.coursier
   - $HOME/.ivy2/cache
   - $HOME/.sbt
-env:
-  global:
-  - secure: SHhR2GjIZ5prfuTujGreZAe+9nJkly2Eu1HP9hYQ4ntGFCz+9hcQ9ZDj532Yye3HItDzhE8wUA5HuL58+GivA72w7dbqMgoE9EvRAZrxPDRb1kvNN+HOHo6+t08DUPBh8jfH/VqNGjEKMRT70UjLWA1hi1rEZAi2J4OlTXkKmGc=
-  - secure: iAA98AVcqwTd11RjJaA133t38gqoGDsnLP2m1Hm2PFrUGE1AXg1/0wX6bXmFCnj+NIfb2ItC9cyuepcvrfAfV4ukU66Yyh6DCgYaup6IhrgSCdck5zZcc2KrxsLyWVAyuClu7TG6xbjHc4os0hZZ0w95pUIG2sOyr4faH1GbeUQ=
-branches:
-  only:
-  - master
-
-matrix:
+stages:
+  - name: test
+  - name: release
+    if: (branch = master AND type = push) OR (tag IS present)
+jobs:
   include:
+  - scala: 2.10.7
+  - scala: 2.11.12
+  - scala: 2.12.4
   - scala: 2.11.12
     dist: trusty
     sudo: required
     env: NATIVE=1
     before_install:
     - curl https://raw.githubusercontent.com/scala-native/scala-native/master/scripts/travis_setup.sh | bash -x
+  - stage: release
+    script: sbt ci-release
