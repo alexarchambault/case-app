@@ -9,7 +9,6 @@ import sbtcrossproject.CrossPlugin.autoImport._
 object Settings {
 
   lazy val shared = Seq(
-    organization := "com.github.alexarchambault",
     resolvers += Resolver.sonatypeRepo("releases"),
     scalacOptions ++= Seq(
       "-feature",
@@ -31,36 +30,6 @@ object Settings {
           Nil
         case _ =>
           compilerPlugin(Deps.macroParadise) :: Nil
-      }
-    },
-    publishMavenStyle := true,
-    pomIncludeRepository := { _ => false },
-    publishTo := {
-      val nexus = "https://oss.sonatype.org/"
-      if (isSnapshot.value)
-        Some("snapshots" at nexus + "content/repositories/snapshots")
-      else
-        Some("releases"  at nexus + "service/local/staging/deploy/maven2")
-    },
-    licenses := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
-    homepage := Some(url("https://github.com/alexarchambault/case-app")),
-    scmInfo := Some(ScmInfo(
-      url("https://github.com/alexarchambault/case-app.git"),
-      "scm:git:github.com/alexarchambault/case-app.git",
-      Some("scm:git:git@github.com:alexarchambault/case-app.git")
-    )),
-    developers := List(Developer(
-      "alexarchambault",
-      "Alexandre Archambault",
-      "",
-      url("https://github.com/alexarchambault")
-    )),
-    credentials ++= {
-      Seq("SONATYPE_USER", "SONATYPE_PASS").map(sys.env.get) match {
-        case Seq(Some(user), Some(pass)) =>
-          Seq(Credentials("Sonatype Nexus Repository Manager", "oss.sonatype.org", user, pass))
-        case _ =>
-          Seq.empty
       }
     },
     autoAPIMappings := true

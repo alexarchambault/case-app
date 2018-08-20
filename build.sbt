@@ -4,6 +4,20 @@ import sbtcrossproject.CrossPlugin.autoImport.crossProject
 import Aliases._
 import Settings._
 
+inThisBuild(List(
+  organization := "com.github.alexarchambault",
+  homepage := Some(url("https://github.com/alexarchambault/case-app")),
+  licenses := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
+  developers := List(
+    Developer(
+      "alexarchambault",
+      "Alexandre Archambault",
+      "",
+      url("https://github.com/alexarchambault")
+    )
+  )
+))
+
 lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
