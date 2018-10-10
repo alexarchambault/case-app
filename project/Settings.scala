@@ -6,7 +6,7 @@ import Aliases._
 
 object Settings {
 
-  private def scala211 = "2.11.12"
+  def scala211 = "2.11.12"
   private def scala212 = "2.12.7"
 
   lazy val shared = Seq(

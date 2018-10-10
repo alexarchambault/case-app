@@ -23,6 +23,7 @@ lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     caseAppPrefix
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
@@ -51,6 +52,7 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
         Nil
     }
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
@@ -62,6 +64,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     name := "case-app"
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
@@ -77,6 +80,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .nativeSettings(
+    scalaVersion := Settings.scala211,
     // See https://github.com/lihaoyi/utest/issues/144
     nativeLinkStubs := true
   )
