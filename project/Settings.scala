@@ -17,14 +17,6 @@ object Settings {
       "-feature",
       "-deprecation"
     ),
-    scalacOptions ++= {
-      scalaBinaryVersion.value match {
-        case "2.11" =>
-          Seq("-target:jvm-1.6")
-        case _ =>
-          Nil
-      }
-    },
     libs ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v >= 13 =>
