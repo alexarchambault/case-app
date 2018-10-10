@@ -8,7 +8,6 @@ object Deps {
 
   import Def.setting
 
-  def macroCompat = "org.typelevel" %% "macro-compat" % "1.1.1"
   def macroParadise = "org.scalamacros" % "paradise" % "2.1.0" cross CrossVersion.patch
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)

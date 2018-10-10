@@ -37,12 +37,6 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       Deps.scalaCompiler.value % "provided",
       Deps.scalaReflect.value % "provided"
     ),
-    libs ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 10)) => Seq(Deps.macroCompat)
-	case _ => Nil
-      }
-    },
     unmanagedSourceDirectories.in(Compile) ++= {
       val current = unmanagedSourceDirectories.in(Compile).value
       val is211Plus = CrossVersion.partialVersion(scalaVersion.value).exists {

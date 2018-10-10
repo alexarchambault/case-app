@@ -8,13 +8,12 @@ import sbtcrossproject.CrossPlugin.autoImport._
 
 object Settings {
 
-  private def scala210 = "2.10.7"
   private def scala211 = "2.11.12"
   private def scala212 = "2.12.7"
 
   lazy val shared = Seq(
     scalaVersion := scala212,
-    crossScalaVersions := Seq(scala212, scala211, scala210),
+    crossScalaVersions := Seq(scala212, scala211),
     resolvers += Resolver.sonatypeRepo("releases"),
     scalacOptions ++= Seq(
       "-feature",
@@ -22,7 +21,7 @@ object Settings {
     ),
     scalacOptions ++= {
       scalaBinaryVersion.value match {
-        case "2.10" | "2.11" =>
+        case "2.11" =>
           Seq("-target:jvm-1.6")
         case _ =>
           Nil
