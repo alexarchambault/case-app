@@ -9,7 +9,7 @@ final case class MappedParser[T, D0, U](underlying: Parser.Aux[T, D0], f: T => U
   def init: D =
     underlying.init
 
-  def step(args: List[String], d: D): Either[Error, Option[(D, List[String])]] =
+  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]] =
     underlying.step(args, d)
 
   def get(d: D): Either[Error, U] =

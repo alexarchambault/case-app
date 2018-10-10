@@ -23,6 +23,7 @@ lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     caseAppPrefix
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
@@ -37,12 +38,6 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
       Deps.scalaCompiler.value % "provided",
       Deps.scalaReflect.value % "provided"
     ),
-    libs ++= {
-      CrossVersion.partialVersion(scalaVersion.value) match {
-        case Some((2, 10)) => Seq(Deps.macroCompat)
-	case _ => Nil
-      }
-    },
     unmanagedSourceDirectories.in(Compile) ++= {
       val current = unmanagedSourceDirectories.in(Compile).value
       val is211Plus = CrossVersion.partialVersion(scalaVersion.value).exists {
@@ -57,6 +52,7 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
         Nil
     }
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
@@ -68,6 +64,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     name := "case-app"
   )
+  .nativeSettings(scalaVersion := Settings.scala211)
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
@@ -83,6 +80,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .nativeSettings(
+    scalaVersion := Settings.scala211,
     // See https://github.com/lihaoyi/utest/issues/144
     nativeLinkStubs := true
   )
@@ -90,6 +88,27 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
 lazy val testsJVM = tests.jvm
 lazy val testsJS = tests.js
 lazy val testsNative = tests.native
+
+lazy val refined = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .dependsOn(core)
+  .settings(
+    shared,
+    caseAppPrefix,
+    libs ++= Seq(
+      Deps.refined.value,
+      Deps.utest.value % "test"
+    ),
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+  .nativeSettings(
+    scalaVersion := Settings.scala211,
+    // See https://github.com/lihaoyi/utest/issues/144
+    nativeLinkStubs := true
+  )
+
+lazy val refinedJVM = refined.jvm
+lazy val refinedJS = refined.js
+lazy val refinedNative = refined.native
 
 lazy val readme = project
   .underDoc
@@ -130,6 +149,8 @@ lazy val `case-app` = project
     coreJS,
     testsJVM,
     testsJS,
+    refinedJVM,
+    refinedJS,
     readme,
     site
   )
@@ -143,12 +164,14 @@ lazy val `case-app` = project
       annotationsJS,
       coreJS,
       testsJS,
+      refinedJS,
       readme,
       // for w/e reasons, these have to be excluded here, even though these are not included in the aggregation below
       utilNative,
       annotationsNative,
       coreNative,
-      testsNative
+      testsNative,
+      refinedNative
     )
   )
 
@@ -158,7 +181,8 @@ lazy val native = project
     utilNative,
     annotationsNative,
     coreNative,
-    testsNative
+    testsNative,
+    refinedNative
   )
   .settings(
     shared,

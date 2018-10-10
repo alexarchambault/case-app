@@ -17,9 +17,8 @@ stages:
     if: (branch = master AND type = push) OR (tag IS present)
 jobs:
   include:
-  - scala: 2.10.7
   - scala: 2.11.12
-  - scala: 2.12.4
+  - scala: 2.12.7
   - scala: 2.11.12
     dist: trusty
     sudo: required

@@ -45,7 +45,7 @@ object Tests extends TestSuite {
       }
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-        val expectedRes = Left(Error.ArgumentAlreadySpecified("???", Nil))
+        val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.ArgumentAlreadySpecified("???", Nil)))
         assert(res == expectedRes)
       }
 
@@ -54,6 +54,12 @@ object Tests extends TestSuite {
         val expectedRes = Right((FewArgs1(numFoo = Last(3)), Nil))
         assert(res == expectedRes)
       }
+    }
+
+    "fail if arg fails to parse" - {
+      val res = Parser[FewArgs].parse(Seq("--num-foo", "true"))
+      val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.MalformedValue("integer", "true")))
+      assert(res == expectedRes)
     }
 
     "parse no args and return default values and remaining args" - {

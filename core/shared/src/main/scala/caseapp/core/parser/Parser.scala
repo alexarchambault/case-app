@@ -41,7 +41,7 @@ abstract class Parser[T] {
     * @param d: current intermediate result
     * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
     */
-  def step(args: List[String], d: D): Either[Error, Option[(D, List[String])]]
+  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]]
 
   /**
     * Get the final result from the final intermediate value.
@@ -108,10 +108,9 @@ abstract class Parser[T] {
 
             helper(newC, newArgs.toList, extraArgsReverse)
 
-          case Left(msg) => {
-            val remaining: Either[Error, (T, RemainingArgs)] = helper(current, args.tail, extraArgsReverse)
+          case Left((msg, rem)) =>
+            val remaining = helper(current, rem, extraArgsReverse)
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
-          }
         }
 
     helper(init, args.toList, Nil)

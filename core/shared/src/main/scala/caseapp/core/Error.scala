@@ -1,7 +1,10 @@
 package caseapp.core
 
+import caseapp.Name
+import caseapp.core.util.NameOps.toNameOps
+
 /** Base type for errors during arguments parsing */
-sealed trait Error extends Product with Serializable {
+sealed abstract class Error extends Product with Serializable {
   def message: String
   def append(that: Error): Error
 }
@@ -48,5 +51,9 @@ object Error {
   final case class MalformedValue(`type`: String, error: String) extends SimpleError(s"Malformed ${`type`}: $error")
 
   final case class Other(override val message: String) extends SimpleError(message)
+
+
+  final case class ParsingArgument(name: Name, error: Error)
+    extends SimpleError(s"Argument ${name.option}: ${error.message}")
 
 }
