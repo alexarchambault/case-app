@@ -4,8 +4,6 @@ import sbt.Keys._
 
 import Aliases._
 
-import sbtcrossproject.CrossPlugin.autoImport._
-
 object Settings {
 
   private def scala211 = "2.11.12"
