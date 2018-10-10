@@ -63,6 +63,12 @@ abstract class ArgParser[T] {
     */
   def description: String
 
+
+  final def xmap[U](from: U => T, to: T => U): ArgParser[U] =
+    new MapErrorArgParser[T, U](this, from, t => Right(to(t)))
+  final def xmapError[U](from: U => T, to: T => Either[Error, U]): ArgParser[U] =
+    new MapErrorArgParser(this, from, to)
+
 }
 
 object ArgParser extends PlatformArgParsers {
