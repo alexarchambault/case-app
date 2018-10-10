@@ -23,13 +23,8 @@ object RefinedTests extends TestSuite {
       case class Args(n: Int, pos: Refined[Int, Positive] = refineMV(1))
       val res = Parser[Args].parse(Seq("-n", "-6", "--pos", "-3"))
       val expectedRes = Left(
-        Error.SeveralErrors(
-          // wish refined didn't add parentheses around the error
-          Error.ParsingArgument(Name("pos"), Error.Other("(-3 > 0)")),
-          List(
-            Error.UnrecognizedArgument("-3") // shouldn't be here
-          )
-        )
+        // wish refined didn't add parentheses around the error
+        Error.ParsingArgument(Name("pos"), Error.Other("(-3 > 0)"))
       )
       assert(res == expectedRes)
     }

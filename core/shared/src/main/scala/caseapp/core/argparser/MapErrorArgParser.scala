@@ -9,13 +9,11 @@ final class MapErrorArgParser[T, U](argParser: ArgParser[T], from: U => T, to: T
       .right
       .flatMap(to)
 
-  override def optional(current: Option[U], value: String): Either[Error, (Consumed, U)] =
-    argParser.optional(current.map(from), value)
-      .right.flatMap {
-        case (c, t) =>
-          to(t)
-            .right.map((c, _))
-      }
+  override def optional(current: Option[U], value: String): (Consumed, Either[Error, U]) = {
+    val (consumed, res) = argParser.optional(current.map(from), value)
+    val res0 = res.right.flatMap(to)
+    (consumed, res0)
+  }
 
   override def apply(current: Option[U]): Either[Error, U] =
     argParser(current.map(from))

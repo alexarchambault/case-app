@@ -9,14 +9,11 @@ final case class LastArgParser[T](parser: ArgParser[T]) extends ArgParser[Last[T
       .right
       .map(Last(_))
 
-  override def optional(current: Option[Last[T]], value: String): Either[Error, (Consumed, Last[T])] =
-    parser
-      .optional(None, value)
-      .right
-      .map {
-        case (consumed, t) =>
-          (consumed, Last(t))
-      }
+  override def optional(current: Option[Last[T]], value: String): (Consumed, Either[Error, Last[T]]) = {
+    val (consumed, res) = parser.optional(None, value)
+    val res0 = res.right.map(t => Last(t))
+    (consumed, res0)
+  }
 
   override def apply(current: Option[Last[T]]): Either[Error, Last[T]] =
     parser(None)

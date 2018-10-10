@@ -13,7 +13,7 @@ final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   def init: D =
     headParser.init :: tailParser.init
 
-  def step(args: List[String], d: D): Either[Error, Option[(D, List[String])]] =
+  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]] =
     headParser
       .step(args, d.head)
       .right

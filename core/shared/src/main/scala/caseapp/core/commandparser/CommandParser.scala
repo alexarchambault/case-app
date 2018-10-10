@@ -102,10 +102,9 @@ abstract class CommandParser[T] {
             assert(newArgs != args)
             helper(newD, newArgs)
 
-          case Left(msg) => {
-            val remaining: Either[Error, (D, RemainingArgs)] = helper(current, args.tail)
+          case Left((msg, rem)) =>
+            val remaining = helper(current, rem)
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
-          }
         }
 
     helper(beforeCommandParser.init, args.toList)

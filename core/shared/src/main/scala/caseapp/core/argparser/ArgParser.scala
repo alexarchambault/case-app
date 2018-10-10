@@ -32,10 +32,8 @@ abstract class ArgParser[T] {
     * @param value: [[scala.Predef.String]] to parse
     * @return in case of success, whether `value` was consumed and a `T`, wrapped in [[scala.Right]]; else, and error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def optional(current: Option[T], value: String): Either[Error, (Consumed, T)] =
-    apply(current, value)
-      .right
-      .map((Consumed(true), _))
+  def optional(current: Option[T], value: String): (Consumed, Either[Error, T]) =
+    (Consumed(true), apply(current, value))
 
   /**
     * Called when the corresponding argument was specific with no value.

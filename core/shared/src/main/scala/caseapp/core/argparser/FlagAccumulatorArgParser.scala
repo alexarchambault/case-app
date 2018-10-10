@@ -11,10 +11,8 @@ final case class FlagAccumulatorArgParser[T](
   def apply(current: Option[T], value: String): Either[Error, T] =
     parse(current, Some(value))
 
-  override def optional(current: Option[T], value: String): Either[Error, (Consumed, T)] =
-    parse(current, None)
-      .right
-      .map((Consumed(false), _))
+  override def optional(current: Option[T], value: String): (Consumed, Either[Error, T]) =
+    (Consumed(false), parse(current, None))
 
   override def apply(current: Option[T]): Either[Error, T] =
     parse(current, None)
