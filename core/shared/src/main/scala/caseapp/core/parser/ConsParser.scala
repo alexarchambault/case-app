@@ -24,32 +24,40 @@ final case class ConsParser[H, T <: HList, DT <: HList](
 
       case firstArg :: rem =>
         val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
-          .map(_.apply(firstArg))
+          .map(n => n -> n(firstArg))
           .collectFirst {
-            case Right(valueOpt) => valueOpt
+            case (n, Right(valueOpt)) => n -> valueOpt
           }
 
         matchedOpt match {
-          case Some(Some(value)) =>
-            argParser(d.head, value)
-              .right
-              .map { h =>
-                Some((Some(h) :: d.tail, rem))
-              }
+          case Some((name, valueOpt)) =>
 
-          case Some(None) =>
-            rem match {
-              case Nil =>
-                argParser(d.head)
+            val res = valueOpt match {
+              case Some(value) =>
+                argParser(d.head, value)
                   .right
-                  .map(h => Some((Some(h) :: d.tail, Nil)))
-              case th :: tRem =>
-                argParser.optional(d.head, th)
-                  .right
-                  .map {
-                    case (Consumed(usedArg), h) =>
-                      Some((Some(h) :: d.tail, if (usedArg) tRem else rem))
+                  .map { h =>
+                    Some((Some(h) :: d.tail, rem))
                   }
+              case None =>
+                rem match {
+                  case Nil =>
+                    argParser(d.head)
+                      .right
+                      .map(h => Some((Some(h) :: d.tail, Nil)))
+                  case th :: tRem =>
+                    argParser
+                      .optional(d.head, th)
+                      .right
+                      .map {
+                        case (Consumed(usedArg), h) =>
+                          Some((Some(h) :: d.tail, if (usedArg) tRem else rem))
+                      }
+                }
+            }
+
+            res.left.map { err =>
+              Error.ParsingArgument(name, err)
             }
 
           case None =>
