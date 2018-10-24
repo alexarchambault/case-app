@@ -103,13 +103,22 @@ object ArgParser extends PlatformArgParsers {
     FlagAccumulatorArgParser.counter
 
   implicit def list[T: ArgParser]: ArgParser[List[T]] =
-    AccumulatorArgParser.list
+    if (ArgParser[T].isFlag)
+      FlagAccumulatorArgParser.list
+    else
+      AccumulatorArgParser.list
 
   implicit def vector[T: ArgParser]: ArgParser[Vector[T]] =
-    AccumulatorArgParser.vector
+    if (ArgParser[T].isFlag)
+      FlagAccumulatorArgParser.vector
+    else
+      AccumulatorArgParser.vector
 
   implicit def option[T: ArgParser]: ArgParser[Option[T]] =
-    AccumulatorArgParser.option
+    if (ArgParser[T].isFlag)
+      FlagAccumulatorArgParser.option
+    else
+      AccumulatorArgParser.option
 
   implicit def last[T: ArgParser]: ArgParser[Last[T]] =
     LastArgParser(implicitly)

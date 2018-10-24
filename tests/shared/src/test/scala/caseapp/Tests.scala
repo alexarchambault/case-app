@@ -323,6 +323,20 @@ object Tests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    "handle option of boolean argument" - {
+      * - {
+        val res = Parser[OptBool].parse(Seq("--opt"))
+        val expectedRes = Right((OptBool(Some(true)), Nil))
+        assert(res == expectedRes)
+      }
+
+      * - {
+        val res = Parser[OptBool].parse(Seq("--opt", "foo"))
+        val expectedRes = Right((OptBool(Some(true)), Seq("foo")))
+        assert(res == expectedRes)
+      }
+    }
+
   }
 
 }
