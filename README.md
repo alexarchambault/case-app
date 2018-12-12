@@ -79,6 +79,20 @@ CaseApp.parse[Options](
 If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
 see below), the final value of its corresponding field is the last provided in the arguments.
 
+### Argument files
+
+If supported by the platform, *case-app* expands each argument of the form: `@<filename>` with
+the contents of `<filename>` where each line constitutes a distinct argument.
+
+For example, `@args` where `args` is a file containing the following:
+```
+--
+-foo
+1
+```
+
+is equivalent to: `-- -foo `.
+
 ### Whole application with argument parsing
 
 *case-app* can take care of the creation of the `main` method parsing

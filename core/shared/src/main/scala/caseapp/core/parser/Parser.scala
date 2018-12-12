@@ -113,7 +113,7 @@ abstract class Parser[T] {
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
         }
 
-    helper(init, args.toList, Nil)
+    helper(init, PlatformArgsExpander.expand(args.toList), Nil)
   }
 
   /**
