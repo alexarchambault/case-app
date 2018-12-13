@@ -79,9 +79,13 @@ CaseApp.parse[Options](
 If an argument is specified several times, but is not typed as a `List` (or an accumulating type,
 see below), the final value of its corresponding field is the last provided in the arguments.
 
-### Argument files
+### Pluggable support for argument expansion before argument parsing
 
-If supported by the platform, *case-app* expands each argument of the form: `@<filename>` with
+By default, all arguments are parsed as-is.
+To enable expanding arguments before argument parsing,
+override
+
+If supported by the platform, *case-app* can expand each argument of the form: `@<filename>` with
 the contents of `<filename>` where each line constitutes a distinct argument.
 
 For example, `@args` where `args` is a file containing the following:
@@ -92,6 +96,18 @@ For example, `@args` where `args` is a file containing the following:
 ```
 
 is equivalent to: `-- -foo `.
+
+This behavior is disabled by default.
+
+To enable argument file expansion, override `CaseApp.expandArgs` as follows:
+
+```
+import caseapp.core.parser.PlatformArgsExpander
+
+override def expandArgs(args: List[String]): List[String] = PlatformArgsExpander.expand(args)
+```
+
+Alternatively, override this function with a custom argument expansion mechanism.
 
 ### Whole application with argument parsing
 

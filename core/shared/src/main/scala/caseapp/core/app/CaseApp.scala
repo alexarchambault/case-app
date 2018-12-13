@@ -27,8 +27,28 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
     exit(0)
   }
 
+  /**
+    * Arguments are expanded then parsed. By default, argument expansion is the identity function.
+    * Overriding this method allows plugging in an arbitrary argument expansion logic.
+    *
+    * One such expansion logic involves replacing each argument of the form '@<file>' with the
+    * contents of that file where each line in the file becomes a distinct argument.
+    * To enable this behavior, override this method as shown below.
+
+    * @example
+    * {{{
+    * import caseapp.core.parser.PlatformArgsExpander
+    * override def expandArgs(args: List[String]): List[String]
+    * = PlatformArgsExpander.expand(args)
+    * }}}
+    *
+    * @param args
+    * @return
+    */
+  def expandArgs(args: List[String]): List[String] = args
+
   def main(args: Array[String]): Unit =
-    parser.withHelp.detailedParse(args) match {
+    parser.withHelp.detailedParse(expandArgs(args.toList)) match {
       case Left(err) =>
         error(err)
 
