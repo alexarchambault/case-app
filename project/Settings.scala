@@ -31,8 +31,8 @@ object Settings {
   )
 
   lazy val dontPublish = Seq(
-    publish := (),
-    publishLocal := (),
+    publish := (()),
+    publishLocal := (()),
     publishArtifact := false
   )
 
