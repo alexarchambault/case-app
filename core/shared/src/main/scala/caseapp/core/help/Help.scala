@@ -61,6 +61,30 @@ final case class Help[T](
 
     copy(args = helpArgs ++ args)
   }
+
+  def duplicates: Map[String, Seq[Arg]] = {
+    val pairs = args.map(a => a.name.option -> a) ++
+      args.flatMap(a => a.extraNames.map(n => n.option -> a))
+    pairs
+      .groupBy(_._1)
+      .mapValues(_.map(_._2))
+      .iterator
+      .filter(_._2.lengthCompare(1) > 0)
+      .toMap
+  }
+
+  def ensureNoDuplicates(): Unit =
+    if (duplicates.nonEmpty) {
+      val message = duplicates
+        .toVector
+        .sortBy(_._1)
+        .map {
+          case (name, count) =>
+            s"$name ($count times)"
+        }
+        .mkString("Found duplicated arguments: ", ", ", ".")
+      throw new Exception(message)
+    }
 }
 
 object Help {

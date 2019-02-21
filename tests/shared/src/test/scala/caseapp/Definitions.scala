@@ -126,4 +126,15 @@ object Definitions {
 
   case class Default0(bah: Double = 0.0)
 
+  object Duplicates {
+
+    case class Foo(fooBar: String, `foo-bar`: Int)
+
+    case class Bar(fooBar: String, @Name("foo-bar") other: Int)
+
+    case class First(fooBar: String)
+    case class Second(@Recurse first: First, `foo-bar`: Int)
+
+  }
+
 }

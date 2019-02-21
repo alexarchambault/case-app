@@ -105,6 +105,39 @@ object HelpTests extends TestSuite {
       }
     }
 
+    "duplicates" - {
+
+      import Definitions.Duplicates._
+
+      * - {
+        val dup = Help[Foo].duplicates
+        assert(dup.nonEmpty)
+
+        val expected = Map("--foo-bar" -> Seq("fooBar", "foo-bar"))
+        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        assert(res == expected)
+      }
+
+      * - {
+        val dup = Help[Bar].duplicates
+        assert(dup.nonEmpty)
+
+        val expected = Map("--foo-bar" -> Seq("fooBar", "other"))
+        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        assert(res == expected)
+      }
+
+      * - {
+        val dup = Help[Second].duplicates
+        assert(dup.nonEmpty)
+
+        val expected = Map("--foo-bar" -> Seq("fooBar", "foo-bar"))
+        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        assert(res == expected)
+      }
+
+    }
+
   }
 
 }

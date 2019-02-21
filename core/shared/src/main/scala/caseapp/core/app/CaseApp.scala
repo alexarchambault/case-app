@@ -27,6 +27,9 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
     exit(0)
   }
 
+  def ensureNoDuplicates(): Unit =
+    messages.ensureNoDuplicates()
+
   /**
     * Arguments are expanded then parsed. By default, argument expansion is the identity function.
     * Overriding this method allows plugging in an arbitrary argument expansion logic.
