@@ -11,6 +11,10 @@ cache:
   - $HOME/.coursier
   - $HOME/.ivy2/cache
   - $HOME/.sbt
+branches:
+  only:
+  - master
+  - /^v\d+\.\d+.*$/ # tagged versions
 stages:
   - name: test
   - name: release
