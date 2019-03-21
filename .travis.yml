@@ -1,14 +1,12 @@
 language: scala
-jdk:
-- oraclejdk8
-before_install:
-- git fetch --tags
+jdk: openjdk8
+git:
+  depth: false
 script: scripts/travis.sh
 sudo: false
 cache:
   directories:
   - $HOME/.cache
-  - $HOME/.coursier
   - $HOME/.ivy2/cache
   - $HOME/.sbt
 branches:
