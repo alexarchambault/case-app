@@ -13,7 +13,6 @@ object Settings {
   lazy val shared = Seq(
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala211, scala213),
-    resolvers += Resolver.sonatypeRepo("releases"),
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation"
