@@ -94,6 +94,7 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
+    onlyIn("2.11", "2.12"), // refined not published for 2.13.0-RC1 for now
     libs ++= Seq(
       Deps.refined.value,
       Deps.utest.value % "test"
