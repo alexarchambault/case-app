@@ -9,7 +9,7 @@ plugins_(
   "org.portable-scala"                % "sbt-scala-native-crossproject" % "0.6.0",
   "org.scala-native"                  % "sbt-scala-native"              % "0.3.8",
   "com.eed3si9n"                      % "sbt-unidoc"                    % "0.4.2",
-  "org.tpolecat"                      % "tut-plugin"                    % "0.6.10"
+  "org.tpolecat"                      % "tut-plugin"                    % "0.6.11"
 )
 
 addSbtCoursier
