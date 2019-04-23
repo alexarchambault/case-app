@@ -7,7 +7,7 @@ plugins_(
   "org.scala-js"                      % "sbt-scalajs"                   % "0.6.27",
   "org.portable-scala"                % "sbt-scalajs-crossproject"      % "0.6.0",
   "org.portable-scala"                % "sbt-scala-native-crossproject" % "0.6.0",
-  "org.scala-native"                  % "sbt-scala-native"              % "0.3.8",
+  "org.scala-native"                  % "sbt-scala-native"              % "0.3.9",
   "com.eed3si9n"                      % "sbt-unidoc"                    % "0.4.2",
   "org.tpolecat"                      % "tut-plugin"                    % "0.6.11"
 )
