@@ -8,7 +8,7 @@ import shapeless.{:: => :*:, HList}
 final case class ConsParser[H, T <: HList, DT <: HList](
   arg: Arg,
   argParser: ArgParser[H],
-  default: Option[H],
+  default: () => Option[H], // FIXME Couldn't this be Option[() => H]?
   tail: Parser.Aux[T, DT]
 ) extends Parser[H :*: T] {
 
@@ -73,7 +73,7 @@ final case class ConsParser[H, T <: HList, DT <: HList](
   def get(d: D): Either[Error, H :*: T] = {
 
     val maybeHead = d.head
-      .orElse(default)
+      .orElse(default())
       .toRight {
         Error.RequiredOptionNotSpecified(
           arg.name.option,

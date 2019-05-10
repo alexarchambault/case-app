@@ -9,7 +9,7 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
 
   def add[H: ArgParser](
     name: String,
-    default: Option[H] = None,
+    default: => Option[H] = None,
     extraNames: Seq[Name] = Nil,
     valueDescription: Option[ValueDescription] = None,
     helpMessage: Option[HelpMessage] = None,
@@ -26,7 +26,7 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
         isFlag
       ),
       ArgParser[H],
-      default,
+      () => default,
       parser
     )
 

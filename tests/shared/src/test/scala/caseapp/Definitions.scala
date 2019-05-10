@@ -137,4 +137,13 @@ object Definitions {
 
   }
 
+  case class DefaultsThrow(
+    n: Int = throw new DefaultsThrow.DefaultCalled("n"),
+    s: String = throw new DefaultsThrow.DefaultCalled("s")
+  )
+
+  object DefaultsThrow {
+    final class DefaultCalled(varName: String) extends Exception(s"$varName default called")
+  }
+
 }
