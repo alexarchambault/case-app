@@ -19,7 +19,7 @@ abstract class LowPriorityParserImplicits {
   ](implicit
     lowPriority: caseapp.util.LowPriority,
     gen: LabelledGeneric.Aux[CC, L],
-    defaults: shapeless.Default.AsOptions.Aux[CC, D],
+    defaults: caseapp.util.Default.AsOptions.Aux[CC, D],
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
     helpMessages: Annotations.Aux[HelpMessage, CC, M],

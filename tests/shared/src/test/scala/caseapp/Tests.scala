@@ -337,6 +337,12 @@ object Tests extends TestSuite {
       }
     }
 
+    "don't compute default values when creating parser" - {
+      caseapp.util.Default[DefaultsThrow]
+      shapeless.lazily[caseapp.util.Default.AsOptions[DefaultsThrow]]
+      val parser = Parser[DefaultsThrow]
+    }
+
   }
 
 }

@@ -64,7 +64,7 @@ abstract class LowPriorityHListParserBuilder {
   ] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
 
-      val tailParser = tail.value(default0.tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
+      val tailParser = tail.value(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
 
       val arg = Arg(
         Name(name.value.name),
@@ -75,7 +75,7 @@ abstract class LowPriorityHListParserBuilder {
         argParser.value.isFlag
       )
 
-      ConsParser(arg, argParser.value, default0.head, tailParser)
+      ConsParser(arg, argParser.value, () => default0().head, tailParser)
         .mapHead(field[K](_))
     }
 
