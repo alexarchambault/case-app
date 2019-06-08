@@ -21,7 +21,7 @@ jobs:
   include:
   - scala: 2.11.12
   - scala: 2.12.8
-  - scala: 2.13.0-RC1
+  - scala: 2.13.0
   - scala: 2.11.12
     dist: trusty
     sudo: required
