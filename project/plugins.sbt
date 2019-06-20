@@ -1,6 +1,6 @@
 
 plugins_(
-  "com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings"              % "2.0.2",
+  "com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings"              % "2.1.0",
   "com.geirsson"                      % "sbt-ci-release"                % "1.2.6",
   "com.47deg"                         % "sbt-microsites"                % "0.7.27",
   "com.jsuereth"                      % "sbt-pgp"                       % "1.1.2",
