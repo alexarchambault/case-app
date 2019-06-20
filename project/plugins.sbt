@@ -2,7 +2,7 @@
 plugins_(
   "com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings"              % "2.1.0",
   "com.geirsson"                      % "sbt-ci-release"                % "1.2.6",
-  "com.47deg"                         % "sbt-microsites"                % "0.7.27",
+  "com.47deg"                         % "sbt-microsites"                % "0.9.1",
   "com.jsuereth"                      % "sbt-pgp"                       % "1.1.2",
   "org.scala-js"                      % "sbt-scalajs"                   % "0.6.28",
   "org.portable-scala"                % "sbt-scalajs-crossproject"      % "0.6.0",
