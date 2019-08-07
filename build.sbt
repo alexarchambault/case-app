@@ -122,22 +122,6 @@ lazy val readme = project
     tutTargetDirectory := baseDirectory.in(LocalRootProject).value
   )
 
-lazy val site = project
-  .underDoc
-  .enablePlugins(MicrositesPlugin)
-  .settings(
-    shared,
-    dontPublish,
-    micrositeName := "case-app",
-    micrositeDescription := "Type-level argument parsing",
-    micrositeBaseUrl := "/case-app",
-    micrositeDocumentationUrl := "docs",
-    micrositeAuthor := "Alexandre Archambault",
-    micrositeHomepage := "https://alexarchambault.github.io/case-app",
-    micrositeGithubOwner := "alexarchambault",
-    micrositeGithubRepo := "case-app"
-  )
-
 lazy val `case-app` = project
   .in(root)
   .enablePlugins(ScalaUnidocPlugin)
@@ -152,14 +136,12 @@ lazy val `case-app` = project
     testsJS,
     refinedJVM,
     refinedJS,
-    readme,
-    site
+    readme
   )
   .settings(
     shared,
     dontPublish,
     name := "case-app-root",
-    addMappingsToSiteDir(mappings.in(ScalaUnidoc, packageDoc), micrositeDocumentationUrl.in(site)),
     unidocProjectFilter.in(ScalaUnidoc, unidoc) := inAnyProject -- inProjects(
       utilJS,
       annotationsJS,
