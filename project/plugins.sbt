@@ -10,8 +10,6 @@ plugins_(
   "org.tpolecat"                      % "tut-plugin"                    % "0.6.12"
 )
 
-addSbtCoursier
-
 
 def plugins_(deps: ModuleID*) =
   deps.flatMap(addSbtPlugin(_))
