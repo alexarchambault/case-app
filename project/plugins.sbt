@@ -7,7 +7,7 @@ plugins_(
   "org.portable-scala"                % "sbt-scala-native-crossproject" % "0.6.1",
   "org.scala-native"                  % "sbt-scala-native"              % "0.3.9",
   "com.eed3si9n"                      % "sbt-unidoc"                    % "0.4.2",
-  "org.tpolecat"                      % "tut-plugin"                    % "0.6.12"
+  "org.tpolecat"                      % "tut-plugin"                    % "0.6.13"
 )
 
 
