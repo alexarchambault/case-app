@@ -34,9 +34,9 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     caseAppPrefix,
     libs ++= Seq(
-      Deps.shapeless.value,
-      Deps.scalaCompiler.value % "provided",
-      Deps.scalaReflect.value % "provided"
+      Deps.shapeless,
+      scalaCompiler.value % "provided",
+      scalaReflect.value % "provided"
     ),
     unmanagedSourceDirectories.in(Compile) ++= {
       val current = unmanagedSourceDirectories.in(Compile).value
@@ -76,7 +76,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     shared,
     caseAppPrefix,
     dontPublish,
-    libs += Deps.utest.value % "test",
+    libs += utest.value % "test",
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
   .nativeSettings(
@@ -96,8 +96,8 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     caseAppPrefix,
     onlyIn("2.11", "2.12"), // refined not published for 2.13.0-RC1 for now
     libs ++= Seq(
-      Deps.refined.value,
-      Deps.utest.value % "test"
+      Deps.refined,
+      utest.value % "test"
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )

@@ -1,18 +1,17 @@
 
 import sbt._
+import sbt.Def.setting
 import sbt.Keys._
+
+import org.portablescala.sbtplatformdeps.PlatformDepsPlugin.autoImport._
 
 import Aliases._
 
 object Settings {
 
-  def scala211 = "2.11.12"
-  private def scala212 = "2.12.10"
-  private def scala213 = "2.13.1"
+  def scala211 = Deps.scalaVersions.find(_.startsWith("2.11.1")).get
 
   lazy val shared = Seq(
-    scalaVersion := scala212,
-    crossScalaVersions := Seq(scala212, scala211, scala213),
     scalacOptions ++= Seq(
       "-feature",
       "-deprecation"
@@ -24,7 +23,7 @@ object Settings {
           // https://github.com/scala/scala/pull/6606
           Nil
         case _ =>
-          compilerPlugin(Deps.macroParadise) :: Nil
+          compilerPlugin(Deps.paradise) :: Nil
       }
     },
     autoAPIMappings := true
@@ -74,5 +73,17 @@ object Settings {
       publishArtifact := ok.value
     )
   }
+
+  def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
+  def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
+  def utest = setting {
+    val sv = scalaVersion.value
+    val ver =
+      if (sv.startsWith("2.11.")) "0.6.7"
+      else Deps.V.utest
+
+    "com.lihaoyi" %%% "utest" % ver
+  }
+
 
 }

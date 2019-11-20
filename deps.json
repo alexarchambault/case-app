@@ -1,0 +1,11 @@
+{
+  "crossDependencies": {
+    "eu.timepit::  refined": "0.9.10",
+    "com.chuusai:: shapeless": "2.3.3",
+    "com.lihaoyi:: utest": "0.6.9"
+  },
+  "dependencies": {
+    "org.scalamacros:::paradise": "2.1.1"
+  },
+  "scala": ["2.11.12", "2.12.10", "2.13.1"]
+}
