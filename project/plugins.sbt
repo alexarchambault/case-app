@@ -1,7 +1,7 @@
 
 plugins_(
   "com.thoughtworks.sbt-api-mappings" % "sbt-api-mappings"              % "3.0.0",
-  "com.geirsson"                      % "sbt-ci-release"                % "1.4.31",
+  "com.geirsson"                      % "sbt-ci-release"                % "1.5.0",
   "org.scala-js"                      % "sbt-scalajs"                   % "0.6.31",
   "org.portable-scala"                % "sbt-scalajs-crossproject"      % "0.6.1",
   "org.portable-scala"                % "sbt-scala-native-crossproject" % "0.6.1",
