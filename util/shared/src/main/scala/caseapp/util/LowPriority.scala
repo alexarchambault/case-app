@@ -12,7 +12,6 @@ object LowPriority {
 
 }
 
-@macrocompat.bundle
 class LowPriorityMacros(val c: whitebox.Context) extends shapeless.OpenImplicitMacros with shapeless.LowPriorityTypes {
   import c.universe._
 
