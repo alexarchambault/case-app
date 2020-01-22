@@ -3,7 +3,6 @@ package caseapp.core.help
 import caseapp.core.Arg
 import caseapp.{AppName, AppVersion, ArgsName, Name, ProgName, ValueDescription}
 import caseapp.core.parser.Parser
-import caseapp.core.help.PlatformUtil
 import caseapp.core.util.CaseUtil
 import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
