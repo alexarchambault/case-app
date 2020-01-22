@@ -19,8 +19,7 @@ object HelpTests extends TestSuite {
 
   val tests = TestSuite {
 
-    // https://github.com/scala/bug/issues/11125#issuecomment-423375868
-    def lines(s: String) = augmentString(s).lines.toVector
+    def lines(s: String) = s.linesIterator.toVector
     def checkLines(message: String, expectedMessage: String) = {
       val messageLines = lines(message)
       val expectedLines = lines(expectedMessage)
@@ -90,8 +89,7 @@ object HelpTests extends TestSuite {
 
     "don't add a help message for fields annotated with @Hidden" - {
 
-      // https://github.com/scala/bug/issues/11125#issuecomment-423375868
-      val helpLines = augmentString(Help[Options].help).lines.toVector
+      val helpLines = Help[Options].help.linesIterator.toVector
 
       * - {
         val res = helpLines.count(_.contains("--first"))

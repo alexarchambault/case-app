@@ -64,7 +64,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   def progName: String = Help[D].progName
 
   def main(args: Array[String]): Unit =
-    commandParser.withHelp.detailedParse(args)(beforeCommandParser.withHelp) match {
+    commandParser.withHelp.detailedParse(args.toVector)(beforeCommandParser.withHelp) match {
       case Left(err) =>
         error(err)
 

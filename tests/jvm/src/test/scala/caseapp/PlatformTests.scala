@@ -10,7 +10,7 @@ object PlatformTests extends TestSuite {
     date: Calendar
   )
 
-  CaseApp.parseWithHelp[WithCalendar] _
+  val withCalendarParser = CaseApp.parseWithHelp[WithCalendar] _
 
   final case class WithPath(
     path: Path
