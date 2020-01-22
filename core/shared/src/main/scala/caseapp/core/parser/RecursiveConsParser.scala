@@ -16,12 +16,10 @@ final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]] =
     headParser
       .step(args, d.head)
-      .right
       .flatMap {
         case None =>
           tailParser
             .step(args, d.tail)
-            .right
             .map(_.map {
               case (t, args) => (d.head :: t, args)
             })

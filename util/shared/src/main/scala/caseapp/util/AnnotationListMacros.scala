@@ -4,7 +4,6 @@ import shapeless._
 
 import scala.reflect.macros.whitebox
 
-@macrocompat.bundle
 class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
   import c.universe._
 

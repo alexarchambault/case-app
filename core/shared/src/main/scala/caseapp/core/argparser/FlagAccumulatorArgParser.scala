@@ -35,27 +35,22 @@ object FlagAccumulatorArgParser {
 
   def list[T](implicit parser: ArgParser[T]): FlagAccumulatorArgParser[List[T]] =
     from(parser.description + "*") { (prevOpt, s) =>
-      s.fold(parser(None))(parser(None, _))
-        .right
-        .map { t =>
-          // inefficient for big lists
-          prevOpt.getOrElse(Nil) :+ t
-        }
+      s.fold(parser(None))(parser(None, _)).map { t =>
+        // inefficient for big lists
+        prevOpt.getOrElse(Nil) :+ t
+      }
     }
 
   def vector[T](implicit parser: ArgParser[T]): FlagAccumulatorArgParser[Vector[T]] =
     from(parser.description + "*") { (prevOpt, s) =>
-      s.fold(parser(None))(parser(None, _))
-        .right
-        .map { t =>
-          prevOpt.getOrElse(Vector.empty) :+ t
-        }
+      s.fold(parser(None))(parser(None, _)).map { t =>
+        prevOpt.getOrElse(Vector.empty) :+ t
+      }
     }
 
   def option[T](implicit parser: ArgParser[T]): FlagAccumulatorArgParser[Option[T]] =
     from(parser.description + "?") { (prevOpt, s) =>
       s.fold(parser(prevOpt.flatten))(parser(prevOpt.flatten, _))
-        .right
         .map(Some(_))
     }
 

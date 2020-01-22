@@ -15,7 +15,6 @@ final case class MappedParser[T, D0, U](underlying: Parser.Aux[T, D0], f: T => U
   def get(d: D): Either[Error, U] =
     underlying
       .get(d)
-      .right
       .map(f)
 
   def args: Seq[Arg] =

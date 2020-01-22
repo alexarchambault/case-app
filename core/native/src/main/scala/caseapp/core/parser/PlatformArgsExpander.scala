@@ -2,7 +2,6 @@ package caseapp.core.parser
 
 import java.nio.charset.StandardCharsets.UTF_8
 import java.nio.file._
-import scala.compat.Platform.EOL
 
 object PlatformArgsExpander {
 
@@ -11,7 +10,7 @@ object PlatformArgsExpander {
       if (arg.startsWith("@")) {
         val argPath = Paths.get(arg.substring(1))
         val argText = new String(Files.readAllBytes(argPath), UTF_8)
-        argText.split(EOL).map(_.trim).filter(_.nonEmpty).toList
+        argText.split(System.lineSeparator).map(_.trim).filter(_.nonEmpty).toList
       } else {
         List(arg)
       }

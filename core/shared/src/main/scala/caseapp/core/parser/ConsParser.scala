@@ -35,19 +35,17 @@ final case class ConsParser[H, T <: HList, DT <: HList](
             val (res, rem0) = valueOpt match {
               case Some(value) =>
                 val res0 = argParser(d.head, value)
-                  .right
                   .map(h => Some(Some(h) :: d.tail))
                 (res0, rem)
               case None =>
                 rem match {
                   case Nil =>
                     val res0 = argParser(d.head)
-                      .right
                       .map(h => Some(Some(h) :: d.tail))
                     (res0, Nil)
                   case th :: tRem =>
                     val (Consumed(usedArg), res) = argParser.optional(d.head, th)
-                    val res0 = res.right.map(h => Some(Some(h) :: d.tail))
+                    val res0 = res.map(h => Some(Some(h) :: d.tail))
                     (res0, if (usedArg) tRem else rem)
                 }
             }
@@ -57,13 +55,11 @@ final case class ConsParser[H, T <: HList, DT <: HList](
               .map { err =>
                 (Error.ParsingArgument(name, err), rem0)
               }
-              .right
               .map(_.map((_, rem0)))
 
           case None =>
             tail
               .step(args, d.tail)
-              .right
               .map(_.map {
                 case (t, args) => (d.head :: t, args)
               })

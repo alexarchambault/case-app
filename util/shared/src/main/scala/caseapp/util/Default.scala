@@ -84,7 +84,6 @@ object Default {
   }
 }
 
-@macrocompat.bundle
 class DefaultMacros(val c: whitebox.Context) extends CaseClassMacros {
   import c.universe._
 

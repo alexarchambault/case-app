@@ -46,15 +46,13 @@ abstract class CommandParser[T] {
   )(implicit
     beforeCommandParser: Parser[D]
   ): Either[Error, (D, Seq[String], Option[Either[Error, (String, T, Seq[String])]])] =
-    detailedParse(args)
-      .right
-      .map {
-        case (d, args0, cmdOpt) =>
-          (d, args0, cmdOpt.map(_.right.map {
-            case (cmd, t, rem) =>
-              (cmd, t, rem.all)
-          }))
-      }
+    detailedParse(args).map {
+      case (d, args0, cmdOpt) =>
+        (d, args0, cmdOpt.map(_.map {
+          case (cmd, t, rem) =>
+            (cmd, t, rem.all)
+        }))
+    }
 
   /**
     * Parse arguments.
@@ -81,21 +79,20 @@ abstract class CommandParser[T] {
       if (args.isEmpty)
         beforeCommandParser
           .get(current)
-          .right
           .map((_, RemainingArgs(Nil, args)))
       else
         beforeCommandParser.step(args, current) match {
           case Right(None) =>
             args match {
               case "--" :: t =>
-                beforeCommandParser.get(current).right.map((_, RemainingArgs(t, Nil)))
+                beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
               case opt :: rem if opt startsWith "-" => {
                 val err = Error.UnrecognizedArgument(opt)
                 val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
               }
               case rem =>
-                beforeCommandParser.get(current).right.map((_, RemainingArgs(Nil, rem)))
+                beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
             }
 
           case Right(Some((newD, newArgs))) =>
@@ -107,32 +104,29 @@ abstract class CommandParser[T] {
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
         }
 
-    helper(beforeCommandParser.init, args.toList)
-      .right
-      .map {
-        case (d, dArgs) =>
-          val cmdOpt = dArgs.unparsed.toList match {
-            case c :: rem0 =>
-              get(c) match {
-                case None =>
-                  Some(Left(Error.CommandNotFound(c)))
-                case Some(p) =>
-                  Some(
-                    p
-                      .detailedParse(rem0)
-                      .right
-                      .map {
-                        case (t, trem) =>
-                          (c, t, trem)
-                      }
-                  )
-              }
-            case Nil =>
-              None
-          }
+    helper(beforeCommandParser.init, args.toList).map {
+      case (d, dArgs) =>
+        val cmdOpt = dArgs.unparsed.toList match {
+          case c :: rem0 =>
+            get(c) match {
+              case None =>
+                Some(Left(Error.CommandNotFound(c)))
+              case Some(p) =>
+                Some(
+                  p
+                    .detailedParse(rem0)
+                    .map {
+                      case (t, trem) =>
+                        (c, t, trem)
+                    }
+                )
+            }
+          case Nil =>
+            None
+        }
 
-          (d, dArgs.remaining, cmdOpt)
-      }
+        (d, dArgs.remaining, cmdOpt)
+    }
   }
 
   final def map[U](f: T => U): CommandParser[U] =
