@@ -13,7 +13,7 @@ final case class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Pars
     underlying.step(args, d)
 
   def get(d: D): Right[Error, Option[T]] =
-    Right(underlying.get(d).right.toOption)
+    Right(underlying.get(d).toOption)
 
   def args: Seq[Arg] =
     underlying.args

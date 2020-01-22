@@ -64,7 +64,6 @@ abstract class Parser[T] {
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)
-      .right
       .map {
         case (t, rem) =>
           (t, rem.all)
@@ -80,7 +79,6 @@ abstract class Parser[T] {
     ): Either[Error, (T, RemainingArgs)] =
       if (args.isEmpty)
         get(current)
-          .right
           .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
       else
         step(args, current) match {
@@ -88,7 +86,6 @@ abstract class Parser[T] {
             args match {
               case "--" :: t =>
                 get(current)
-                  .right
                   .map((_, RemainingArgs(extraArgsReverse.reverse, t)))
               case opt :: rem if opt.startsWith("-") => {
                 val err = Error.UnrecognizedArgument(opt)

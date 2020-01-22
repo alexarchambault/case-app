@@ -35,20 +35,7 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
       Deps.shapeless.value,
       Deps.scalaCompiler.value % "provided",
       Deps.scalaReflect.value % "provided"
-    ),
-    unmanagedSourceDirectories.in(Compile) ++= {
-      val current = unmanagedSourceDirectories.in(Compile).value
-      val is211Plus = CrossVersion.partialVersion(scalaVersion.value).exists {
-        case (major, minor) => major == 2 && minor >= 11
-      }
-      if (is211Plus)
-        current.collect {
-	  case dir if dir.getName == "scala" =>
-	    dir.getParentFile / "scala-2.11+"
-        }
-      else
-        Nil
-    }
+    )
   )
 
 lazy val utilJVM = util.jvm

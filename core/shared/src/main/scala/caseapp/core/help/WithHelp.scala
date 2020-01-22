@@ -21,5 +21,5 @@ final case class WithHelp[T](
     baseOrError: Either[Error, T]
 ) {
   def map[U](f: T => U): WithHelp[U] =
-    copy(baseOrError = baseOrError.right.map(f))
+    copy(baseOrError = baseOrError.map(f))
 }

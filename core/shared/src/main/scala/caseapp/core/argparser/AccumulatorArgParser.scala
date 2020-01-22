@@ -23,28 +23,22 @@ object AccumulatorArgParser {
 
   def list[T](implicit parser: ArgParser[T]): AccumulatorArgParser[List[T]] =
     from(parser.description + "*") { (prevOpt, s) =>
-      parser(None, s)
-        .right
-        .map { t =>
-          // inefficient for big lists
-          prevOpt.getOrElse(Nil) :+ t
-        }
+      parser(None, s).map { t =>
+        // inefficient for big lists
+        prevOpt.getOrElse(Nil) :+ t
+      }
     }
 
   def vector[T](implicit parser: ArgParser[T]): AccumulatorArgParser[Vector[T]] =
     from(parser.description + "*") { (prevOpt, s) =>
-      parser(None, s)
-        .right
-        .map { t =>
-          prevOpt.getOrElse(Vector.empty) :+ t
-        }
+      parser(None, s).map { t =>
+        prevOpt.getOrElse(Vector.empty) :+ t
+      }
     }
 
   def option[T](implicit parser: ArgParser[T]): AccumulatorArgParser[Option[T]] =
     from(parser.description + "?") { (prevOpt, s) =>
-      parser(prevOpt.flatten, s)
-        .right
-        .map(Some(_))
+      parser(prevOpt.flatten, s).map(Some(_))
     }
 
 

@@ -79,13 +79,13 @@ object CaseApp {
     Parser[T].detailedParse(args)
 
   def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, Seq[String])] =
-    parser.withHelp.parse(args).right.map {
+    parser.withHelp.parse(args).map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
 
   def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, RemainingArgs)] =
-    parser.withHelp.detailedParse(args).right map {
+    parser.withHelp.detailedParse(args).map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
