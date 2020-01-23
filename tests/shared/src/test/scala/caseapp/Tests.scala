@@ -235,37 +235,37 @@ object Tests extends TestSuite {
       }
       * - {
         val res = parser.parse[Default0](Seq("first"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("", 0), Nil))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("first"), First("", 0), Nil))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("first", "arg", "other"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("first", First(), Seq("arg", "other")))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("first"), First(), Seq("arg", "other")))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("first", "--foo", "bah", "--bar", "4"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("first"), First("bah", 4), Nil))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("first", "-f", "bah", "--bar", "4"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("first", First("bah", 4), Nil))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("first"), First("bah", 4), Nil))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("--bah", "3", "first"))
-        val expectedRes = Right((Default0(3.0), Nil, Some(Right("first", First(), Nil))))
+        val expectedRes = Right((Default0(3.0), Nil, Some(Right(Seq("first"), First(), Nil))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("second"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 0), Nil))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("second"), Second("", 0), Nil))))
         assert(res == expectedRes)
       }
       * - {
         val res = parser.parse[Default0](Seq("second", "--baz", "5", "other"))
-        val expectedRes = Right((Default0(), Nil, Some(Right("second", Second("", 5), Seq("other")))))
+        val expectedRes = Right((Default0(), Nil, Some(Right(Seq("second"), Second("", 5), Seq("other")))))
         assert(res == expectedRes)
       }
       * - {
@@ -279,18 +279,18 @@ object Tests extends TestSuite {
       "adt" - {
         * - {
           val res = ManualCommand.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
-          val expectedRes = Right((Default0(), Nil, Some(Right("c1", Command1Opts("aa"), Nil))))
+          val expectedRes = Right((Default0(), Nil, Some(Right(Seq("c1"), Command1Opts("aa"), Nil))))
           assert(res == expectedRes)
         }
 
         * - {
           val res = ManualCommand.commandParser.parse[Default0](Seq("c2", "-b"))
-          val expectedRes = Right((Default0(), Nil, Some(Right("c2", Command2Opts(true), Nil))))
+          val expectedRes = Right((Default0(), Nil, Some(Right(Seq("c2"), Command2Opts(true), Nil))))
           assert(res == expectedRes)
         }
 
         "find the user-specified name of a command arguments" - {
-          ManualCommand.commandsMessages.messagesMap.get("c1").exists { h =>
+          ManualCommand.commandsMessages.messagesMap.get(Seq("c1")).exists { h =>
             h.argsNameOption.exists(_ == "c1-stuff")
           }
         }
@@ -299,18 +299,38 @@ object Tests extends TestSuite {
       "not adt" - {
         * - {
           val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c1", "-s", "aa"))
-          val expectedRes = Right((Default0(), Nil, Some(Right(("c1", Inl(ManualCommandNotAdtOptions.Command1Opts("aa")), Nil)))))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c1"), Inl(ManualCommandNotAdtOptions.Command1Opts("aa")), Nil)))))
           assert(res == expectedRes)
         }
 
         * - {
           val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c2", "-b"))
-          val expectedRes = Right((Default0(), Nil, Some(Right(("c2", Inr(Inl(ManualCommandNotAdtOptions.Command2Opts(true))), Nil)))))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c2"), Inr(Inl(ManualCommandNotAdtOptions.Command2Opts(true))), Nil)))))
           assert(res == expectedRes)
         }
 
         "find the user-specified name of a command arguments" - {
-          ManualCommandNotAdt.commandsMessages.messagesMap.get("c1").exists { h =>
+          ManualCommandNotAdt.commandsMessages.messagesMap.get(Seq("c1")).exists { h =>
+            h.argsNameOption.exists(_ == "c1-stuff")
+          }
+        }
+      }
+
+      "sub commands" - {
+        * - {
+          val res = ManualSubCommand.commandParser.parse[Default0](Seq("foo", "-s", "aa"))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("foo"), Inl(ManualSubCommandOptions.Command1Opts("aa")), Nil)))))
+          assert(res == expectedRes)
+        }
+
+        * - {
+          val res = ManualSubCommand.commandParser.parse[Default0](Seq("foo", "list", "-b"))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("foo", "list"), Inr(Inl(ManualSubCommandOptions.Command2Opts(true))), Nil)))))
+          assert(res == expectedRes)
+        }
+
+        "find the user-specified name of a command arguments" - {
+          ManualSubCommand.commandsMessages.messagesMap.get(Seq("foo")).exists { h =>
             h.argsNameOption.exists(_ == "c1-stuff")
           }
         }

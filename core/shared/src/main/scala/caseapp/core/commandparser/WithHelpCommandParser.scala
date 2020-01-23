@@ -5,9 +5,14 @@ import caseapp.core.help.WithHelp
 
 final case class WithHelpCommandParser[T](parser: CommandParser[T]) extends CommandParser[WithHelp[T]] {
 
-  def get(command: String): Option[Parser[WithHelp[T]]] =
+  def commandMap: Map[Seq[String], Parser[WithHelp[T]]] =
     parser
-      .get(command)
-      .map(_.withHelp)
+      .commandMap
+      .iterator
+      .map {
+        case (c, p) =>
+          c -> p.withHelp
+      }
+      .toMap
 
 }

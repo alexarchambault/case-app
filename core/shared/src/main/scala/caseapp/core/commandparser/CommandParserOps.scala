@@ -8,9 +8,15 @@ final class CommandParserOps[T <: Coproduct](val commandParser: CommandParser[T]
 
   // foo added not to collide with the other add method below
   def add[H](name: String)(implicit parser: Parser[H], foo: Unit = ()): CommandParser[H :+: T] =
+    add(Seq(name))
+
+  def add[H](name: Seq[String])(implicit parser: Parser[H], unused: Parser[H]): CommandParser[H :+: T] =
     ConsCommandParser(name, parser, commandParser)
 
   def add[H](name: String, parser: Parser[H]): CommandParser[H :+: T] =
+    add(Seq(name), parser)
+
+  def add[H](name: Seq[String], parser: Parser[H]): CommandParser[H :+: T] =
     ConsCommandParser(name, parser, commandParser)
 
   def add[H](
@@ -22,8 +28,14 @@ final class CommandParserOps[T <: Coproduct](val commandParser: CommandParser[T]
     app: CaseApp[H],
     name: String
   ): CommandParser[H :+: T] =
+    add(app, Seq(name))
+
+  def add[H](
+    app: CaseApp[H],
+    name: Seq[String]
+  ): CommandParser[H :+: T] =
     ConsCommandParser(
-      if (name.isEmpty) app.messages.progName else name,
+      if (name.isEmpty) Seq(app.messages.progName) else name,
       app.parser,
       commandParser
     )

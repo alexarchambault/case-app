@@ -10,7 +10,7 @@ import scala.language.implicitConversions
 
 
 final case class CommandsHelp[T](
-  messages: Seq[(String, CommandHelp)]
+  messages: Seq[(Seq[String], CommandHelp)]
 ) {
   lazy val messagesMap = messages.toMap
 
@@ -40,7 +40,7 @@ object CommandsHelp {
         .mkString("-")
     }
 
-    CommandsHelp((name -> CommandHelp(
+    CommandsHelp((Seq(name) -> CommandHelp(
       parser.value.args,
       argsName().map(_.argsName)
     )) +: tail.messages)

@@ -26,7 +26,7 @@ abstract class AutoCommandParserImplicits {
         .mkString("-")
     }
 
-    ConsCommandParser(name, parser.value, tail)
+    ConsCommandParser(Seq(name), parser.value, tail)
       .mapHead(field[K](_))
   }
 

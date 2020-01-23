@@ -7,15 +7,15 @@ final case class CommandHelp(
   argsNameOption: Option[String]
 ) {
 
-  def usageMessage(progName: String, commandName: String): String =
-    s"Usage: $progName $commandName ${argsNameOption.map("<" + _ + ">").mkString}"
+  def usageMessage(progName: String, commandName: Seq[String]): String =
+    s"Usage: $progName ${commandName.mkString(" ")} ${argsNameOption.map("<" + _ + ">").mkString}"
 
   def optionsMessage: String =
     Help.optionsMessage(args)
 
-  def helpMessage(progName: String, commandName: String): String = {
+  def helpMessage(progName: String, commandName: Seq[String]): String = {
     val b = new StringBuilder
-    b ++= s"Command: $commandName${Help.NL}"
+    b ++= s"Command: ${commandName.mkString(" ")}${Help.NL}"
     b ++= usageMessage(progName, commandName)
     b ++= Help.NL
     b ++= optionsMessage
