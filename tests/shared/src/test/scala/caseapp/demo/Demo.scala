@@ -124,3 +124,35 @@ object ManualCommandNotAdt extends CommandAppA(ManualCommandNotAdtStuff.parser, 
 
   }
 }
+
+object ManualSubCommandStuff {
+
+  case object Command1 extends CaseApp[ManualSubCommandOptions.Command1Opts] {
+    def run(options: ManualSubCommandOptions.Command1Opts, args: RemainingArgs): Unit = {
+
+    }
+  }
+
+  case object Command2 extends CaseApp[ManualSubCommandOptions.Command2Opts] {
+    def run(options: ManualSubCommandOptions.Command2Opts, args: RemainingArgs): Unit = {
+
+    }
+  }
+
+  val parser = CommandParser.nil
+    .add(Command1, "foo")
+    .add(Command2, Seq("foo", "list"))
+    .reverse
+
+  val help = CommandsHelp.nil
+    .add(Command1, "foo")
+    .add(Command2, Seq("foo", "list").mkString("-"))
+    .reverse
+
+}
+
+object ManualSubCommand extends CommandAppA(ManualSubCommandStuff.parser, ManualSubCommandStuff.help) {
+  def runA = args => options => {
+
+  }
+}

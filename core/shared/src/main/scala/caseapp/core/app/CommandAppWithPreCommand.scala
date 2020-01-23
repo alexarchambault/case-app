@@ -32,7 +32,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
     optionsDesc = s"[options] [command] [command-options]"
   )
 
-  lazy val commands: Seq[String] = CommandsHelp[T].messages.map(_._1)
+  lazy val commands: Seq[Seq[String]] = CommandsHelp[T].messages.map(_._1)
 
   def helpAsked(): Nothing = {
     print(beforeCommandMessages.help)
@@ -41,7 +41,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
     exit(0)
   }
 
-  def commandHelpAsked(command: String): Nothing = {
+  def commandHelpAsked(command: Seq[String]): Nothing = {
     println(commandsMessages.messagesMap(command).helpMessage(beforeCommandMessages.progName, command))
     exit(0)
   }
@@ -53,7 +53,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
     exit(0)
   }
 
-  def commandUsageAsked(command: String): Nothing = {
+  def commandUsageAsked(command: Seq[String]): Nothing = {
     println(commandsMessages.messagesMap(command).usageMessage(beforeCommandMessages.progName, command))
     exit(0)
   }

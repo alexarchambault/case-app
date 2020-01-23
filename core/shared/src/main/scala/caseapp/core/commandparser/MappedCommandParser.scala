@@ -4,9 +4,14 @@ import caseapp.core.parser.Parser
 
 final case class MappedCommandParser[T, U](parser: CommandParser[T], f: T => U) extends CommandParser[U] {
 
-  def get(command: String): Option[Parser[U]] =
+  def commandMap: Map[Seq[String], Parser[U]] =
     parser
-      .get(command)
-      .map(_.map(f))
+      .commandMap
+      .iterator
+      .map {
+        case (c, p) =>
+          c -> p.map(f)
+      }
+      .toMap
 
 }

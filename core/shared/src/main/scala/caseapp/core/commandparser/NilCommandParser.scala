@@ -1,10 +1,11 @@
 package caseapp.core.commandparser
 
+import caseapp.core.parser.Parser
 import shapeless.CNil
 
 case object NilCommandParser extends CommandParser[CNil] {
 
-  def get(command: String): None.type =
-    None
+  def commandMap: Map[Seq[String], Parser[CNil]] =
+    Map.empty
 
 }

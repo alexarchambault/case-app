@@ -7,6 +7,9 @@ import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 import shapeless.{CNil, Coproduct}
 
+import scala.collection.mutable
+import scala.annotation.tailrec
+
 /**
   * Parses arguments, handling sub-commands.
   *
@@ -21,7 +24,12 @@ abstract class CommandParser[T] {
     *
     * @return in case of success, `Parser[T]` of `command`, wrapped in [[scala.Some]]; [[scala.None]] in case of failure
     */
-  def get(command: String): Option[Parser[T]]
+  def get(command: Seq[String]): Option[Parser[T]] =
+    commandMap.get(command)
+
+  private lazy val commandTree = CommandParser.CommandTree.fromCommandMap(commandMap)
+
+  def commandMap: Map[Seq[String], Parser[T]]
 
   /**
     * Creates a [[CommandParser]] accepting help / usage arguments, out of this one.
@@ -45,7 +53,7 @@ abstract class CommandParser[T] {
     args: Seq[String]
   )(implicit
     beforeCommandParser: Parser[D]
-  ): Either[Error, (D, Seq[String], Option[Either[Error, (String, T, Seq[String])]])] =
+  ): Either[Error, (D, Seq[String], Option[Either[Error, (Seq[String], T, Seq[String])]])] =
     detailedParse(args).map {
       case (d, args0, cmdOpt) =>
         (d, args0, cmdOpt.map(_.map {
@@ -70,7 +78,7 @@ abstract class CommandParser[T] {
     args: Seq[String]
   )(implicit
     beforeCommandParser: Parser[D]
-  ): Either[Error, (D, Seq[String], Option[Either[Error, (String, T, RemainingArgs)]])] = {
+  ): Either[Error, (D, Seq[String], Option[Either[Error, (Seq[String], T, RemainingArgs)]])] = {
 
     def helper(
       current: beforeCommandParser.D,
@@ -86,11 +94,10 @@ abstract class CommandParser[T] {
             args match {
               case "--" :: t =>
                 beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
-              case opt :: rem if opt startsWith "-" => {
+              case opt :: rem if opt startsWith "-" =>
                 val err = Error.UnrecognizedArgument(opt)
                 val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
-              }
               case rem =>
                 beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
             }
@@ -106,24 +113,24 @@ abstract class CommandParser[T] {
 
     helper(beforeCommandParser.init, args.toList).map {
       case (d, dArgs) =>
-        val cmdOpt = dArgs.unparsed.toList match {
-          case c :: rem0 =>
-            get(c) match {
-              case None =>
-                Some(Left(Error.CommandNotFound(c)))
-              case Some(p) =>
+        val args0 = dArgs.unparsed.toList
+
+        val cmdOpt =
+          if (args0.isEmpty) None
+          else
+            commandTree.command(args0) match {
+              case Some((cmd, p, rem0)) =>
                 Some(
                   p
                     .detailedParse(rem0)
                     .map {
                       case (t, trem) =>
-                        (c, t, trem)
+                        (cmd, t, trem)
                     }
                 )
+              case None =>
+                Some(Left(Error.CommandNotFound(args0.head)))
             }
-          case Nil =>
-            None
-        }
 
         (d, dArgs.remaining, cmdOpt)
     }
@@ -148,5 +155,64 @@ object CommandParser extends AutoCommandParserImplicits {
 
   implicit def toCommandParserOps[T <: Coproduct](parser: CommandParser[T]): CommandParserOps[T] =
     new CommandParserOps(parser)
+
+  private final case class CommandTree[T](map: Map[String, (CommandTree[T], Option[Parser[T]])]) {
+
+    def command(args: Seq[String]): Option[(Seq[String], Parser[T], Seq[String])] =
+      command(args, Nil)
+
+    def command(args: Seq[String], reverseName: List[String]): Option[(Seq[String], Parser[T], Seq[String])] = {
+      assert(args.nonEmpty)
+      map.get(args.head) match {
+        case None => None
+        case Some((tree0, parserOpt)) =>
+          val reverseName0 = args.head :: reverseName
+          lazy val current = parserOpt.map((reverseName0.reverse, _, args.tail))
+          if (args.lengthCompare(1) == 0)
+            current
+          else
+            tree0.command(args.tail, reverseName0).orElse(current)
+      }
+    }
+  }
+
+  private object CommandTree {
+    private final case class Mutable[T](
+      map: mutable.HashMap[String, (Mutable[T], Option[Parser[T]])] =
+        new mutable.HashMap[String, (Mutable[T], Option[Parser[T]])]
+    ) {
+      @tailrec
+      def add(command: Seq[String], parser: Parser[T]): Unit = {
+        assert(command.nonEmpty)
+        if (command.lengthCompare(1) == 0) {
+          val mutable0 = map.get(command.head).map(_._1).getOrElse(Mutable[T]())
+          map.put(command.head, (mutable0, Some(parser)))
+        } else {
+          val (mutable0, _) = map.getOrElseUpdate(command.head, (Mutable[T](), None))
+          mutable0.add(command.tail, parser)
+        }
+      }
+
+      def add(commandMap: Map[Seq[String], Parser[T]]): this.type = {
+        for ((c, p) <- commandMap)
+          add(c, p)
+        this
+      }
+
+      def result: CommandTree[T] = {
+        val map0 = map
+          .iterator
+          .map {
+            case (name, (mutable0, parserOpt)) =>
+              (name, (mutable0.result, parserOpt))
+          }
+          .toMap
+        CommandTree(map0)
+      }
+    }
+
+    def fromCommandMap[T](commandMap: Map[Seq[String], Parser[T]]): CommandTree[T] =
+      Mutable[T]().add(commandMap).result
+  }
 
 }

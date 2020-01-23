@@ -12,7 +12,7 @@ final class CommandsHelpOps[C <: Coproduct](val commandsHelp: CommandsHelp[C]) e
     argsNameOption: Option[String]
   ): CommandsHelp[H :+: C] =
     CommandsHelp(
-      commandsHelp.messages :+ (name -> CommandHelp(args, argsNameOption))
+      commandsHelp.messages :+ (Seq(name) -> CommandHelp(args, argsNameOption))
     )
 
   def add[H](
