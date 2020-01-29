@@ -36,7 +36,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
 
   def helpAsked(): Nothing = {
     print(beforeCommandMessages.help)
-    println(s"Available commands: ${commands.mkString(", ")}\n")
+    println(s"Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}\n")
     println(s"Type  $progName command --help  for help on an individual command")
     exit(0)
   }
@@ -48,7 +48,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
 
   def usageAsked(): Nothing = {
     println(beforeCommandMessages.usage)
-    println(s"Available commands: ${commands.mkString(", ")}\n")
+    println(s"Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}\n")
     println(s"Type  $progName command --usage  for usage of an individual command")
     exit(0)
   }
