@@ -4,7 +4,7 @@ plugins_(
   "com.geirsson"                      % "sbt-ci-release"                % "1.5.0",
   "org.scala-js"                      % "sbt-scalajs"                   % "0.6.32",
   "org.portable-scala"                % "sbt-scalajs-crossproject"      % "0.6.1",
-  "com.eed3si9n"                      % "sbt-unidoc"                    % "0.4.2",
+  "com.eed3si9n"                      % "sbt-unidoc"                    % "0.4.3",
   "org.tpolecat"                      % "tut-plugin"                    % "0.6.13"
 )
 
