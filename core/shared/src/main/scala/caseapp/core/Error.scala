@@ -39,8 +39,6 @@ object Error {
 
   final case class UnrecognizedFlagValue(value: String) extends SimpleError(s"Unrecognized flag value: $value")
 
-  final case class UnrecognizedValue(value: String) extends SimpleError(s"Unrecognized value: $value")
-
   final case class UnrecognizedArgument(arg: String) extends SimpleError(s"Unrecognized argument: $arg")
 
   final case class CommandNotFound(command: String) extends SimpleError(s"Command not found: $command")
