@@ -1,12 +1,14 @@
 package caseapp.core
 
+import dataclass.data
+
 /**
   * Arguments that don't correspond to options.
   *
   * @param remaining: arguments before any `--`
   * @param unparsed: arguments after a first `--`, if any
   */
-final case class RemainingArgs(
+@data class RemainingArgs(
   remaining: Seq[String],
   unparsed: Seq[String]
 ) {

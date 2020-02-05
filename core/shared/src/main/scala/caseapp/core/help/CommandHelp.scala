@@ -1,8 +1,9 @@
 package caseapp.core.help
 
 import caseapp.core.Arg
+import dataclass.data
 
-final case class CommandHelp(
+@data class CommandHelp(
   args: Seq[Arg],
   argsNameOption: Option[String]
 ) {

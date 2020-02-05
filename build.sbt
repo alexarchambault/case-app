@@ -45,7 +45,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(annotations, util)
   .settings(
     shared,
-    name := "case-app"
+    name := "case-app",
+    libraryDependencies += Deps.dataClass % Provided
   )
 
 lazy val coreJVM = core.jvm

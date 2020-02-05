@@ -1,8 +1,9 @@
 package caseapp.core.argparser
 
 import caseapp.core.Error
+import dataclass.data
 
-final case class AccumulatorArgParser[T](
+@data class AccumulatorArgParser[T](
   description: String,
   parse: (Option[T], String) => Either[Error, T]
 ) extends ArgParser[T] {

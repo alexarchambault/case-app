@@ -1,8 +1,9 @@
 package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
+import dataclass.data
 
-final case class MappedParser[T, D0, U](underlying: Parser.Aux[T, D0], f: T => U) extends Parser[U] {
+@data class MappedParser[T, D0, U](underlying: Parser.Aux[T, D0], f: T => U) extends Parser[U] {
 
   type D = D0
 

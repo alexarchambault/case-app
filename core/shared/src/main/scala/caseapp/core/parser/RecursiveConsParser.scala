@@ -2,8 +2,9 @@ package caseapp.core.parser
 
 import caseapp.core.Error
 import shapeless.{::, HList}
+import dataclass.data
 
-final case class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
+@data class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   headParser: Parser.Aux[H, HD],
   tailParser: Parser.Aux[T, TD]
 ) extends Parser[H :: T] {

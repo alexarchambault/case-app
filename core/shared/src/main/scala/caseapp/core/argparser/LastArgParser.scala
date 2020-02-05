@@ -1,8 +1,9 @@
 package caseapp.core.argparser
 
 import caseapp.core.Error
+import dataclass.data
 
-final case class LastArgParser[T](parser: ArgParser[T]) extends ArgParser[Last[T]] {
+@data class LastArgParser[T](parser: ArgParser[T]) extends ArgParser[Last[T]] {
 
   def apply(current: Option[Last[T]], value: String): Either[Error, Last[T]] =
     parser(None, value).map(Last(_))

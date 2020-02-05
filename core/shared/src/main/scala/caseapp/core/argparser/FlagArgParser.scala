@@ -1,8 +1,9 @@
 package caseapp.core.argparser
 
 import caseapp.core.Error
+import dataclass.data
 
-final case class FlagArgParser[T](
+@data class FlagArgParser[T](
   description: String,
   parse: Option[String] => Either[Error, T]
 ) extends ArgParser[T] {

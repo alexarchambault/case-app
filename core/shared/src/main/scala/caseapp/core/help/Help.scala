@@ -6,12 +6,13 @@ import caseapp.core.parser.Parser
 import caseapp.core.util.CaseUtil
 import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
+import dataclass.data
 import shapeless.Typeable
 
 /**
  * Provides usage and help messages related to `T`
  */
-final case class Help[T](
+@data class Help[T](
   args: Seq[Arg],
   appName: String,
   appVersion: String,
@@ -58,7 +59,9 @@ final case class Help[T](
     final case class Dummy()
     val helpArgs = Parser[WithHelp[Dummy]].args
 
-    copy(args = helpArgs ++ args)
+    withArgs(helpArgs ++ args)
+      // circumventing a possible data-class issue here (getting a Help[Nothing] else)
+      .asInstanceOf[Help[WithHelp[T]]]
   }
 
   def duplicates: Map[String, Seq[Arg]] = {

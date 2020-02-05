@@ -2,8 +2,9 @@ package caseapp.core.commandparser
 
 import caseapp.core.parser.Parser
 import caseapp.core.help.WithHelp
+import dataclass.data
 
-final case class WithHelpCommandParser[T](parser: CommandParser[T]) extends CommandParser[WithHelp[T]] {
+@data class WithHelpCommandParser[T](parser: CommandParser[T]) extends CommandParser[WithHelp[T]] {
 
   def commandMap: Map[Seq[String], Parser[WithHelp[T]]] =
     parser

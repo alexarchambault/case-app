@@ -1,8 +1,9 @@
 package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
+import dataclass.data
 
-final case class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
+@data class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
 
   type D = D0
 
