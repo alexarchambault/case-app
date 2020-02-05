@@ -9,6 +9,11 @@ object Settings {
   private def scala212 = "2.12.10"
   private def scala213 = "2.13.1"
 
+  private lazy val isAtLeastScala213 = Def.setting {
+    import Ordering.Implicits._
+    CrossVersion.partialVersion(scalaVersion.value).exists(_ >= (2, 13))
+  }
+
   lazy val shared = Seq(
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala213),
@@ -25,6 +30,10 @@ object Settings {
         case _ =>
           compilerPlugin(Deps.macroParadise) :: Nil
       }
+    },
+    scalacOptions ++= {
+      if (isAtLeastScala213.value) Seq("-Ymacro-annotations")
+      else Nil
     },
     autoAPIMappings := true
   )

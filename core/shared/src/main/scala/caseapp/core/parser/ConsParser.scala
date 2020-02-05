@@ -4,8 +4,9 @@ import caseapp.core.argparser.{ArgParser, Consumed}
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import shapeless.{:: => :*:, HList}
+import dataclass.data
 
-final case class ConsParser[H, T <: HList, DT <: HList](
+@data class ConsParser[H, T <: HList, DT <: HList](
   arg: Arg,
   argParser: ArgParser[H],
   default: () => Option[H], // FIXME Couldn't this be Option[() => H]?

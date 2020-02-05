@@ -25,12 +25,13 @@ abstract class CommandAppWithPreCommand[D, T](implicit
     exit(255)
   }
 
-  lazy val beforeCommandMessages: Help[D] = baseBeforeCommandMessages.copy(
-    appName = appName,
-    appVersion = appVersion,
-    progName = progName,
-    optionsDesc = s"[options] [command] [command-options]"
-  )
+  lazy val beforeCommandMessages: Help[D] =
+    baseBeforeCommandMessages
+      .withAppName(appName)
+      .withAppVersion(appVersion)
+      .withProgName(progName)
+      .withOptionsDesc(s"[options] [command] [command-options]")
+      .asInstanceOf[Help[D]] // circumventing data-class losing the type param :|
 
   lazy val commands: Seq[Seq[String]] = CommandsHelp[T].messages.map(_._1)
 

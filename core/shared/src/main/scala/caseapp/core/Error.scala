@@ -2,6 +2,7 @@ package caseapp.core
 
 import caseapp.Name
 import caseapp.core.util.NameOps.toNameOps
+import dataclass.data
 
 /** Base type for errors during arguments parsing */
 sealed abstract class Error extends Product with Serializable {
@@ -14,17 +15,17 @@ object Error {
   sealed abstract class SimpleError(val message: String) extends Error {
     def append(that: Error): Error = that match {
       case simple: SimpleError => Error.SeveralErrors(this, Seq(simple))
-      case Error.SeveralErrors(head, tail) =>
-        Error.SeveralErrors(this, head +: tail)
+      case s: Error.SeveralErrors =>
+        Error.SeveralErrors(this, s.head +: s.tail)
     }
   }
 
-  final case class SeveralErrors(head: SimpleError, tail: Seq[SimpleError]) extends Error {
+  @data class SeveralErrors(head: SimpleError, tail: Seq[SimpleError]) extends Error {
     def message: String = (head +: tail).map(_.message).mkString("\n")
     def append(that: Error): Error = that match {
-      case simple: SimpleError => this.copy(tail = tail :+ simple)
-      case Error.SeveralErrors(thatHead, thatTail) =>
-        this.copy(tail = tail ++ (thatHead +: thatTail))
+      case simple: SimpleError => withTail(tail :+ simple)
+      case s: Error.SeveralErrors =>
+        withTail(tail ++ (s.head +: s.tail))
     }
   }
 
@@ -32,26 +33,26 @@ object Error {
 
   case object ArgumentMissing extends SimpleError("argument missing")
 
-  case class ArgumentAlreadySpecified(name: String, extraNames: Seq[String] = Nil)
+  @data class ArgumentAlreadySpecified(name: String, extraNames: Seq[String] = Nil)
     extends SimpleError(s"argument ${(name +: extraNames).mkString(" / ")} already specified")
 
   case object CannotBeDisabled extends SimpleError("Option cannot be explicitly disabled")
 
-  final case class UnrecognizedFlagValue(value: String) extends SimpleError(s"Unrecognized flag value: $value")
+  @data class UnrecognizedFlagValue(value: String) extends SimpleError(s"Unrecognized flag value: $value")
 
-  final case class UnrecognizedArgument(arg: String) extends SimpleError(s"Unrecognized argument: $arg")
+  @data class UnrecognizedArgument(arg: String) extends SimpleError(s"Unrecognized argument: $arg")
 
-  final case class CommandNotFound(command: String) extends SimpleError(s"Command not found: $command")
+  @data class CommandNotFound(command: String) extends SimpleError(s"Command not found: $command")
 
-  final case class RequiredOptionNotSpecified(name: String, extraNames: Seq[String] = Nil)
+  @data class RequiredOptionNotSpecified(name: String, extraNames: Seq[String] = Nil)
     extends SimpleError(s"Required option ${(name +: extraNames).mkString(" / ")} not specified")
 
-  final case class MalformedValue(`type`: String, error: String) extends SimpleError(s"Malformed ${`type`}: $error")
+  @data class MalformedValue(`type`: String, error: String) extends SimpleError(s"Malformed ${`type`}: $error")
 
-  final case class Other(override val message: String) extends SimpleError(message)
+  @data class Other(override val message: String) extends SimpleError(message)
 
 
-  final case class ParsingArgument(name: Name, error: Error)
+  @data class ParsingArgument(name: Name, error: Error)
     extends SimpleError(s"Argument ${name.option}: ${error.message}")
 
 }

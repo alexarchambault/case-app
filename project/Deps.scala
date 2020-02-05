@@ -8,6 +8,7 @@ object Deps {
 
   import Def.setting
 
+  def dataClass = "io.github.alexarchambault" %% "data-class" % "0.2.1"
   def macroParadise = "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch
   def refined = setting("eu.timepit" %%% "refined" % "0.9.12")
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)

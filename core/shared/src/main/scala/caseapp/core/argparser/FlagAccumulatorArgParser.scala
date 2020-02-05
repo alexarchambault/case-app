@@ -2,8 +2,9 @@ package caseapp.core.argparser
 
 import caseapp.core.{Counter, Error}
 import caseapp.{@@, Tag}
+import dataclass.data
 
-final case class FlagAccumulatorArgParser[T](
+@data class FlagAccumulatorArgParser[T](
   description: String,
   parse: (Option[T], Option[String]) => Either[Error, T]
 ) extends ArgParser[T] {
