@@ -70,7 +70,16 @@ abstract class Parser[T] {
       }
 
   /** Keeps the remaining args before and after a possible -- separated */
-  final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] = {
+  final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] =
+    detailedParse(
+      args,
+      stopAtFirstUnrecognized = false
+    )
+
+  final def detailedParse(
+    args: Seq[String],
+    stopAtFirstUnrecognized: Boolean
+  ): Either[Error, (T, RemainingArgs)] = {
 
     def helper(
       current: D,
@@ -84,16 +93,32 @@ abstract class Parser[T] {
         step(args, current) match {
           case Right(None) =>
             args match {
-              case "--" :: t =>
+              case "--" :: rem =>
                 get(current)
-                  .map((_, RemainingArgs(extraArgsReverse.reverse, t)))
-              case opt :: rem if opt.startsWith("-") => {
-                val err = Error.UnrecognizedArgument(opt)
-                val remaining: Either[Error, (T, RemainingArgs)] = helper(current, rem, extraArgsReverse)
-                Left(remaining.fold(errs => err.append(errs), _ => err))
-              }
+                  .map { t =>
+                    if (stopAtFirstUnrecognized)
+                      // extraArgsReverse should be empty anyway here
+                      (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
+                    else
+                      (t, RemainingArgs(extraArgsReverse.reverse, rem))
+                  }
+              case opt :: rem if opt.startsWith("-") =>
+                if (stopAtFirstUnrecognized)
+                  get(current)
+                    // extraArgsReverse should be empty anyway here
+                    .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+                else {
+                  val err = Error.UnrecognizedArgument(opt)
+                  val remaining = helper(current, rem, extraArgsReverse)
+                  Left(remaining.fold(err.append, _ => err))
+                }
               case userArg :: rem =>
-                helper(current, rem, userArg :: extraArgsReverse)
+                if (stopAtFirstUnrecognized)
+                  get(current)
+                    // extraArgsReverse should be empty anyway here
+                    .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+                else
+                  helper(current, rem, userArg :: extraArgsReverse)
             }
 
           case Right(Some((newC, newArgs))) =>
