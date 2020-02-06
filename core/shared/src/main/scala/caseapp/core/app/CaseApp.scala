@@ -5,7 +5,13 @@ import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 
-abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T]) {
+abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
+
+  def parser: Parser[T] =
+    if (stopAtFirstUnrecognized)
+      parser0.stopAtFirstUnrecognized
+    else
+      parser0
 
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
