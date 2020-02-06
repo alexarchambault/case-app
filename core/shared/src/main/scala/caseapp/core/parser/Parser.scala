@@ -61,6 +61,10 @@ abstract class Parser[T] {
     */
   def args: Seq[Arg]
 
+  def defaultStopAtFirstUnrecognized: Boolean =
+    false
+  def stopAtFirstUnrecognized: Parser[T] =
+    StopAtFirstUnrecognizedParser(this)
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)
@@ -73,7 +77,7 @@ abstract class Parser[T] {
   final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] =
     detailedParse(
       args,
-      stopAtFirstUnrecognized = false
+      stopAtFirstUnrecognized = defaultStopAtFirstUnrecognized
     )
 
   final def detailedParse(
@@ -143,7 +147,11 @@ abstract class Parser[T] {
     */
   final def withHelp: Parser[WithHelp[T]] = {
     implicit val parser: Parser.Aux[T, D] = this
-    Parser[WithHelp[T]]
+    val p = Parser[WithHelp[T]]
+    if (defaultStopAtFirstUnrecognized)
+      p.stopAtFirstUnrecognized
+    else
+      p
   }
 
   final def map[U](f: T => U): Parser.Aux[U, D] =

@@ -314,6 +314,20 @@ object Tests extends TestSuite {
             h.argsNameOption.exists(_ == "c1-stuff")
           }
         }
+
+        "stop at first unrecognized argument if asked so" - {
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c3", "-b"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c3"), Inr(Inr(Inl(ManualCommandNotAdtOptions.Command3Opts()))), Seq("-b"))))))
+            assert(res == expectedRes)
+          }
+
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c3", "-n", "1", "--foo"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c3"), Inr(Inr(Inl(ManualCommandNotAdtOptions.Command3Opts(1)))), Seq("--foo"))))))
+            assert(res == expectedRes)
+          }
+        }
       }
 
       "sub commands" - {

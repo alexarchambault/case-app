@@ -107,14 +107,23 @@ object ManualCommandNotAdtStuff {
     }
   }
 
+  case object Command3StopAtUnreco extends CaseApp[ManualCommandNotAdtOptions.Command3Opts] {
+    override def stopAtFirstUnrecognized = true
+    def run(options: ManualCommandNotAdtOptions.Command3Opts, args: RemainingArgs): Unit = {
+
+    }
+  }
+
   val parser = CommandParser.nil
     .add(Command1)
     .add(Command2)
+    .add(Command3StopAtUnreco)
     .reverse
 
   val help = CommandsHelp.nil
     .add(Command1)
     .add(Command2)
+    .add(Command3StopAtUnreco)
     .reverse
 
 }

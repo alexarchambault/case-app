@@ -11,4 +11,7 @@ object ManualCommandNotAdtOptions {
   @ProgName("c2")
   final case class Command2Opts(b: Boolean)
 
+  @ProgName("c3")
+  final case class Command3Opts(n: Int = 2)
+
 }

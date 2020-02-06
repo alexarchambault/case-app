@@ -19,4 +19,7 @@ import dataclass.data
   def args: Seq[Arg] =
     underlying.args
 
+  override def defaultStopAtFirstUnrecognized: Boolean =
+    underlying.defaultStopAtFirstUnrecognized
+
 }
