@@ -5,7 +5,13 @@ import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 
-abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T]) {
+abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
+
+  def parser: Parser[T] =
+    if (stopAtFirstUnrecognized)
+      parser0.stopAtFirstUnrecognized
+    else
+      parser0
 
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
@@ -50,8 +56,18 @@ abstract class CaseApp[T](implicit val parser: Parser[T], val messages: Help[T])
     */
   def expandArgs(args: List[String]): List[String] = args
 
+  /**
+   * Whether to stop parsing at the first unrecognized argument.
+   *
+   * That is, stop parsing at the first non option (not starting with "-"), or
+   * the first unrecognized option. The unparsed arguments are put in the `args`
+   * argument of `run`.
+  */
+  def stopAtFirstUnrecognized: Boolean =
+    false
+
   def main(args: Array[String]): Unit =
-    parser.withHelp.detailedParse(expandArgs(args.toList)) match {
+    parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized) match {
       case Left(err) =>
         error(err)
 

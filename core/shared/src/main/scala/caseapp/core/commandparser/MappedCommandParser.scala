@@ -1,8 +1,9 @@
 package caseapp.core.commandparser
 
 import caseapp.core.parser.Parser
+import dataclass.data
 
-final case class MappedCommandParser[T, U](parser: CommandParser[T], f: T => U) extends CommandParser[U] {
+@data class MappedCommandParser[T, U](parser: CommandParser[T], f: T => U) extends CommandParser[U] {
 
   def commandMap: Map[Seq[String], Parser[U]] =
     parser

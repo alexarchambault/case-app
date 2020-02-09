@@ -1,6 +1,7 @@
 package caseapp.core
 
 import caseapp.{HelpMessage, Name, ValueDescription}
+import dataclass.data
 
 /**
   * Infos about an argument / option an application can accept.
@@ -12,7 +13,7 @@ import caseapp.{HelpMessage, Name, ValueDescription}
   * @param noHelp: if true, this argument should not appear in help messages
   * @param isFlag: if true, passing an actual value to this argument is optional
   */
-final case class Arg(
+@data class Arg(
   name: Name,
   extraNames: Seq[Name] = Nil,
   valueDescription: Option[ValueDescription] = None,

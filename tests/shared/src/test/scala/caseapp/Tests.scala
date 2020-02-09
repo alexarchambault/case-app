@@ -314,6 +314,20 @@ object Tests extends TestSuite {
             h.argsNameOption.exists(_ == "c1-stuff")
           }
         }
+
+        "stop at first unrecognized argument if asked so" - {
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c3", "-b"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c3"), Inr(Inr(Inl(ManualCommandNotAdtOptions.Command3Opts()))), Seq("-b"))))))
+            assert(res == expectedRes)
+          }
+
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c3", "-n", "1", "--foo"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c3"), Inr(Inr(Inl(ManualCommandNotAdtOptions.Command3Opts(1)))), Seq("--foo"))))))
+            assert(res == expectedRes)
+          }
+        }
       }
 
       "sub commands" - {
@@ -361,6 +375,40 @@ object Tests extends TestSuite {
       caseapp.util.Default[DefaultsThrow]
       shapeless.lazily[caseapp.util.Default.AsOptions[DefaultsThrow]]
       val parser = Parser[DefaultsThrow]
+    }
+
+    "stop at first unrecognized argument if asked" - {
+      val parser = Parser[FewArgs]
+      * - {
+        val res = parser.detailedParse(Nil, stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(), RemainingArgs(Nil, Nil)))
+        assert(res == expected)
+      }
+      * - {
+        val res = parser.detailedParse(Seq("--value", "a", "--other"), stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--other"), Nil)))
+        assert(res == expected)
+      }
+      * - {
+        val res = parser.detailedParse(Seq("--value", "a"), stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(value = "a"), RemainingArgs(Nil, Nil)))
+        assert(res == expected)
+      }
+      * - {
+        val res = parser.detailedParse(Seq("--value", "a", "--", "--other"), stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--", "--other"), Nil)))
+        assert(res == expected)
+      }
+      * - {
+        val res = parser.detailedParse(Seq("foo", "--value", "a"), stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(), RemainingArgs(Seq("foo", "--value", "a"), Nil)))
+        assert(res == expected)
+      }
+      * - {
+        val res = parser.detailedParse(Seq("--value", "a", "foo", "--", "--other"), stopAtFirstUnrecognized = true)
+        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("foo", "--", "--other"), Nil)))
+        assert(res == expected)
+      }
     }
 
   }

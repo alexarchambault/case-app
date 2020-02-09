@@ -1,9 +1,10 @@
 package caseapp.core.commandparser
 
 import caseapp.core.parser.Parser
+import dataclass.data
 import shapeless.{:+:, Coproduct, Inl, Inr}
 
-final case class ConsCommandParser[H, T <: Coproduct](
+@data class ConsCommandParser[H, T <: Coproduct](
   name: Seq[String],
   parser: Parser[H],
   tail: CommandParser[T]

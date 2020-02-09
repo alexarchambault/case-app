@@ -3,13 +3,14 @@ package caseapp.core.help
 import caseapp.core.util.CaseUtil
 import caseapp.{ArgsName, CommandName, Parser}
 import caseapp.util.AnnotationOption
+import dataclass.data
 import shapeless.{:+:, CNil, Coproduct, LabelledGeneric, Strict, Witness}
 import shapeless.labelled.FieldType
 
 import scala.language.implicitConversions
 
 
-final case class CommandsHelp[T](
+@data class CommandsHelp[T](
   messages: Seq[(Seq[String], CommandHelp)]
 ) {
   lazy val messagesMap = messages.toMap
