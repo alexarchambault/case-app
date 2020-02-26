@@ -1,5 +1,5 @@
 
-import sbtcrossproject.CrossPlugin.autoImport.crossProject
+import sbtcrossproject.crossProject
 
 import Aliases._
 import Settings._
@@ -80,47 +80,5 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
 lazy val refinedJVM = refined.jvm
 lazy val refinedJS = refined.js
 
-lazy val readme = project
-  .underDoc
-  .dependsOn(coreJVM)
-  .enablePlugins(TutPlugin)
-  .settings(
-    shared,
-    dontPublish,
-    tutSourceDirectory := baseDirectory.value,
-    tutTargetDirectory := baseDirectory.in(LocalRootProject).value
-  )
-
-lazy val `case-app` = project
-  .in(root)
-  .enablePlugins(ScalaUnidocPlugin)
-  .aggregate(
-    utilJVM,
-    utilJS,
-    annotationsJVM,
-    annotationsJS,
-    coreJVM,
-    coreJS,
-    testsJVM,
-    testsJS,
-    refinedJVM,
-    refinedJS,
-    readme
-  )
-  .settings(
-    shared,
-    dontPublish,
-    name := "case-app-root",
-    unidocProjectFilter.in(ScalaUnidoc, unidoc) := inAnyProject -- inProjects(
-      utilJS,
-      annotationsJS,
-      coreJS,
-      testsJS,
-      refinedJS,
-      readme
-    )
-  )
-
-aliases(
-  "validate" -> commandSeq("test", "tut")
-)
+skip.in(publish) := true
+crossScalaVersions := Nil
