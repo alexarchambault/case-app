@@ -1,4 +1,0 @@
----
-layout: docs
-title: Commands
----
