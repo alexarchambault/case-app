@@ -2,7 +2,7 @@ language: scala
 jdk: openjdk8
 git:
   depth: false
-script: sbt ++${TRAVIS_SCALA_VERSION} test tut
+script: sbt ++${TRAVIS_SCALA_VERSION} test
 sudo: false
 cache:
   directories:

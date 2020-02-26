@@ -80,16 +80,5 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
 lazy val refinedJVM = refined.jvm
 lazy val refinedJS = refined.js
 
-lazy val readme = project
-  .underDoc
-  .dependsOn(coreJVM)
-  .enablePlugins(TutPlugin)
-  .settings(
-    shared,
-    dontPublish,
-    tutSourceDirectory := baseDirectory.value,
-    tutTargetDirectory := baseDirectory.in(LocalRootProject).value
-  )
-
 skip.in(publish) := true
 crossScalaVersions := Nil
