@@ -91,32 +91,5 @@ lazy val readme = project
     tutTargetDirectory := baseDirectory.in(LocalRootProject).value
   )
 
-lazy val `case-app` = project
-  .in(root)
-  .enablePlugins(ScalaUnidocPlugin)
-  .aggregate(
-    utilJVM,
-    utilJS,
-    annotationsJVM,
-    annotationsJS,
-    coreJVM,
-    coreJS,
-    testsJVM,
-    testsJS,
-    refinedJVM,
-    refinedJS,
-    readme
-  )
-  .settings(
-    shared,
-    dontPublish,
-    name := "case-app-root",
-    unidocProjectFilter.in(ScalaUnidoc, unidoc) := inAnyProject -- inProjects(
-      utilJS,
-      annotationsJS,
-      coreJS,
-      testsJS,
-      refinedJS,
-      readme
-    )
-  )
+skip.in(publish) := true
+crossScalaVersions := Nil
