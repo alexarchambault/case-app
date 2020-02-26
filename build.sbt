@@ -120,7 +120,3 @@ lazy val `case-app` = project
       readme
     )
   )
-
-aliases(
-  "validate" -> commandSeq("test", "tut")
-)
