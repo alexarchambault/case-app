@@ -1,5 +1,5 @@
 
-import sbtcrossproject.CrossPlugin.autoImport.crossProject
+import sbtcrossproject.crossProject
 
 import Aliases._
 import Settings._
