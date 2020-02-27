@@ -1,5 +1,7 @@
 package caseapp.core.help
 
+import java.util.Locale
+
 import caseapp.core.util.CaseUtil
 import caseapp.{ArgsName, CommandName, Parser}
 import caseapp.util.AnnotationOption
@@ -37,7 +39,7 @@ object CommandsHelp {
     // FIXME Duplicated in CommandParser.ccons
     val name = commandName().map(_.commandName).getOrElse {
       CaseUtil.pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
-        .map(_.toLowerCase)
+        .map(_.toLowerCase(Locale.ROOT))
         .mkString("-")
     }
 

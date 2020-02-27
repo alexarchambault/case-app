@@ -1,5 +1,7 @@
 package caseapp.core.commandparser
 
+import java.util.Locale
+
 import caseapp.CommandName
 import caseapp.core.parser.Parser
 import caseapp.core.util.CaseUtil
@@ -22,7 +24,7 @@ abstract class AutoCommandParserImplicits {
 
     val name = commandName().map(_.commandName).getOrElse {
       CaseUtil.pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
-        .map(_.toLowerCase)
+        .map(_.toLowerCase(Locale.ROOT))
         .mkString("-")
     }
 

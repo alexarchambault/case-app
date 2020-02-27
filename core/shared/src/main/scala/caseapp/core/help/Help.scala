@@ -1,5 +1,7 @@
 package caseapp.core.help
 
+import java.util.Locale
+
 import caseapp.core.Arg
 import caseapp.{AppName, AppVersion, ArgsName, Name, ProgName, ValueDescription}
 import caseapp.core.parser.Parser
@@ -136,7 +138,13 @@ object Help {
       parser.args,
       appName0,
       appVersion().fold("")(_.appVersion),
-      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
+      progName()
+        .map(_.progName)
+        .getOrElse {
+          CaseUtil.pascalCaseSplit(appName0.toList)
+            .map(_.toLowerCase(Locale.ROOT))
+            .mkString("-")
+        },
       argsName().map(_.argsName)
     )
   }

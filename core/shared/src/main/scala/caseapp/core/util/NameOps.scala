@@ -1,5 +1,7 @@
 package caseapp.core.util
 
+import java.util.Locale
+
 import scala.language.implicitConversions
 
 import caseapp.Name
@@ -10,7 +12,9 @@ class NameOps(val name: Name) extends AnyVal {
     name.name.length == 1
 
   private def optionName: String =
-    CaseUtil.pascalCaseSplit(name.name.toList).map(_.toLowerCase).mkString("-")
+    CaseUtil.pascalCaseSplit(name.name.toList)
+      .map(_.toLowerCase(Locale.ROOT))
+      .mkString("-")
   private def optionEq: String =
     if (isShort) s"-${name.name}=" else s"--$optionName="
 
