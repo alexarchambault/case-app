@@ -5,6 +5,7 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import shapeless.{:: => :*:, HList}
 import dataclass.data
+import caseapp.core.util.OptionFormatter
 
 @data class ConsParser[H, T <: HList, DT <: HList](
   arg: Arg,
@@ -18,14 +19,18 @@ import dataclass.data
   def init: D =
     None :: tail.init
 
-  def step(args: List[String], d: Option[H] :*: tail.D): Either[(Error, List[String]), Option[(D, List[String])]] =
+  def step(
+      args: List[String],
+      d: Option[H] :*: tail.D,
+      optionFormatter: OptionFormatter
+  ): Either[(Error, List[String]), Option[(D, List[String])]] =
     args match {
       case Nil =>
         Right(None)
 
       case firstArg :: rem =>
         val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
-          .map(n => n -> n(firstArg))
+          .map(n => n -> n(firstArg, optionFormatter))
           .collectFirst {
             case (n, Right(valueOpt)) => n -> valueOpt
           }
@@ -51,30 +56,29 @@ import dataclass.data
                 }
             }
 
-            res
-              .left
+            res.left
               .map { err =>
-                (Error.ParsingArgument(name, err), rem0)
+                (Error.ParsingArgument(name, err, optionFormatter), rem0)
               }
               .map(_.map((_, rem0)))
 
           case None =>
             tail
-              .step(args, d.tail)
+              .step(args, d.tail, optionFormatter)
               .map(_.map {
                 case (t, args) => (d.head :: t, args)
               })
         }
     }
 
-  def get(d: D): Either[Error, H :*: T] = {
+  def get(d: D, optionFormatter: OptionFormatter): Either[Error, H :*: T] = {
 
     val maybeHead = d.head
       .orElse(default())
       .toRight {
         Error.RequiredOptionNotSpecified(
-          arg.name.option,
-          arg.extraNames.map(_.option)
+          arg.name.option(optionFormatter),
+          arg.extraNames.map(_.option(optionFormatter))
         )
       }
 
@@ -92,8 +96,6 @@ import dataclass.data
     arg +: tail.args
 
   def mapHead[I](f: H => I): Parser.Aux[I :*: T, D] =
-    map { l =>
-      f(l.head) :: l.tail
-    }
+    map { l => f(l.head) :: l.tail }
 
 }

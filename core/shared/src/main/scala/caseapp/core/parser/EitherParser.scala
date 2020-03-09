@@ -2,6 +2,7 @@ package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
 import dataclass.data
+import caseapp.core.util.OptionFormatter
 
 @data class EitherParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Either[Error, T]] {
 
@@ -9,11 +10,15 @@ import dataclass.data
 
   def init = underlying.init
 
-  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]] =
-    underlying.step(args, d)
+  def step(
+      args: List[String],
+      d: D,
+      optionFormatter: OptionFormatter
+  ): Either[(Error, List[String]), Option[(D, List[String])]] =
+    underlying.step(args, d, optionFormatter)
 
-  def get(d: D): Right[Error, Either[Error, T]] =
-    Right(underlying.get(d))
+  def get(d: D, optionFormatter: OptionFormatter): Right[Error, Either[Error, T]] =
+    Right(underlying.get(d, optionFormatter))
 
   def args: Seq[Arg] =
     underlying.args

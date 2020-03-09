@@ -5,6 +5,7 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.help.WithHelp
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
+import caseapp.core.util.OptionFormatter
 
 /**
   * Parses arguments, resulting in a `T` in case of success.
@@ -41,7 +42,17 @@ abstract class Parser[T] {
     * @param d: current intermediate result
     * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
     */
-  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]]
+  def step(
+      args: List[String],
+      d: D
+  ): Either[(Error, List[String]), Option[(D, List[String])]] =
+    step(args, d, defaultOptionFormatter)
+
+  def step(
+      args: List[String],
+      d: D,
+      optionFormatter: OptionFormatter
+  ): Either[(Error, List[String]), Option[(D, List[String])]]
 
   /**
     * Get the final result from the final intermediate value.
@@ -52,7 +63,9 @@ abstract class Parser[T] {
     * @param d: final intermediate value
     * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def get(d: D): Either[Error, T]
+  def get(d: D): Either[Error, T] = get(d, defaultOptionFormatter)
+
+  def get(d: D, optionFormatter: OptionFormatter): Either[Error, T]
 
   /**
     * Arguments this parser accepts.
@@ -65,6 +78,12 @@ abstract class Parser[T] {
     false
   def stopAtFirstUnrecognized: Parser[T] =
     StopAtFirstUnrecognizedParser(this)
+
+  def defaultOptionFormatter: OptionFormatter =
+    OptionFormatter.DefaultFormatter
+
+  def optionFormatter(f: OptionFormatter): Parser[T] =
+    OptionFormatterParser(this, f)
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)

@@ -4,17 +4,19 @@ import caseapp.{HelpMessage, Name, ValueDescription}
 import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import shapeless.{::, Generic, HList, ops}
+import caseapp.core.util.OptionFormatter
 
 class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends AnyVal {
 
   def add[H: ArgParser](
-    name: String,
-    default: => Option[H] = None,
-    extraNames: Seq[Name] = Nil,
-    valueDescription: Option[ValueDescription] = None,
-    helpMessage: Option[HelpMessage] = None,
-    noHelp: Boolean = false,
-    isFlag: Boolean = false
+      name: String,
+      default: => Option[H] = None,
+      extraNames: Seq[Name] = Nil,
+      valueDescription: Option[ValueDescription] = None,
+      helpMessage: Option[HelpMessage] = None,
+      noHelp: Boolean = false,
+      isFlag: Boolean = false,
+      formatter: OptionFormatter = OptionFormatter.DefaultFormatter
   ): Parser.Aux[H :: T, Option[H] :: D] =
     ConsParser(
       Arg(

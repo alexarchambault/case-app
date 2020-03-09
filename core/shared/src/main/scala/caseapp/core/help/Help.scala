@@ -8,17 +8,19 @@ import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
 import shapeless.Typeable
+import caseapp.core.util.OptionFormatter
 
 /**
- * Provides usage and help messages related to `T`
- */
+  * Provides usage and help messages related to `T`
+  */
 @data class Help[T](
-  args: Seq[Arg],
-  appName: String,
-  appVersion: String,
-  progName: String,
-  argsNameOption: Option[String],
-  optionsDesc: String = "[options]"
+    args: Seq[Arg],
+    appName: String,
+    appVersion: String,
+    progName: String,
+    argsNameOption: Option[String],
+    optionsDesc: String = Help.DefaultOptionsDesc,
+    optionFormatter: OptionFormatter = Help.DefaultOptionFormatter
 ) {
 
   /** One-line usage message for `T` */
@@ -31,7 +33,7 @@ import shapeless.Typeable
     ).filter(_.nonEmpty).mkString(" ")
 
   /** Options description for `T` */
-  def options: String = Help.optionsMessage(args)
+  def options: String = Help.optionsMessage(args, optionFormatter)
 
   /**
     * Full multi-line help message for `T`.
@@ -65,8 +67,8 @@ import shapeless.Typeable
   }
 
   def duplicates: Map[String, Seq[Arg]] = {
-    val pairs = args.map(a => a.name.option -> a) ++
-      args.flatMap(a => a.extraNames.map(n => n.option -> a))
+    val pairs = args.map(a => a.name.option(optionFormatter) -> a) ++
+      args.flatMap(a => a.extraNames.map(n => n.option(optionFormatter) -> a))
     pairs
       .groupBy(_._1)
       .mapValues(_.map(_._2))
@@ -90,17 +92,21 @@ import shapeless.Typeable
 }
 
 object Help {
+  val DefaultOptionsDesc = "[options]"
+  val DefaultOptionFormatter = OptionFormatter.DefaultFormatter
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
 
-
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
+    optionsMessage(args, OptionFormatter.DefaultFormatter)
+
+  /** Option message for `args` */
+  def optionsMessage(args: Seq[Arg], optionFormatter: OptionFormatter): String =
     args
       .collect {
         case arg if !arg.noHelp =>
-
           val names = (arg.name +: arg.extraNames).distinct
 
           // FIXME Flags that accept no value are not given the right help message here
@@ -110,12 +116,12 @@ object Help {
 
           val message = arg.helpMessage.map(Help.TB + _.message)
 
-          val usage = s"${Help.WW}${names.map(_.option) mkString " | "}  ${valueDescription.map(_.message).mkString}"
+          val usage =
+            s"${Help.WW}${names.map(_.option(optionFormatter)) mkString " | "}  ${valueDescription.map(_.message).mkString}"
 
           (usage :: message.toList).mkString(Help.NL)
       }
       .mkString(Help.NL)
-
 
   // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
 
@@ -136,8 +142,15 @@ object Help {
       parser.args,
       appName0,
       appVersion().fold("")(_.appVersion),
-      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
-      argsName().map(_.argsName)
+      progName().fold(
+        CaseUtil
+          .pascalCaseSplit(appName0.toList)
+          .map(_.toLowerCase)
+          .mkString("-")
+      )(_.progName),
+      argsName().map(_.argsName),
+      Help.DefaultOptionsDesc,
+      parser.defaultOptionFormatter
     )
   }
 

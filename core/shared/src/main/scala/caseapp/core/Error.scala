@@ -3,6 +3,7 @@ package caseapp.core
 import caseapp.Name
 import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
+import caseapp.core.util.OptionFormatter
 
 /** Base type for errors during arguments parsing */
 sealed abstract class Error extends Product with Serializable {
@@ -50,9 +51,9 @@ object Error {
   @data class MalformedValue(`type`: String, error: String) extends SimpleError(s"Malformed ${`type`}: $error")
 
   @data class Other(override val message: String) extends SimpleError(message)
-
-
-  @data class ParsingArgument(name: Name, error: Error)
-    extends SimpleError(s"Argument ${name.option}: ${error.message}")
+  @data class ParsingArgument(name: Name, error: Error, optionFormatter: OptionFormatter)
+      extends SimpleError(
+        s"Argument ${name.option(optionFormatter)}: ${error.message}"
+      )
 
 }
