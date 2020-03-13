@@ -2,6 +2,11 @@ package caseapp.core.util
 
 import caseapp.Name
 
+/**
+  * Formats option arguments to a given format.
+  *
+  * Default formatter will format option arguments as `--foo-bar`.
+  */
 abstract class OptionFormatter {
   def format(name: Name): String
 }

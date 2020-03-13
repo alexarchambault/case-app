@@ -9,14 +9,11 @@ class NameOps(val name: Name) {
   private def isShort: Boolean =
     name.name.length == 1
 
-  private def optionName(optionFormatter: OptionFormatter): String = 
-    optionFormatter.format(name)
-
-  private def optionEq(formatter: OptionFormatter): String =
-    if (isShort) s"-${name.name}=" else s"--${optionName(formatter)}="
+  private def optionEq(optionFormatter: OptionFormatter): String = 
+    option(optionFormatter) + "="
 
   def option(optionFormatter: OptionFormatter): String =
-    if (isShort) s"-${name.name}" else s"--${optionName(optionFormatter)}"
+    if (isShort) s"-${name.name}" else s"--${optionFormatter.format(name)}"
 
   def apply(
       args: List[String],
