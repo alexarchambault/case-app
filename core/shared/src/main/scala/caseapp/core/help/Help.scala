@@ -20,7 +20,7 @@ import caseapp.core.util.Formatter
     progName: String,
     argsNameOption: Option[String],
     optionsDesc: String = Help.DefaultOptionsDesc,
-    nameFormatter: Formatter[Name] = Help.defaultNameFormatter
+    nameFormatter: Formatter[Name] = Help.DefaultNameFormatter
 ) {
 
   /** One-line usage message for `T` */
@@ -93,7 +93,7 @@ import caseapp.core.util.Formatter
 
 object Help {
   val DefaultOptionsDesc = "[options]"
-  val defaultNameFormatter = Formatter.DefaultNameFormatter
+  val DefaultNameFormatter = Formatter.DefaultNameFormatter
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
