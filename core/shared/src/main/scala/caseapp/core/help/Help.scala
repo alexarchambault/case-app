@@ -8,7 +8,7 @@ import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
 import shapeless.Typeable
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
 
 /**
   * Provides usage and help messages related to `T`
@@ -20,7 +20,7 @@ import caseapp.core.util.OptionFormatter
     progName: String,
     argsNameOption: Option[String],
     optionsDesc: String = Help.DefaultOptionsDesc,
-    optionFormatter: OptionFormatter = Help.DefaultOptionFormatter
+    nameFormatter: Formatter[Name] = Help.defaultNameFormatter
 ) {
 
   /** One-line usage message for `T` */
@@ -33,7 +33,7 @@ import caseapp.core.util.OptionFormatter
     ).filter(_.nonEmpty).mkString(" ")
 
   /** Options description for `T` */
-  def options: String = Help.optionsMessage(args, optionFormatter)
+  def options: String = Help.optionsMessage(args, nameFormatter)
 
   /**
     * Full multi-line help message for `T`.
@@ -67,8 +67,8 @@ import caseapp.core.util.OptionFormatter
   }
 
   def duplicates: Map[String, Seq[Arg]] = {
-    val pairs = args.map(a => a.name.option(optionFormatter) -> a) ++
-      args.flatMap(a => a.extraNames.map(n => n.option(optionFormatter) -> a))
+    val pairs = args.map(a => a.name.option(nameFormatter) -> a) ++
+      args.flatMap(a => a.extraNames.map(n => n.option(nameFormatter) -> a))
     pairs
       .groupBy(_._1)
       .mapValues(_.map(_._2))
@@ -93,17 +93,17 @@ import caseapp.core.util.OptionFormatter
 
 object Help {
   val DefaultOptionsDesc = "[options]"
-  val DefaultOptionFormatter = OptionFormatter.DefaultFormatter
+  val defaultNameFormatter = Formatter.DefaultNameFormatter
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
 
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
-    optionsMessage(args, OptionFormatter.DefaultFormatter)
+    optionsMessage(args, Formatter.DefaultNameFormatter)
 
   /** Option message for `args` */
-  def optionsMessage(args: Seq[Arg], optionFormatter: OptionFormatter): String =
+  def optionsMessage(args: Seq[Arg], nameFormatter: Formatter[Name]): String =
     args
       .collect {
         case arg if !arg.noHelp =>
@@ -117,7 +117,7 @@ object Help {
           val message = arg.helpMessage.map(Help.TB + _.message)
 
           val usage =
-            s"${Help.WW}${names.map(_.option(optionFormatter)) mkString " | "}  ${valueDescription.map(_.message).mkString}"
+            s"${Help.WW}${names.map(_.option(nameFormatter)) mkString " | "}  ${valueDescription.map(_.message).mkString}"
 
           (usage :: message.toList).mkString(Help.NL)
       }
@@ -150,7 +150,7 @@ object Help {
       )(_.progName),
       argsName().map(_.argsName),
       Help.DefaultOptionsDesc,
-      parser.defaultOptionFormatter
+      parser.defaultNameFormatter
     )
   }
 

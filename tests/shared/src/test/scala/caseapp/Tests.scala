@@ -6,7 +6,7 @@ import caseapp.core.help.{Help, WithHelp}
 import caseapp.demo._
 import shapeless.{Inl, Inr}
 import utest._
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
 
 object Tests extends TestSuite {
 
@@ -46,7 +46,7 @@ object Tests extends TestSuite {
       }
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-        val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.ArgumentAlreadySpecified("???", Nil), OptionFormatter.DefaultFormatter))
+        val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.ArgumentAlreadySpecified("???", Nil), Formatter.DefaultNameFormatter))
         assert(res == expectedRes)
       }
 
@@ -59,7 +59,7 @@ object Tests extends TestSuite {
 
     "fail if arg fails to parse" - {
       val res = Parser[FewArgs].parse(Seq("--num-foo", "true"))
-      val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.MalformedValue("integer", "true"), OptionFormatter.DefaultFormatter))
+      val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.MalformedValue("integer", "true"), Formatter.DefaultNameFormatter))
       assert(res == expectedRes)
     }
 
@@ -415,7 +415,7 @@ object Tests extends TestSuite {
     "parse with custom option formatter" - {
       val res =
         Parser[FewArgs]
-          .optionFormatter((n: Name) => n.name)
+          .nameFormatter((n: Name) => n.name)
           .detailedParse(
             Seq("--value", "b", "--numFoo", "1")
           )

@@ -3,7 +3,8 @@ package caseapp.core.parser
 import caseapp.core.Error
 import shapeless.{::, HList}
 import dataclass.data
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 @data class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   headParser: Parser.Aux[H, HD],
@@ -18,14 +19,14 @@ import caseapp.core.util.OptionFormatter
   def step(
       args: List[String],
       d: D,
-      optionFormatter: OptionFormatter
+      nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
     headParser
-      .step(args, d.head, optionFormatter)
+      .step(args, d.head, nameFormatter)
       .flatMap {
         case None =>
           tailParser
-            .step(args, d.tail, optionFormatter)
+            .step(args, d.tail, nameFormatter)
             .map(_.map {
               case (t, args) => (d.head :: t, args)
             })
@@ -33,9 +34,9 @@ import caseapp.core.util.OptionFormatter
           Right(Some(h :: d.tail, args))
       }
 
-  def get(d: D, optionFormatter: OptionFormatter): Either[Error, H :: T] = {
-    val maybeHead = headParser.get(d.head, optionFormatter)
-    val maybeTail = tailParser.get(d.tail, optionFormatter)
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :: T] = {
+    val maybeHead = headParser.get(d.head, nameFormatter)
+    val maybeTail = tailParser.get(d.tail, nameFormatter)
 
     (maybeHead, maybeTail) match {
       case (Left(headErrs), Left(tailErrs)) => Left(headErrs.append(tailErrs))

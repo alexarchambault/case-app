@@ -7,7 +7,7 @@ import eu.timepit.refined.refineMV
 import eu.timepit.refined.api.Refined
 import eu.timepit.refined.numeric.Positive
 import utest._
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
 
 object RefinedTests extends TestSuite {
 
@@ -25,7 +25,7 @@ object RefinedTests extends TestSuite {
       val res = Parser[Args].parse(Seq("-n", "-6", "--pos", "-3"))
       val expectedRes = Left(
         // wish refined didn't add parentheses around the error
-        Error.ParsingArgument(Name("pos"), Error.Other("(-3 > 0)"), OptionFormatter.DefaultFormatter)
+        Error.ParsingArgument(Name("pos"), Error.Other("(-3 > 0)"), Formatter.DefaultNameFormatter)
       )
       assert(res == expectedRes)
     }

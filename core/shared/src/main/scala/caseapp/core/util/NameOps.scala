@@ -9,16 +9,16 @@ class NameOps(val name: Name) {
   private def isShort: Boolean =
     name.name.length == 1
 
-  private def optionEq(optionFormatter: OptionFormatter): String = 
-    option(optionFormatter) + "="
+  private def optionEq(nameFormatter: Formatter[Name]): String = 
+    option(nameFormatter) + "="
 
-  def option(optionFormatter: OptionFormatter): String =
-    if (isShort) s"-${name.name}" else s"--${optionFormatter.format(name)}"
+  def option(nameFormatter: Formatter[Name]): String =
+    if (isShort) s"-${name.name}" else s"--${nameFormatter.format(name)}"
 
   def apply(
       args: List[String],
       isFlag: Boolean,
-      formatter: OptionFormatter
+      formatter: Formatter[Name]
   ): Option[List[String]] =
     args match {
       case Nil => None
@@ -31,7 +31,7 @@ class NameOps(val name: Name) {
           None
     }
 
-  def apply(arg: String, formatter: OptionFormatter): Either[Unit, Option[String]] =
+  def apply(arg: String, formatter: Formatter[Name]): Either[Unit, Option[String]] =
     if (arg == option(formatter))
       Right(None)
     else if (arg.startsWith(optionEq(formatter)))

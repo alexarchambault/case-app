@@ -5,7 +5,8 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import shapeless.{:: => :*:, HList}
 import dataclass.data
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 @data class ConsParser[H, T <: HList, DT <: HList](
   arg: Arg,
@@ -22,7 +23,7 @@ import caseapp.core.util.OptionFormatter
   def step(
       args: List[String],
       d: Option[H] :*: tail.D,
-      optionFormatter: OptionFormatter
+      nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
     args match {
       case Nil =>
@@ -30,7 +31,7 @@ import caseapp.core.util.OptionFormatter
 
       case firstArg :: rem =>
         val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
-          .map(n => n -> n(firstArg, optionFormatter))
+          .map(n => n -> n(firstArg, nameFormatter))
           .collectFirst {
             case (n, Right(valueOpt)) => n -> valueOpt
           }
@@ -58,27 +59,27 @@ import caseapp.core.util.OptionFormatter
 
             res.left
               .map { err =>
-                (Error.ParsingArgument(name, err, optionFormatter), rem0)
+                (Error.ParsingArgument(name, err, nameFormatter), rem0)
               }
               .map(_.map((_, rem0)))
 
           case None =>
             tail
-              .step(args, d.tail, optionFormatter)
+              .step(args, d.tail, nameFormatter)
               .map(_.map {
                 case (t, args) => (d.head :: t, args)
               })
         }
     }
 
-  def get(d: D, optionFormatter: OptionFormatter): Either[Error, H :*: T] = {
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :*: T] = {
 
     val maybeHead = d.head
       .orElse(default())
       .toRight {
         Error.RequiredOptionNotSpecified(
-          arg.name.option(optionFormatter),
-          arg.extraNames.map(_.option(optionFormatter))
+          arg.name.option(nameFormatter),
+          arg.extraNames.map(_.option(nameFormatter))
         )
       }
 

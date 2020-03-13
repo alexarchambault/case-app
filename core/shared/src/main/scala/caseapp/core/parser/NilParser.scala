@@ -2,7 +2,8 @@ package caseapp.core.parser
 
 import caseapp.core.Error
 import shapeless.HNil
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 case object NilParser extends Parser[HNil] {
 
@@ -14,11 +15,11 @@ case object NilParser extends Parser[HNil] {
   def step(
       args: List[String],
       d: HNil,
-      formatter: OptionFormatter
+      formatter: Formatter[Name]
   ): Right[(Error, List[String]), None.type] =
     Right(None)
 
-  def get(d: D, formatter: OptionFormatter): Right[Error, HNil] =
+  def get(d: D, formatter: Formatter[Name]): Right[Error, HNil] =
     Right(HNil)
 
   def args: Nil.type =

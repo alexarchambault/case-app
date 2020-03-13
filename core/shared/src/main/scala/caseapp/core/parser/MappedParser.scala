@@ -2,7 +2,8 @@ package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
 import dataclass.data
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 @data class MappedParser[T, D0, U](underlying: Parser.Aux[T, D0], f: T => U) extends Parser[U] {
 
@@ -14,13 +15,13 @@ import caseapp.core.util.OptionFormatter
   def step(
       args: List[String],
       d: D,
-      optionFormatter: OptionFormatter
+      nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
-    underlying.step(args, d, optionFormatter)
+    underlying.step(args, d, nameFormatter)
 
-  def get(d: D, optionFormatter: OptionFormatter): Either[Error, U] =
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, U] =
     underlying
-      .get(d, optionFormatter)
+      .get(d, nameFormatter)
       .map(f)
 
   def args: Seq[Arg] =

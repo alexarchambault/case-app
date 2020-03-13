@@ -2,7 +2,8 @@ package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
 import dataclass.data
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 @data class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
 
@@ -14,12 +15,12 @@ import caseapp.core.util.OptionFormatter
   def step(
       args: List[String],
       d: D,
-      optionFormatter: OptionFormatter
+      nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
-    underlying.step(args, d, optionFormatter)
+    underlying.step(args, d, nameFormatter)
 
-  def get(d: D, optionFormatter: OptionFormatter): Right[Error, Option[T]] =
-    Right(underlying.get(d, optionFormatter).toOption)
+  def get(d: D, nameFormatter: Formatter[Name]): Right[Error, Option[T]] =
+    Right(underlying.get(d, nameFormatter).toOption)
 
   def args: Seq[Arg] =
     underlying.args

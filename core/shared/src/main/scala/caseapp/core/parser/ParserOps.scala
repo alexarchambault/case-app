@@ -4,7 +4,7 @@ import caseapp.{HelpMessage, Name, ValueDescription}
 import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import shapeless.{::, Generic, HList, ops}
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
 
 class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends AnyVal {
 
@@ -16,7 +16,7 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
       helpMessage: Option[HelpMessage] = None,
       noHelp: Boolean = false,
       isFlag: Boolean = false,
-      formatter: OptionFormatter = OptionFormatter.DefaultFormatter
+      formatter: Formatter[Name] = Formatter.DefaultNameFormatter
   ): Parser.Aux[H :: T, Option[H] :: D] =
     ConsParser(
       Arg(

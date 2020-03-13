@@ -5,7 +5,8 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.help.WithHelp
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
-import caseapp.core.util.OptionFormatter
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 /**
   * Parses arguments, resulting in a `T` in case of success.
@@ -46,7 +47,7 @@ abstract class Parser[T] {
       args: List[String],
       d: D
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
-    step(args, d, defaultOptionFormatter)
+    step(args, d, defaultNameFormatter)
 
   /**
     * Process the next argument.
@@ -60,13 +61,13 @@ abstract class Parser[T] {
     *
     * @param args: arguments to process
     * @param d: current intermediate result
-    * @param optionFormatter: formats options to the appropriate format
+    * @param nameFormatter: formats name to the appropriate format
     * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
     */
   def step(
       args: List[String],
       d: D,
-      optionFormatter: OptionFormatter
+      nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]]
 
   /**
@@ -78,7 +79,7 @@ abstract class Parser[T] {
     * @param d: final intermediate value
     * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def get(d: D): Either[Error, T] = get(d, defaultOptionFormatter)
+  def get(d: D): Either[Error, T] = get(d, defaultNameFormatter)
 
   /**
     * Get the final result from the final intermediate value.
@@ -87,10 +88,10 @@ abstract class Parser[T] {
     * out of it.
     *
     * @param d: final intermediate value
-    * @param optionFormatter: formats options to the appropriate format
+    * @param nameFormatter: formats names to the appropriate format
     * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def get(d: D, optionFormatter: OptionFormatter): Either[Error, T]
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T]
 
   /**
     * Arguments this parser accepts.
@@ -104,11 +105,11 @@ abstract class Parser[T] {
   def stopAtFirstUnrecognized: Parser[T] =
     StopAtFirstUnrecognizedParser(this)
 
-  def defaultOptionFormatter: OptionFormatter =
-    OptionFormatter.DefaultFormatter
+  def defaultNameFormatter: Formatter[Name] =
+    Formatter.DefaultNameFormatter
 
-  def optionFormatter(f: OptionFormatter): Parser[T] =
-    OptionFormatterParser(this, f)
+  def nameFormatter(f: Formatter[Name]): Parser[T] =
+    ParserWithNameFormatter(this, f)
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)
