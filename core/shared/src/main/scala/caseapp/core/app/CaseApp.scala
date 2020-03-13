@@ -4,14 +4,18 @@ import caseapp.core.Error
 import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
-  def parser: Parser[T] =
+  def parser: Parser[T] = {
+    val p = parser0.nameFormatter(nameFormatter)
     if (stopAtFirstUnrecognized)
-      parser0.stopAtFirstUnrecognized
+      p.stopAtFirstUnrecognized
     else
-      parser0
+      p
+  }
 
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
@@ -65,6 +69,9 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
   */
   def stopAtFirstUnrecognized: Boolean =
     false
+
+  def nameFormatter: Formatter[Name] =
+    Formatter.DefaultNameFormatter
 
   def main(args: Array[String]): Unit =
     parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized) match {

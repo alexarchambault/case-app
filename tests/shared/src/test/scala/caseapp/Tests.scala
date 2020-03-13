@@ -329,6 +329,12 @@ object Tests extends TestSuite {
             assert(res == expectedRes)
           }
         }
+
+        "parser with custom name formatter" - {
+          val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c4", "--someString", "aa"))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c4"), Inr(Inr(Inr(Inl(ManualCommandNotAdtOptions.Command4Opts("aa"))))), Nil)))))
+          assert(res == expectedRes)
+        }
       }
 
       "sub commands" - {

@@ -57,7 +57,8 @@ import caseapp.Name
                 }
             }
 
-            res.left
+            res
+              .left
               .map { err =>
                 (Error.ParsingArgument(name, err, nameFormatter), rem0)
               }
@@ -97,6 +98,8 @@ import caseapp.Name
     arg +: tail.args
 
   def mapHead[I](f: H => I): Parser.Aux[I :*: T, D] =
-    map { l => f(l.head) :: l.tail }
+    map { l =>
+      f(l.head) :: l.tail
+    }
 
 }

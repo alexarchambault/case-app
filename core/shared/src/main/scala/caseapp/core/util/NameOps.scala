@@ -4,7 +4,7 @@ import scala.language.implicitConversions
 
 import caseapp.Name
 
-class NameOps(val name: Name) {
+class NameOps(val name: Name) extends AnyVal {
 
   private def isShort: Boolean =
     name.name.length == 1

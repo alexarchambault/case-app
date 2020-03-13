@@ -11,16 +11,16 @@ import shapeless.Typeable
 import caseapp.core.util.Formatter
 
 /**
-  * Provides usage and help messages related to `T`
-  */
+ * Provides usage and help messages related to `T`
+ */
 @data class Help[T](
-    args: Seq[Arg],
-    appName: String,
-    appVersion: String,
-    progName: String,
-    argsNameOption: Option[String],
-    optionsDesc: String = Help.DefaultOptionsDesc,
-    nameFormatter: Formatter[Name] = Help.DefaultNameFormatter
+  args: Seq[Arg],
+  appName: String,
+  appVersion: String,
+  progName: String,
+  argsNameOption: Option[String],
+  optionsDesc: String = Help.DefaultOptionsDesc,
+  nameFormatter: Formatter[Name] = Help.DefaultNameFormatter
 ) {
 
   /** One-line usage message for `T` */
@@ -98,6 +98,7 @@ object Help {
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
 
+
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
     optionsMessage(args, Formatter.DefaultNameFormatter)
@@ -107,6 +108,7 @@ object Help {
     args
       .collect {
         case arg if !arg.noHelp =>
+
           val names = (arg.name +: arg.extraNames).distinct
 
           // FIXME Flags that accept no value are not given the right help message here
@@ -122,6 +124,7 @@ object Help {
           (usage :: message.toList).mkString(Help.NL)
       }
       .mkString(Help.NL)
+
 
   // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
 
@@ -142,12 +145,7 @@ object Help {
       parser.args,
       appName0,
       appVersion().fold("")(_.appVersion),
-      progName().fold(
-        CaseUtil
-          .pascalCaseSplit(appName0.toList)
-          .map(_.toLowerCase)
-          .mkString("-")
-      )(_.progName),
+      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
       argsName().map(_.argsName),
       Help.DefaultOptionsDesc,
       parser.defaultNameFormatter

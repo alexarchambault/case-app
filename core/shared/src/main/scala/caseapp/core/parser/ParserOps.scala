@@ -9,14 +9,14 @@ import caseapp.core.util.Formatter
 class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends AnyVal {
 
   def add[H: ArgParser](
-      name: String,
-      default: => Option[H] = None,
-      extraNames: Seq[Name] = Nil,
-      valueDescription: Option[ValueDescription] = None,
-      helpMessage: Option[HelpMessage] = None,
-      noHelp: Boolean = false,
-      isFlag: Boolean = false,
-      formatter: Formatter[Name] = Formatter.DefaultNameFormatter
+    name: String,
+    default: => Option[H] = None,
+    extraNames: Seq[Name] = Nil,
+    valueDescription: Option[ValueDescription] = None,
+    helpMessage: Option[HelpMessage] = None,
+    noHelp: Boolean = false,
+    isFlag: Boolean = false,
+    formatter: Formatter[Name] = Formatter.DefaultNameFormatter
   ): Parser.Aux[H :: T, Option[H] :: D] =
     ConsParser(
       Arg(

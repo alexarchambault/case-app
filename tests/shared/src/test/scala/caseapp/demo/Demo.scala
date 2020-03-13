@@ -3,6 +3,7 @@ package demo
 
 import caseapp.core.app.CommandAppA
 import caseapp.core.help.CommandsHelp
+import caseapp.core.util.Formatter
 
 @AppVersion("0.1.0")
 @ArgsName("files")
@@ -114,16 +115,25 @@ object ManualCommandNotAdtStuff {
     }
   }
 
+  case object Command4NameFormatter extends CaseApp[ManualCommandNotAdtOptions.Command4Opts] {
+    override def nameFormatter: Formatter[Name] = (name: Name) => name.name
+    def run(options: ManualCommandNotAdtOptions.Command4Opts, args: RemainingArgs): Unit = {
+
+    }
+  }
+
   val parser = CommandParser.nil
     .add(Command1)
     .add(Command2)
     .add(Command3StopAtUnreco)
+    .add(Command4NameFormatter)
     .reverse
 
   val help = CommandsHelp.nil
     .add(Command1)
     .add(Command2)
     .add(Command3StopAtUnreco)
+    .add(Command4NameFormatter)
     .reverse
 
 }
