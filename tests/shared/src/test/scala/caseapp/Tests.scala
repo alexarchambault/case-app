@@ -6,6 +6,7 @@ import caseapp.core.help.{Help, WithHelp}
 import caseapp.demo._
 import shapeless.{Inl, Inr}
 import utest._
+import caseapp.core.util.Formatter
 
 object Tests extends TestSuite {
 
@@ -45,7 +46,7 @@ object Tests extends TestSuite {
       }
       * - {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
-        val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.ArgumentAlreadySpecified("???", Nil)))
+        val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.ArgumentAlreadySpecified("???", Nil), Formatter.DefaultNameFormatter))
         assert(res == expectedRes)
       }
 
@@ -58,7 +59,7 @@ object Tests extends TestSuite {
 
     "fail if arg fails to parse" - {
       val res = Parser[FewArgs].parse(Seq("--num-foo", "true"))
-      val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.MalformedValue("integer", "true")))
+      val expectedRes = Left(Error.ParsingArgument(Name("numFoo"), Error.MalformedValue("integer", "true"), Formatter.DefaultNameFormatter))
       assert(res == expectedRes)
     }
 
@@ -328,6 +329,12 @@ object Tests extends TestSuite {
             assert(res == expectedRes)
           }
         }
+
+        "parser with custom name formatter" - {
+          val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c4", "--someString", "aa"))
+          val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c4"), Inr(Inr(Inr(Inl(ManualCommandNotAdtOptions.Command4Opts("aa"))))), Nil)))))
+          assert(res == expectedRes)
+        }
       }
 
       "sub commands" - {
@@ -409,6 +416,21 @@ object Tests extends TestSuite {
         val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("foo", "--", "--other"), Nil)))
         assert(res == expected)
       }
+    }
+
+    "parse with custom option formatter" - {
+      val res =
+        Parser[FewArgs]
+          .nameFormatter((n: Name) => n.name)
+          .detailedParse(
+            Seq("--value", "b", "--numFoo", "1")
+          )
+
+      val expectedRes =
+        Right(
+          (FewArgs("b", 1), RemainingArgs(Seq(), Seq()))
+        )
+      assert(res == expectedRes)
     }
 
   }

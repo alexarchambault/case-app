@@ -8,6 +8,7 @@ import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
 import shapeless.Typeable
+import caseapp.core.util.Formatter
 
 /**
  * Provides usage and help messages related to `T`
@@ -18,7 +19,8 @@ import shapeless.Typeable
   appVersion: String,
   progName: String,
   argsNameOption: Option[String],
-  optionsDesc: String = "[options]"
+  optionsDesc: String = Help.DefaultOptionsDesc,
+  nameFormatter: Formatter[Name] = Help.DefaultNameFormatter
 ) {
 
   /** One-line usage message for `T` */
@@ -31,7 +33,7 @@ import shapeless.Typeable
     ).filter(_.nonEmpty).mkString(" ")
 
   /** Options description for `T` */
-  def options: String = Help.optionsMessage(args)
+  def options: String = Help.optionsMessage(args, nameFormatter)
 
   /**
     * Full multi-line help message for `T`.
@@ -65,8 +67,8 @@ import shapeless.Typeable
   }
 
   def duplicates: Map[String, Seq[Arg]] = {
-    val pairs = args.map(a => a.name.option -> a) ++
-      args.flatMap(a => a.extraNames.map(n => n.option -> a))
+    val pairs = args.map(a => a.name.option(nameFormatter) -> a) ++
+      args.flatMap(a => a.extraNames.map(n => n.option(nameFormatter) -> a))
     pairs
       .groupBy(_._1)
       .mapValues(_.map(_._2))
@@ -90,6 +92,8 @@ import shapeless.Typeable
 }
 
 object Help {
+  val DefaultOptionsDesc = "[options]"
+  val DefaultNameFormatter = Formatter.DefaultNameFormatter
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
@@ -97,6 +101,10 @@ object Help {
 
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
+    optionsMessage(args, Formatter.DefaultNameFormatter)
+
+  /** Option message for `args` */
+  def optionsMessage(args: Seq[Arg], nameFormatter: Formatter[Name]): String =
     args
       .collect {
         case arg if !arg.noHelp =>
@@ -110,7 +118,8 @@ object Help {
 
           val message = arg.helpMessage.map(Help.TB + _.message)
 
-          val usage = s"${Help.WW}${names.map(_.option) mkString " | "}  ${valueDescription.map(_.message).mkString}"
+          val usage =
+            s"${Help.WW}${names.map(_.option(nameFormatter)) mkString " | "}  ${valueDescription.map(_.message).mkString}"
 
           (usage :: message.toList).mkString(Help.NL)
       }
@@ -137,7 +146,9 @@ object Help {
       appName0,
       appVersion().fold("")(_.appVersion),
       progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
-      argsName().map(_.argsName)
+      argsName().map(_.argsName),
+      Help.DefaultOptionsDesc,
+      parser.defaultNameFormatter
     )
   }
 

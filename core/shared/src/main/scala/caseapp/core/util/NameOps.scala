@@ -9,31 +9,33 @@ class NameOps(val name: Name) extends AnyVal {
   private def isShort: Boolean =
     name.name.length == 1
 
-  private def optionName: String =
-    CaseUtil.pascalCaseSplit(name.name.toList).map(_.toLowerCase).mkString("-")
-  private def optionEq: String =
-    if (isShort) s"-${name.name}=" else s"--$optionName="
+  private def optionEq(nameFormatter: Formatter[Name]): String = 
+    option(nameFormatter) + "="
 
-  def option: String =
-    if (isShort) s"-${name.name}" else s"--$optionName"
+  def option(nameFormatter: Formatter[Name]): String =
+    if (isShort) s"-${name.name}" else s"--${nameFormatter.format(name)}"
 
-  def apply(args: List[String], isFlag: Boolean): Option[List[String]] =
+  def apply(
+      args: List[String],
+      isFlag: Boolean,
+      formatter: Formatter[Name]
+  ): Option[List[String]] =
     args match {
       case Nil => None
       case h :: t =>
-        if (h == option)
+        if (h == option(formatter))
           Some(t)
-        else if (!isFlag && h.startsWith(optionEq))
-          Some(h.drop(optionEq.length) :: t)
+        else if (!isFlag && h.startsWith(optionEq(formatter)))
+          Some(h.drop(optionEq(formatter).length) :: t)
         else
           None
     }
 
-  def apply(arg: String): Either[Unit, Option[String]] =
-    if (arg == option)
+  def apply(arg: String, formatter: Formatter[Name]): Either[Unit, Option[String]] =
+    if (arg == option(formatter))
       Right(None)
-    else if (arg.startsWith(optionEq))
-      Right(Some(arg.drop(optionEq.length)))
+    else if (arg.startsWith(optionEq(formatter)))
+      Right(Some(arg.drop(optionEq(formatter).length)))
     else
       Left(())
 

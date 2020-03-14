@@ -5,6 +5,8 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import shapeless.{:: => :*:, HList}
 import dataclass.data
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 @data class ConsParser[H, T <: HList, DT <: HList](
   arg: Arg,
@@ -18,14 +20,18 @@ import dataclass.data
   def init: D =
     None :: tail.init
 
-  def step(args: List[String], d: Option[H] :*: tail.D): Either[(Error, List[String]), Option[(D, List[String])]] =
+  def step(
+      args: List[String],
+      d: Option[H] :*: tail.D,
+      nameFormatter: Formatter[Name]
+  ): Either[(Error, List[String]), Option[(D, List[String])]] =
     args match {
       case Nil =>
         Right(None)
 
       case firstArg :: rem =>
         val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
-          .map(n => n -> n(firstArg))
+          .map(n => n -> n(firstArg, nameFormatter))
           .collectFirst {
             case (n, Right(valueOpt)) => n -> valueOpt
           }
@@ -54,27 +60,27 @@ import dataclass.data
             res
               .left
               .map { err =>
-                (Error.ParsingArgument(name, err), rem0)
+                (Error.ParsingArgument(name, err, nameFormatter), rem0)
               }
               .map(_.map((_, rem0)))
 
           case None =>
             tail
-              .step(args, d.tail)
+              .step(args, d.tail, nameFormatter)
               .map(_.map {
                 case (t, args) => (d.head :: t, args)
               })
         }
     }
 
-  def get(d: D): Either[Error, H :*: T] = {
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :*: T] = {
 
     val maybeHead = d.head
       .orElse(default())
       .toRight {
         Error.RequiredOptionNotSpecified(
-          arg.name.option,
-          arg.extraNames.map(_.option)
+          arg.name.option(nameFormatter),
+          arg.extraNames.map(_.option(nameFormatter))
         )
       }
 

@@ -136,6 +136,20 @@ object HelpTests extends TestSuite {
 
     }
 
+    "generate a help message with custom parser" - {
+
+      implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
+      val message = CaseApp.helpMessage[FewArgs]
+
+      val expectedMessage =
+        """FewArgs
+          |Usage: few-args [options]
+          |  --value  <string>
+          |  --numFoo  <int>""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
   }
 
 }

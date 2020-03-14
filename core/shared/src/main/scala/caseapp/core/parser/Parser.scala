@@ -5,6 +5,8 @@ import caseapp.core.{Arg, Error}
 import caseapp.core.help.WithHelp
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
+import caseapp.core.util.Formatter
+import caseapp.Name
 
 /**
   * Parses arguments, resulting in a `T` in case of success.
@@ -41,7 +43,29 @@ abstract class Parser[T] {
     * @param d: current intermediate result
     * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
     */
-  def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]]
+  final def step(args: List[String], d: D): Either[(Error, List[String]), Option[(D, List[String])]] =
+    step(args, d, defaultNameFormatter)
+
+  /**
+    * Process the next argument.
+    *
+    * If some arguments were successfully processed (third case in return below), the returned remaining argument
+    * sequence must be shorter than the passed `args`.
+    *
+    * This method doesn't fully process `args`. It tries just to parse *one* argument (typically one option `--foo` and
+    * its value `bar`, so two elements from `args` - it can also be only one element in case of a flag), if possible.
+    * If you want to fully process a sequence of arguments, see `parse` or `detailedParse`.
+    *
+    * @param args: arguments to process
+    * @param d: current intermediate result
+    * @param nameFormatter: formats name to the appropriate format
+    * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
+    */
+  def step(
+      args: List[String],
+      d: D,
+      nameFormatter: Formatter[Name]
+  ): Either[(Error, List[String]), Option[(D, List[String])]]
 
   /**
     * Get the final result from the final intermediate value.
@@ -52,7 +76,19 @@ abstract class Parser[T] {
     * @param d: final intermediate value
     * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def get(d: D): Either[Error, T]
+  final def get(d: D): Either[Error, T] = get(d, defaultNameFormatter)
+
+  /**
+    * Get the final result from the final intermediate value.
+    *
+    * Typically fails if some mandatory arguments were not specified, so are missing in `d`, preventing building a `T`
+    * out of it.
+    *
+    * @param d: final intermediate value
+    * @param nameFormatter: formats names to the appropriate format
+    * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
+    */
+  def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T]
 
   /**
     * Arguments this parser accepts.
@@ -65,6 +101,12 @@ abstract class Parser[T] {
     false
   def stopAtFirstUnrecognized: Parser[T] =
     StopAtFirstUnrecognizedParser(this)
+
+  def defaultNameFormatter: Formatter[Name] =
+    Formatter.DefaultNameFormatter
+
+  def nameFormatter(f: Formatter[Name]): Parser[T] =
+    ParserWithNameFormatter(this, f)
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)
