@@ -13,7 +13,7 @@ object Formatter {
     *
     * Default formatter will format option arguments as `foo-bar`.
     */
-  val DefaultNameFormatter = new Formatter[Name] {
+  val DefaultNameFormatter: Formatter[Name] = new Formatter[Name] {
     override def format(name: Name): String =
       CaseUtil
         .pascalCaseSplit(name.name.toList)
