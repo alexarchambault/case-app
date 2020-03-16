@@ -19,7 +19,8 @@ import caseapp.HelpMessage
   def helpMessage(progName: String, commandName: Seq[String]): String = {
     val b = new StringBuilder
     b ++= s"Command: ${commandName.mkString(" ")}${Help.NL}"
-    b ++= helpMessage.map(_.message).getOrElse("")
+    for (m <- helpMessage)
+      b ++= m.message
     b ++= usageMessage(progName, commandName)
     b ++= Help.NL
     b ++= optionsMessage
