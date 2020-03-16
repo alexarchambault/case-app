@@ -444,7 +444,7 @@ object Tests extends TestSuite {
 
       val expectedRes =
         Right(
-          (WithHelp(false, false, Right(FewArgs("b",1))), RemainingArgs(List(), List()))
+          (WithHelp(false, false, Right(FewArgs("b", 1))), RemainingArgs(List(), List()))
         )
       assert(res == expectedRes)
     }
