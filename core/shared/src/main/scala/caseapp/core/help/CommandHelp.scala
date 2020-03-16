@@ -2,10 +2,12 @@ package caseapp.core.help
 
 import caseapp.core.Arg
 import dataclass.data
+import caseapp.HelpMessage
 
 @data class CommandHelp(
   args: Seq[Arg],
-  argsNameOption: Option[String]
+  argsNameOption: Option[String],
+  helpMessage: Option[HelpMessage]
 ) {
 
   def usageMessage(progName: String, commandName: Seq[String]): String =
@@ -17,6 +19,8 @@ import dataclass.data
   def helpMessage(progName: String, commandName: Seq[String]): String = {
     val b = new StringBuilder
     b ++= s"Command: ${commandName.mkString(" ")}${Help.NL}"
+    for (m <- helpMessage)
+      b ++= m.message
     b ++= usageMessage(progName, commandName)
     b ++= Help.NL
     b ++= optionsMessage
