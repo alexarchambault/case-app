@@ -43,6 +43,20 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
+    "generate a help message" - {
+
+      val message = CaseApp.helpMessage[ExampleWithHelpMessage]
+
+      val expectedMessage =
+        """ExampleWithHelpMessage
+          |Example help message
+          |Usage: example-with-help-message [options]
+          |  --foo  <string>
+          |  --bar  <int>""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
     "mark optional options with ? in help messages" - {
       val message = CaseApp.helpMessage[OptBool]
 
@@ -148,6 +162,17 @@ object HelpTests extends TestSuite {
           |  --numFoo  <int>""".stripMargin
 
       checkLines(message, expectedMessage)
+    }
+
+    "generate help message for commands" - {
+      val msg = CommandTest.commandsMessages
+        .messagesMap(List("third"))
+        .helpMessage
+        .map(_.message)
+        .getOrElse("")
+      val expected = "Third help message"
+
+      assert(msg == expected)
     }
 
   }

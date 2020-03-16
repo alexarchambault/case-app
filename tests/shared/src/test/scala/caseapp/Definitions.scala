@@ -111,6 +111,12 @@ object Definitions {
     bar: Int
   )
 
+  @HelpMessage("Example help message")
+  final case class ExampleWithHelpMessage(
+    foo: String,
+    bar: Int
+  )
+
   sealed trait Command
 
   case class First(
@@ -123,6 +129,15 @@ object Definitions {
     fooh: String = "",
     baz: Int = 0
   ) extends Command
+
+  @HelpMessage("Third help message")
+  case class Third(
+    third: Int = 0
+  ) extends Command
+
+  object CommandTest extends CommandApp[Command] {
+    def run(options: Command, remainingArgs: RemainingArgs): Unit = {}
+  }
 
   case class Default0(bah: Double = 0.0)
 

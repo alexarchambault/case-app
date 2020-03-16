@@ -9,6 +9,7 @@ import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
 import shapeless.Typeable
 import caseapp.core.util.Formatter
+import caseapp.HelpMessage
 
 /**
  * Provides usage and help messages related to `T`
@@ -20,7 +21,8 @@ import caseapp.core.util.Formatter
   progName: String,
   argsNameOption: Option[String],
   optionsDesc: String = Help.DefaultOptionsDesc,
-  nameFormatter: Formatter[Name] = Help.DefaultNameFormatter
+  nameFormatter: Formatter[Name] = Help.DefaultNameFormatter,
+  helpMessage: Option[HelpMessage] = Help.DefaultHelpMessage
 ) {
 
   /** One-line usage message for `T` */
@@ -47,6 +49,7 @@ import caseapp.core.util.Formatter
     if (appVersion.nonEmpty)
       b ++= s" $appVersion"
     b ++= Help.NL
+    helpMessage.foreach(msg => b ++= s"${msg.message}${Help.NL}")
     b ++= usage
     b ++= Help.NL
     b ++= options
@@ -94,6 +97,7 @@ import caseapp.core.util.Formatter
 object Help {
   val DefaultOptionsDesc = "[options]"
   val DefaultNameFormatter = Formatter.DefaultNameFormatter
+  val DefaultHelpMessage = Option.empty[HelpMessage]
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
@@ -136,7 +140,8 @@ object Help {
      appName: AnnotationOption[AppName, T],
      appVersion: AnnotationOption[AppVersion, T],
      progName: AnnotationOption[ProgName, T],
-     argsName: AnnotationOption[ArgsName, T]
+     argsName: AnnotationOption[ArgsName, T],
+     helpMessage: AnnotationOption[HelpMessage, T], 
    ): Help[T] = {
 
     val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
@@ -148,7 +153,8 @@ object Help {
       progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
       argsName().map(_.argsName),
       Help.DefaultOptionsDesc,
-      parser.defaultNameFormatter
+      parser.defaultNameFormatter,
+      helpMessage()
     )
   }
 

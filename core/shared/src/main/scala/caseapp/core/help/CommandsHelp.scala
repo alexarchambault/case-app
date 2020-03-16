@@ -8,6 +8,7 @@ import shapeless.{:+:, CNil, Coproduct, LabelledGeneric, Strict, Witness}
 import shapeless.labelled.FieldType
 
 import scala.language.implicitConversions
+import caseapp.HelpMessage
 
 
 @data class CommandsHelp[T](
@@ -32,7 +33,8 @@ object CommandsHelp {
      commandName: AnnotationOption[CommandName, H],
      parser: Strict[Parser[H]],
      argsName: AnnotationOption[ArgsName, H],
-     tail: CommandsHelp[T]
+     tail: CommandsHelp[T],
+     helpMessage: AnnotationOption[HelpMessage, H]
    ): CommandsHelp[FieldType[K, H] :+: T] = {
     // FIXME Duplicated in CommandParser.ccons
     val name = commandName().map(_.commandName).getOrElse {
@@ -43,7 +45,8 @@ object CommandsHelp {
 
     CommandsHelp((Seq(name) -> CommandHelp(
       parser.value.args,
-      argsName().map(_.argsName)
+      argsName().map(_.argsName),
+      helpMessage()
     )) +: tail.messages)
   }
 

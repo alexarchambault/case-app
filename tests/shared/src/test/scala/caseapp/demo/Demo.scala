@@ -43,6 +43,7 @@ final case class First(
 ) extends DemoCommand
 
 @CommandName("second")
+@HelpMessage("second cmd help")
 final case class Secondd(
   extra: List[Int],
   @ExtraName("S")
