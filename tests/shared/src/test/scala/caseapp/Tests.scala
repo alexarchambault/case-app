@@ -433,6 +433,22 @@ object Tests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    "parser withHelp works with custom option formatter" - {
+      val res =
+        Parser[FewArgs]
+          .nameFormatter((n: Name) => n.name)
+          .withHelp
+          .detailedParse(
+            Seq("--value", "b", "--numFoo", "1")
+          )
+
+      val expectedRes =
+        Right(
+          (WithHelp(false, false, Right(FewArgs("b", 1))), RemainingArgs(List(), List()))
+        )
+      assert(res == expectedRes)
+    }
+
   }
 
 }
