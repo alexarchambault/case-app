@@ -6,7 +6,7 @@ import Aliases._
 
 object Settings {
 
-  private def scala212 = "2.12.10"
+  private def scala212 = "2.12.11"
   private def scala213 = "2.13.1"
 
   private lazy val isAtLeastScala213 = Def.setting {
