@@ -1,5 +1,10 @@
 language: scala
-jdk: openjdk8
+jdk:
+  - openjdk8
+  - openjdk11
+scala:
+  - 2.12.11
+  - 2.13.1
 git:
   depth: false
 script: sbt ++${TRAVIS_SCALA_VERSION} test
@@ -19,7 +24,6 @@ stages:
     if: (branch = master AND type = push) OR (tag IS present)
 jobs:
   include:
-  - scala: 2.12.11
-  - scala: 2.13.1
   - stage: release
     script: sbt ci-release
+    jdk: openjdk11
