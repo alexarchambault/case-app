@@ -18,6 +18,7 @@ object Settings {
     scalaVersion := scala212,
     crossScalaVersions := Seq(scala212, scala213),
     scalacOptions ++= Seq(
+      "-target:jvm-1.8",
       "-feature",
       "-deprecation"
     ),
