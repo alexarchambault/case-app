@@ -21,7 +21,8 @@ inThisBuild(List(
 lazy val annotations = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
-    caseAppPrefix
+    caseAppPrefix,
+    Mima.settings
   )
 
 lazy val annotationsJVM = annotations.jvm
@@ -31,6 +32,7 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     caseAppPrefix,
+    Mima.settings,
     libs ++= Seq(
       Deps.shapeless.value,
       Deps.scalaCompiler.value % "provided",
@@ -46,6 +48,7 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     name := "case-app",
+    Mima.settings,
     libraryDependencies += Deps.dataClass % Provided
   )
 
@@ -53,6 +56,7 @@ lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
+  .disablePlugins(MimaPlugin)
   .dependsOn(core)
   .settings(
     shared,
@@ -70,6 +74,7 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     caseAppPrefix,
+    Mima.settings,
     libs ++= Seq(
       Deps.refined.value,
       Deps.utest.value % "test"
@@ -80,5 +85,6 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
 lazy val refinedJVM = refined.jvm
 lazy val refinedJS = refined.js
 
+disablePlugins(MimaPlugin)
 skip.in(publish) := true
 crossScalaVersions := Nil

@@ -4,11 +4,10 @@ jdk:
   - openjdk11
 scala:
   - 2.12.11
-  - 2.13.1
+  - 2.13.2
 git:
   depth: false
-script: sbt ++${TRAVIS_SCALA_VERSION} test
-sudo: false
+script: sbt ++${TRAVIS_SCALA_VERSION} test mimaReportBinaryIssues
 cache:
   directories:
   - $HOME/.cache
