@@ -4,9 +4,21 @@ import caseapp.core.Error
 import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
+import caseapp.Name
+import caseapp.core.app.{AppRunners, ErrorOut, HelpOut, Run, UsageOut}
+import caseapp.core.util.Formatter
 import cats.effect.{ExitCode, IO, IOApp}
 
-abstract class IOCaseApp[T](implicit val parser: Parser[T], val messages: Help[T]) extends IOApp {
+abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) extends IOApp {
+
+  def parser: Parser[T] = {
+    val p = parser0.nameFormatter(nameFormatter)
+    if (stopAtFirstUnrecognized)
+      p.stopAtFirstUnrecognized
+    else
+      p
+  }
+
   def run(options: T, remainingArgs: RemainingArgs): IO[ExitCode]
 
   def error(message: Error): IO[ExitCode] = IO {
@@ -44,18 +56,24 @@ abstract class IOCaseApp[T](implicit val parser: Parser[T], val messages: Help[T
     */
   def expandArgs(args: List[String]): List[String] = args
 
+  /**
+    * Whether to stop parsing at the first unrecognized argument.
+    *
+    * That is, stop parsing at the first non option (not starting with "-"), or
+    * the first unrecognized option. The unparsed arguments are put in the `args`
+    * argument of `run`.
+    */
+  def stopAtFirstUnrecognized: Boolean =
+    false
+
+  def nameFormatter: Formatter[Name] =
+    Formatter.DefaultNameFormatter
+
   override def run(args: List[String]): IO[ExitCode] =
-    parser.withHelp.detailedParse(expandArgs(args)) match {
-      case Left(err) =>
-        error(err)
-      case Right((WithHelp(true, _, _), _)) =>
-        usageAsked
-      case Right((WithHelp(_, true, _), _)) =>
-        helpAsked
-      case Right((WithHelp(_, _, t), remainingArgs)) =>
-        t.fold(
-          error,
-          run(_, remainingArgs)
-        )
+    AppRunners.interpretCaseArgs[T](expandArgs(args)) match {
+      case Run(t, remainingArgs) => run(t, remainingArgs)
+      case ErrorOut(err) => error(err)
+      case HelpOut => helpAsked
+      case UsageOut => usageAsked
     }
 }
