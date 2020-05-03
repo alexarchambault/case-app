@@ -43,6 +43,20 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
 
+lazy val cats = crossProject(JSPlatform, JVMPlatform)
+  .dependsOn(core)
+  .settings(
+    shared,
+    name := "case-app-cats",
+    Mima.settings,
+    libs ++= Seq(
+      Deps.catsEffect.value
+    )
+  )
+
+lazy val catsJVM = cats.jvm
+lazy val catsJS = cats.js
+
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(annotations, util)
   .settings(
