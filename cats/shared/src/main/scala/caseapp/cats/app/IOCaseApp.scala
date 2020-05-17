@@ -8,6 +8,9 @@ import caseapp.Name
 import caseapp.core.util.Formatter
 import cats.effect.{ExitCode, IO, IOApp}
 
+/**
+  * [[cats.effect.IO]]
+  */
 abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) extends IOApp {
 
   def parser: Parser[T] = {
