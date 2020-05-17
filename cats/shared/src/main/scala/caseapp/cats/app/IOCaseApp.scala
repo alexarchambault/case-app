@@ -5,7 +5,6 @@ import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 import caseapp.Name
-import caseapp.core.app.{AppRunners, ErrorOut, HelpOut, Run, UsageOut}
 import caseapp.core.util.Formatter
 import cats.effect.{ExitCode, IO, IOApp}
 
@@ -23,7 +22,7 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
 
   def error(message: Error): IO[ExitCode] = IO {
     Console.err.println(message.message)
-    ExitCode(1)
+    ExitCode.Error
   }
 
   def helpAsked: IO[ExitCode] = IO {
@@ -70,10 +69,11 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
     Formatter.DefaultNameFormatter
 
   override def run(args: List[String]): IO[ExitCode] =
-    AppRunners.interpretCaseArgs[T](expandArgs(args)) match {
-      case Run(t, remainingArgs) => run(t, remainingArgs)
-      case ErrorOut(err) => error(err)
-      case HelpOut => helpAsked
-      case UsageOut => usageAsked
+    parser.withHelp.detailedParse(args) match {
+      case Left(err) => error(err)
+      case Right((WithHelp(true, _, _), _)) => usageAsked
+      case Right((WithHelp(_, true, _), _)) => helpAsked
+      case Right((WithHelp(_, _, Left(err)), _)) => error(err)
+      case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
     }
 }
