@@ -1,4 +1,4 @@
-package caseapp.cats.app
+package caseapp.cats
 
 import caseapp.core.commandparser.CommandParser
 import caseapp.core.help.CommandsHelp
