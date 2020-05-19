@@ -8,9 +8,6 @@ import caseapp.Name
 import caseapp.core.util.Formatter
 import cats.effect.{ExitCode, IO, IOApp}
 
-/**
-  * [[cats.effect.IO]]
-  */
 abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) extends IOApp {
 
   def parser: Parser[T] = {
@@ -23,20 +20,20 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
 
   def run(options: T, remainingArgs: RemainingArgs): IO[ExitCode]
 
-  def error(message: Error): IO[ExitCode] = IO {
-    Console.err.println(message.message)
-    ExitCode.Error
-  }
+  def error(message: Error): IO[ExitCode] =
+    IO(Console.err.println(message.message))
+      .as(ExitCode.Error)
 
-  def helpAsked: IO[ExitCode] = IO {
+  def helpAsked: IO[ExitCode] =
     println(messages.withHelp.help)
-    ExitCode.Success
-  }
+      .as(ExitCode.Success)
 
-  def usageAsked: IO[ExitCode] = IO {
+  def usageAsked: IO[ExitCode] =
     println(messages.withHelp.usage)
-    ExitCode.Success
-  }
+      .as(ExitCode.Success)
+
+  def println(x: String): IO[Unit] =
+    IO(Console.println(x))
 
   /**
     * Arguments are expanded then parsed. By default, argument expansion is the identity function.

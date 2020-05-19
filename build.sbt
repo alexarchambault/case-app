@@ -71,7 +71,7 @@ lazy val coreJS = core.js
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .disablePlugins(MimaPlugin)
-  .dependsOn(core)
+  .dependsOn(cats, core)
   .settings(
     shared,
     caseAppPrefix,
