@@ -6,7 +6,7 @@ object DslTests extends TestSuite {
 
   final case class Result(foo: Int, bar: String = "ab", value: Double)
 
-  val tests = TestSuite {
+  val tests: Tests = Tests {
 
     "simple" - {
 

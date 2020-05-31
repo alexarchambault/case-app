@@ -8,12 +8,12 @@ import shapeless.{Inl, Inr}
 import utest._
 import caseapp.core.util.Formatter
 
-object Tests extends TestSuite {
+object CaseAppTests extends TestSuite {
 
   import Definitions._
 
 
-  val tests = TestSuite {
+  val tests = Tests {
 
     "parse no args" - {
       val res = Parser[NoArgs].parse(Seq.empty)

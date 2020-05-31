@@ -4,7 +4,7 @@ import cats.effect._
 import caseapp._
 import caseapp.core.help.Help
 import caseapp.core.Error
-import utest.{Tests => UtestTests, _}
+import utest._
 
 import scala.collection.mutable.ArrayBuffer
 
@@ -49,7 +49,7 @@ object CatsTests extends TestSuite {
       .unsafeToFuture()
   }
 
-  override def tests: UtestTests = UtestTests {
+  override def tests: Tests = Tests {
     test("IOCaseApp") - {
       test("output usage") - {
         testCheckStdout(List("--usage"), Help[FewArgs].withHelp.usage)

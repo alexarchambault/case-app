@@ -17,7 +17,7 @@ object HelpTests extends TestSuite {
     @ValueDescription("overridden description") value: String
   )
 
-  val tests = TestSuite {
+  val tests = Tests {
 
     def lines(s: String) = s.linesIterator.toVector
     def checkLines(message: String, expectedMessage: String) = {
