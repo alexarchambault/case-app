@@ -39,30 +39,34 @@ abstract class IOCommandAppWithPreCommand[D, T](implicit
 
   lazy val commands: Seq[Seq[String]] = CommandsHelp[T].messages.map(_._1)
 
-  def helpAsked(): IO[ExitCode] = IO {
-    print(beforeCommandMessages.help)
-    println(s"Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}\n")
-    println(s"Type  $progName command --help  for help on an individual command")
-    ExitCode.Success
-  }
+  def helpAsked(): IO[ExitCode] =
+    println(
+      s"""${beforeCommandMessages.help}
+         |Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}
+         |
+         |Type  $progName command --help  for help on an individual command"""
+        .stripMargin)
+        .as(ExitCode.Success)
 
-  def commandHelpAsked(command: Seq[String]): IO[ExitCode] = IO {
+  def commandHelpAsked(command: Seq[String]): IO[ExitCode] =
     println(commandsMessages.messagesMap(command).helpMessage(beforeCommandMessages.progName, command))
-    ExitCode.Success
-  }
+        .as(ExitCode.Success)
 
-  def usageAsked(): IO[ExitCode] = IO {
-    println(beforeCommandMessages.usage)
-    println(s"Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}\n")
-    println(s"Type  $progName command --usage  for usage of an individual command")
-    ExitCode.Success
-  }
+  def usageAsked(): IO[ExitCode] =
+    println(
+      s"""${beforeCommandMessages.usage}
+         |Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}
+         |
+         |Type  $progName command --usage  for usage of an individual command"""
+        .stripMargin)
+    .as(ExitCode.Success)
 
-  def commandUsageAsked(command: Seq[String]): IO[ExitCode] = IO {
+  def commandUsageAsked(command: Seq[String]): IO[ExitCode] =
     println(commandsMessages.messagesMap(command).usageMessage(beforeCommandMessages.progName, command))
-    ExitCode.Success
-  }
+      .as(ExitCode.Success)
 
+  def println(x: String): IO[Unit] =
+    IO(Console.println(x))
 
   def appName: String = Help[D].appName
   def appVersion: String = Help[D].appVersion

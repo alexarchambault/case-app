@@ -1,67 +1,111 @@
 package caseapp.cats
 
 import cats.effect._
+import cats.effect.concurrent.Ref
 import caseapp._
-import caseapp.core.help.Help
+import caseapp.core.help.{CommandsHelp, Help}
 import caseapp.core.Error
 import utest._
 
-import scala.collection.mutable.ArrayBuffer
+sealed trait RecordedApp {
 
-private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T]) extends IOCaseApp[T]()(parser0, messages) {
+  val stdoutBuff: Ref[IO, List[String]] = Ref.unsafe(List.empty)
+  val stderrBuff: Ref[IO, List[String]] = Ref.unsafe(List.empty)
 
-  private var stdoutBuff = ArrayBuffer.empty[String]
-  private var stderrBuff = ArrayBuffer.empty[String]
+  def run(args: List[String]): IO[ExitCode]
+}
 
-  def stdoutLog: List[String] = stdoutBuff.toList
-  def stderrLog: List[String] = stderrBuff.toList
+private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T]) extends IOCaseApp[T]()(parser0, messages) with RecordedApp {
 
-  override def error(message: Error): IO[ExitCode] = IO {
-    stderrBuff += message.message
-    ExitCode.Error
-  }
+  override def error(message: Error): IO[ExitCode] =
+    stderrBuff.update(message.message :: _)
+      .as(ExitCode.Error)
 
-  override def println(x: String): IO[Unit] = IO {
-    stdoutBuff += x
-  }
+  override def println(x: String): IO[Unit] =
+    stdoutBuff.update(x :: _)
+
+  override def run(options: T, remainingArgs: RemainingArgs): IO[ExitCode] =
+    println(s"run: $options").as(ExitCode.Success)
+}
+
+private class RecordedIOCommandApp[T](implicit parser0: CommandParser[T], messages: CommandsHelp[T]) extends IOCommandApp[T]()(parser0, messages) with RecordedApp {
+
+  override def error(message: Error): IO[ExitCode] =
+    stderrBuff.update(message.message :: _)
+      .as(ExitCode.Error)
+
+  override def println(x: String): IO[Unit] =
+    stdoutBuff.update(x :: _)
 
   override def run(options: T, remainingArgs: RemainingArgs): IO[ExitCode] =
     println(s"run: $options").as(ExitCode.Success)
 }
 
 object CatsTests extends TestSuite {
+
   import Definitions._
 
-  private def testCheckStdout(args: List[String], expected: String) =
-    testRunFuture(args, expectedStdout = List(expected), expectedStderr = List.empty)
+  private def testCaseStdout(args: List[String], expected: String) =
+    testRunFuture(new RecordedIOCaseApp[FewArgs](), args, expectedStdout = List(expected), expectedStderr = List.empty)
 
-  private def testCheckStderr(args: List[String], expected: String) =
-    testRunFuture(args, expectedStdout = List.empty, expectedStderr = List(expected))
+  private def testCaseStderr(args: List[String], expected: String) =
+    testRunFuture(new RecordedIOCaseApp[FewArgs](), args, expectedStdout = List.empty, expectedStderr = List(expected))
 
-  private def testRunFuture(args: List[String], expectedStdout: List[String], expectedStderr: List[String]) = {
-    val caseApp = new RecordedIOCaseApp[FewArgs]()
-    caseApp.run(args)
-      .flatMap { _ => IO {
-        val stdoutRes = caseApp.stdoutLog
-        val stderrRes = caseApp.stderrLog
-        assert(stdoutRes == expectedStdout, stderrRes == expectedStderr)
-      }}
+  private def testCommandStdout(args: List[String], expected: String) =
+    testRunFuture(new RecordedIOCommandApp[Command](), args, expectedStdout = List(expected), expectedStderr = List.empty)
+
+  private def testCommandStderr(args: List[String], expected: String) =
+    testRunFuture(new RecordedIOCommandApp[Command](), args, expectedStdout = List.empty, expectedStderr = List(expected))
+
+  private def testRunFuture(app: RecordedApp, args: List[String], expectedStdout: List[String], expectedStderr: List[String]) = {
+    app.run(args)
+      .flatMap { _ =>
+        for {
+          stdoutRes <- app.stdoutBuff.get
+          stderrRes <- app.stderrBuff.get
+        } yield assert(stdoutRes == expectedStdout, stderrRes == expectedStderr)
+      }
       .unsafeToFuture()
   }
 
   override def tests: Tests = Tests {
     test("IOCaseApp") - {
       test("output usage") - {
-        testCheckStdout(List("--usage"), Help[FewArgs].withHelp.usage)
+        testCaseStdout(List("--usage"), Help[FewArgs].withHelp.usage)
       }
       test("output help") - {
-        testCheckStdout(List("--help"), Help[FewArgs].withHelp.help)
+        testCaseStdout(List("--help"), Help[FewArgs].withHelp.help)
       }
       test("parse error") - {
-        testCheckStderr(List("--invalid"), "Unrecognized argument: --invalid")
+        testCaseStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
       test("run") - {
-        testCheckStdout(List("--value", "foo", "--num-foo", "42"), "run: FewArgs(foo,42)")
+        testCaseStdout(List("--value", "foo", "--num-foo", "42"), "run: FewArgs(foo,42)")
+      }
+    }
+    test("IOCommandApp") - {
+      test("output usage") - {
+        testCommandStdout(List("--usage"),
+          """Usage: none.type [options] [command] [command-options]
+            |Available commands: first, second, third
+            |
+            |Type  none.type command --usage  for usage of an individual command""".stripMargin)
+      }
+      test("output help") - {
+        testCommandStdout(List("--help"),
+          """None.type
+            |Usage: none.type [options] [command] [command-options]
+            |
+            |
+            |Available commands: first, second, third
+            |
+            |Type  none.type command --help  for help on an individual command""".stripMargin)
+      }
+      test("parse error") - {
+        testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
+      }
+      test("run") - {
+        testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")
       }
     }
   }

@@ -1,6 +1,7 @@
 package caseapp.cats
 
 import caseapp.core.commandparser.CommandParser
+import caseapp.core.Error
 import caseapp.core.help.CommandsHelp
 import cats.effect.{ExitCode, IO}
 
@@ -10,9 +11,9 @@ abstract class IOCommandApp[T](implicit
 ) extends IOCommandAppWithPreCommand[None.type , T] {
 
   override def beforeCommand(options:  None.type, remainingArgs:  Seq[String]): IO[Option[ExitCode]] = {
-    if (remainingArgs.nonEmpty) IO {
-      Console.err.println(s"Found extra arguments: ${remainingArgs.mkString(" ")}")
-      Some(ExitCode(255))
+    if (remainingArgs.nonEmpty) {
+      error(Error.Other(s"Found extra arguments: ${remainingArgs.mkString(" ")}"))
+        .map(Some(_))
     } else IO.none
   }
 }
