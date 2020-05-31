@@ -104,6 +104,12 @@ object CatsTests extends TestSuite {
       test("parse error") - {
         testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
+      test("output command usage") - {
+        testCommandStdout(List("first", "--usage"), CommandsHelp[Command].messagesMap(List("first")).usageMessage("none.type", List("first")))
+      }
+      test("output command help") - {
+        testCommandStdout(List("first", "--help"), CommandsHelp[Command].messagesMap(List("first")).helpMessage("none.type", List("first")))
+      }
       test("run") - {
         testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")
       }
