@@ -388,7 +388,7 @@ import caseapp.cats._
 import cats.effect._
 
 object IOCaseExample extends IOCaseApp[ExampleOptions] {
-  def run(options: ExampleOptions, arg: RemainingArgs): IO[ExitCode] = {
+  def run(options: ExampleOptions, arg: RemainingArgs): IO[ExitCode] = IO {
     // Core of the app
     // ...
     ExitCode.Success
@@ -396,7 +396,7 @@ object IOCaseExample extends IOCaseApp[ExampleOptions] {
 }
 
 object IOCommandExample extends CommandApp[DemoCommand] {
-  def run(command: DemoCommand, args: RemainingArgs): IO[ExitCOde] = {
+  def run(command: DemoCommand, args: RemainingArgs): IO[ExitCode] = IO {
     // ...
     ExitCode.Success
   }
