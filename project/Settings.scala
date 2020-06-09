@@ -1,6 +1,7 @@
 
 import sbt._
 import sbt.Keys._
+import sbtevictionrules.EvictionRulesPlugin.autoImport.evictionRules
 
 import Aliases._
 
@@ -36,7 +37,11 @@ object Settings {
       if (isAtLeastScala213.value) Seq("-Ymacro-annotations")
       else Nil
     },
-    autoAPIMappings := true
+    autoAPIMappings := true,
+    evictionRules ++= Seq(
+      "org.scala-lang.modules" %% "scala-xml" % "semver",
+      "org.scala-js" %% "scalajs-library" % "semver"
+    )
   )
 
   lazy val dontPublish = Seq(
