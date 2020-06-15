@@ -8,6 +8,7 @@ vscode:
 
 tasks:
   - init: "mkdir -p .vscode && echo '{\"metals.sbtScript\": \"/home/gitpod/.local/share/coursier/bin/sbt\"}' > .vscode/settings.json"
+  - command: for dir in .cache .config .local; do if test -d /home/gitpod/$dir; then if test -d /workspace/$dir; then rm -rf /home/gitpod/$dir; else mv /home/gitpod/$dir /workspace; fi; fi && if test -d /workspace/$dir; then ln -s /workspace/$dir /home/gitpod/; fi; done
 
 ports:
   - port: 8212
