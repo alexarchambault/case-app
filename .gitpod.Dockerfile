@@ -15,4 +15,5 @@ RUN curl -fLo cs https://git.io/coursier-cli-linux &&\
       scalafmt:2.5.3 &&\
     ./cs fetch org.scalameta::metals:0.9.0 >/dev/null &&\
     ./cs fetch org.scala-sbt:sbt:1.3.12 >/dev/null &&\
+    ./cs fetch coursier:2.0.0-RC5-3 >/dev/null &&\
     rm -f cs
