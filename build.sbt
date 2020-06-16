@@ -49,6 +49,9 @@ lazy val cats = crossProject(JSPlatform, JVMPlatform)
     shared,
     name := "case-app-cats",
     Mima.settings,
+    mimaPreviousArtifacts := {
+      mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
+    },
     libs ++= Seq(
       Deps.catsEffect.value
     )
