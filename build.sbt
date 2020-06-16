@@ -43,6 +43,23 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
 
+lazy val cats = crossProject(JSPlatform, JVMPlatform)
+  .dependsOn(core)
+  .settings(
+    shared,
+    name := "case-app-cats",
+    Mima.settings,
+    mimaPreviousArtifacts := {
+      mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
+    },
+    libs ++= Seq(
+      Deps.catsEffect.value
+    )
+  )
+
+lazy val catsJVM = cats.jvm
+lazy val catsJS = cats.js
+
 lazy val core = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(annotations, util)
   .settings(
@@ -57,7 +74,7 @@ lazy val coreJS = core.js
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .disablePlugins(MimaPlugin)
-  .dependsOn(core)
+  .dependsOn(cats, core)
   .settings(
     shared,
     caseAppPrefix,

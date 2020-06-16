@@ -375,8 +375,34 @@ case class Options(
 )
 ```
 
+### Cats Effect
+
+A [cats-effect](https://github.com/typelevel/cats-effect) module is available, providing
+`IO` versions of the application classes referenced above. They all extend [IOApp](https://typelevel.org/cats-effect/datatypes/ioapp.html)
+so [`Timer`](https://typelevel.org/cats-effect/datatypes/timer.html) and [`ContextShift`](https://typelevel.org/cats-effect/datatypes/contextshift.html)
+are conveniently available.
 
 
+```scala
+// additional imports
+import caseapp.cats._
+import cats.effect._
+
+object IOCaseExample extends IOCaseApp[ExampleOptions] {
+  def run(options: ExampleOptions, arg: RemainingArgs): IO[ExitCode] = IO {
+    // Core of the app
+    // ...
+    ExitCode.Success
+  }
+}
+
+object IOCommandExample extends CommandApp[DemoCommand] {
+  def run(command: DemoCommand, args: RemainingArgs): IO[ExitCode] = IO {
+    // ...
+    ExitCode.Success
+  }
+}
+```
 
 ### Migration from the previous version
 
@@ -390,6 +416,8 @@ Add to your `build.sbt`
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
 libraryDependencies += "com.github.alexarchambault" %% "case-app" % "2.0.0-M3"
+// cats-effect module
+libraryDependencies += "com.github.alexarchambault" %% "case-app-cats" % "2.0.0-M3"
 ```
 
 Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
