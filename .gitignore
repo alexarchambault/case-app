@@ -3,3 +3,7 @@ target/
 .idea_modules
 *.swp
 *~
+.bloop/
+.metals/
+.vscode/
+project/metals.sbt
