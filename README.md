@@ -404,31 +404,20 @@ object IOCommandExample extends CommandApp[DemoCommand] {
 }
 ```
 
-### Migration from the previous version
-
-Shared options used to be automatic, and now require the `@Recurse`
-annotation on the field corresponding to the shared options. This prevents
-ambiguities with custom types as above.
-
 ## Usage
 
 Add to your `build.sbt`
 ```scala
 resolvers += Resolver.sonatypeRepo("releases")
-libraryDependencies += "com.github.alexarchambault" %% "case-app" % "2.0.0-M3"
+libraryDependencies += "com.github.alexarchambault" %% "case-app" % "2.0.1"
 // cats-effect module
-libraryDependencies += "com.github.alexarchambault" %% "case-app-cats" % "2.0.0-M3"
+libraryDependencies += "com.github.alexarchambault" %% "case-app-cats" % "2.0.1"
 ```
+The latest version is [![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_2.13.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_2.13).
 
 Note that case-app depends on shapeless 2.3. Use the `1.0.0` version if you depend on shapeless 2.2.
 
-It is built against scala 2.10, 2.11, and 2.12, and 2.13.0-M1, and supports both scala-js and scala-native.
-
-If you are using scala 2.10.x, also add the macro paradise plugin to your build,
-```scala
-libraryDependencies +=
-  compilerPlugin("org.scalamacros" % "paradise" % "2.0.1" cross CrossVersion.full)
-```
+It is built against scala 2.12, and 2.13, and supports Scala.js too.
 
 ## Contributors
 
