@@ -72,6 +72,16 @@ lazy val core = crossProject(JSPlatform, JVMPlatform)
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
 
+lazy val docs = project
+  .in(file("doc"))
+  .enablePlugins(MdocPlugin)
+  .dependsOn(catsJVM, coreJVM)
+  .settings(
+    shared,
+    mdocIn := file("doc/docs"),
+    mdocOut := file("doc/processed-docs")
+  )
+
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .disablePlugins(MimaPlugin)
   .dependsOn(cats, core)
