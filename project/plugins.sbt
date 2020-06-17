@@ -4,6 +4,7 @@ addSbtPlugin(("io.github.alexarchambault.sbt" % "sbt-compatibility" % "0.0.8").e
 addSbtPlugin("io.github.alexarchambault.sbt" % "sbt-eviction-rules" % "0.2.0")
 addSbtPlugin("com.github.alexarchambault.tmp" % "sbt-mima-plugin" % "0.7.1-SNAPSHOT")
 addSbtPlugin("org.scala-js" % "sbt-scalajs" % "1.1.0")
+addSbtPlugin("org.scalameta" % "sbt-mdoc" % "2.2.2")
 addSbtPlugin("org.portable-scala" % "sbt-scalajs-crossproject" % "1.0.0")
 
 resolvers += Resolver.sonatypeRepo("snapshots")

@@ -1,5 +1,6 @@
 target/
 .idea
+node_modules/
 .idea_modules
 *.swp
 *~
