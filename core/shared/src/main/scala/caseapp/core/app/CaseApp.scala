@@ -74,12 +74,12 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     Formatter.DefaultNameFormatter
 
   def main(args: Array[String]): Unit =
-    parser.withHelp.detailedParse(args) match {
+    parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized) match {
       case Left(err) => error(err)
-      case Right((WithHelp(true, _, _), _)) => usageAsked()
       case Right((WithHelp(_, true, _), _)) => helpAsked()
+      case Right((WithHelp(true, _, _), _)) => usageAsked()
       case Right((WithHelp(_, _, Left(err)), _)) => error(err)
-      case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(_, remainingArgs)
+      case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
     }
 }
 
