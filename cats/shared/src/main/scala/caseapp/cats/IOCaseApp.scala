@@ -69,10 +69,10 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
     Formatter.DefaultNameFormatter
 
   override def run(args: List[String]): IO[ExitCode] =
-    parser.withHelp.detailedParse(args) match {
+    parser.withHelp.detailedParse(expandArgs(args), stopAtFirstUnrecognized) match {
       case Left(err) => error(err)
-      case Right((WithHelp(true, _, _), _)) => usageAsked
       case Right((WithHelp(_, true, _), _)) => helpAsked
+      case Right((WithHelp(true, _, _), _)) => usageAsked
       case Right((WithHelp(_, _, Left(err)), _)) => error(err)
       case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
     }
