@@ -102,7 +102,7 @@ This behavior is disabled by default.
 
 To enable argument file expansion, override `CaseApp.expandArgs` as follows:
 
-```
+```scala
 import caseapp.core.parser.PlatformArgsExpander
 
 override def expandArgs(args: List[String]): List[String] = PlatformArgsExpander.expand(args)
@@ -438,4 +438,3 @@ Copyright (c) 2014-2017 Alexandre Archambault and contributors.
 See LICENSE file for more details.
 
 Released under Apache 2.0 license.
-
