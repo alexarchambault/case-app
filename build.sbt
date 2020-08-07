@@ -74,12 +74,12 @@ lazy val coreJS = core.js
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .disablePlugins(MimaPlugin)
-  .dependsOn(cats, core)
+  .dependsOn(cats % "test", core)
   .settings(
     shared,
     caseAppPrefix,
     dontPublish,
-    libs += Deps.utest.value % "test",
+    libs ++= Seq(Deps.utest.value % "test", Deps.catsEffect.value % "test"),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
