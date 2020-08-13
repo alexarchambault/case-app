@@ -2,6 +2,7 @@ package caseapp
 
 import caseapp.core.Error
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
+import _root_.cats.data.NonEmptyList
 
 object Definitions {
 
@@ -29,6 +30,7 @@ object Definitions {
   final case class WithTaggedList(
     list   : List[String]
   )
+  final case class WithNonEmptyList(nel: NonEmptyList[String])
 
   final case class OptBool(
     opt    : Option[Boolean]

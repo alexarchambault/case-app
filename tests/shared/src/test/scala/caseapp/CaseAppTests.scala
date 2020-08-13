@@ -1,5 +1,6 @@
 package caseapp
 
+import _root_.cats.data.NonEmptyList
 import caseapp.core.Error
 import caseapp.core.Error.SeveralErrors
 import caseapp.core.help.{Help, WithHelp}
@@ -7,6 +8,7 @@ import caseapp.demo._
 import shapeless.{Inl, Inr}
 import utest._
 import caseapp.core.util.Formatter
+import caseapp.cats.CatsArgParser._
 
 object CaseAppTests extends TestSuite {
 
@@ -102,6 +104,14 @@ object CaseAppTests extends TestSuite {
     "parse semi-colon separated list args" - {
       val res = Parser[WithTaggedList].parse(Seq("--list", "foo", "--list", "bar", "--list", "other", "extra2"))
       val expectedRes = Right((WithTaggedList(list = List("foo", "bar", "other")), Seq("extra2")))
+      assert(res == expectedRes)
+    }
+
+    "parse nonEmptyList args" - {
+      val res =
+        Parser[WithNonEmptyList].parse(Seq("--nel", "2", "--nel", "5", "extra"))
+      val expectedRes =
+        Right((WithNonEmptyList(nel = NonEmptyList.of("2", "5")), Seq("extra")))
       assert(res == expectedRes)
     }
 
