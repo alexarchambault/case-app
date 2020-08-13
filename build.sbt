@@ -79,7 +79,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
     shared,
     caseAppPrefix,
     dontPublish,
-    libs ++= Seq(Deps.utest.value % "test", Deps.catsEffect.value % "test"),
+    libs += Deps.utest.value % "test",
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
