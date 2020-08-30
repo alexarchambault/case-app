@@ -15,6 +15,6 @@ object Deps {
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
   def shapeless = setting("com.chuusai" %%% "shapeless" % "2.3.3")
-  def utest = setting("com.lihaoyi" %%% "utest" % "0.7.4")
+  def utest = setting("com.lihaoyi" %%% "utest" % "0.7.5")
 
 }
