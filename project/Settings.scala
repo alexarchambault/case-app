@@ -1,6 +1,7 @@
 
 import sbt._
 import sbt.Keys._
+import sbtcompatibility.SbtCompatibilityPlugin.autoImport.compatibilityRules
 import sbtevictionrules.EvictionRulesPlugin.autoImport.evictionRules
 
 import Aliases._
@@ -38,6 +39,10 @@ object Settings {
       else Nil
     },
     autoAPIMappings := true,
+    compatibilityRules ++= Seq(
+      "org.scala-lang.modules" %% "scala-xml" % "semver",
+      "org.scala-js" %% "scalajs-library" % "semver"
+    ),
     evictionRules ++= Seq(
       "org.scala-lang.modules" %% "scala-xml" % "semver",
       "org.scala-js" %% "scalajs-library" % "semver"
