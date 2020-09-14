@@ -1,7 +1,7 @@
 
 import sbt._
 import sbt.Keys._
-import sbtcompatibility.SbtCompatibilityPlugin.autoImport.compatibilityRules
+import sbtcompatibility.SbtCompatibilityPlugin.autoImport._
 import sbtevictionrules.EvictionRulesPlugin.autoImport.evictionRules
 
 import Aliases._
@@ -41,11 +41,15 @@ object Settings {
     autoAPIMappings := true,
     compatibilityRules ++= Seq(
       "org.scala-lang.modules" %% "scala-xml" % "semver",
-      "org.scala-js" %% "scalajs-library" % "semver"
+      "org.scala-js" %% "scalajs-library" % "semver",
+      "org.typelevel" % "cats*" % "semver"
     ),
+    compatibilityIgnored += "org.typelevel" %% "cats-macros",
+    compatibilityIgnored += "org.typelevel" %% "cats-macros_sjs1",
     evictionRules ++= Seq(
       "org.scala-lang.modules" %% "scala-xml" % "semver",
-      "org.scala-js" %% "scalajs-library" % "semver"
+      "org.scala-js" %% "scalajs-library" % "semver",
+      "org.typelevel" % "cats*" % "semver"
     )
   )
 
