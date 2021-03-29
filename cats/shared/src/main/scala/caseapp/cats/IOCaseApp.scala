@@ -65,11 +65,20 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
   def stopAtFirstUnrecognized: Boolean =
     false
 
+  /**
+    * Whether to ignore unrecognized arguments.
+    *
+    * That is, if there are unrecognized arguments, the parsing still succeeds.
+    * The unparsed arguments are put in the `args` argument of `run`.
+    */
+  def ignoreUnrecognized: Boolean =
+    false
+
   def nameFormatter: Formatter[Name] =
     Formatter.DefaultNameFormatter
 
   override def run(args: List[String]): IO[ExitCode] =
-    parser.withHelp.detailedParse(expandArgs(args), stopAtFirstUnrecognized) match {
+    parser.withHelp.detailedParse(expandArgs(args), stopAtFirstUnrecognized, ignoreUnrecognized) match {
       case Left(err) => error(err)
       case Right((WithHelp(_, true, _), _)) => helpAsked
       case Right((WithHelp(true, _, _), _)) => usageAsked
