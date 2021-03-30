@@ -102,6 +102,11 @@ abstract class Parser[T] {
   def stopAtFirstUnrecognized: Parser[T] =
     StopAtFirstUnrecognizedParser(this)
 
+  def defaultIgnoreUnrecognized: Boolean =
+    false
+  def ignoreUnrecognized: Parser[T] =
+    IgnoreUnrecognizedParser(this)
+
   def defaultNameFormatter: Formatter[Name] =
     Formatter.DefaultNameFormatter
 
@@ -119,12 +124,24 @@ abstract class Parser[T] {
   final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] =
     detailedParse(
       args,
-      stopAtFirstUnrecognized = defaultStopAtFirstUnrecognized
+      stopAtFirstUnrecognized = defaultStopAtFirstUnrecognized,
+      ignoreUnrecognized = defaultIgnoreUnrecognized
     )
 
   final def detailedParse(
     args: Seq[String],
     stopAtFirstUnrecognized: Boolean
+  ): Either[Error, (T, RemainingArgs)] =
+    detailedParse(
+      args,
+      stopAtFirstUnrecognized = stopAtFirstUnrecognized,
+      ignoreUnrecognized = defaultIgnoreUnrecognized
+    )
+
+  final def detailedParse(
+    args: Seq[String],
+    stopAtFirstUnrecognized: Boolean,
+    ignoreUnrecognized: Boolean
   ): Either[Error, (T, RemainingArgs)] = {
 
     def helper(
@@ -149,7 +166,9 @@ abstract class Parser[T] {
                       (t, RemainingArgs(extraArgsReverse.reverse, rem))
                   }
               case opt :: rem if opt.startsWith("-") =>
-                if (stopAtFirstUnrecognized)
+                if (ignoreUnrecognized)
+                  helper(current, rem, opt :: extraArgsReverse)
+                else if (stopAtFirstUnrecognized)
                   get(current)
                     // extraArgsReverse should be empty anyway here
                     .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
@@ -190,7 +209,9 @@ abstract class Parser[T] {
   final def withHelp: Parser[WithHelp[T]] = {
     implicit val parser: Parser.Aux[T, D] = this
     val p = ParserWithNameFormatter(Parser[WithHelp[T]], defaultNameFormatter)
-    if (defaultStopAtFirstUnrecognized)
+    if (defaultIgnoreUnrecognized)
+      p.ignoreUnrecognized
+    else if (defaultStopAtFirstUnrecognized)
       p.stopAtFirstUnrecognized
     else
       p

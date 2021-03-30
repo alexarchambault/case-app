@@ -11,7 +11,9 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
 
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)
-    if (stopAtFirstUnrecognized)
+    if (ignoreUnrecognized)
+      p.ignoreUnrecognized
+    else if (stopAtFirstUnrecognized)
       p.stopAtFirstUnrecognized
     else
       p
@@ -70,11 +72,20 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
   def stopAtFirstUnrecognized: Boolean =
     false
 
+  /**
+    * Whether to ignore unrecognized arguments.
+    *
+    * That is, if there are unrecognized arguments, the parsing still succeeds.
+    * The unparsed arguments are put in the `args` argument of `run`.
+    */
+  def ignoreUnrecognized: Boolean =
+    false
+
   def nameFormatter: Formatter[Name] =
     Formatter.DefaultNameFormatter
 
   def main(args: Array[String]): Unit =
-    parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized) match {
+    parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
       case Left(err) => error(err)
       case Right((WithHelp(_, true, _), _)) => helpAsked()
       case Right((WithHelp(true, _, _), _)) => usageAsked()
