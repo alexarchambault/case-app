@@ -436,32 +436,32 @@ object CaseAppTests extends TestSuite {
     "stop at first unrecognized argument if asked" - {
       val parser = Parser[FewArgs]
       * - {
-        val res = parser.detailedParse(Nil, stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Nil, stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(), RemainingArgs(Nil, Nil)))
         assert(res == expected)
       }
       * - {
-        val res = parser.detailedParse(Seq("--value", "a", "--other"), stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Seq("--value", "a", "--other"), stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--other"), Nil)))
         assert(res == expected)
       }
       * - {
-        val res = parser.detailedParse(Seq("--value", "a"), stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Seq("--value", "a"), stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(value = "a"), RemainingArgs(Nil, Nil)))
         assert(res == expected)
       }
       * - {
-        val res = parser.detailedParse(Seq("--value", "a", "--", "--other"), stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Seq("--value", "a", "--", "--other"), stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--", "--other"), Nil)))
         assert(res == expected)
       }
       * - {
-        val res = parser.detailedParse(Seq("foo", "--value", "a"), stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Seq("foo", "--value", "a"), stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(), RemainingArgs(Seq("foo", "--value", "a"), Nil)))
         assert(res == expected)
       }
       * - {
-        val res = parser.detailedParse(Seq("--value", "a", "foo", "--", "--other"), stopAtFirstUnrecognized = true, ignoreUnrecognized = false)
+        val res = parser.detailedParse(Seq("--value", "a", "foo", "--", "--other"), stopAtFirstUnrecognized = true)
         val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("foo", "--", "--other"), Nil)))
         assert(res == expected)
       }

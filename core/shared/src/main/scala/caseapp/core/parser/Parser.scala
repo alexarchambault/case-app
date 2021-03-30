@@ -130,6 +130,16 @@ abstract class Parser[T] {
 
   final def detailedParse(
     args: Seq[String],
+    stopAtFirstUnrecognized: Boolean
+  ): Either[Error, (T, RemainingArgs)] =
+    detailedParse(
+      args,
+      stopAtFirstUnrecognized = stopAtFirstUnrecognized,
+      ignoreUnrecognized = defaultIgnoreUnrecognized
+    )
+
+  final def detailedParse(
+    args: Seq[String],
     stopAtFirstUnrecognized: Boolean,
     ignoreUnrecognized: Boolean
   ): Either[Error, (T, RemainingArgs)] = {
