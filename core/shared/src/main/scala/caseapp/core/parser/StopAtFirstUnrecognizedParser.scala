@@ -20,6 +20,8 @@ import caseapp.Name
     underlying.args
   override def defaultStopAtFirstUnrecognized: Boolean =
     true
+  override def defaultIgnoreUnrecognized: Boolean =
+    underlying.defaultIgnoreUnrecognized
   override def defaultNameFormatter: Formatter[Name] =
     underlying.defaultNameFormatter
 }

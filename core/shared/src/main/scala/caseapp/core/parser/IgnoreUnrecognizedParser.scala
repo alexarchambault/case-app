@@ -19,7 +19,9 @@ import caseapp.Name
   def args: Seq[Arg] =
     underlying.args
   override def defaultStopAtFirstUnrecognized: Boolean =
-    false
+    underlying.defaultStopAtFirstUnrecognized
+  override def defaultIgnoreUnrecognized: Boolean =
+    true
   override def defaultNameFormatter: Formatter[Name] =
     underlying.defaultNameFormatter
 }

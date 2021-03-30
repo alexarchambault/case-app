@@ -209,7 +209,9 @@ abstract class Parser[T] {
   final def withHelp: Parser[WithHelp[T]] = {
     implicit val parser: Parser.Aux[T, D] = this
     val p = ParserWithNameFormatter(Parser[WithHelp[T]], defaultNameFormatter)
-    if (defaultStopAtFirstUnrecognized)
+    if (defaultIgnoreUnrecognized)
+      p.ignoreUnrecognized
+    else if (defaultStopAtFirstUnrecognized)
       p.stopAtFirstUnrecognized
     else
       p

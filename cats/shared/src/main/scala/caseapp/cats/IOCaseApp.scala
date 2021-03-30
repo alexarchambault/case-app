@@ -12,7 +12,9 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
 
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)
-    if (stopAtFirstUnrecognized)
+    if (ignoreUnrecognized)
+      p.ignoreUnrecognized
+    else if (stopAtFirstUnrecognized)
       p.stopAtFirstUnrecognized
     else
       p
