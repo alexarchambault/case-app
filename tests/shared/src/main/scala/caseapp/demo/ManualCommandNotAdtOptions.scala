@@ -17,4 +17,6 @@ object ManualCommandNotAdtOptions {
   @ProgName("c4")
   final case class Command4Opts(someString: String = "default")
 
+  @ProgName("c5")
+  final case class Command5Opts(l: Long = 0)
 }
