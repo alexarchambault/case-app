@@ -326,6 +326,20 @@ object CaseAppTests extends TestSuite {
           }
         }
 
+        "ignore unrecognized argument if asked so" - {
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c5", "-b"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c5"), Inr(Inr(Inr(Inr(Inl(ManualCommandNotAdtOptions.Command5Opts()))))), Seq("-b"))))))
+            assert(res == expectedRes)
+          }
+
+          * - {
+            val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c5", "--foo", "bar", "-l", "1", "--baz"))
+            val expectedRes = Right((Default0(), Nil, Some(Right((Seq("c5"), Inr(Inr(Inr(Inr(Inl(ManualCommandNotAdtOptions.Command5Opts(1)))))), Seq("--foo", "bar", "--baz"))))))
+            assert(res == expectedRes)
+          }
+        }
+
         "stop at first unrecognized argument if asked so" - {
           * - {
             val res = ManualCommandNotAdt.commandParser.parse[Default0](Seq("c3", "-b"))

@@ -123,11 +123,19 @@ object ManualCommandNotAdtStuff {
     }
   }
 
+  case object Command5IgnoreUnrecognized extends CaseApp[ManualCommandNotAdtOptions.Command5Opts] {
+    override def ignoreUnrecognized = true
+    def run(options: ManualCommandNotAdtOptions.Command5Opts, args: RemainingArgs): Unit = {
+
+    }
+  }
+
   val parser = CommandParser.nil
     .add(Command1)
     .add(Command2)
     .add(Command3StopAtUnreco)
     .add(Command4NameFormatter)
+    .add(Command5IgnoreUnrecognized)
     .reverse
 
   val help = CommandsHelp.nil
@@ -135,6 +143,7 @@ object ManualCommandNotAdtStuff {
     .add(Command2)
     .add(Command3StopAtUnreco)
     .add(Command4NameFormatter)
+    .add(Command5IgnoreUnrecognized)
     .reverse
 
 }
