@@ -6,6 +6,31 @@ import shapeless.{Annotations, HList, LabelledGeneric, Strict}
 
 abstract class LowPriorityParserImplicits {
 
+  def derive[
+    CC,
+    L <: HList,
+    D <: HList,
+    N <: HList,
+    V <: HList,
+    M <: HList,
+    H <: HList,
+    R <: HList,
+    P <: HList
+  ](implicit
+    gen: LabelledGeneric.Aux[CC, L],
+    defaults: caseapp.util.Default.AsOptions.Aux[CC, D],
+    names: AnnotationList.Aux[Name, CC, N],
+    valuesDesc: Annotations.Aux[ValueDescription, CC, V],
+    helpMessages: Annotations.Aux[HelpMessage, CC, M],
+    noHelp: Annotations.Aux[Hidden, CC, H],
+    recurse: Annotations.Aux[Recurse, CC, R],
+    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, H, R, P]]
+  ): Parser.Aux[CC, P] =
+    parser
+      .value
+      .apply(defaults(), names(), valuesDesc(), helpMessages(), noHelp())
+      .map(gen.from)
+
   implicit def generic[
     CC,
     L <: HList,
@@ -27,9 +52,15 @@ abstract class LowPriorityParserImplicits {
     recurse: Annotations.Aux[Recurse, CC, R],
     parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, H, R, P]]
   ): Parser.Aux[CC, P] =
-    parser
-      .value
-      .apply(defaults(), names(), valuesDesc(), helpMessages(), noHelp())
-      .map(gen.from)
+    derive[CC, L, D, N, V, M, H, R, P](
+      gen,
+      defaults,
+      names,
+      valuesDesc,
+      helpMessages,
+      noHelp,
+      recurse,
+      parser
+    )
 
 }
