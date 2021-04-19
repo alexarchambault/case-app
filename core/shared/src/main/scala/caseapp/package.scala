@@ -12,8 +12,14 @@ package object caseapp {
   type Parser[T] = core.parser.Parser[T]
   val Parser = core.parser.Parser
 
+  type Help[T] = core.help.Help[T]
+  val Help = core.help.Help
+
   type CommandParser[T] = core.commandparser.CommandParser[T]
   val CommandParser = core.commandparser.CommandParser
+
+  type CommandsHelp[T] = core.help.CommandsHelp[T]
+  val CommandsHelp = core.help.CommandsHelp
 
 
   type CaseApp[T] = core.app.CaseApp[T]

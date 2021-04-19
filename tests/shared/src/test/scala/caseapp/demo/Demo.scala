@@ -2,7 +2,6 @@ package caseapp
 package demo
 
 import caseapp.core.app.CommandAppA
-import caseapp.core.help.CommandsHelp
 import caseapp.core.util.Formatter
 
 @AppVersion("0.1.0")
