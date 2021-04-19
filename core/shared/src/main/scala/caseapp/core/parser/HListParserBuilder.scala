@@ -136,7 +136,6 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
   implicit def hconsRecursive[
      K <: Symbol,
      H,
-    HD,
      T <: HList,
     PT <: HList,
     DT <: HList,
@@ -146,7 +145,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     HT <: HList,
     RT <: HList
   ](implicit
-     headParser: Strict[Parser.Aux[H, HD]],
+     headParser: Strict[Parser[H]],
      tail: Aux[T, DT, NT, VT, MT, HT, RT, PT]
    ): Aux[
     FieldType[K, H] :: T,
@@ -156,7 +155,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     None.type :: MT,
     None.type :: HT,
     Some[Recurse] :: RT,
-    HD :: PT
+    headParser.value.D :: PT
   ] =
     instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
 

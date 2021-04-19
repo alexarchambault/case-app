@@ -57,6 +57,13 @@ object CommandsHelp {
    ): CommandsHelp[S] =
     CommandsHelp(underlying.value.messages)
 
+  def derive[S, C <: Coproduct]
+   (implicit
+     gen: LabelledGeneric.Aux[S, C],
+     underlying: Strict[CommandsHelp[C]]
+   ): CommandsHelp[S] =
+    generic[S, C](gen, underlying)
+
 
   implicit def toCommandsHelpOps[T <: Coproduct](commandsHelp: CommandsHelp[T]): CommandsHelpOps[T] =
     new CommandsHelpOps(commandsHelp)

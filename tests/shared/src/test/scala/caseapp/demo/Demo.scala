@@ -2,8 +2,16 @@ package caseapp
 package demo
 
 import caseapp.core.app.CommandAppA
-import caseapp.core.help.CommandsHelp
 import caseapp.core.util.Formatter
+
+final case class SharedOptions(
+  other: String = ""
+)
+
+object SharedOptions {
+  implicit val parser: Parser[SharedOptions] = Parser.derive
+  implicit val help: Help[SharedOptions] = Help.derive
+}
 
 @AppVersion("0.1.0")
 @ArgsName("files")
@@ -11,8 +19,14 @@ final case class DemoOptions(
   first: Boolean,
   @ExtraName("V") @HelpMessage("Set a value") value : Option[String],
   @ExtraName("v") @HelpMessage("Be verbose") verbose : Int @@ Counter,
-  @ExtraName("S") @ValueDescription("stages")  stages : List[String]
+  @ExtraName("S") @ValueDescription("stages")  stages : List[String],
+  @Recurse shared: SharedOptions = SharedOptions()
 )
+
+object DemoOptions {
+  implicit val parser: Parser[DemoOptions] = Parser.derive
+  implicit val help: Help[DemoOptions] = Help.derive
+}
 
 object Demo extends CaseApp[DemoOptions] {
 

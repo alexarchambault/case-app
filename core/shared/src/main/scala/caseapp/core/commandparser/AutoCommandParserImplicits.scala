@@ -37,4 +37,11 @@ abstract class AutoCommandParserImplicits {
    ): CommandParser[S] =
     underlying.value.map(lgen.from)
 
+  def derive[S, C <: Coproduct]
+   (implicit
+    lgen: LabelledGeneric.Aux[S, C],
+    underlying: Strict[CommandParser[C]]
+   ): CommandParser[S] =
+    generic[S, C](lgen, underlying)
+
 }
