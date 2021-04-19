@@ -132,6 +132,26 @@ object Help {
 
   // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
 
+  def derive[T]
+   (implicit
+     parser: Parser[T],
+     typeable: Typeable[T],
+     appName: AnnotationOption[AppName, T],
+     appVersion: AnnotationOption[AppVersion, T],
+     progName: AnnotationOption[ProgName, T],
+     argsName: AnnotationOption[ArgsName, T],
+     helpMessage: AnnotationOption[HelpMessage, T],
+   ): Help[T] =
+    help[T](
+      parser,
+      typeable,
+      appName,
+      appVersion,
+      progName,
+      argsName,
+      helpMessage
+    )
+
   /** Implicitly derives a `Help[T]` for `T` */
   implicit def help[T]
    (implicit
@@ -141,7 +161,7 @@ object Help {
      appVersion: AnnotationOption[AppVersion, T],
      progName: AnnotationOption[ProgName, T],
      argsName: AnnotationOption[ArgsName, T],
-     helpMessage: AnnotationOption[HelpMessage, T], 
+     helpMessage: AnnotationOption[HelpMessage, T],
    ): Help[T] = {
 
     val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
