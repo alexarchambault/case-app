@@ -14,7 +14,7 @@ object Deps {
   def refined = setting("eu.timepit" %%% "refined" % "0.9.23")
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
-  def shapeless = setting("com.chuusai" %%% "shapeless" % "2.3.3")
+  def shapeless = setting("com.chuusai" %%% "shapeless" % "2.3.6")
   def utest = setting("com.lihaoyi" %%% "utest" % "0.7.8")
 
 }
