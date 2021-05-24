@@ -8,13 +8,13 @@ object Deps {
 
   import Def.setting
 
-  def catsEffect = setting("org.typelevel" %%% "cats-effect" % "2.4.1")
+  def catsEffect = setting("org.typelevel" %%% "cats-effect" % "2.5.1")
   def dataClass = "io.github.alexarchambault" %% "data-class" % "0.2.5"
   def macroParadise = "org.scalamacros" % "paradise" % "2.1.1" cross CrossVersion.patch
   def refined = setting("eu.timepit" %%% "refined" % "0.9.23")
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
   def shapeless = setting("com.chuusai" %%% "shapeless" % "2.3.7")
-  def utest = setting("com.lihaoyi" %%% "utest" % "0.7.8")
+  def utest = setting("com.lihaoyi" %%% "utest" % "0.7.10")
 
 }
