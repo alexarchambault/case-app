@@ -1,1 +1,0 @@
-No changes since `1.1.0-RC3` - simple requalification of `1.1.0-RC3` to `1.1.0`

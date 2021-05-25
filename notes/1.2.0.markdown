@@ -1,5 +1,0 @@
-### Changes
-
-- `ArgParser.instance[T](a => b)` now takes a `hintDescription: String`.
-  Use `ArgParser.instance[T]("hint")(a => b)` instead.
-- `WithHelp.base: T` is now `WithHelp.baseOrError: Either[String, T]`

@@ -1,3 +1,0 @@
-Initial release:
-
-* Parses arguments out of case classes, possibly defined recursively.
