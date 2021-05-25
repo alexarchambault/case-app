@@ -4,8 +4,6 @@ import sbt.Keys._
 import sbtcompatibility.SbtCompatibilityPlugin.autoImport._
 import sbtevictionrules.EvictionRulesPlugin.autoImport.evictionRules
 
-import Aliases._
-
 object Settings {
 
   private def scala212 = "2.12.13"
@@ -24,7 +22,7 @@ object Settings {
       "-feature",
       "-deprecation"
     ),
-    libs ++= {
+    libraryDependencies ++= {
       CrossVersion.partialVersion(scalaVersion.value) match {
         case Some((2, v)) if v >= 13 =>
           // if scala 2.13.0-M4 or later, macro annotations merged into scala-reflect
