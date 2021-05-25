@@ -102,7 +102,5 @@ lazy val refinedJVM = refined.jvm
 lazy val refinedJS = refined.js
 
 disablePlugins(MimaPlugin)
-// No longer a transitive dependency of shapeless.
-ThisBuild / compatibilityIgnored += "org.typelevel" %% "macro-compat"
 skip.in(publish) := true
 crossScalaVersions := Nil
