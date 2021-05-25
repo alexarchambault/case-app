@@ -1,0 +1,53 @@
+name: CI
+on:
+  push:
+    branches:
+    - master
+    tags:
+    - "v*"
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        SCALA_VERSION: ["2.12.13", "2.13.6"]
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.1
+    - uses: laughedelic/coursier-setup@v1
+      with:
+        jvm: 8
+        apps: sbt-launcher:1.2.22
+    - name: Test
+      run: sbt ++${{ matrix.SCALA_VERSION }} test mimaReportBinaryIssues
+
+  publish:
+    needs: test
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.1
+    - uses: laughedelic/coursier-setup@v1
+      with:
+        jvm: 8
+        apps: sbt-launcher:1.2.22
+    - run: .github/scripts/gpg-setup.sh
+      env:
+        PGP_SECRET: ${{ secrets.PGP_SECRET }}
+    - name: Release
+      run: sbt ci-release
+      env:
+        PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
+        PGP_SECRET: ${{ secrets.PGP_SECRET }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
