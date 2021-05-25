@@ -1,7 +1,0 @@
-### Changes
-
-* Add scala 2.12 build (thanks to @larsrh, [#40])
-* Switch to shapeless 2.3.2 (thanks to @larsrh, [#40])
-* Switch to scala-js 0.6.12 (thanks to @larsrh, [#40])
-
-[#40]: https://github.com/alexarchambault/case-app/pull/40

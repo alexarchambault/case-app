@@ -1,7 +1,0 @@
-### Changes
-
-- Switch to scala JS `0.6.13` ([#42], thanks to [@larsrh])
-- Publish for scala `2.12.0-RC2` ([#42], thanks to [@larsrh])
-
-[@larsrh]: https://github.com/larsrh
-[#42]: https://github.com/alexarchambault/case-app/pull/42

@@ -1,7 +1,6 @@
 
 import sbtcrossproject.crossProject
 
-import Aliases._
 import Settings._
 
 inThisBuild(List(
@@ -33,7 +32,7 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
     shared,
     caseAppPrefix,
     Mima.settings,
-    libs ++= Seq(
+    libraryDependencies ++= Seq(
       Deps.shapeless.value,
       Deps.scalaCompiler.value % "provided",
       Deps.scalaReflect.value % "provided"
@@ -52,7 +51,7 @@ lazy val cats = crossProject(JSPlatform, JVMPlatform)
     mimaPreviousArtifacts := {
       mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
     },
-    libs ++= Seq(
+    libraryDependencies ++= Seq(
       Deps.catsEffect.value
     )
   )
@@ -74,12 +73,12 @@ lazy val coreJS = core.js
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform)
   .disablePlugins(MimaPlugin)
-  .dependsOn(cats % "test", core)
+  .dependsOn(cats % Test, core)
   .settings(
     shared,
     caseAppPrefix,
-    dontPublish,
-    libs += Deps.utest.value % "test",
+    skip.in(publish) := true,
+    libraryDependencies += Deps.utest.value % Test,
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
@@ -92,9 +91,9 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
     shared,
     caseAppPrefix,
     Mima.settings,
-    libs ++= Seq(
+    libraryDependencies ++= Seq(
       Deps.refined.value,
-      Deps.utest.value % "test"
+      Deps.utest.value % Test
     ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
@@ -103,7 +102,5 @@ lazy val refinedJVM = refined.jvm
 lazy val refinedJS = refined.js
 
 disablePlugins(MimaPlugin)
-// No longer a transitive dependency of shapeless.
-ThisBuild / compatibilityIgnored += "org.typelevel" %% "macro-compat"
 skip.in(publish) := true
 crossScalaVersions := Nil

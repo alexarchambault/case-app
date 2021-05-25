@@ -1,3 +1,0 @@
-Type-level & seamless command-line argument parsing for Scala:
-
-* Allowed nested case classes with no default value
