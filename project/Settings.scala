@@ -51,12 +51,6 @@ object Settings {
     )
   )
 
-  lazy val dontPublish = Seq(
-    publish := (()),
-    publishLocal := (()),
-    publishArtifact := false
-  )
-
   lazy val caseAppPrefix = {
     name := {
       val shortenedName = name.value
@@ -65,35 +59,6 @@ object Settings {
         .stripSuffix("Native")
       "case-app-" + shortenedName
     }
-  }
-
-  def onlyIn(sbv: String*) = {
-
-    val sbv0 = sbv.toSet
-    val ok = Def.setting {
-      CrossVersion.partialVersion(scalaBinaryVersion.value)
-        .map { case (maj, min) => s"$maj.$min" }
-        .exists(sbv0)
-    }
-
-    Seq(
-      baseDirectory := {
-        val baseDir = baseDirectory.value
-
-        if (ok.value)
-          baseDir
-        else
-          baseDir / "target" / "dummy"
-      },
-      libraryDependencies := {
-        val deps = libraryDependencies.value
-        if (ok.value)
-          deps
-        else
-          Nil
-      },
-      publishArtifact := ok.value
-    )
   }
 
 }
