@@ -9,7 +9,8 @@ import shapeless.labelled.{FieldType, field}
 
 abstract class LowPriorityHListParserBuilder {
 
-  implicit def hconsTaggedNoDefault[
+  @deprecated("Redundant with hconsNoDefault", "2.0.7")
+  def hconsTaggedNoDefault[
     K <: Symbol,
     Tag,
     H,

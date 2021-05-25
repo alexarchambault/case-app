@@ -61,7 +61,8 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
       NilParser
     }
 
-  implicit def hconsTagged[
+  @deprecated("Redundant with hcons", "2.0.7")
+  def hconsTagged[
     K <: Symbol,
     Tag,
     H,

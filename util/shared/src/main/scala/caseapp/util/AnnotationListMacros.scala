@@ -43,7 +43,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
           .asMethod
           .paramLists
           .flatten
-          .map { sym => sym.name.decodedName.toString -> sym }
+          .map { sym => nameAsString(sym.name) -> sym }
           .toMap
 
         val fields = fieldsOf(tpe)
@@ -54,7 +54,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
         }
 
         fields.map { case (name, _) =>
-          val paramConstrSym = constructorSyms(name.decodedName.toString)
+          val paramConstrSym = constructorSyms(nameAsString(name))
 
           paramConstrSym.annotations.collect {
             case ann if ann.tree.tpe =:= annTpe => construct0(ann.tree.children.tail)
