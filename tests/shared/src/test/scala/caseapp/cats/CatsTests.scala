@@ -1,7 +1,7 @@
 package caseapp.cats
 
 import cats.effect._
-import cats.effect.concurrent.Ref
+import cats.effect.unsafe.implicits.global
 import caseapp._
 import caseapp.core.help.{CommandsHelp, Help}
 import caseapp.core.Error
