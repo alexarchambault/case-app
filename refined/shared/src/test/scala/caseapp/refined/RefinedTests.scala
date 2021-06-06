@@ -13,14 +13,14 @@ object RefinedTests extends TestSuite {
 
   val tests = Tests {
 
-    "simple" - {
+    test("simple") {
       case class Args(n: Int, pos: Refined[Int, Positive])
       val res = Parser[Args].parse(Seq("-n", "-6", "--pos", "3"))
       val expectedRes = Right((Args(-6, refineMV(3)), Seq.empty))
       assert(res == expectedRes)
     }
 
-    "error" - {
+    test("error") {
       case class Args(n: Int, pos: Refined[Int, Positive] = refineMV(1))
       val res = Parser[Args].parse(Seq("-n", "-6", "--pos", "-3"))
       val expectedRes = Left(

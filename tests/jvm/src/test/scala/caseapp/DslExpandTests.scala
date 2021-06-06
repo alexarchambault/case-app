@@ -16,14 +16,14 @@ object DslExpandTests  extends TestSuite {
 
   val tests = TestSuite {
 
-    "handle expanded extra user arguments 1" - {
+    test("handle expanded extra user arguments 1") {
       val argfile = Paths.get(DslExpandTests.getClass.getResource("/args1").toURI)
       val res = Parser[NoArgs].detailedParse(PlatformArgsExpander.expand(List(s"@$argfile")))
       val expectedRes = Right((NoArgs(), RemainingArgs(Seq(), Seq("b", "-a", "--other"))))
       assert(res == expectedRes)
     }
 
-    "handle expanded extra user arguments 2" - {
+    test("handle expanded extra user arguments 2") {
       val argfile = Paths.get(DslExpandTests.getClass.getResource("/args2").toURI)
       val res = Parser[NoArgs].detailedParse(PlatformArgsExpander.expand(List("--", s"@$argfile")))
       val expectedRes = Right((NoArgs(), RemainingArgs(Seq(), Seq("b", "-a", "--other"))))

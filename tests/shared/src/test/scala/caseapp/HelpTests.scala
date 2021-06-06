@@ -30,7 +30,7 @@ object HelpTests extends TestSuite {
       assert(messageLines == expectedLines)
     }
 
-    "generate a help message" - {
+    test("generate a help message") {
 
       val message = CaseApp.helpMessage[Example]
 
@@ -43,7 +43,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "generate a help message" - {
+    test("generate a help message") {
 
       val message = CaseApp.helpMessage[ExampleWithHelpMessage]
 
@@ -57,7 +57,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "mark optional options with ? in help messages" - {
+    test("mark optional options with ? in help messages") {
       val message = CaseApp.helpMessage[OptBool]
 
       val expectedMessage =
@@ -68,7 +68,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "mark repeatable options with * in help messages" - {
+    test("mark repeatable options with * in help messages") {
       val message = CaseApp.helpMessage[WithList]
 
       val expectedMessage =
@@ -79,7 +79,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "use custom arg parser descriptions in help messages" - {
+    test("use custom arg parser descriptions in help messages") {
       val message = CaseApp.helpMessage[WithCustom]
 
       val expectedMessage =
@@ -90,7 +90,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "use value descriptions from annotations when given" - {
+    test("use value descriptions from annotations when given") {
       val message = CaseApp.helpMessage[WithValueDescription]
 
       val expectedMessage =
@@ -101,27 +101,27 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "don't add a help message for fields annotated with @Hidden" - {
+    test("don't add a help message for fields annotated with @Hidden") {
 
       val helpLines = Help[Options].help.linesIterator.toVector
 
-      * - {
+      test {
         val res = helpLines.count(_.contains("--first"))
         val expectedRes = 1
         assert(res == expectedRes)
       }
-      * - {
+      test {
         val res = helpLines.count(_.contains("--second"))
         val expectedRes = 0
         assert(res == expectedRes)
       }
     }
 
-    "duplicates" - {
+    test("duplicates") {
 
       import Definitions.Duplicates._
 
-      * - {
+      test {
         val dup = Help[Foo].duplicates
         assert(dup.nonEmpty)
 
@@ -130,7 +130,7 @@ object HelpTests extends TestSuite {
         assert(res == expected)
       }
 
-      * - {
+      test {
         val dup = Help[Bar].duplicates
         assert(dup.nonEmpty)
 
@@ -139,7 +139,7 @@ object HelpTests extends TestSuite {
         assert(res == expected)
       }
 
-      * - {
+      test {
         val dup = Help[Second].duplicates
         assert(dup.nonEmpty)
 
@@ -150,7 +150,7 @@ object HelpTests extends TestSuite {
 
     }
 
-    "generate a help message with custom parser" - {
+    test("generate a help message with custom parser") {
 
       implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
       val message = CaseApp.helpMessage[FewArgs]
@@ -164,7 +164,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    "generate help message for commands" - {
+    test("generate help message for commands") {
       val msg = CommandTest.commandsMessages
         .messagesMap(List("third"))
         .helpMessage

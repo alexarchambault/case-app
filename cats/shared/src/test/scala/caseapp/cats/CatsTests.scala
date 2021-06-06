@@ -72,29 +72,29 @@ object CatsTests extends TestSuite {
   }
 
   override def tests: Tests = Tests {
-    test("IOCaseApp") - {
-      test("output usage") - {
+    test("IOCaseApp") {
+      test("output usage") {
         testCaseStdout(List("--usage"), Help[FewArgs].withHelp.usage)
       }
-      test("output help") - {
+      test("output help") {
         testCaseStdout(List("--help"), Help[FewArgs].withHelp.help)
       }
-      test("parse error") - {
+      test("parse error") {
         testCaseStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
-      test("run") - {
+      test("run") {
         testCaseStdout(List("--value", "foo", "--num-foo", "42"), "run: FewArgs(foo,42)")
       }
     }
-    test("IOCommandApp") - {
-      test("output usage") - {
+    test("IOCommandApp") {
+      test("output usage") {
         testCommandStdout(List("--usage"),
           """Usage: none.type [options] [command] [command-options]
             |Available commands: first, second, third
             |
             |Type  none.type command --usage  for usage of an individual command""".stripMargin)
       }
-      test("output help") - {
+      test("output help") {
         testCommandStdout(List("--help"),
           """None.type
             |Usage: none.type [options] [command] [command-options]
@@ -104,16 +104,16 @@ object CatsTests extends TestSuite {
             |
             |Type  none.type command --help  for help on an individual command""".stripMargin)
       }
-      test("parse error") - {
+      test("parse error") {
         testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
-      test("output command usage") - {
+      test("output command usage") {
         testCommandStdout(List("first", "--usage"), CommandsHelp[Command].messagesMap(List("first")).usageMessage("none.type", List("first")))
       }
-      test("output command help") - {
+      test("output command help") {
         testCommandStdout(List("first", "--help"), CommandsHelp[Command].messagesMap(List("first")).helpMessage("none.type", List("first")))
       }
-      test("run") - {
+      test("run") {
         testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")
       }
     }
