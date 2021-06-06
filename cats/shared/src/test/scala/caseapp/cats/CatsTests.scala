@@ -1,11 +1,14 @@
 package caseapp.cats
 
-import cats.effect._
-import cats.effect.concurrent.Ref
+import _root_.cats.effect._
+import _root_.cats.effect.concurrent.Ref
+import _root_.cats.data.NonEmptyList
 import caseapp._
 import caseapp.core.help.{CommandsHelp, Help}
 import caseapp.core.Error
 import utest._
+
+import caseapp.cats.CatsArgParser._
 
 sealed trait RecordedApp {
 
@@ -113,6 +116,14 @@ object CatsTests extends TestSuite {
       test("run") - {
         testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")
       }
+    }
+
+    test("parse nonEmptyList args") {
+      val res =
+        Parser[WithNonEmptyList].parse(Seq("--nel", "2", "--nel", "5", "extra"))
+      val expectedRes =
+        Right((WithNonEmptyList(nel = NonEmptyList.of("2", "5")), Seq("extra")))
+      assert(res == expectedRes)
     }
   }
 }
