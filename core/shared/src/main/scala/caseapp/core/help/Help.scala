@@ -139,7 +139,7 @@ import caseapp.HelpMessage
           b.append(" options:")
         }
         b.append(format.newLine)
-        b.append(argsAndDescriptions.render("  ", "  ", format.newLine, argsAndDescriptions.widths.map(_.min(45)).toVector))
+        argsAndDescriptions.render(b, "  ", "  ", format.newLine, argsAndDescriptions.widths.map(_.min(45)).toVector)
       }
     }
 }

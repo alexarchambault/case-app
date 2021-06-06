@@ -14,7 +14,11 @@ import dataclass.data
 
   def render(colSeparator: String, linePrefix: String, lineSeparator: String, defaultWidths: IndexedSeq[Int]): String = {
     val b = new StringBuilder
+    render(b, colSeparator, linePrefix, lineSeparator, defaultWidths)
+    b.result()
+  }
 
+  def render(b: StringBuilder, colSeparator: String, linePrefix: String, lineSeparator: String, defaultWidths: IndexedSeq[Int]): Unit =
     for ((line, lineIdx) <- lines.zipWithIndex) {
       b.append(linePrefix)
       val trailingEmptyCount = line.reverseIterator.takeWhile(_.length == 0).length
@@ -30,8 +34,5 @@ import dataclass.data
       if (lineIdx < lines.length - 1)
         b.append(lineSeparator)
     }
-
-    b.result()
-  }
 
 }

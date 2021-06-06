@@ -1,11 +1,12 @@
 package caseapp
 
+import caseapp.core.app.CommandsEntryPoint
 import caseapp.core.help.{Help, HelpFormat}
 import utest._
 
 object HelpTests extends TestSuite {
 
-  import Definitions._
+  import Definitions.{Command => _, First => _, Second => _, Third => _, _}
   import HelpDefinitions._
 
   case class Options(
@@ -218,7 +219,7 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    test("generate help message for commands") {
+    test("generate help message for commands (legacy API)") {
       val msg = CommandTest.commandsMessages
         .messagesMap(List("third"))
         .helpMessage
@@ -227,6 +228,30 @@ object HelpTests extends TestSuite {
       val expected = "Third help message"
 
       assert(msg == expected)
+    }
+
+    test("generate help message for commands") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(First)
+        def commands = Seq(First, Second, Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Options:
+          |  --usage           Print usage and exit
+          |  -h, --help        Print help message and exit
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Commands:
+          |  first
+          |  second
+          |  third   Third help message""".stripMargin
+
+      assert(help == expected)
     }
 
   }

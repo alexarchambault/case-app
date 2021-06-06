@@ -5,6 +5,7 @@ import dataclass._
 
 @data class HelpFormat(
   progName: fansi.Attrs = fansi.Attrs.Empty,
+  commandName: fansi.Attrs = fansi.Attrs.Empty,
   option: fansi.Attrs = fansi.Attrs.Empty,
   newLine: String = System.lineSeparator(),
   terminalWidth: Int = 80,
@@ -34,6 +35,7 @@ object HelpFormat {
     if (ansiColors)
       HelpFormat()
         .withProgName(fansi.Bold.On)
+        .withCommandName(fansi.Bold.On)
         .withOption(fansi.Color.Yellow)
     else
       HelpFormat()
