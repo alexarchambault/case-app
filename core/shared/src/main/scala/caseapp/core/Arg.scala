@@ -21,3 +21,8 @@ import dataclass.data
   noHelp: Boolean = false,
   isFlag: Boolean = false
 )
+
+object Arg {
+  def apply(name: String): Arg =
+    Arg(Name(name))
+}

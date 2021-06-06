@@ -41,6 +41,12 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
   def tupled[P](implicit helper: ParserOps.TupledHelper[T, P]): Parser.Aux[P, D] =
     helper(parser)
 
+  def to[F](implicit helper: ParserOps.ToHelper[T, F]): Parser.Aux[F, D] =
+    helper(parser)
+
+  def toTuple[P](implicit helper: ParserOps.ToTupleHelper[T, P]): Parser.Aux[P, D] =
+    helper(parser)
+
 }
 
 object ParserOps {
@@ -67,6 +73,20 @@ object ParserOps {
           .map(gen.from)
     }
 
+  sealed abstract class ToHelper[T, F] {
+    def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[F, D]
+  }
+
+  implicit def defaultToHelper[F, T <: HList]
+   (implicit
+     gen: Generic.Aux[F, T]
+   ): ToHelper[T, F] =
+    new ToHelper[T, F] {
+      def apply[D](parser: Parser.Aux[T, D]) =
+        parser
+          .map(gen.from)
+    }
+
 
   sealed abstract class TupledHelper[T, P] {
     def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[P, D]
@@ -81,6 +101,21 @@ object ParserOps {
       def apply[D](parser: Parser.Aux[T, D]) =
         parser
           .map(rev.apply)
+          .map(tupler.apply)
+    }
+
+
+  sealed abstract class ToTupleHelper[T, P] {
+    def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[P, D]
+  }
+
+  implicit def defaultToTupleHelper[P, T <: HList]
+   (implicit
+     tupler: ops.hlist.Tupler.Aux[T, P]
+   ): ToTupleHelper[T, P] =
+    new ToTupleHelper[T, P] {
+      def apply[D](parser: Parser.Aux[T, D]) =
+        parser
           .map(tupler.apply)
     }
 

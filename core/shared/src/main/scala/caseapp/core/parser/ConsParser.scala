@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.core.argparser.{ArgParser, Consumed}
+import caseapp.core.argparser.ArgParser
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import shapeless.{:: => :*:, HList}
@@ -15,75 +15,32 @@ import caseapp.Name
   tail: Parser.Aux[T, DT]
 ) extends Parser[H :*: T] {
 
+  private val argument = Argument(arg, argParser, default)
+
   type D = Option[H] :*: DT
 
   def init: D =
-    None :: tail.init
+    argument.init :: tail.init
 
   def step(
       args: List[String],
       d: Option[H] :*: tail.D,
       nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(D, List[String])]] =
-    args match {
-      case Nil =>
-        Right(None)
-
-      case firstArg :: rem =>
-        val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
-          .map(n => n -> n(firstArg, nameFormatter))
-          .collectFirst {
-            case (n, Right(valueOpt)) => n -> valueOpt
-          }
-
-        matchedOpt match {
-          case Some((name, valueOpt)) =>
-
-            val (res, rem0) = valueOpt match {
-              case Some(value) =>
-                val res0 = argParser(d.head, value)
-                  .map(h => Some(Some(h) :: d.tail))
-                (res0, rem)
-              case None =>
-                rem match {
-                  case Nil =>
-                    val res0 = argParser(d.head)
-                      .map(h => Some(Some(h) :: d.tail))
-                    (res0, Nil)
-                  case th :: tRem =>
-                    val (Consumed(usedArg), res) = argParser.optional(d.head, th)
-                    val res0 = res.map(h => Some(Some(h) :: d.tail))
-                    (res0, if (usedArg) tRem else rem)
-                }
-            }
-
-            res
-              .left
-              .map { err =>
-                (Error.ParsingArgument(name, err, nameFormatter), rem0)
-              }
-              .map(_.map((_, rem0)))
-
-          case None =>
-            tail
-              .step(args, d.tail, nameFormatter)
-              .map(_.map {
-                case (t, args) => (d.head :: t, args)
-              })
-        }
+    argument.step(args, d.head, nameFormatter).flatMap {
+      case Some((dHead, rem)) =>
+        Right(Some((dHead :: d.tail, rem)))
+      case None =>
+        tail
+          .step(args, d.tail, nameFormatter)
+          .map(_.map {
+            case (t, args) => (d.head :: t, args)
+          })
     }
 
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :*: T] = {
 
-    val maybeHead = d.head
-      .orElse(default())
-      .toRight {
-        Error.RequiredOptionNotSpecified(
-          arg.name.option(nameFormatter),
-          arg.extraNames.map(_.option(nameFormatter))
-        )
-      }
-
+    val maybeHead = argument.get(d.head, nameFormatter)
     val maybeTail = tail.get(d.tail)
 
     (maybeHead, maybeTail) match {
@@ -101,5 +58,13 @@ import caseapp.Name
     map { l =>
       f(l.head) :: l.tail
     }
+
+  def ::[A](argument: Argument[A]): ConsParser[A, H :*: T, D] =
+    ConsParser[A, H :*: T, D](
+      argument.arg,
+      argument.argParser,
+      argument.default,
+      this
+    )
 
 }
