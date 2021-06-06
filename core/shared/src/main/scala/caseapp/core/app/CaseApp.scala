@@ -1,11 +1,11 @@
 package caseapp.core.app
 
-import caseapp.core.Error
+import caseapp.Name
+import caseapp.core.{Error, RemainingArgs}
+import caseapp.core.complete.{Completer, CompletionItem, HelpCompleter}
 import caseapp.core.help.{Help, WithHelp}
 import caseapp.core.parser.Parser
-import caseapp.core.RemainingArgs
 import caseapp.core.util.Formatter
-import caseapp.Name
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
@@ -18,6 +18,18 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     else
       p
   }
+
+  def completer: Completer[T] =
+    new HelpCompleter[T](messages)
+
+  def complete(args: Seq[String], index: Int): List[CompletionItem] =
+    parser.withHelp.complete(
+      args,
+      index,
+      completer.withHelp,
+      stopAtFirstUnrecognized,
+      ignoreUnrecognized
+    )
 
   def run(options: T, remainingArgs: RemainingArgs): Unit
 

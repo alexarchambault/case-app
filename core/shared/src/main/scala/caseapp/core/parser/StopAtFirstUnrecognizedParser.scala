@@ -12,7 +12,7 @@ import caseapp.Name
       args: List[String],
       d: D,
       nameFormatter: Formatter[Name]
-  ): Either[(Error, List[String]), Option[(D, List[String])]] =
+  ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     underlying.step(args, d, nameFormatter)
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T] =
     underlying.get(d, nameFormatter)

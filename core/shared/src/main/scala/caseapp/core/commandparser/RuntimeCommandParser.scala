@@ -4,6 +4,7 @@ import caseapp.core.app.{CaseApp, Command}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
+import caseapp.core.complete.CompletionItem
 
 object RuntimeCommandParser {
 
@@ -32,7 +33,67 @@ object RuntimeCommandParser {
     tree.command(args).getOrElse((Nil, defaultCommand, args))
   }
 
+  def complete(
+    defaultCommand: Command[_],
+    commands: Seq[Command[_]],
+    args: List[String],
+    index: Int
+  ): List[CompletionItem] = {
+    val map = commandMap(commands)
+    val tree = CommandTree.fromCommandMap(map)
+    val (commandName, command, commandArgs) = tree.command(args).getOrElse((Nil, defaultCommand, args))
+    val prefix = args.applyOrElse(index, (_: Int) => "")
+    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
+    val commandCompletions =
+      if (index < commandName.length) Nil
+      else
+        command.complete(
+          commandArgs,
+          index - commandName.length
+        )
+    commandNameCompletions ++ commandCompletions
+  }
+
+  def complete(
+    commands: Seq[Command[_]],
+    args: List[String],
+    index: Int
+  ): List[CompletionItem] = {
+    val map = commandMap(commands)
+    val tree = CommandTree.fromCommandMap(map)
+    val prefix = args.applyOrElse(index, (_: Int) => "")
+    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
+    val commandArgsCompletions = tree.command(args).toList.flatMap {
+      case (commandName, command, commandArgs) =>
+        if (index < commandName.length) Nil
+        else
+          command.complete(
+            commandArgs,
+            index - commandName.length
+          )
+    }
+    commandNameCompletions ++ commandArgsCompletions
+  }
+
   private final case class CommandTree[T](defaultApp: Option[T], map: Map[String, CommandTree[T]]) {
+
+    @tailrec
+    def complete(prefix: List[String])(implicit ev: T <:< CaseApp[_]): List[CompletionItem] =
+      prefix match {
+        case Nil =>
+          val byApps = map.toList.groupBy(_._2.defaultApp)
+          byApps.toList.sortBy(_._2.head._1).map {
+            case (appOpt, values) =>
+              val values0 = values.map(_._1)
+              CompletionItem(values0.head, appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message)), values0.tail)
+          }
+        case h :: t =>
+          map.get(h) match {
+            case None => Nil
+            case Some(subTree) =>
+              subTree.complete(t)
+          }
+      }
 
     def command(args: List[String]): Option[(List[String], T, List[String])] =
       command(args, Nil)

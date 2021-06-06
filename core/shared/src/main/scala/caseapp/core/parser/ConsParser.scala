@@ -26,15 +26,16 @@ import caseapp.Name
       args: List[String],
       d: Option[H] :*: tail.D,
       nameFormatter: Formatter[Name]
-  ): Either[(Error, List[String]), Option[(D, List[String])]] =
-    argument.step(args, d.head, nameFormatter).flatMap {
-      case Some((dHead, rem)) =>
-        Right(Some((dHead :: d.tail, rem)))
-      case None =>
+  ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
+    argument.step(args, d.head, nameFormatter) match {
+      case Left((err, rem)) => Left((err, arg, rem))
+      case Right(Some((dHead, rem))) =>
+        Right(Some((dHead :: d.tail, arg, rem)))
+      case Right(None) =>
         tail
           .step(args, d.tail, nameFormatter)
           .map(_.map {
-            case (t, args) => (d.head :: t, args)
+            case (t, arg, args) => (d.head :: t, arg, args)
           })
     }
 
