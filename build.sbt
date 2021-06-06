@@ -76,7 +76,10 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     name := "case-app",
-    libraryDependencies += Deps.dataClass % Provided
+    libraryDependencies ++= Seq(
+      Deps.sourcecode.value,
+      Deps.dataClass % Provided
+    )
   )
 
 lazy val coreJVM = core.jvm
