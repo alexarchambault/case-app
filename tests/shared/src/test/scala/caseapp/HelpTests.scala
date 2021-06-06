@@ -204,7 +204,7 @@ object HelpTests extends TestSuite {
 
     }
 
-    test("generate a help message with custom parser") {
+    test("generate a help message with custom formatter") {
 
       implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
       val message = Help[FewArgs].help(format)
