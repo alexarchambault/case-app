@@ -60,3 +60,5 @@ final class Recurse extends StaticAnnotation
   * Do not include this field / argument in the help message
   */
 final class Hidden extends StaticAnnotation
+
+final case class Group(name: String) extends StaticAnnotation

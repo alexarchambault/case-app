@@ -1,7 +1,7 @@
 package caseapp.core
 
-import caseapp.{HelpMessage, Name, ValueDescription}
-import dataclass.data
+import caseapp.{Group, HelpMessage, Name, ValueDescription}
+import dataclass._
 
 /**
   * Infos about an argument / option an application can accept.
@@ -19,7 +19,9 @@ import dataclass.data
   valueDescription: Option[ValueDescription] = None,
   helpMessage: Option[HelpMessage] = None,
   noHelp: Boolean = false,
-  isFlag: Boolean = false
+  isFlag: Boolean = false,
+  @since
+  group: Option[Group] = None
 )
 
 object Arg {

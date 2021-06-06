@@ -94,16 +94,6 @@ object CatsTests extends TestSuite {
             |
             |Type  none.type command --usage  for usage of an individual command""".stripMargin)
       }
-      test("output help") {
-        testCommandStdout(List("--help"),
-          """None.type
-            |Usage: none.type [options] [command] [command-options]
-            |
-            |
-            |Available commands: first, second, third
-            |
-            |Type  none.type command --help  for help on an individual command""".stripMargin)
-      }
       test("parse error") {
         testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }

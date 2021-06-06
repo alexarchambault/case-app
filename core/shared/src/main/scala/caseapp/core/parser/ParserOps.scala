@@ -8,6 +8,7 @@ import caseapp.core.util.Formatter
 
 class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends AnyVal {
 
+  // FIXME group is missing
   def add[H: ArgParser](
     name: String,
     default: => Option[H] = None,

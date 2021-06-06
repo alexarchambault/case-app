@@ -29,13 +29,25 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     exit(1)
   }
 
-  def helpAsked(): Nothing = {
-    println(messages.withHelp.help)
+  protected def helpWithProgName(progName: String): Help[WithHelp[T]] = {
+    val baseHelp = messages.withHelp
+    if (progName.isEmpty || progName == baseHelp.progName) baseHelp
+    else baseHelp.withProgName(progName)
+  }
+
+  def helpAsked(): Nothing =
+    helpAsked("")
+  def helpAsked(progName: String): Nothing = {
+    val help = helpWithProgName(progName)
+    println(help.help)
     exit(0)
   }
 
-  def usageAsked(): Nothing = {
-    println(messages.withHelp.usage)
+  def usageAsked(): Nothing =
+    usageAsked("")
+  def usageAsked(progName: String): Nothing = {
+    val help = helpWithProgName(progName)
+    println(help.usage)
     exit(0)
   }
 
