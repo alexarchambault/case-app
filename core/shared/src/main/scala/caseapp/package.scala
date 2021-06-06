@@ -25,6 +25,8 @@ package object caseapp {
   type CaseApp[T] = core.app.CaseApp[T]
   val CaseApp = core.app.CaseApp
 
+  type Command[T] = core.app.Command[T]
+
   type CommandApp[T] = core.app.CommandApp[T]
 
 

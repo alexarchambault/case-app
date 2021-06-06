@@ -19,7 +19,7 @@ object PlatformTests extends TestSuite {
   CaseApp.parseWithHelp[WithPath] _
 
   val tests = TestSuite {
-    "parse a date" - {
+    test("parse a date") {
       val res = Parser[WithCalendar].parse(Seq("--date", "2014-10-23"))
       val expectedRes = Right((
         WithCalendar(date = new GregorianCalendar(2014, 9, 23)),
@@ -28,7 +28,7 @@ object PlatformTests extends TestSuite {
       assert(res == expectedRes)
     }
 
-    "parse a path" - {
+    test("parse a path") {
       val res = Parser[WithPath].parse(Seq("--path", "/path/to/file.ext"))
       val expectedRes = Right((
         WithPath(path = Paths.get("/path/to/file.ext")),

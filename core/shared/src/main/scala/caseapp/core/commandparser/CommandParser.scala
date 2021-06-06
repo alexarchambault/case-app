@@ -102,11 +102,11 @@ abstract class CommandParser[T] {
                 beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
             }
 
-          case Right(Some((newD, newArgs))) =>
+          case Right(Some((newD, _, newArgs))) =>
             assert(newArgs != args)
             helper(newD, newArgs)
 
-          case Left((msg, rem)) =>
+          case Left((msg, _, rem)) =>
             val remaining = helper(current, rem)
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
         }

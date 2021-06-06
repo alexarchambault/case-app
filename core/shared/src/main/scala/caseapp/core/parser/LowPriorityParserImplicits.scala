@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.{HelpMessage, Hidden, Name, Recurse, ValueDescription}
+import caseapp.{HelpMessage, Group, Hidden, Name, Recurse, ValueDescription}
 import caseapp.util.AnnotationList
 import shapeless.{Annotations, HList, LabelledGeneric, Strict}
 
@@ -13,6 +13,7 @@ abstract class LowPriorityParserImplicits {
     N <: HList,
     V <: HList,
     M <: HList,
+    G <: HList,
     H <: HList,
     R <: HList,
     P <: HList
@@ -22,13 +23,14 @@ abstract class LowPriorityParserImplicits {
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
+    group: Annotations.Aux[Group, CC, G],
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, H, R, P]]
+    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, R, P]]
   ): Parser.Aux[CC, P] =
     parser
       .value
-      .apply(defaults(), names(), valuesDesc(), helpMessages(), noHelp())
+      .apply(defaults(), names(), valuesDesc(), helpMessages(), group(), noHelp())
       .map(gen.from)
 
   implicit def generic[
@@ -38,6 +40,7 @@ abstract class LowPriorityParserImplicits {
     N <: HList,
     V <: HList,
     M <: HList,
+    G <: HList,
     H <: HList,
     R <: HList,
     P <: HList
@@ -48,16 +51,18 @@ abstract class LowPriorityParserImplicits {
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
+    group: Annotations.Aux[Group, CC, G],
     noHelp: Annotations.Aux[Hidden, CC, H],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, H, R, P]]
+    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, R, P]]
   ): Parser.Aux[CC, P] =
-    derive[CC, L, D, N, V, M, H, R, P](
+    derive[CC, L, D, N, V, M, G, H, R, P](
       gen,
       defaults,
       names,
       valuesDesc,
       helpMessages,
+      group,
       noHelp,
       recurse,
       parser

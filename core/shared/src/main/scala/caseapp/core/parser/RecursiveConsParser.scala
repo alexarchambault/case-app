@@ -1,10 +1,10 @@
 package caseapp.core.parser
 
-import caseapp.core.Error
+import caseapp.Name
+import caseapp.core.{Arg, Error}
+import caseapp.core.util.Formatter
 import shapeless.{::, HList}
 import dataclass.data
-import caseapp.core.util.Formatter
-import caseapp.Name
 
 @data class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   headParser: Parser.Aux[H, HD],
@@ -20,7 +20,7 @@ import caseapp.Name
       args: List[String],
       d: D,
       nameFormatter: Formatter[Name]
-  ): Either[(Error, List[String]), Option[(D, List[String])]] =
+  ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
       .step(args, d.head, nameFormatter)
       .flatMap {
@@ -28,10 +28,10 @@ import caseapp.Name
           tailParser
             .step(args, d.tail, nameFormatter)
             .map(_.map {
-              case (t, args) => (d.head :: t, args)
+              case (t, arg, args) => (d.head :: t, arg, args)
             })
-        case Some((h, args)) =>
-          Right(Some(h :: d.tail, args))
+        case Some((h, arg, args)) =>
+          Right(Some(h :: d.tail, arg, args))
       }
 
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :: T] = {

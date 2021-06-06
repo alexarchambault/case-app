@@ -8,7 +8,7 @@ object DslTests extends TestSuite {
 
   val tests: Tests = Tests {
 
-    "simple" - {
+    test("simple") {
 
       val dslParser = Parser.nil
         .add[Int]("foo")
@@ -24,7 +24,7 @@ object DslTests extends TestSuite {
 
       val derivedParser = Parser[Result]
 
-      * - {
+      test {
         val args = Seq("--foo", "2", "--bar", "bzz", "--value", "2.0")
         val dslRes = dslParser.parse(args)
         val derivedRes = derivedParser.parse(args)
@@ -37,7 +37,7 @@ object DslTests extends TestSuite {
         assert(tupledRes == expectedTupledRes)
       }
 
-      * - {
+      test {
         val args = Seq("--foo", "2", "--value", "2.0")
         val dslRes = dslParser.parse(args)
         val derivedRes = derivedParser.parse(args)

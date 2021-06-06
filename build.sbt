@@ -17,21 +17,26 @@ inThisBuild(List(
   )
 ))
 
-lazy val annotations = crossProject(JSPlatform, JVMPlatform)
+lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .nativeConfigure(_.disablePlugins(MimaPlugin))
+  .jvmSettings(Mima.settings)
+  .jsSettings(Mima.settings)
   .settings(
     shared,
-    caseAppPrefix,
-    Mima.settings
+    caseAppPrefix
   )
 
 lazy val annotationsJVM = annotations.jvm
 lazy val annotationsJS = annotations.js
+lazy val annotationsNative = annotations.native
 
-lazy val util = crossProject(JSPlatform, JVMPlatform)
+lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .nativeConfigure(_.disablePlugins(MimaPlugin))
+  .jvmSettings(Mima.settings)
+  .jsSettings(Mima.settings)
   .settings(
     shared,
     caseAppPrefix,
-    Mima.settings,
     libraryDependencies ++= Seq(
       Deps.shapeless.value,
       Deps.scalaCompiler.value % "provided",
@@ -41,39 +46,49 @@ lazy val util = crossProject(JSPlatform, JVMPlatform)
 
 lazy val utilJVM = util.jvm
 lazy val utilJS = util.js
+lazy val utilNative = util.native
 
 lazy val cats = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
+  .jvmSettings(Mima.settings)
+  .jsSettings(Mima.settings)
   .settings(
     shared,
     name := "case-app-cats",
-    Mima.settings,
     mimaPreviousArtifacts := {
       mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
     },
     libraryDependencies ++= Seq(
       Deps.catsEffect.value
-    )
+    ),
+    libraryDependencies += Deps.utest.value % Test,
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
 lazy val catsJVM = cats.jvm
 lazy val catsJS = cats.js
 
-lazy val core = crossProject(JSPlatform, JVMPlatform)
+lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
+  .nativeConfigure(_.disablePlugins(MimaPlugin))
   .dependsOn(annotations, util)
+  .jvmSettings(Mima.settings)
+  .jsSettings(Mima.settings)
   .settings(
     shared,
     name := "case-app",
-    Mima.settings,
-    libraryDependencies += Deps.dataClass % Provided
+    libraryDependencies ++= Seq(
+      Deps.sourcecode.value,
+      Deps.dataClass % Provided
+    )
   )
 
 lazy val coreJVM = core.jvm
 lazy val coreJS = core.js
+lazy val coreNative = core.native
 
-lazy val tests = crossProject(JSPlatform, JVMPlatform)
+lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .disablePlugins(MimaPlugin)
-  .dependsOn(cats % Test, core)
+  .dependsOn(core)
   .settings(
     shared,
     caseAppPrefix,
@@ -84,6 +99,7 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform)
 
 lazy val testsJVM = tests.jvm
 lazy val testsJS = tests.js
+lazy val testsNative = tests.native
 
 lazy val refined = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
