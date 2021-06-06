@@ -1,11 +1,13 @@
 package caseapp
 
-import caseapp.core.help.Help
+import caseapp.core.app.CommandsEntryPoint
+import caseapp.core.help.{Help, HelpFormat}
 import utest._
 
 object HelpTests extends TestSuite {
 
-  import Definitions._
+  import Definitions.{Command => _, First => _, Second => _, Third => _, _}
+  import HelpDefinitions._
 
   case class Options(
     first: Int,
@@ -16,6 +18,8 @@ object HelpTests extends TestSuite {
   case class WithValueDescription(
     @ValueDescription("overridden description") value: String
   )
+
+  val format = HelpFormat.default(false)
 
   val tests = Tests {
 
@@ -30,98 +34,148 @@ object HelpTests extends TestSuite {
       assert(messageLines == expectedLines)
     }
 
-    "generate a help message" - {
+    test("generate a help message") {
 
-      val message = CaseApp.helpMessage[Example]
+      val message = Help[Example].help(format)
 
       val expectedMessage =
-        """Example
-          |Usage: example [options]
-          |  --foo  <string>
-          |  --bar  <int>""".stripMargin
+        """Usage: example [options]
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "generate a help message" - {
+    test("generate a help message with description") {
 
-      val message = CaseApp.helpMessage[ExampleWithHelpMessage]
+      val message = Help[ExampleWithHelpMessage].help(format)
 
       val expectedMessage =
-        """ExampleWithHelpMessage
+        """Usage: example-with-help-message [options]
           |Example help message
-          |Usage: example-with-help-message [options]
-          |  --foo  <string>
-          |  --bar  <int>""".stripMargin
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "mark optional options with ? in help messages" - {
-      val message = CaseApp.helpMessage[OptBool]
+    test("group options") {
+
+      val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
+      val groupFormat = format.withSortGroups(Some { groups =>
+        groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
+      })
+      val message = Help[GroupedOptions].help(groupFormat)
 
       val expectedMessage =
-        """OptBool
-          |Usage: opt-bool [options]
-          |  --opt  <bool?>""".stripMargin
+        """Usage: grouped [options]
+          |Example help message
+          |
+          |Something options:
+          |  --foo string
+          |  --other double
+          |
+          |Bb options:
+          |  --bar int
+          |  --something""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "mark repeatable options with * in help messages" - {
-      val message = CaseApp.helpMessage[WithList]
+    test("group ordering") {
+
+      val orderedGroups = Seq("Something", "Bb")
+      val groupFormat = format.withSortedGroups(Some(orderedGroups))
+      val message = Help[GroupedOptions].help(groupFormat)
 
       val expectedMessage =
-        """WithList
-          |Usage: with-list [options]
-          |  --list  <int*>""".stripMargin
+        """Usage: grouped [options]
+          |Example help message
+          |
+          |Something options:
+          |  --foo string
+          |  --other double
+          |
+          |Bb options:
+          |  --bar int
+          |  --something""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "use custom arg parser descriptions in help messages" - {
-      val message = CaseApp.helpMessage[WithCustom]
+    test("mark optional options with ? in help messages") {
+      val message = Help[OptBool].help(format)
 
       val expectedMessage =
-        """WithCustom
-          |Usage: with-custom [options]
-          |  --custom  <custom parameter>""".stripMargin
+        """Usage: opt-bool [options]
+          |
+          |Options:
+          |  --opt""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "use value descriptions from annotations when given" - {
-      val message = CaseApp.helpMessage[WithValueDescription]
+    test("mark repeatable options with * in help messages") {
+      val message = Help[WithList].help(format)
 
       val expectedMessage =
-        """WithValueDescription
-          |Usage: with-value-description [options]
-          |  --value  <overridden description>""".stripMargin
+        """Usage: with-list [options]
+          |
+          |Options:
+          |  --list int*""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "don't add a help message for fields annotated with @Hidden" - {
+    test("use custom arg parser descriptions in help messages") {
+      val message = Help[WithCustom].help(format)
 
-      val helpLines = Help[Options].help.linesIterator.toVector
+      val expectedMessage =
+        """Usage: with-custom [options]
+          |
+          |Options:
+          |  --custom custom parameter""".stripMargin
 
-      * - {
+      checkLines(message, expectedMessage)
+    }
+
+    test("use value descriptions from annotations when given") {
+      val message = Help[WithValueDescription].help(format)
+
+      val expectedMessage =
+        """Usage: with-value-description [options]
+          |
+          |Options:
+          |  --value overridden description""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    test("don't add a help message for fields annotated with @Hidden") {
+
+      val helpLines = Help[Options].help(format).linesIterator.toVector
+
+      test {
         val res = helpLines.count(_.contains("--first"))
         val expectedRes = 1
         assert(res == expectedRes)
       }
-      * - {
+      test {
         val res = helpLines.count(_.contains("--second"))
         val expectedRes = 0
         assert(res == expectedRes)
       }
     }
 
-    "duplicates" - {
+    test("duplicates") {
 
       import Definitions.Duplicates._
 
-      * - {
+      test {
         val dup = Help[Foo].duplicates
         assert(dup.nonEmpty)
 
@@ -130,7 +184,7 @@ object HelpTests extends TestSuite {
         assert(res == expected)
       }
 
-      * - {
+      test {
         val dup = Help[Bar].duplicates
         assert(dup.nonEmpty)
 
@@ -139,7 +193,7 @@ object HelpTests extends TestSuite {
         assert(res == expected)
       }
 
-      * - {
+      test {
         val dup = Help[Second].duplicates
         assert(dup.nonEmpty)
 
@@ -150,21 +204,22 @@ object HelpTests extends TestSuite {
 
     }
 
-    "generate a help message with custom parser" - {
+    test("generate a help message with custom formatter") {
 
       implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
-      val message = CaseApp.helpMessage[FewArgs]
+      val message = Help[FewArgs].help(format)
 
       val expectedMessage =
-        """FewArgs
-          |Usage: few-args [options]
-          |  --value  <string>
-          |  --numFoo  <int>""".stripMargin
+        """Usage: few-args [options]
+          |
+          |Options:
+          |  --value string
+          |  --numFoo int""".stripMargin
 
       checkLines(message, expectedMessage)
     }
 
-    "generate help message for commands" - {
+    test("generate help message for commands (legacy API)") {
       val msg = CommandTest.commandsMessages
         .messagesMap(List("third"))
         .helpMessage
@@ -173,6 +228,30 @@ object HelpTests extends TestSuite {
       val expected = "Third help message"
 
       assert(msg == expected)
+    }
+
+    test("generate help message for commands") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(First)
+        def commands = Seq(First, Second, Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Options:
+          |  --usage           Print usage and exit
+          |  -h, --help        Print help message and exit
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Commands:
+          |  first
+          |  second
+          |  third   Third help message""".stripMargin
+
+      assert(help == expected)
     }
 
   }

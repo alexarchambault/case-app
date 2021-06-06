@@ -3,10 +3,10 @@ package caseapp.core.help
 import caseapp.core.Arg
 import caseapp.{AppName, AppVersion, ArgsName, Name, ProgName, ValueDescription}
 import caseapp.core.parser.Parser
-import caseapp.core.util.CaseUtil
+import caseapp.core.util.{CaseUtil, fansi}
 import caseapp.util.AnnotationOption
 import caseapp.core.util.NameOps.toNameOps
-import dataclass.data
+import dataclass._
 import shapeless.Typeable
 import caseapp.core.util.Formatter
 import caseapp.HelpMessage
@@ -15,11 +15,12 @@ import caseapp.HelpMessage
  * Provides usage and help messages related to `T`
  */
 @data class Help[T](
-  args: Seq[Arg],
-  appName: String,
-  appVersion: String,
-  progName: String,
-  argsNameOption: Option[String],
+  args: Seq[Arg] = Nil,
+  appName: String = "",
+  appVersion: String = "",
+  progName: String = "",
+  argsNameOption: Option[String] = None,
+  @since
   optionsDesc: String = Help.DefaultOptionsDesc,
   nameFormatter: Formatter[Name] = Help.DefaultNameFormatter,
   helpMessage: Option[HelpMessage] = Help.DefaultHelpMessage
@@ -43,19 +44,8 @@ import caseapp.HelpMessage
     * Includes both `usageMessage` and `optionsMessage`
     *
     */
-  def help: String = {
-    val b = new StringBuilder
-    b ++= appName
-    if (appVersion.nonEmpty)
-      b ++= s" $appVersion"
-    b ++= Help.NL
-    helpMessage.foreach(msg => b ++= s"${msg.message}${Help.NL}")
-    b ++= usage
-    b ++= Help.NL
-    b ++= options
-    b ++= Help.NL
-    b.result()
-  }
+  def help: String =
+    help(HelpFormat.default())
 
   /**
    * Add help and usage options.
@@ -91,6 +81,66 @@ import caseapp.HelpMessage
         }
         .mkString("Found duplicated arguments: ", ", ", ".")
       throw new Exception(message)
+    }
+
+  def printUsage(b: StringBuilder, format: HelpFormat): Unit = {
+    b.append("Usage: ")
+    b.append(format.progName(progName).render)
+
+    if (args.nonEmpty) {
+      b.append(" ")
+      b.append(optionsDesc)
+    }
+
+    for (argName <- argsNameOption) {
+      b.append(" [")
+      b.append(argName)
+      b.append("]")
+    }
+  }
+
+  def printHelp(b: StringBuilder, format: HelpFormat): Unit = {
+    printUsage(b, format)
+    b.append(format.newLine)
+
+    for (desc <- helpMessage.map(_.message))
+      Help.printDescription(b, desc, format.newLine, format.terminalWidth)
+
+    b.append(format.newLine)
+
+    printOptions(b, format)
+  }
+
+  def help(format: HelpFormat): String = {
+    val b = new StringBuilder
+    printHelp(b, format)
+    b.result()
+  }
+
+  def printOptions(b: StringBuilder, format: HelpFormat): Unit =
+    if (args.nonEmpty) {
+      val groupedArgs = args.groupBy(_.group.fold("")(_.name))
+      val groups = format.sortGroupValues(groupedArgs.toVector)
+      val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
+      for (((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex) {
+        val argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter).toVector.map(_.toVector))
+
+        if (groupIdx > 0) {
+          b.append(format.newLine)
+          b.append(format.newLine)
+        }
+        if (groupName.isEmpty) {
+          if (groups.length > 1)
+            b.append("Other options:")
+          else
+            b.append("Options:")
+        } else {
+          b.append(groupName)
+          b.append(" options:")
+        }
+        b.append(format.newLine)
+        argsAndDescriptions.render(b, "  ", "  ", format.newLine, argsAndDescriptions.widths.map(_.min(45)).toVector)
+      }
     }
 }
 
@@ -182,5 +232,39 @@ object Help {
   val NL = PlatformUtil.NL
   val WW = "  "
   val TB = "        "
+
+  private def optionsTable(args: Seq[Arg], format: HelpFormat, nameFormatter: Formatter[Name]): Seq[Seq[fansi.Str]] =
+    for (arg <- args if !arg.noHelp) yield {
+      val sortedNames = (arg.name +: arg.extraNames).groupBy(_.name.length).toVector.sortBy(_._1).flatMap(_._2)
+      val options = sortedNames
+        .iterator
+        .map(name => format.option(name.option(nameFormatter)))
+        .zip(Iterator.continually(", ": fansi.Str))
+        .flatMap { case (a, b) => Iterator(a, b) }
+        .toVector
+        .take(sortedNames.length * 2 - 1)
+        .foldLeft("": fansi.Str)(_ ++ _)
+
+      val optionsAndValue =
+        if (arg.isFlag) options
+        else options ++ " " ++ arg.valueDescription.fold("value")(_.description)
+
+      val desc = arg.helpMessage.fold("")(_.message)
+
+      Seq[fansi.Str](optionsAndValue, desc)
+    }
+
+  def reflowed(input: String, newLine: String, terminalWidth: Int): String =
+    if (input.length <= terminalWidth)
+      input
+    else
+      WordUtils.wrap(input, terminalWidth, Some(newLine), wrapLongWords = true, wrapOn = " ")
+
+  def printDescription(b: StringBuilder, desc: String, newLine: String, terminalWidth: Int): Unit = {
+    val wrappedDesc = reflowed(desc, newLine, terminalWidth)
+    b.append(wrappedDesc)
+    if (!wrappedDesc.endsWith(newLine))
+      b.append(newLine)
+  }
 
 }

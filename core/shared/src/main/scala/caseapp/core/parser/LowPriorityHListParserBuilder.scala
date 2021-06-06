@@ -20,23 +20,25 @@ abstract class LowPriorityHListParserBuilder {
     NT <: HList,
     VT <: HList,
     MT <: HList,
+    GT <: HList,
     HT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
   ): Aux[
     FieldType[K, H @@ Tag] :: T,
     Option[H @@ Tag] :: DT,
     List[Name] :: NT,
     Option[ValueDescription] :: VT,
     Option[HelpMessage] :: MT,
+    Option[Group] :: GT,
     Option[Hidden] :: HT,
     None.type :: RT,
     Option[H @@ Tag] :: PT
   ] =
-    hconsNoDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, HT, RT]
+    hconsNoDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, RT]
 
   implicit def hconsNoDefault[
     K <: Symbol,
@@ -47,25 +49,27 @@ abstract class LowPriorityHListParserBuilder {
     NT <: HList,
     VT <: HList,
     MT <: HList,
+    GT <: HList,
     HT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
   ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
     List[Name] :: NT,
     Option[ValueDescription] :: VT,
     Option[HelpMessage] :: MT,
+    Option[Group] :: GT,
     Option[Hidden] :: HT,
     None.type :: RT,
     Option[H] :: PT
   ] =
-    instance { (default0, names, valueDescriptions, helpMessages, noHelp) =>
+    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
 
-      val tailParser = tail.value(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, noHelp.tail)
+      val tailParser = tail.value(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, groups.tail, noHelp.tail)
 
       val arg = Arg(
         Name(name.value.name),
@@ -73,7 +77,8 @@ abstract class LowPriorityHListParserBuilder {
         valueDescriptions.head.orElse(Some(new ValueDescription(argParser.value.description))),
         helpMessages.head,
         noHelp.head.nonEmpty,
-        argParser.value.isFlag
+        argParser.value.isFlag,
+        groups.head
       )
 
       ConsParser(arg, argParser.value, () => default0().head, tailParser)
