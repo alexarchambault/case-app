@@ -123,7 +123,7 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     Formatter.DefaultNameFormatter
 
   def main(args: Array[String]): Unit =
-    main(messages.progName, args)
+    main(messages.progName, PlatformUtil.arguments(args))
 
   def main(progName: String, args: Array[String]): Unit =
     if (hasHelp)

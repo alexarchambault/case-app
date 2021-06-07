@@ -89,15 +89,16 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         PlatformUtil.exit(1)
     }
 
-  def main(args: Array[String]): Unit =
-    if (enableCompleteCommand && args.startsWith(completeCommandName.toArray[String]))
-      completeMain(args.drop(completeCommandName.length))
-    else if (enableCompletionsCommand && args.startsWith(completionsCommandName.toArray[String]))
-      completionsMain(args.drop(completionsCommandName.length))
+  def main(args: Array[String]): Unit = {
+    val actualArgs = PlatformUtil.arguments(args)
+    if (enableCompleteCommand && actualArgs.startsWith(completeCommandName.toArray[String]))
+      completeMain(actualArgs.drop(completeCommandName.length))
+    else if (enableCompletionsCommand && actualArgs.startsWith(completionsCommandName.toArray[String]))
+      completionsMain(actualArgs.drop(completionsCommandName.length))
     else
       defaultCommand match {
         case None =>
-          RuntimeCommandParser.parse(commands, args.toList) match {
+          RuntimeCommandParser.parse(commands, actualArgs.toList) match {
             case None =>
               val usage = help.help(helpFormat)
               println(usage)
@@ -107,7 +108,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
           }
         case Some(defaultCommand0) =>
           val (commandName, command, commandArgs) =
-            RuntimeCommandParser.parse(defaultCommand0, commands, args.toList)
+            RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
           command.main(commandProgName(commandName), commandArgs.toArray)
       }
+    }
 }
