@@ -240,9 +240,11 @@ object HelpTests extends TestSuite {
       val expected =
         """Usage: foo <COMMAND> [options]
           |
-          |Options:
-          |  --usage           Print usage and exit
-          |  -h, --help        Print help message and exit
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
           |  -f, --foo string
           |  --bar int
           |
@@ -250,6 +252,61 @@ object HelpTests extends TestSuite {
           |  first
           |  second
           |  third   Third help message""".stripMargin
+
+      assert(help == expected)
+    }
+
+    test("group commands in help message") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(CommandGroups.First)
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
+
+    test("hide hidden commands in help message") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(HiddenCommands.First)
+        def commands = Seq(HiddenCommands.First, HiddenCommands.Second, HiddenCommands.Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Aa commands:
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second""".stripMargin
 
       assert(help == expected)
     }

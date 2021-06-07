@@ -9,10 +9,18 @@ import dataclass._
   option: fansi.Attrs = fansi.Attrs.Empty,
   newLine: String = System.lineSeparator(),
   terminalWidth: Int = 80,
+  @since("2.1.0")
   sortGroups: Option[Seq[String] => Seq[String]] = None,
-  sortedGroups: Option[Seq[String]] = None
+  sortedGroups: Option[Seq[String]] = None,
+  @since("2.1.0")
+  sortCommandGroups: Option[Seq[String] => Seq[String]] = None,
+  sortedCommandGroups: Option[Seq[String]] = None
 ) {
-  def sortGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
+  private def sortValues[T](
+    sortGroups: Option[Seq[String] => Seq[String]],
+    sortedGroups: Option[Seq[String]],
+    elems: Seq[(String, T)]
+  ): Seq[(String, T)] =
     sortGroups match {
       case None =>
         sortedGroups match {
@@ -26,6 +34,10 @@ import dataclass._
         val sorted = sort(elems.map(_._1)).zipWithIndex.toMap
         elems.sortBy { case (group, _) => sorted.getOrElse(group, Int.MaxValue) }
     }
+  def sortGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
+    sortValues(sortGroups, sortedGroups, elems)
+  def sortCommandGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
+    sortValues(sortCommandGroups, sortedCommandGroups, elems)
 }
 
 object HelpFormat {

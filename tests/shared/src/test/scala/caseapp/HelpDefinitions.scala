@@ -38,4 +38,35 @@ object HelpDefinitions {
     @Group("Bb")
       something: Boolean
   )
+
+  object CommandGroups {
+    object First extends Command[FirstOptions] {
+      override def group = "Aa"
+      def run(options: FirstOptions, args: RemainingArgs) = ???
+    }
+    object Second extends Command[SecondOptions] {
+      override def group = "Bb"
+      def run(options: SecondOptions, args: RemainingArgs) = ???
+    }
+    object Third extends Command[ThirdOptions] {
+      override def group = "Aa"
+      def run(options: ThirdOptions, args: RemainingArgs) = ???
+    }
+  }
+
+  object HiddenCommands {
+    object First extends Command[FirstOptions] {
+      override def group = "Aa"
+      override def hidden = true
+      def run(options: FirstOptions, args: RemainingArgs) = ???
+    }
+    object Second extends Command[SecondOptions] {
+      override def group = "Bb"
+      def run(options: SecondOptions, args: RemainingArgs) = ???
+    }
+    object Third extends Command[ThirdOptions] {
+      override def group = "Aa"
+      def run(options: ThirdOptions, args: RemainingArgs) = ???
+    }
+  }
 }

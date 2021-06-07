@@ -10,6 +10,6 @@ abstract class CommandApp[T](implicit
   def beforeCommand(options: None.type, remainingArgs: Seq[String]): Unit =
     if (remainingArgs.nonEmpty) {
       Console.err.println(s"Found extra arguments: ${remainingArgs.mkString(" ")}")
-      sys.exit(255)
+      PlatformUtil.exit(255)
     }
 }

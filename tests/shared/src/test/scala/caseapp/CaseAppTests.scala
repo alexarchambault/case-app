@@ -11,7 +11,7 @@ import caseapp.core.util.Formatter
 object CaseAppTests extends TestSuite {
 
   import Definitions._
-
+  import CaseAppDefinitions._
 
   val tests = Tests {
 
@@ -500,6 +500,18 @@ object CaseAppTests extends TestSuite {
           (WithHelp(false, false, Right(FewArgs("b", 1))), RemainingArgs(List(), List()))
         )
       assert(res == expectedRes)
+    }
+
+    test("disable help") {
+      val messageOpt =
+        try {
+          HasHelp.App.main(Array("--help"))
+          None
+        } catch {
+          case ex: HasHelp.Errored =>
+            Some(ex.error.message)
+        }
+      assert(messageOpt.contains("Unrecognized argument: --help"))
     }
 
   }

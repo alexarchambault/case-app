@@ -1,7 +1,7 @@
 package caseapp.core.help
 
 import caseapp.core.Error
-import caseapp.{ExtraName, HelpMessage, Recurse}
+import caseapp.{ExtraName, Group, HelpMessage, Recurse}
 
 /**
   * Helper to add `--usage` and `--help` options to an existing type `T`.
@@ -12,8 +12,10 @@ import caseapp.{ExtraName, HelpMessage, Recurse}
   * @tparam T: type to which usage and help options are added
   */
 final case class WithHelp[T](
+  @Group("Help")
   @HelpMessage("Print usage and exit")
     usage: Boolean = false,
+  @Group("Help")
   @HelpMessage("Print help message and exit")
   @ExtraName("h")
     help: Boolean = false,

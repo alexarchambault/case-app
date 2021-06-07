@@ -10,7 +10,7 @@ import dataclass._
   progName: String,
   description: Option[String],
   defaultHelp: Help[_],
-  commands: Seq[(List[List[String]], Help[_])]
+  commands: Seq[RuntimeCommandHelp[_]]
 ) {
 
   def help(): String =
@@ -47,8 +47,6 @@ import dataclass._
     if (commands.nonEmpty) {
       b.append(format.newLine)
       b.append(format.newLine)
-      b.append("Commands:")
-      b.append(format.newLine)
       printCommands(b, format)
     }
 
@@ -57,21 +55,45 @@ import dataclass._
 
   def printCommands(b: StringBuilder, format: HelpFormat): Unit =
     if (commands.nonEmpty) {
-      val content = commands
+
+      val grouped = format.sortCommandGroupValues(
+        commands
+          .filter(!_.hidden)
+          .groupBy(_.group)
+          .toVector
+      )
+
+      def table(commands: Seq[RuntimeCommandHelp[_]]) =
+        Table {
+          commands
+            .iterator
+            .map { help =>
+              val names0 = help.names.map(_.mkString(" ")).map(format.commandName(_).render).mkString(", ")
+              val descOpt = help.help.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption).map(x => x: fansi.Str)
+              Seq(names0: fansi.Str, descOpt.getOrElse("": fansi.Str))
+            }
+            .toVector
+        }
+
+      grouped
         .iterator
-        .flatMap {
-          case (names, commandHelp) =>
-            names.iterator.map((_, commandHelp))
+        .zipWithIndex
+        .foreach {
+          case ((groupName, groupCommands), idx) =>
+            if (idx > 0) {
+              b.append(format.newLine)
+              b.append(format.newLine)
+            }
+            val printedName =
+              if (groupName.isEmpty) {
+                if (grouped.length == 1) "Commands:"
+                else "Other commands:"
+              } else s"$groupName commands:"
+            b.append(printedName)
+            b.append(format.newLine)
+            val table0 = table(groupCommands)
+            table0.render(b, "  ", "  ", format.newLine, table0.widths.map(_.min(45)).toVector)
         }
-        .map {
-          case (name, commandHelp) =>
-            val name0 = name.mkString(" ")
-            val descOpt = commandHelp.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption).map(x => x: fansi.Str)
-            Seq(format.commandName(name0), descOpt.getOrElse("": fansi.Str))
-        }
-        .toVector
-      val table = Table(content)
-      table.render(b, "  ", "  ", format.newLine, table.widths.map(_.min(45)).toVector)
     }
 
 }

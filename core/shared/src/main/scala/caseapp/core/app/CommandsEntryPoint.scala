@@ -3,6 +3,7 @@ package caseapp.core.app
 import caseapp.core.commandparser.RuntimeCommandParser
 import caseapp.core.complete.{Bash, CompletionItem, Zsh}
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandsHelp}
+import caseapp.core.help.RuntimeCommandHelp
 
 abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
@@ -17,7 +18,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
       progName,
       Some(description).filter(_.nonEmpty),
       defaultCommand.map(_.messages.withHelp: Help[_]).getOrElse(Help[Unit]()),
-      commands.map(cmd => (cmd.names, cmd.messages.withHelp))
+      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.messages.withHelp, cmd.group, cmd.hidden))
     )
 
   def helpFormat: HelpFormat =
@@ -40,7 +41,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case Zsh.id => Zsh.script(progName)
         case _ =>
           System.err.println(s"Unrecognized completion format '$format'")
-          sys.exit(1)
+          PlatformUtil.exit(1)
       }
     args match {
       case Array(format, dest) =>
@@ -51,7 +52,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         println(script0)
       case _ =>
         System.err.println(s"Usage: $progName $completionsCommandName format [dest]")
-        sys.exit(1)
+        PlatformUtil.exit(1)
     }
   }
 
@@ -81,32 +82,34 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             println(Zsh.print(items))
           case _ =>
             System.err.println(s"Unrecognized completion format '$format'")
-            sys.exit(1)
+            PlatformUtil.exit(1)
         }
       case _ =>
         System.err.println(s"Usage: $progName $completeCommandName format index ...args...")
-        sys.exit(1)
+        PlatformUtil.exit(1)
     }
 
-  def main(args: Array[String]): Unit =
-    if (enableCompleteCommand && args.startsWith(completeCommandName.toArray[String]))
-      completeMain(args.drop(completeCommandName.length))
-    else if (enableCompletionsCommand && args.startsWith(completionsCommandName.toArray[String]))
-      completionsMain(args.drop(completionsCommandName.length))
+  def main(args: Array[String]): Unit = {
+    val actualArgs = PlatformUtil.arguments(args)
+    if (enableCompleteCommand && actualArgs.startsWith(completeCommandName.toArray[String]))
+      completeMain(actualArgs.drop(completeCommandName.length))
+    else if (enableCompletionsCommand && actualArgs.startsWith(completionsCommandName.toArray[String]))
+      completionsMain(actualArgs.drop(completionsCommandName.length))
     else
       defaultCommand match {
         case None =>
-          RuntimeCommandParser.parse(commands, args.toList) match {
+          RuntimeCommandParser.parse(commands, actualArgs.toList) match {
             case None =>
               val usage = help.help(helpFormat)
               println(usage)
-              sys.exit(0)
+              PlatformUtil.exit(0)
             case Some((commandName, command, commandArgs)) =>
               command.main(commandProgName(commandName), commandArgs.toArray)
           }
         case Some(defaultCommand0) =>
           val (commandName, command, commandArgs) =
-            RuntimeCommandParser.parse(defaultCommand0, commands, args.toList)
+            RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
           command.main(commandProgName(commandName), commandArgs.toArray)
       }
+    }
 }

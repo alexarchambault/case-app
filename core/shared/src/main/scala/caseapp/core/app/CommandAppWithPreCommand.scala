@@ -18,7 +18,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
   def exit(code: Int): Nothing =
-    sys.exit(code)
+    PlatformUtil.exit(code)
 
   def error(message: Error): Nothing = {
     Console.err.println(message.message)
@@ -65,7 +65,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   def progName: String = Help[D].progName
 
   def main(args: Array[String]): Unit =
-    commandParser.withHelp.detailedParse(args.toVector)(beforeCommandParser.withHelp) match {
+    commandParser.withHelp.detailedParse(PlatformUtil.arguments(args).toVector)(beforeCommandParser.withHelp) match {
       case Left(err) =>
         error(err)
 
