@@ -41,7 +41,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case Zsh.id => Zsh.script(progName)
         case _ =>
           System.err.println(s"Unrecognized completion format '$format'")
-          sys.exit(1)
+          PlatformUtil.exit(1)
       }
     args match {
       case Array(format, dest) =>
@@ -52,7 +52,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         println(script0)
       case _ =>
         System.err.println(s"Usage: $progName $completionsCommandName format [dest]")
-        sys.exit(1)
+        PlatformUtil.exit(1)
     }
   }
 
@@ -82,11 +82,11 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             println(Zsh.print(items))
           case _ =>
             System.err.println(s"Unrecognized completion format '$format'")
-            sys.exit(1)
+            PlatformUtil.exit(1)
         }
       case _ =>
         System.err.println(s"Usage: $progName $completeCommandName format index ...args...")
-        sys.exit(1)
+        PlatformUtil.exit(1)
     }
 
   def main(args: Array[String]): Unit =
@@ -101,7 +101,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             case None =>
               val usage = help.help(helpFormat)
               println(usage)
-              sys.exit(0)
+              PlatformUtil.exit(0)
             case Some((commandName, command, commandArgs)) =>
               command.main(commandProgName(commandName), commandArgs.toArray)
           }

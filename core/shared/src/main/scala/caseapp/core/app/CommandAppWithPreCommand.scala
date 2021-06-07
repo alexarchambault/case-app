@@ -18,7 +18,7 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
   def exit(code: Int): Nothing =
-    sys.exit(code)
+    PlatformUtil.exit(code)
 
   def error(message: Error): Nothing = {
     Console.err.println(message.message)
