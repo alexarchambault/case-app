@@ -18,7 +18,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
       progName,
       Some(description).filter(_.nonEmpty),
       defaultCommand.map(_.messages.withHelp: Help[_]).getOrElse(Help[Unit]()),
-      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.messages.withHelp, cmd.group))
+      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.messages.withHelp, cmd.group, cmd.hidden))
     )
 
   def helpFormat: HelpFormat =

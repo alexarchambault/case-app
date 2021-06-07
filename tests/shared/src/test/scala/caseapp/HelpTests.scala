@@ -284,6 +284,33 @@ object HelpTests extends TestSuite {
       assert(help == expected)
     }
 
+    test("hide hidden commands in help message") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(HiddenCommands.First)
+        def commands = Seq(HiddenCommands.First, HiddenCommands.Second, HiddenCommands.Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Aa commands:
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
+
   }
 
 }

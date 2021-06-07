@@ -9,4 +9,5 @@ abstract class Command[T](implicit parser: Parser[T], help: Help[T]) extends Cas
   def name: String =
     help.progName
   def group: String = ""
+  def hidden: Boolean = false
 }

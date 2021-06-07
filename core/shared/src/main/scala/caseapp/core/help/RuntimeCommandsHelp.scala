@@ -56,7 +56,12 @@ import dataclass._
   def printCommands(b: StringBuilder, format: HelpFormat): Unit =
     if (commands.nonEmpty) {
 
-      val grouped = format.sortCommandGroupValues(commands.groupBy(_.group).toVector)
+      val grouped = format.sortCommandGroupValues(
+        commands
+          .filter(!_.hidden)
+          .groupBy(_.group)
+          .toVector
+      )
 
       def table(commands: Seq[RuntimeCommandHelp[_]]) =
         Table {
