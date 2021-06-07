@@ -256,6 +256,34 @@ object HelpTests extends TestSuite {
       assert(help == expected)
     }
 
+    test("group commands in help message") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+        override def defaultCommand = Some(CommandGroups.First)
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
+
   }
 
 }

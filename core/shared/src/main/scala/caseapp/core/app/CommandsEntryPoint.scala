@@ -3,6 +3,7 @@ package caseapp.core.app
 import caseapp.core.commandparser.RuntimeCommandParser
 import caseapp.core.complete.{Bash, CompletionItem, Zsh}
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandsHelp}
+import caseapp.core.help.RuntimeCommandHelp
 
 abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
@@ -17,7 +18,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
       progName,
       Some(description).filter(_.nonEmpty),
       defaultCommand.map(_.messages.withHelp: Help[_]).getOrElse(Help[Unit]()),
-      commands.map(cmd => (cmd.names, cmd.messages.withHelp))
+      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.messages.withHelp, cmd.group))
     )
 
   def helpFormat: HelpFormat =
