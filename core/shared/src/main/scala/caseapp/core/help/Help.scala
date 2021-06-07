@@ -28,12 +28,12 @@ import caseapp.HelpMessage
 
   /** One-line usage message for `T` */
   def usage: String =
-    Seq(
-      "Usage:",
-      progName,
-      optionsDesc,
-      argsNameOption.fold("")("<" + _ + ">")
-    ).filter(_.nonEmpty).mkString(" ")
+    usage(HelpFormat.default())
+  def usage(format: HelpFormat): String = {
+    val b = new StringBuilder
+    printUsage(b, format)
+    b.result()
+  }
 
   /** Options description for `T` */
   def options: String = Help.optionsMessage(args, nameFormatter)

@@ -3,7 +3,7 @@ package caseapp.core.app
 import caseapp.Name
 import caseapp.core.{Error, RemainingArgs}
 import caseapp.core.complete.{Completer, CompletionItem, HelpCompleter}
-import caseapp.core.help.{Help, WithHelp}
+import caseapp.core.help.{Help, HelpFormat, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.util.Formatter
 
@@ -62,7 +62,7 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     helpAsked("")
   def helpAsked(progName: String): Nothing = {
     val help = helpWithProgName(progName)
-    println(help.help)
+    println(help.help(helpFormat))
     exit(0)
   }
 
@@ -70,9 +70,12 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     usageAsked("")
   def usageAsked(progName: String): Nothing = {
     val help = helpWithProgName(progName)
-    println(help.usage)
+    println(help.usage(helpFormat))
     exit(0)
   }
+
+  def helpFormat: HelpFormat =
+    HelpFormat.default()
 
   def ensureNoDuplicates(): Unit =
     messages.ensureNoDuplicates()

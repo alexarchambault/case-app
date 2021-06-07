@@ -240,9 +240,11 @@ object HelpTests extends TestSuite {
       val expected =
         """Usage: foo <COMMAND> [options]
           |
-          |Options:
-          |  --usage           Print usage and exit
-          |  -h, --help        Print help message and exit
+          |Help options:
+          |  --usage     Print usage and exit
+          |  -h, --help  Print help message and exit
+          |
+          |Other options:
           |  -f, --foo string
           |  --bar int
           |

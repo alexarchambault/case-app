@@ -87,13 +87,6 @@ object CatsTests extends TestSuite {
       }
     }
     test("IOCommandApp") {
-      test("output usage") {
-        testCommandStdout(List("--usage"),
-          """Usage: none.type [options] [command] [command-options]
-            |Available commands: first, second, third
-            |
-            |Type  none.type command --usage  for usage of an individual command""".stripMargin)
-      }
       test("parse error") {
         testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
