@@ -59,15 +59,11 @@ import dataclass._
     if (commands.nonEmpty) {
       val content = commands
         .iterator
-        .flatMap {
-          case (names, commandHelp) =>
-            names.iterator.map((_, commandHelp))
-        }
         .map {
-          case (name, commandHelp) =>
-            val name0 = name.mkString(" ")
+          case (names, commandHelp) =>
+            val names0 = names.map(_.mkString(" ")).map(format.commandName(_).render).mkString(", ")
             val descOpt = commandHelp.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption).map(x => x: fansi.Str)
-            Seq(format.commandName(name0), descOpt.getOrElse("": fansi.Str))
+            Seq(names0: fansi.Str, descOpt.getOrElse("": fansi.Str))
         }
         .toVector
       val table = Table(content)
