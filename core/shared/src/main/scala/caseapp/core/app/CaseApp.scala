@@ -9,6 +9,8 @@ import caseapp.core.util.Formatter
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
+  def hasHelp: Boolean = true
+
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)
     if (ignoreUnrecognized)
@@ -23,13 +25,22 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     new HelpCompleter[T](messages)
 
   def complete(args: Seq[String], index: Int): List[CompletionItem] =
-    parser.withHelp.complete(
-      args,
-      index,
-      completer.withHelp,
-      stopAtFirstUnrecognized,
-      ignoreUnrecognized
-    )
+    if (hasHelp)
+      parser.withHelp.complete(
+        args,
+        index,
+        completer.withHelp,
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      )
+    else
+      parser.complete(
+        args,
+        index,
+        completer,
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      )
 
   def run(options: T, remainingArgs: RemainingArgs): Unit
 
@@ -112,13 +123,19 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     main(messages.progName, args)
 
   def main(progName: String, args: Array[String]): Unit =
-    parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
-      case Left(err) => error(err)
-      case Right((WithHelp(_, true, _), _)) => helpAsked(progName)
-      case Right((WithHelp(true, _, _), _)) => usageAsked(progName)
-      case Right((WithHelp(_, _, Left(err)), _)) => error(err)
-      case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
-    }
+    if (hasHelp)
+      parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
+        case Left(err) => error(err)
+        case Right((WithHelp(_, true, _), _)) => helpAsked(progName)
+        case Right((WithHelp(true, _, _), _)) => usageAsked(progName)
+        case Right((WithHelp(_, _, Left(err)), _)) => error(err)
+        case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
+      }
+    else
+      parser.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
+        case Left(err) => error(err)
+        case Right((t, remainingArgs)) => run(t, remainingArgs)
+      }
 }
 
 object CaseApp {
