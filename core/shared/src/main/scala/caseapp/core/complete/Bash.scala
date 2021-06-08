@@ -16,7 +16,7 @@ object Bash {
       |}
       |
       |complete -F _${progName}_completions $progName
-      |"""
+      |""".stripMargin
 
   private def escape(s: String): String =
     s.replace("\"", "\\\"")
