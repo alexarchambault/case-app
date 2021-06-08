@@ -8,9 +8,7 @@ object Bash {
     s"$shellName-v1"
 
   def script(progName: String): String =
-   s"""#/usr/bin/env bash
-      |
-      |_${progName}_completions() {
+   s"""_${progName}_completions() {
       |  local IFS=$$'\n'
       |  eval "$$($progName complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
       |}
