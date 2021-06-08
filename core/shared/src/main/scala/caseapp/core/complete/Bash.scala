@@ -7,14 +7,16 @@ object Bash {
   val id: String =
     s"$shellName-v1"
 
-  def script(progName: String): String =
+  def script(progName: String): String = {
+    val ifs = "\\n"
    s"""_${progName}_completions() {
-      |  local IFS=$$'\n'
+      |  local IFS=$$'$ifs'
       |  eval "$$($progName complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
       |}
       |
       |complete -F _${progName}_completions $progName
       |""".stripMargin
+  }
 
   private def escape(s: String): String =
     s.replace("\"", "\\\"")
