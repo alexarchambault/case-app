@@ -37,8 +37,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
     def script(format: String): String =
       format match {
-        case Bash.id => Bash.script(progName)
-        case Zsh.id => Zsh.script(progName)
+        case Bash.shellName | Bash.id => Bash.script(progName)
+        case Zsh.shellName | Zsh.id => Zsh.script(progName)
         case _ =>
           System.err.println(s"Unrecognized completion format '$format'")
           PlatformUtil.exit(1)
