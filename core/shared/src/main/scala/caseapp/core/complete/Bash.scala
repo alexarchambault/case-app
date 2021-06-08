@@ -2,8 +2,10 @@ package caseapp.core.complete
 
 object Bash {
 
+  val shellName: String =
+    "bash"
   val id: String =
-    "bash-v1"
+    s"$shellName-v1"
 
   def script(progName: String): String =
    s"""#/usr/bin/env bash

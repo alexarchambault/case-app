@@ -10,8 +10,10 @@ import scala.collection.mutable
 
 object Zsh {
 
+  val shellName: String =
+    "zsh"
   val id: String =
-    "zsh-v1"
+    s"$shellName-v1"
 
   def script(progName: String): String =
    s"""#compdef _$progName $progName
