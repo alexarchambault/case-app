@@ -48,5 +48,22 @@ object ParserTests extends TestSuite {
         assert(res.isLeft)
       }
     }
+    test("Keep single dashes in user arguments") {
+      case class Helper(n: Int, value: String)
+      val parser =
+        Argument[Int](Arg("n")) ::
+        Argument[String](Arg("value")).withDefault(() => Some("default")) ::
+          NilParser
+      test("single") {
+        val res = parser.to[Helper].parse(Seq("-n", "2", "-"))
+        val expected = Right((Helper(2, "default"), Seq("-")))
+        assert(res == expected)
+      }
+      test("several") {
+        val res = parser.to[Helper].parse(Seq("-", "a", "-", "-n", "2", "-"))
+        val expected = Right((Helper(2, "default"), Seq("-", "a", "-", "-")))
+        assert(res == expected)
+      }
+    }
   }
 }
