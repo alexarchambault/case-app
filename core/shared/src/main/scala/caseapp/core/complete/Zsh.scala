@@ -50,7 +50,7 @@ object Zsh {
       if (arguments.isEmpty) Nil
       else {
         val desc = item.description.map(":" + _.replace("'", "\\'")).getOrElse("")
-        arguments.map("'" + _ + desc + "'")
+        arguments.map("'" + _.replace(":", "\\:") + desc + "'")
       }
     optionsOutput ++ argumentsOutput
   }
