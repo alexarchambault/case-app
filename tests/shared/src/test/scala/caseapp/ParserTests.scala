@@ -15,6 +15,7 @@ object ParserTests extends TestSuite {
           NilParser
       val res = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
       val expected = Right((Helper(2, "foo"), Seq("something")))
+      assert(res == expected)
     }
     test("tuple") {
       case class Helper(n: Int, value: String)
@@ -24,6 +25,7 @@ object ParserTests extends TestSuite {
           NilParser
       val res = parser.toTuple.parse(Seq("-n", "2", "something", "--value", "foo"))
       val expected = Right(((2, "foo"), Seq("something")))
+      assert(res == expected)
     }
     test("default value") {
       case class Helper(n: Int, value: String)
@@ -34,10 +36,12 @@ object ParserTests extends TestSuite {
       test {
         val res = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
         val expected = Right((Helper(2, "foo"), Seq("something")))
+        assert(res == expected)
       }
       test {
         val res = parser.to[Helper].parse(Seq("-n", "2", "something"))
         val expected = Right((Helper(2, "-"), Seq("something")))
+        assert(res == expected)
       }
       test {
         val res = parser.to[Helper].parse(Seq("--value", "other", "something"))
