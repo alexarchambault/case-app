@@ -15,6 +15,7 @@ object ParserTests extends TestSuite {
           NilParser
       val res = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
       val expected = Right((Helper(2, "foo"), Seq("something")))
+      assert(res == expected)
     }
     test("tuple") {
       case class Helper(n: Int, value: String)
@@ -24,6 +25,7 @@ object ParserTests extends TestSuite {
           NilParser
       val res = parser.toTuple.parse(Seq("-n", "2", "something", "--value", "foo"))
       val expected = Right(((2, "foo"), Seq("something")))
+      assert(res == expected)
     }
     test("default value") {
       case class Helper(n: Int, value: String)
@@ -34,14 +36,33 @@ object ParserTests extends TestSuite {
       test {
         val res = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
         val expected = Right((Helper(2, "foo"), Seq("something")))
+        assert(res == expected)
       }
       test {
         val res = parser.to[Helper].parse(Seq("-n", "2", "something"))
         val expected = Right((Helper(2, "-"), Seq("something")))
+        assert(res == expected)
       }
       test {
         val res = parser.to[Helper].parse(Seq("--value", "other", "something"))
         assert(res.isLeft)
+      }
+    }
+    test("Keep single dashes in user arguments") {
+      case class Helper(n: Int, value: String)
+      val parser =
+        Argument[Int](Arg("n")) ::
+        Argument[String](Arg("value")).withDefault(() => Some("default")) ::
+          NilParser
+      test("single") {
+        val res = parser.to[Helper].parse(Seq("-n", "2", "-"))
+        val expected = Right((Helper(2, "default"), Seq("-")))
+        assert(res == expected)
+      }
+      test("several") {
+        val res = parser.to[Helper].parse(Seq("-", "a", "-", "-n", "2", "-"))
+        val expected = Right((Helper(2, "default"), Seq("-", "a", "-", "-")))
+        assert(res == expected)
       }
     }
   }

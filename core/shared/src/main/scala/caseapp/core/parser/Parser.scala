@@ -181,7 +181,7 @@ abstract class Parser[T] {
                   }
                   val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
                   (res, reverseSteps0.reverse)
-              case opt :: rem if opt.startsWith("-") =>
+              case opt :: rem if opt.startsWith("-") && opt != "-" =>
                 if (ignoreUnrecognized)
                   helper(current, rem, opt :: extraArgsReverse, Step.IgnoredUnrecognized(index) :: reverseSteps, index + 1)
                 else if (stopAtFirstUnrecognized) {
@@ -281,6 +281,8 @@ abstract class Parser[T] {
           case Step.IgnoredUnrecognized(_) =>
             completer.optionName(value, stateOpt)
           case Step.Unrecognized(_, _) =>
+            completer.optionName(value, stateOpt)
+          case Step.StandardArgument(idx) if args0(idx) == "-" =>
             completer.optionName(value, stateOpt)
           case Step.MatchedOption(_, consumed, arg) if shift == 0 =>
             completer.optionName(value, stateOpt)
