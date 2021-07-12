@@ -159,52 +159,68 @@ abstract class Parser[T] {
       extraArgsReverse: List[String],
       reverseSteps: List[Step],
       index: Int
-    ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
-      args match {
-        case Nil =>
+    ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
+
+      def done = {
+        val res = get(current)
+          .left.map((_, Left(current)))
+          .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
+        (res, reverseSteps.reverse)
+      }
+
+      def stopParsing(tailArgs: List[String]) = {
+        val res = get(current)
+          .left.map((_, Left(current)))
+          .map { t =>
+            if (stopAtFirstUnrecognized)
+              // extraArgsReverse should be empty anyway here
+              (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
+            else
+              (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
+          }
+          val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
+          (res, reverseSteps0.reverse)
+      }
+
+      def unrecognized(headArg: String, tailArgs: List[String]) =
+        if (stopAtFirstUnrecognized) {
           val res = get(current)
             .left.map((_, Left(current)))
-            .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
-          (res, reverseSteps.reverse)
+            // extraArgsReverse should be empty anyway here
+            .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+          val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
+          (res, reverseSteps0.reverse)
+        } else {
+          val err = Error.UnrecognizedArgument(headArg)
+          val (remaining, steps) = helper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
+          val res = Left((remaining.fold(t => err.append(t._1), _ => err), remaining.fold(_._2, t => Right(t._1))))
+          (res, steps)
+        }
+
+      def stoppingAtUnrecognized = {
+        val res = get(current)
+          .left.map((_, Left(current)))
+          // extraArgsReverse should be empty anyway here
+          .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+        val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
+        (res, reverseSteps0.reverse)
+      }
+
+      args match {
+        case Nil => done
         case headArg :: tailArgs =>
           step(args, current) match {
             case Right(None) =>
-              if (headArg == "--") {
-                val res = get(current)
-                  .left.map((_, Left(current)))
-                  .map { t =>
-                    if (stopAtFirstUnrecognized)
-                      // extraArgsReverse should be empty anyway here
-                      (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
-                    else
-                      (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
-                  }
-                  val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
-                  (res, reverseSteps0.reverse)
-              } else if (headArg.startsWith("-") && headArg != "-") {
+              if (headArg == "--")
+                stopParsing(tailArgs)
+              else if (headArg.startsWith("-") && headArg != "-") {
                 if (ignoreUnrecognized)
                   helper(current, tailArgs, headArg :: extraArgsReverse, Step.IgnoredUnrecognized(index) :: reverseSteps, index + 1)
-                else if (stopAtFirstUnrecognized) {
-                  val res = get(current)
-                    .left.map((_, Left(current)))
-                    // extraArgsReverse should be empty anyway here
-                    .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
-                  val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
-                  (res, reverseSteps0.reverse)
-                } else {
-                  val err = Error.UnrecognizedArgument(headArg)
-                  val (remaining, steps) = helper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
-                  val res = Left((remaining.fold(t => err.append(t._1), _ => err), remaining.fold(_._2, t => Right(t._1))))
-                  (res, steps)
-                }
-              } else if (stopAtFirstUnrecognized) {
-                val res = get(current)
-                  .left.map((_, Left(current)))
-                  // extraArgsReverse should be empty anyway here
-                  .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
-                val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
-                (res, reverseSteps0.reverse)
-              } else
+                else
+                  unrecognized(headArg, tailArgs)
+              } else if (stopAtFirstUnrecognized)
+                stoppingAtUnrecognized
+              else
                 helper(current, tailArgs, headArg :: extraArgsReverse, Step.StandardArgument(index) :: reverseSteps, index + 1)
 
             case Right(Some((newC, matchedArg, newArgs))) =>
@@ -227,6 +243,7 @@ abstract class Parser[T] {
               (res, steps)
           }
       }
+    }
 
     helper(init, args.toList, Nil, Nil, 0)
   }
