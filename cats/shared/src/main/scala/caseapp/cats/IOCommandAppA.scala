@@ -6,6 +6,7 @@ import caseapp.core.RemainingArgs
 import cats.effect.{ExitCode, IO}
 
 /* The A suffix stands for anonymous */
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class IOCommandAppA[T](implicit
   commandParser: CommandParser[T],
   commandsMessages: CommandsHelp[T]

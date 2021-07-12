@@ -11,6 +11,7 @@ import scala.language.implicitConversions
 import caseapp.HelpMessage
 
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 @data class CommandsHelp[T](
   messages: Seq[(Seq[String], CommandHelp)]
 ) {
@@ -20,6 +21,7 @@ import caseapp.HelpMessage
     CommandsHelp(messages)
 }
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 object CommandsHelp {
 
   def apply[T](implicit messages: CommandsHelp[T]): CommandsHelp[T] = messages

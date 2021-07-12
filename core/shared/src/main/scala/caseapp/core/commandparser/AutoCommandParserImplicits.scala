@@ -7,6 +7,7 @@ import caseapp.util.AnnotationOption
 import shapeless.{:+:, CNil, Coproduct, LabelledGeneric, Strict, Witness}
 import shapeless.labelled.{FieldType, field}
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class AutoCommandParserImplicits {
 
   implicit def cnil: CommandParser[CNil] =

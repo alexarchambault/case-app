@@ -15,6 +15,7 @@ import scala.annotation.tailrec
   *
   * @tparam T: result type
   */
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class CommandParser[T] {
 
   /**
@@ -141,6 +142,7 @@ abstract class CommandParser[T] {
 
 }
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 object CommandParser extends AutoCommandParserImplicits {
 
   def apply[T](implicit parser: CommandParser[T]): CommandParser[T] = parser
