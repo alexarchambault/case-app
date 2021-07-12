@@ -53,4 +53,7 @@ import dataclass.data
       f(l.head) :: l.tail
     }
 
+  def withDefaultOrigin(origin: String): Parser.Aux[H :: T, D] =
+    withHeadParser(headParser.withDefaultOrigin(origin))
+      .withTailParser(tailParser.withDefaultOrigin(origin))
 }

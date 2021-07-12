@@ -33,4 +33,6 @@ import caseapp.Name
   override def defaultNameFormatter: Formatter[Name] =
     underlying.defaultNameFormatter
 
+  def withDefaultOrigin(origin: String): Parser.Aux[Either[Error, T], D] =
+    withUnderlying(underlying.withDefaultOrigin(origin))
 }

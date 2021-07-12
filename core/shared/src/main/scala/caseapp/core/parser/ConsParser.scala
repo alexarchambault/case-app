@@ -9,13 +9,9 @@ import caseapp.core.util.Formatter
 import caseapp.Name
 
 @data class ConsParser[H, T <: HList, DT <: HList](
-  arg: Arg,
-  argParser: ArgParser[H],
-  default: () => Option[H], // FIXME Couldn't this be Option[() => H]?
+  argument: Argument[H],
   tail: Parser.Aux[T, DT]
 ) extends Parser[H :*: T] {
-
-  private val argument = Argument(arg, argParser, default)
 
   type D = Option[H] :*: DT
 
@@ -28,9 +24,9 @@ import caseapp.Name
       nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     argument.step(args, d.head, nameFormatter) match {
-      case Left((err, rem)) => Left((err, arg, rem))
+      case Left((err, rem)) => Left((err, argument.arg, rem))
       case Right(Some((dHead, rem))) =>
-        Right(Some((dHead :: d.tail, arg, rem)))
+        Right(Some((dHead :: d.tail, argument.arg, rem)))
       case Right(None) =>
         tail
           .step(args, d.tail, nameFormatter)
@@ -53,7 +49,7 @@ import caseapp.Name
   }
 
   val args: Seq[Arg] =
-    arg +: tail.args
+    argument.arg +: tail.args
 
   def mapHead[I](f: H => I): Parser.Aux[I :*: T, D] =
     map { l =>
@@ -61,11 +57,9 @@ import caseapp.Name
     }
 
   def ::[A](argument: Argument[A]): ConsParser[A, H :*: T, D] =
-    ConsParser[A, H :*: T, D](
-      argument.arg,
-      argument.argParser,
-      argument.default,
-      this
-    )
+    ConsParser[A, H :*: T, D](argument, this)
 
+  def withDefaultOrigin(origin: String): Parser.Aux[H :*: T, D] =
+    withArgument(argument.withDefaultOrigin(origin))
+      .withTail(tail.withDefaultOrigin(origin))
 }

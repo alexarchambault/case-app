@@ -17,8 +17,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     RuntimeCommandsHelp(
       progName,
       Some(description).filter(_.nonEmpty),
-      defaultCommand.map(_.messages.withHelp: Help[_]).getOrElse(Help[Unit]()),
-      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.messages.withHelp, cmd.group, cmd.hidden))
+      defaultCommand.map(_.finalHelp: Help[_]).getOrElse(Help[Unit]()),
+      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.finalHelp, cmd.group, cmd.hidden))
     )
 
   def helpFormat: HelpFormat =
@@ -100,7 +100,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case None =>
           RuntimeCommandParser.parse(commands, actualArgs.toList) match {
             case None =>
-              val usage = help.help(helpFormat)
+              val usage = help.help(helpFormat, showHidden = false)
               println(usage)
               PlatformUtil.exit(0)
             case Some((commandName, command, commandArgs)) =>

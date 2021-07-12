@@ -25,10 +25,25 @@ jobs:
         jvm: 8
         apps: sbt-launcher:1.2.22
     - name: Test
-      run: sbt ++${{ matrix.SCALA_VERSION }} test mimaReportBinaryIssues
+      run: sbt ++${{ matrix.SCALA_VERSION }} test
+
+  bin-compat:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.1
+    - uses: laughedelic/coursier-setup@v1
+      with:
+        jvm: 8
+        apps: sbt-launcher:1.2.22
+    - name: Test
+      run: sbt +mimaReportBinaryIssues
 
   publish:
-    needs: test
+    needs: [test, bin-compat]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:

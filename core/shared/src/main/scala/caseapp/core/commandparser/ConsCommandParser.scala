@@ -4,6 +4,7 @@ import caseapp.core.parser.Parser
 import dataclass.data
 import shapeless.{:+:, Coproduct, Inl, Inr}
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 @data class ConsCommandParser[H, T <: Coproduct](
   name: Seq[String],
   parser: Parser[H],

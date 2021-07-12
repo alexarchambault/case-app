@@ -5,9 +5,9 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class ParserWithNameFormatter[T](underlying: Parser[T], f: Formatter[Name])
+@data class ParserWithNameFormatter[T, D0](underlying: Parser.Aux[T, D0], f: Formatter[Name])
     extends Parser[T] {
-  type D = underlying.D
+  type D = D0
 
   def init: D = underlying.init
 
@@ -30,4 +30,7 @@ import caseapp.Name
     underlying.defaultIgnoreUnrecognized
 
   override def defaultNameFormatter: Formatter[Name] = f
+
+  def withDefaultOrigin(origin: String): Parser.Aux[T, D] =
+    withUnderlying(underlying.withDefaultOrigin(origin))
 }

@@ -7,6 +7,7 @@ import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 import cats.effect._
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class IOCommandAppWithPreCommand[D, T](implicit
   val beforeCommandParser: Parser[D],
   baseBeforeCommandMessages: Help[D],

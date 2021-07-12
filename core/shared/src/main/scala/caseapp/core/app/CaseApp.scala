@@ -3,13 +3,14 @@ package caseapp.core.app
 import caseapp.Name
 import caseapp.core.{Error, RemainingArgs}
 import caseapp.core.complete.{Completer, CompletionItem, HelpCompleter}
-import caseapp.core.help.{Help, HelpFormat, WithHelp}
+import caseapp.core.help.{Help, HelpFormat, WithFullHelp, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.util.Formatter
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
   def hasHelp: Boolean = true
+  def hasFullHelp: Boolean = false
 
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)
@@ -25,7 +26,15 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     new HelpCompleter[T](messages)
 
   def complete(args: Seq[String], index: Int): List[CompletionItem] =
-    if (hasHelp)
+    if (hasFullHelp)
+      parser.withFullHelp.complete(
+        args,
+        index,
+        completer.withFullHelp,
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      )
+    else if (hasHelp)
       parser.withHelp.complete(
         args,
         index,
@@ -52,24 +61,29 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     exit(1)
   }
 
-  protected def helpWithProgName(progName: String): Help[WithHelp[T]] = {
-    val baseHelp = messages.withHelp
-    if (progName.isEmpty || progName == baseHelp.progName) baseHelp
-    else baseHelp.withProgName(progName)
+  lazy val finalHelp: Help[_] =
+    if (hasFullHelp) messages.withFullHelp
+    else if (hasHelp) messages.withHelp
+    else messages
+
+  def fullHelpAsked(progName: String): Nothing = {
+    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    println(help.help(helpFormat, showHidden = true))
+    exit(0)
   }
 
   def helpAsked(): Nothing =
     helpAsked("")
   def helpAsked(progName: String): Nothing = {
-    val help = helpWithProgName(progName)
-    println(help.help(helpFormat))
+    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    println(help.help(helpFormat, showHidden = false))
     exit(0)
   }
 
   def usageAsked(): Nothing =
     usageAsked("")
   def usageAsked(progName: String): Nothing = {
-    val help = helpWithProgName(progName)
+    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
     println(help.usage(helpFormat))
     exit(0)
   }
@@ -78,7 +92,7 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     HelpFormat.default()
 
   def ensureNoDuplicates(): Unit =
-    messages.ensureNoDuplicates()
+    finalHelp.ensureNoDuplicates()
 
   /**
     * Arguments are expanded then parsed. By default, argument expansion is the identity function.
@@ -123,10 +137,19 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     Formatter.DefaultNameFormatter
 
   def main(args: Array[String]): Unit =
-    main(messages.progName, PlatformUtil.arguments(args))
+    main(finalHelp.progName, PlatformUtil.arguments(args))
 
   def main(progName: String, args: Array[String]): Unit =
-    if (hasHelp)
+    if (hasFullHelp)
+      parser.withFullHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
+        case Left(err) => error(err)
+        case Right((WithFullHelp(_, _, true, _), _)) => fullHelpAsked(progName)
+        case Right((WithFullHelp(_, true, _, _), _)) => helpAsked(progName)
+        case Right((WithFullHelp(true, _, _, _), _)) => usageAsked(progName)
+        case Right((WithFullHelp(_, _, _, Left(err)), _)) => error(err)
+        case Right((WithFullHelp(_, _, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
+      }
+    else if (hasHelp)
       parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
         case Left(err) => error(err)
         case Right((WithHelp(_, true, _), _)) => helpAsked(progName)

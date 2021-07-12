@@ -4,6 +4,7 @@ import caseapp.core.app.CaseApp
 import caseapp.core.parser.Parser
 import shapeless.{:+:, Coproduct, Generic, ops}
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 final class CommandParserOps[T <: Coproduct](val commandParser: CommandParser[T]) extends AnyVal {
 
   // foo added not to collide with the other add method below

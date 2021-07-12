@@ -1,9 +1,11 @@
 package caseapp
 
-import caseapp.core.Arg
-import caseapp.core.parser.{Argument, NilParser}
-import utest._
+import caseapp.core.{Arg, Error}
+import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.parser.ParserOps
+import caseapp.core.util.Formatter
+
+import utest._
 
 object ParserTests extends TestSuite {
   val tests = Tests {
@@ -31,7 +33,7 @@ object ParserTests extends TestSuite {
       case class Helper(n: Int, value: String)
       val parser =
         Argument[Int](Arg("n")) ::
-        Argument[String](Arg("value")).withDefault(() => Some("-")) ::
+        StandardArgument[String](Arg("value")).withDefault(() => Some("-")) ::
           NilParser
       test {
         val res = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
@@ -52,7 +54,7 @@ object ParserTests extends TestSuite {
       case class Helper(n: Int, value: String)
       val parser =
         Argument[Int](Arg("n")) ::
-        Argument[String](Arg("value")).withDefault(() => Some("default")) ::
+        StandardArgument[String](Arg("value")).withDefault(() => Some("default")) ::
           NilParser
       test("single") {
         val res = parser.to[Helper].parse(Seq("-n", "2", "-"))
@@ -64,6 +66,56 @@ object ParserTests extends TestSuite {
         val expected = Right((Helper(2, "default"), Seq("-", "a", "-", "-")))
         assert(res == expected)
       }
+    }
+
+    test("Retain origin class of options") {
+      val parser = Parser[Definitions.MoreArgs]
+      val args = parser.args
+      val baseMap = args.groupBy(_.name.name)
+      assert(baseMap.size == 3)
+      assert(baseMap.forall(_._2.length == 1))
+      val map = baseMap.map { case (k, v) => (k, v.head) }
+
+      val countArg = map.getOrElse("count", sys.error("count argument not found"))
+      val valueArg = map.getOrElse("value", sys.error("value argument not found"))
+      val numFooArg = map.getOrElse("numFoo", sys.error("numFoo argument not found"))
+
+      assert(countArg.origin == Some("MoreArgs"))
+      assert(valueArg.origin == Some("FewArgs"))
+      assert(numFooArg.origin == Some("FewArgs"))
+    }
+
+    test("Custom Argument type") {
+      case class Helper(n: Int, values: List[String])
+
+      val valuesArgument = new Argument[List[String]] {
+        def arg = Arg(Name("X")).withIsFlag(true)
+        def withDefaultOrigin(origin: String): Argument[List[String]] = ???
+        def init: Option[List[String]] = Some(Nil)
+        def step(
+            args: List[String],
+            d: Option[List[String]],
+            nameFormatter: Formatter[Name]
+        ): Either[(Error, List[String]), Option[(Option[List[String]], List[String])]] =
+          args match {
+            case h :: t if h.startsWith("-X") =>
+              Right(Some((Some(h :: d.getOrElse(Nil)), t)))
+            case _ => Right(None)
+          }
+        def get(d: Option[List[String]], nameFormatter: Formatter[Name]): Either[Error, List[String]] =
+          d.map(_.reverse).toRight(
+            Error.RequiredOptionNotSpecified("-X*", Nil)
+          )
+      }
+
+      val parser =
+        Argument[Int](Arg("n")) ::
+        valuesArgument ::
+          NilParser
+
+      val res = parser.to[Helper].parse(Seq("-n", "2", "-Xa", "foo", "-Xb"))
+      val expected = Right((Helper(2, List("-Xa", "-Xb")), List("foo")))
+      assert(res == expected)
     }
   }
 }

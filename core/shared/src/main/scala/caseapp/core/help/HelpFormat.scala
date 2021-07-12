@@ -14,7 +14,9 @@ import dataclass._
   sortedGroups: Option[Seq[String]] = None,
   @since("2.1.0")
   sortCommandGroups: Option[Seq[String] => Seq[String]] = None,
-  sortedCommandGroups: Option[Seq[String]] = None
+  sortedCommandGroups: Option[Seq[String]] = None,
+  @since("2.1.0")
+  hidden: fansi.Attrs = fansi.Attrs.Empty
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],
@@ -49,6 +51,7 @@ object HelpFormat {
         .withProgName(fansi.Bold.On)
         .withCommandName(fansi.Bold.On)
         .withOption(fansi.Color.Yellow)
+        .withHidden(fansi.Color.DarkGray)
     else
       HelpFormat()
 }

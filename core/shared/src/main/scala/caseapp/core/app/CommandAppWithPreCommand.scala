@@ -6,6 +6,7 @@ import caseapp.core.help.{CommandsHelp, Help, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
 
+@deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class CommandAppWithPreCommand[D, T](implicit
   val beforeCommandParser: Parser[D],
   baseBeforeCommandMessages: Help[D],

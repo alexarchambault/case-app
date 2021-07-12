@@ -21,8 +21,14 @@ import dataclass._
   noHelp: Boolean = false,
   isFlag: Boolean = false,
   @since
-  group: Option[Group] = None
-)
+  group: Option[Group] = None,
+  @since
+  origin: Option[String] = None
+) {
+  def withDefaultOrigin(defaultOrigin: String): Arg =
+    if (origin.isEmpty) withOrigin(Some(defaultOrigin))
+    else this
+}
 
 object Arg {
   def apply(name: String): Arg =
