@@ -138,7 +138,9 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         groups.head
       )
 
-      ConsParser(arg, argParser.value, () => default0().head.orElse(Some(default.value.value)), tailParser)
+      val argument = Argument(arg, argParser.value, () => default0().head.orElse(Some(default.value.value)))
+
+      ConsParser(argument, tailParser)
         .mapHead(field[K](_))
     }
 

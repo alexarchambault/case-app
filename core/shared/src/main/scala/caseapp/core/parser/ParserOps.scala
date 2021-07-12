@@ -18,8 +18,8 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
     noHelp: Boolean = false,
     isFlag: Boolean = false,
     formatter: Formatter[Name] = Formatter.DefaultNameFormatter
-  ): Parser.Aux[H :: T, Option[H] :: D] =
-    ConsParser(
+  ): Parser.Aux[H :: T, Option[H] :: D] = {
+    val argument = Argument(
       Arg(
         Name(name),
         extraNames,
@@ -29,9 +29,10 @@ class ParserOps[T <: HList, D <: HList](val parser: Parser.Aux[T, D]) extends An
         isFlag
       ),
       ArgParser[H],
-      () => default,
-      parser
+      () => default
     )
+    ConsParser(argument, parser)
+  }
 
   def addAll[U]: ParserOps.AddAllHelper[T, D, U] =
     new ParserOps.AddAllHelper[T, D, U](parser)

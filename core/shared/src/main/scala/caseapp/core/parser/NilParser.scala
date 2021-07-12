@@ -26,12 +26,7 @@ case object NilParser extends Parser[HNil] {
     scala.Nil
 
   def ::[A](argument: Argument[A]): ConsParser[A, HNil, HNil] =
-    ConsParser[A, HNil, HNil](
-      argument.arg,
-      argument.argParser,
-      argument.default,
-      this
-    )
+    ConsParser[A, HNil, HNil](argument, this)
 
   def withDefaultOrigin(origin: String): Parser.Aux[HNil, D] =
     this

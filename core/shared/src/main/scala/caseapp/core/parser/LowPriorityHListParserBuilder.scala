@@ -81,7 +81,9 @@ abstract class LowPriorityHListParserBuilder {
         groups.head
       )
 
-      ConsParser(arg, argParser.value, () => default0().head, tailParser)
+      val argument = Argument(arg, argParser.value, () => default0().head)
+
+      ConsParser(argument, tailParser)
         .mapHead(field[K](_))
     }
 

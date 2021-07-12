@@ -10,8 +10,11 @@ import caseapp.Name
 @data class Argument[H](
   arg: Arg,
   argParser: ArgParser[H],
-  default: () => Option[H]
+  default: () => Option[H] // FIXME Couldn't this be Option[() => H]?
 ) {
+
+  def withDefaultOrigin(origin: String): Argument[H] =
+    withArg(arg.withDefaultOrigin(origin))
 
   def init: Option[H] =
     None
