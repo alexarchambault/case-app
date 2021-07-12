@@ -68,4 +68,7 @@ import caseapp.Name
       this
     )
 
+  def withDefaultOrigin(origin: String): Parser.Aux[H :*: T, D] =
+    withArg(arg.withDefaultOrigin(origin))
+      .withTail(tail.withDefaultOrigin(origin))
 }

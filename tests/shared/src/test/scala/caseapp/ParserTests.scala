@@ -65,5 +65,22 @@ object ParserTests extends TestSuite {
         assert(res == expected)
       }
     }
+
+    test("Retain origin class of options") {
+      val parser = Parser[Definitions.MoreArgs]
+      val args = parser.args
+      val baseMap = args.groupBy(_.name.name)
+      assert(baseMap.size == 3)
+      assert(baseMap.forall(_._2.length == 1))
+      val map = baseMap.map { case (k, v) => (k, v.head) }
+
+      val countArg = map.getOrElse("count", sys.error("count argument not found"))
+      val valueArg = map.getOrElse("value", sys.error("value argument not found"))
+      val numFooArg = map.getOrElse("numFoo", sys.error("numFoo argument not found"))
+
+      assert(countArg.origin == Some("MoreArgs"))
+      assert(valueArg.origin == Some("FewArgs"))
+      assert(numFooArg.origin == Some("FewArgs"))
+    }
   }
 }

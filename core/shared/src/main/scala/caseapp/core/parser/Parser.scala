@@ -92,18 +92,18 @@ abstract class Parser[T] {
 
   def defaultStopAtFirstUnrecognized: Boolean =
     false
-  def stopAtFirstUnrecognized: Parser[T] =
+  def stopAtFirstUnrecognized: Parser.Aux[T, D] =
     StopAtFirstUnrecognizedParser(this)
 
   def defaultIgnoreUnrecognized: Boolean =
     false
-  def ignoreUnrecognized: Parser[T] =
+  def ignoreUnrecognized: Parser.Aux[T, D] =
     IgnoreUnrecognizedParser(this)
 
   def defaultNameFormatter: Formatter[Name] =
     Formatter.DefaultNameFormatter
 
-  def nameFormatter(f: Formatter[Name]): Parser[T] =
+  def nameFormatter(f: Formatter[Name]): Parser.Aux[T, D] =
     ParserWithNameFormatter(this, f)
 
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
@@ -313,6 +313,8 @@ abstract class Parser[T] {
 
   final def map[U](f: T => U): Parser.Aux[U, D] =
     MappedParser(this, f)
+
+  def withDefaultOrigin(origin: String): Parser.Aux[T, D]
 }
 
 object Parser extends LowPriorityParserImplicits {

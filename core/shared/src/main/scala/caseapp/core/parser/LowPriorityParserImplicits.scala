@@ -2,7 +2,7 @@ package caseapp.core.parser
 
 import caseapp.{HelpMessage, Group, Hidden, Name, Recurse, ValueDescription}
 import caseapp.util.AnnotationList
-import shapeless.{Annotations, HList, LabelledGeneric, Strict}
+import shapeless.{Annotations, HList, LabelledGeneric, Strict, Typeable}
 
 abstract class LowPriorityParserImplicits {
 
@@ -19,6 +19,7 @@ abstract class LowPriorityParserImplicits {
     P <: HList
   ](implicit
     gen: LabelledGeneric.Aux[CC, L],
+    typeable: Typeable[CC],
     defaults: caseapp.util.Default.AsOptions.Aux[CC, D],
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
@@ -32,6 +33,7 @@ abstract class LowPriorityParserImplicits {
       .value
       .apply(defaults(), names(), valuesDesc(), helpMessages(), group(), noHelp())
       .map(gen.from)
+      .withDefaultOrigin(typeable.describe)
 
   implicit def generic[
     CC,
@@ -47,6 +49,7 @@ abstract class LowPriorityParserImplicits {
   ](implicit
     lowPriority: caseapp.util.LowPriority,
     gen: LabelledGeneric.Aux[CC, L],
+    typeable: Typeable[CC],
     defaults: caseapp.util.Default.AsOptions.Aux[CC, D],
     names: AnnotationList.Aux[Name, CC, N],
     valuesDesc: Annotations.Aux[ValueDescription, CC, V],
@@ -58,6 +61,7 @@ abstract class LowPriorityParserImplicits {
   ): Parser.Aux[CC, P] =
     derive[CC, L, D, N, V, M, G, H, R, P](
       gen,
+      typeable,
       defaults,
       names,
       valuesDesc,

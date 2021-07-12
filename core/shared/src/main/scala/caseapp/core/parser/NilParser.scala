@@ -33,4 +33,6 @@ case object NilParser extends Parser[HNil] {
       this
     )
 
+  def withDefaultOrigin(origin: String): Parser.Aux[HNil, D] =
+    this
 }

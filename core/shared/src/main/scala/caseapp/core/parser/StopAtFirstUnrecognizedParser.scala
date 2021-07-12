@@ -5,8 +5,8 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class StopAtFirstUnrecognizedParser[T](underlying: Parser[T]) extends Parser[T] {
-  type D = underlying.D
+@data class StopAtFirstUnrecognizedParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[T] {
+  type D = D0
   def init: D = underlying.init
   def step(
       args: List[String],
@@ -24,4 +24,7 @@ import caseapp.Name
     underlying.defaultIgnoreUnrecognized
   override def defaultNameFormatter: Formatter[Name] =
     underlying.defaultNameFormatter
+
+  def withDefaultOrigin(origin: String): Parser.Aux[T, D] =
+    withUnderlying(underlying.withDefaultOrigin(origin))
 }
