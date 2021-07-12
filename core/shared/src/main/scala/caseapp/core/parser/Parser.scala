@@ -160,16 +160,16 @@ abstract class Parser[T] {
       reverseSteps: List[Step],
       index: Int
     ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
-      if (args.isEmpty) {
-        val res = get(current)
-          .left.map((_, Left(current)))
-          .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
-        (res, reverseSteps.reverse)
-      } else
-        step(args, current) match {
-          case Right(None) =>
-            args match {
-              case "--" :: rem =>
+      args match {
+        case Nil =>
+          val res = get(current)
+            .left.map((_, Left(current)))
+            .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
+          (res, reverseSteps.reverse)
+        case headArg :: tailArgs =>
+          step(args, current) match {
+            case Right(None) =>
+              if (headArg == "--") {
                 val res = get(current)
                   .left.map((_, Left(current)))
                   .map { t =>
@@ -177,13 +177,13 @@ abstract class Parser[T] {
                       // extraArgsReverse should be empty anyway here
                       (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
                     else
-                      (t, RemainingArgs(extraArgsReverse.reverse, rem))
+                      (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
                   }
                   val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
                   (res, reverseSteps0.reverse)
-              case opt :: rem if opt.startsWith("-") && opt != "-" =>
+              } else if (headArg.startsWith("-") && headArg != "-") {
                 if (ignoreUnrecognized)
-                  helper(current, rem, opt :: extraArgsReverse, Step.IgnoredUnrecognized(index) :: reverseSteps, index + 1)
+                  helper(current, tailArgs, headArg :: extraArgsReverse, Step.IgnoredUnrecognized(index) :: reverseSteps, index + 1)
                 else if (stopAtFirstUnrecognized) {
                   val res = get(current)
                     .left.map((_, Left(current)))
@@ -192,42 +192,41 @@ abstract class Parser[T] {
                   val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
                   (res, reverseSteps0.reverse)
                 } else {
-                  val err = Error.UnrecognizedArgument(opt)
-                  val (remaining, steps) = helper(current, rem, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
+                  val err = Error.UnrecognizedArgument(headArg)
+                  val (remaining, steps) = helper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
                   val res = Left((remaining.fold(t => err.append(t._1), _ => err), remaining.fold(_._2, t => Right(t._1))))
                   (res, steps)
                 }
-              case userArg :: rem =>
-                if (stopAtFirstUnrecognized) {
-                  val res = get(current)
-                    .left.map((_, Left(current)))
-                    // extraArgsReverse should be empty anyway here
-                    .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
-                  val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
-                  (res, reverseSteps0.reverse)
-                } else
-                  helper(current, rem, userArg :: extraArgsReverse, Step.StandardArgument(index) :: reverseSteps, index + 1)
-            }
+              } else if (stopAtFirstUnrecognized) {
+                val res = get(current)
+                  .left.map((_, Left(current)))
+                  // extraArgsReverse should be empty anyway here
+                  .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+                val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
+                (res, reverseSteps0.reverse)
+              } else
+                helper(current, tailArgs, headArg :: extraArgsReverse, Step.StandardArgument(index) :: reverseSteps, index + 1)
 
-          case Right(Some((newC, matchedArg, newArgs))) =>
+            case Right(Some((newC, matchedArg, newArgs))) =>
 
-            assert(
-              newArgs != args,
-              s"From $args, an ArgParser is supposed to have consumed arguments, but returned the same argument list"
-            )
+              assert(
+                newArgs != args,
+                s"From $args, an ArgParser is supposed to have consumed arguments, but returned the same argument list"
+              )
 
-            val consumed0 = consumed(args, newArgs)
-            assert(consumed0 > 0)
+              val consumed0 = consumed(args, newArgs)
+              assert(consumed0 > 0)
 
-            helper(newC, newArgs.toList, extraArgsReverse, Step.MatchedOption(index, consumed0, matchedArg) :: reverseSteps, index + consumed0)
+              helper(newC, newArgs.toList, extraArgsReverse, Step.MatchedOption(index, consumed0, matchedArg) :: reverseSteps, index + consumed0)
 
-          case Left((msg, matchedArg, rem)) =>
-            val consumed0 = consumed(args, rem)
-            assert(consumed0 > 0)
-            val (remaining, steps) = helper(current, rem, extraArgsReverse, Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps, index + consumed0)
-            val res = Left((remaining.fold(errs => msg.append(errs._1), _ => msg), remaining.fold(_._2, t => Right(t._1))))
-            (res, steps)
-        }
+            case Left((msg, matchedArg, rem)) =>
+              val consumed0 = consumed(args, rem)
+              assert(consumed0 > 0)
+              val (remaining, steps) = helper(current, rem, extraArgsReverse, Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps, index + consumed0)
+              val res = Left((remaining.fold(errs => msg.append(errs._1), _ => msg), remaining.fold(_._2, t => Right(t._1))))
+              (res, steps)
+          }
+      }
 
     helper(init, args.toList, Nil, Nil, 0)
   }
