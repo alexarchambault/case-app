@@ -2,7 +2,7 @@ package caseapp.core.parser
 
 import scala.language.implicitConversions
 import caseapp.core.{Arg, Error}
-import caseapp.core.help.WithHelp
+import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
 import caseapp.core.util.Formatter
@@ -330,6 +330,17 @@ abstract class Parser[T] {
   final def withHelp: Parser[WithHelp[T]] = {
     implicit val parser: Parser.Aux[T, D] = this
     val p = ParserWithNameFormatter(Parser[WithHelp[T]], defaultNameFormatter)
+    if (defaultIgnoreUnrecognized)
+      p.ignoreUnrecognized
+    else if (defaultStopAtFirstUnrecognized)
+      p.stopAtFirstUnrecognized
+    else
+      p
+  }
+
+  final def withFullHelp: Parser[WithFullHelp[T]] = {
+    implicit val parser: Parser.Aux[T, D] = this
+    val p = ParserWithNameFormatter(Parser[WithFullHelp[T]], defaultNameFormatter)
     if (defaultIgnoreUnrecognized)
       p.ignoreUnrecognized
     else if (defaultStopAtFirstUnrecognized)

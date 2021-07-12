@@ -36,7 +36,7 @@ import caseapp.HelpMessage
   }
 
   /** Options description for `T` */
-  def options: String = Help.optionsMessage(args, nameFormatter)
+  def options: String = Help.optionsMessage(args, nameFormatter, showHidden = false)
 
   /**
     * Full multi-line help message for `T`.
@@ -45,7 +45,7 @@ import caseapp.HelpMessage
     *
     */
   def help: String =
-    help(HelpFormat.default())
+    help(HelpFormat.default(), showHidden = false)
 
   /**
    * Add help and usage options.
@@ -57,6 +57,15 @@ import caseapp.HelpMessage
     withArgs(helpArgs ++ args)
       // circumventing a possible data-class issue here (getting a Help[Nothing] else)
       .asInstanceOf[Help[WithHelp[T]]]
+  }
+
+  def withFullHelp: Help[WithFullHelp[T]] = {
+    final case class Dummy()
+    val helpArgs = Parser[WithFullHelp[Dummy]].args
+
+    withArgs(helpArgs ++ args)
+      // circumventing a possible data-class issue here (getting a Help[Nothing] else)
+      .asInstanceOf[Help[WithFullHelp[T]]]
   }
 
   def duplicates: Map[String, Seq[Arg]] = {
@@ -99,7 +108,7 @@ import caseapp.HelpMessage
     }
   }
 
-  def printHelp(b: StringBuilder, format: HelpFormat): Unit = {
+  def printHelp(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit = {
     printUsage(b, format)
     b.append(format.newLine)
 
@@ -108,22 +117,25 @@ import caseapp.HelpMessage
 
     b.append(format.newLine)
 
-    printOptions(b, format)
+    printOptions(b, format, showHidden)
   }
 
-  def help(format: HelpFormat): String = {
+  def help(format: HelpFormat): String =
+    help(format, showHidden = false)
+
+  def help(format: HelpFormat, showHidden: Boolean): String = {
     val b = new StringBuilder
-    printHelp(b, format)
+    printHelp(b, format, showHidden)
     b.result()
   }
 
-  def printOptions(b: StringBuilder, format: HelpFormat): Unit =
+  def printOptions(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (args.nonEmpty) {
       val groupedArgs = args.groupBy(_.group.fold("")(_.name))
       val groups = format.sortGroupValues(groupedArgs.toVector)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
       for (((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex) {
-        val argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter).toVector.map(_.toVector))
+        val argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter, showHidden).toVector.map(_.toVector))
 
         if (groupIdx > 0) {
           b.append(format.newLine)
@@ -155,13 +167,13 @@ object Help {
 
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
-    optionsMessage(args, Formatter.DefaultNameFormatter)
+    optionsMessage(args, Formatter.DefaultNameFormatter, showHidden = false)
 
   /** Option message for `args` */
-  def optionsMessage(args: Seq[Arg], nameFormatter: Formatter[Name]): String =
+  def optionsMessage(args: Seq[Arg], nameFormatter: Formatter[Name], showHidden: Boolean): String =
     args
       .collect {
-        case arg if !arg.noHelp =>
+        case arg if showHidden || !arg.noHelp =>
 
           val names = (arg.name +: arg.extraNames).distinct
 
@@ -233,8 +245,8 @@ object Help {
   val WW = "  "
   val TB = "        "
 
-  private def optionsTable(args: Seq[Arg], format: HelpFormat, nameFormatter: Formatter[Name]): Seq[Seq[fansi.Str]] =
-    for (arg <- args if !arg.noHelp) yield {
+  private def optionsTable(args: Seq[Arg], format: HelpFormat, nameFormatter: Formatter[Name], showHidden: Boolean): Seq[Seq[fansi.Str]] =
+    for (arg <- args if showHidden || !arg.noHelp) yield {
       val sortedNames = (arg.name +: arg.extraNames).groupBy(_.name.length).toVector.sortBy(_._1).flatMap(_._2)
       val options = sortedNames
         .iterator
@@ -249,7 +261,9 @@ object Help {
         if (arg.isFlag) options
         else options ++ " " ++ arg.valueDescription.fold("value")(_.description)
 
-      val desc = arg.helpMessage.fold("")(_.message)
+      val desc: fansi.Str =
+        if (arg.noHelp) format.hidden("(hidden)") ++ arg.helpMessage.map(_.message).filter(_.nonEmpty).fold("")(" " + _)
+        else arg.helpMessage.fold("")(_.message)
 
       Seq[fansi.Str](optionsAndValue, desc)
     }

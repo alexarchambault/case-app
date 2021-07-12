@@ -14,9 +14,11 @@ import dataclass._
 ) {
 
   def help(): String =
-    help(HelpFormat.default())
+    help(HelpFormat.default(), showHidden = false)
+  def help(format: HelpFormat): String =
+    help(format, showHidden = false)
 
-  def help(format: HelpFormat): String = {
+  def help(format: HelpFormat, showHidden: Boolean): String = {
     val b = new StringBuilder
     b.append("Usage: ")
     b.append(format.progName(progName).render)
@@ -42,23 +44,23 @@ import dataclass._
 
     b.append(format.newLine)
 
-    defaultHelp.printOptions(b, format)
+    defaultHelp.printOptions(b, format, showHidden)
 
     if (commands.nonEmpty) {
       b.append(format.newLine)
       b.append(format.newLine)
-      printCommands(b, format)
+      printCommands(b, format, showHidden)
     }
 
     b.result()
   }
 
-  def printCommands(b: StringBuilder, format: HelpFormat): Unit =
+  def printCommands(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (commands.nonEmpty) {
 
       val grouped = format.sortCommandGroupValues(
         commands
-          .filter(!_.hidden)
+          .filter(c => showHidden || !c.hidden)
           .groupBy(_.group)
           .toVector
       )
@@ -69,7 +71,10 @@ import dataclass._
             .iterator
             .map { help =>
               val names0 = help.names.map(_.mkString(" ")).map(format.commandName(_).render).mkString(", ")
-              val descOpt = help.help.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption).map(x => x: fansi.Str)
+              val baseDescOpt = help.help.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption)
+              val descOpt =
+                if (help.hidden) Some(format.hidden("(hidden)") ++ (baseDescOpt.map(" " + _).getOrElse(""): String))
+                else baseDescOpt.map(x => x: fansi.Str)
               Seq(names0: fansi.Str, descOpt.getOrElse("": fansi.Str))
             }
             .toVector

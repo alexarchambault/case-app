@@ -1,7 +1,7 @@
 package caseapp.core.complete
 
 import caseapp.core.Arg
-import caseapp.core.help.WithHelp
+import caseapp.core.help.{WithFullHelp, WithHelp}
 
 trait Completer[T] { self =>
   def optionName(prefix: String, state: Option[T]): List[CompletionItem]
@@ -18,5 +18,7 @@ trait Completer[T] { self =>
         self.argument(prefix, state.flatMap(f))
     }
   def withHelp: Completer[WithHelp[T]] =
+    contramapOpt(_.baseOrError.toOption)
+  def withFullHelp: Completer[WithFullHelp[T]] =
     contramapOpt(_.baseOrError.toOption)
 }
