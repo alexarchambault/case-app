@@ -9,6 +9,7 @@ import caseapp.core.util.Formatter
 import caseapp.Name
 import caseapp.core.complete.Completer
 import caseapp.core.complete.CompletionItem
+import scala.annotation.tailrec
 
 /**
   * Parses arguments, resulting in a `T` in case of success.
@@ -153,6 +154,16 @@ abstract class Parser[T] {
         case _ => initial.length - updated.length  // kind of meh, might make parsing O(args.length^2)
       }
 
+    def runHelper(
+      current: D,
+      args: List[String],
+      extraArgsReverse: List[String],
+      reverseSteps: List[Step],
+      index: Int
+    ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
+      helper(current, args, extraArgsReverse, reverseSteps, index)
+
+    @tailrec
     def helper(
       current: D,
       args: List[String],
@@ -192,7 +203,7 @@ abstract class Parser[T] {
           (res, reverseSteps0.reverse)
         } else {
           val err = Error.UnrecognizedArgument(headArg)
-          val (remaining, steps) = helper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
+          val (remaining, steps) = runHelper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
           val res = Left((remaining.fold(t => err.append(t._1), _ => err), remaining.fold(_._2, t => Right(t._1))))
           (res, steps)
         }
@@ -238,7 +249,7 @@ abstract class Parser[T] {
             case Left((msg, matchedArg, rem)) =>
               val consumed0 = consumed(args, rem)
               assert(consumed0 > 0)
-              val (remaining, steps) = helper(current, rem, extraArgsReverse, Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps, index + consumed0)
+              val (remaining, steps) = runHelper(current, rem, extraArgsReverse, Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps, index + consumed0)
               val res = Left((remaining.fold(errs => msg.append(errs._1), _ => msg), remaining.fold(_._2, t => Right(t._1))))
               (res, steps)
           }
