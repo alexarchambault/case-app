@@ -9,11 +9,13 @@ class NameOps(val name: Name) extends AnyVal {
   private def isShort: Boolean =
     name.name.length == 1
 
-  private def optionEq(nameFormatter: Formatter[Name]): String = 
+  private def optionEq(nameFormatter: Formatter[Name]): String =
     option(nameFormatter) + "="
 
   def option(nameFormatter: Formatter[Name]): String =
-    if (isShort) s"-${name.name}" else s"--${nameFormatter.format(name)}"
+    if (name.name.startsWith("-")) nameFormatter.format(name)
+    else if (isShort) s"-${name.name}"
+    else s"--${nameFormatter.format(name)}"
 
   def apply(
       args: List[String],
