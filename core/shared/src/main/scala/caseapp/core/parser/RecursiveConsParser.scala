@@ -53,6 +53,9 @@ import dataclass.data
       f(l.head) :: l.tail
     }
 
+  def ::[A](argument: Argument[A]): ConsParser[A, H :: T, D] =
+    ConsParser[A, H :: T, D](argument, this)
+
   def withDefaultOrigin(origin: String): Parser.Aux[H :: T, D] =
     withHeadParser(headParser.withDefaultOrigin(origin))
       .withTailParser(tailParser.withDefaultOrigin(origin))

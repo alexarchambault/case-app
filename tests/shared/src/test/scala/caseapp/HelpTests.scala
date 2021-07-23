@@ -257,8 +257,8 @@ object HelpTests extends TestSuite {
         """Usage: foo <COMMAND> [options]
           |
           |Help options:
-          |  --usage     Print usage and exit
-          |  -h, --help  Print help message and exit
+          |  --usage            Print usage and exit
+          |  -h, -help, --help  Print help message and exit
           |
           |Other options:
           |  -f, --foo string
@@ -283,8 +283,8 @@ object HelpTests extends TestSuite {
         """Usage: foo <COMMAND> [options]
           |
           |Help options:
-          |  --usage     Print usage and exit
-          |  -h, --help  Print help message and exit
+          |  --usage            Print usage and exit
+          |  -h, -help, --help  Print help message and exit
           |
           |Other options:
           |  -f, --foo string
@@ -312,8 +312,8 @@ object HelpTests extends TestSuite {
           """Usage: foo <COMMAND> [options]
             |
             |Help options:
-            |  --usage     Print usage and exit
-            |  -h, --help  Print help message and exit
+            |  --usage            Print usage and exit
+            |  -h, -help, --help  Print help message and exit
             |
             |Other options:
             |  -f, --foo string
@@ -333,8 +333,8 @@ object HelpTests extends TestSuite {
           """Usage: foo <COMMAND> [options]
             |
             |Help options:
-            |  --usage     Print usage and exit
-            |  -h, --help  Print help message and exit
+            |  --usage            Print usage and exit
+            |  -h, -help, --help  Print help message and exit
             |
             |Other options:
             |  -f, --foo string

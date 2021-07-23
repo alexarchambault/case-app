@@ -8,6 +8,7 @@
 package object caseapp {
 
   type ExtraName = Name
+  val ExtraName = Name
 
   type Parser[T] = core.parser.Parser[T]
   val Parser = core.parser.Parser

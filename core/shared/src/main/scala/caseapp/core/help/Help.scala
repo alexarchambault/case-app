@@ -247,10 +247,14 @@ object Help {
 
   private def optionsTable(args: Seq[Arg], format: HelpFormat, nameFormatter: Formatter[Name], showHidden: Boolean): Seq[Seq[fansi.Str]] =
     for (arg <- args if showHidden || !arg.noHelp) yield {
-      val sortedNames = (arg.name +: arg.extraNames).groupBy(_.name.length).toVector.sortBy(_._1).flatMap(_._2)
+      val sortedNames = (arg.name +: arg.extraNames)
+        .map(name => format.option(name.option(nameFormatter)))
+        .groupBy(_.length)
+        .toVector
+        .sortBy(_._1)
+        .flatMap(_._2)
       val options = sortedNames
         .iterator
-        .map(name => format.option(name.option(nameFormatter)))
         .zip(Iterator.continually(", ": fansi.Str))
         .flatMap { case (a, b) => Iterator(a, b) }
         .toVector
