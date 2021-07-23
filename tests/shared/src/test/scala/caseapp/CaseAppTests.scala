@@ -514,6 +514,19 @@ object CaseAppTests extends TestSuite {
       assert(messageOpt.contains("Unrecognized argument: --help"))
     }
 
+    test("accept -help") {
+      val res =
+        Parser[FewArgs].withHelp.detailedParse(
+          Seq("-help")
+        )
+
+      val expectedRes =
+        Right(
+          (WithHelp(false, true, Right(FewArgs())), RemainingArgs(List(), List()))
+        )
+      assert(res == expectedRes)
+    }
+
   }
 
 }
