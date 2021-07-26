@@ -81,7 +81,9 @@ lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
     },
     libraryDependencies ++= Seq(
       Deps.catsEffect2.value
-    )
+    ),
+    libraryDependencies += Deps.utest.value % Test,
+    testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
 lazy val cats2JVM = cats2.jvm
