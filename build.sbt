@@ -75,7 +75,7 @@ lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
   .settings(
     shared,
     name := "case-app-cats-effect-2",
-    Compile / scalaSource := file((catsJVM / Compile / scalaSource).value.toString.replace("jvm", "shared")),
+    Compile / sources := (catsJVM / Compile / sources).value,
     mimaPreviousArtifacts := {
       mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
     },
