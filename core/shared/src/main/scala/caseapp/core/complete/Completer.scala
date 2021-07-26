@@ -20,5 +20,5 @@ trait Completer[T] { self =>
   def withHelp: Completer[WithHelp[T]] =
     contramapOpt(_.baseOrError.toOption)
   def withFullHelp: Completer[WithFullHelp[T]] =
-    contramapOpt(_.baseOrError.toOption)
+    contramapOpt(_.withHelp.baseOrError.toOption)
 }
