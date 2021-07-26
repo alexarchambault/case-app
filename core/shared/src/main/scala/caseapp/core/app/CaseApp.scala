@@ -143,11 +143,11 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     if (hasFullHelp)
       parser.withFullHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
         case Left(err) => error(err)
-        case Right((WithFullHelp(_, _, true, _), _)) => fullHelpAsked(progName)
-        case Right((WithFullHelp(_, true, _, _), _)) => helpAsked(progName)
-        case Right((WithFullHelp(true, _, _, _), _)) => usageAsked(progName)
-        case Right((WithFullHelp(_, _, _, Left(err)), _)) => error(err)
-        case Right((WithFullHelp(_, _, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
+        case Right((WithFullHelp(_, true), _)) => fullHelpAsked(progName)
+        case Right((WithFullHelp(WithHelp(_, true, _), _), _)) => helpAsked(progName)
+        case Right((WithFullHelp(WithHelp(true, _, _), _), _)) => usageAsked(progName)
+        case Right((WithFullHelp(WithHelp(_, _, Left(err)), _), _)) => error(err)
+        case Right((WithFullHelp(WithHelp(_, _, Right(t)), _), remainingArgs)) => run(t, remainingArgs)
       }
     else if (hasHelp)
       parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
