@@ -20,7 +20,7 @@ object WordUtils {
     val patternToWrapOn = Pattern.compile(wrapOn0)
     val inputLineLength = str.length
     var offset = 0
-    val wrappedLine = new StringBuilder(inputLineLength + 32)
+    val wrappedLine = new java.lang.StringBuilder(inputLineLength + 32)
 
     var shouldStop = false
 
@@ -45,13 +45,13 @@ object WordUtils {
 
           if (spaceToWrapAt >= offset) {
             // normal case
-            wrappedLine.append(str, offset, spaceToWrapAt)
+            wrappedLine.append(str.drop(offset).take(spaceToWrapAt))
             wrappedLine.append(newLineStr)
             offset = spaceToWrapAt + 1
           } else // really long word or URL
           if (wrapLongWords) {
             // wrap really long word one line at a time
-            wrappedLine.append(str, offset, wrapLength0 + offset)
+            wrappedLine.append(str.drop(offset).take(wrapLength0 + offset))
             wrappedLine.append(newLineStr)
             offset += wrapLength0
           } else {
@@ -61,11 +61,11 @@ object WordUtils {
               spaceToWrapAt = matcher.start() + offset + wrapLength0
 
             if (spaceToWrapAt >= 0) {
-              wrappedLine.append(str, offset, spaceToWrapAt)
+              wrappedLine.append(str.drop(offset).take(spaceToWrapAt))
               wrappedLine.append(newLineStr)
               offset = spaceToWrapAt + 1
             } else {
-              wrappedLine.append(str, offset, str.length())
+              wrappedLine.append(str.drop(offset).take(str.length()))
               offset = inputLineLength
             }
           }
@@ -74,7 +74,7 @@ object WordUtils {
     }
 
     // Whatever is left in line is short enough to just pass through
-    wrappedLine.append(str, offset, str.length())
+    wrappedLine.append(str.drop(offset).take(str.length()))
 
     wrappedLine.toString
   }
