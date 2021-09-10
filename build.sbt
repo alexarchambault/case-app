@@ -77,7 +77,7 @@ lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
     name := "case-app-cats-effect-2",
     Compile / sources := (catsJVM / Compile / sources).value,
     mimaPreviousArtifacts := {
-      mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
+      mimaPreviousArtifacts.value.filter(_.revision != "2.1.0-M6")
     },
     libraryDependencies ++= Seq(
       Deps.catsEffect2.value
