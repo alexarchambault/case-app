@@ -19,7 +19,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-    - uses: coursier/cache-action@v6.2
+    - uses: coursier/cache-action@v6.3
     - uses: laughedelic/coursier-setup@v1
       with:
         jvm: 8
@@ -34,7 +34,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-    - uses: coursier/cache-action@v6.2
+    - uses: coursier/cache-action@v6.3
     - uses: laughedelic/coursier-setup@v1
       with:
         jvm: 8
@@ -51,7 +51,7 @@ jobs:
       with:
         fetch-depth: 0
         submodules: true
-    - uses: coursier/cache-action@v6.2
+    - uses: coursier/cache-action@v6.3
     - uses: laughedelic/coursier-setup@v1
       with:
         jvm: 8
