@@ -113,7 +113,12 @@ import caseapp.HelpMessage
     b.append(format.newLine)
 
     for (desc <- helpMessage.map(_.message))
-      Help.printDescription(b, desc, format.newLine, format.terminalWidth)
+      Help.printDescription(
+        b,
+        desc,
+        format.newLine,
+        format.terminalWidthOpt.getOrElse(Int.MaxValue)
+      )
 
     b.append(format.newLine)
 
