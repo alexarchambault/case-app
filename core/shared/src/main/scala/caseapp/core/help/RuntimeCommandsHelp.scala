@@ -40,7 +40,12 @@ import dataclass._
     b.append(format.newLine)
 
     for (desc <- description)
-      Help.printDescription(b, desc, format.newLine, format.terminalWidth)
+      Help.printDescription(
+        b,
+        desc,
+        format.newLine,
+        format.terminalWidthOpt.getOrElse(Int.MaxValue)
+      )
 
     b.append(format.newLine)
 

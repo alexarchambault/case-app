@@ -59,7 +59,7 @@ lazy val cats = crossProject(JSPlatform, JVMPlatform)
       mimaPreviousArtifacts.value.filter(_.revision != "2.0.0")
     },
     libraryDependencies ++= Seq(
-      Deps.catsEffect.value
+      Deps.catsEffect3.value
     ),
     libraryDependencies += Deps.utest.value % Test,
     testFrameworks += new TestFramework("utest.runner.Framework")
@@ -67,6 +67,27 @@ lazy val cats = crossProject(JSPlatform, JVMPlatform)
 
 lazy val catsJVM = cats.jvm
 lazy val catsJS = cats.js
+
+lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
+  .dependsOn(core)
+  .jvmSettings(Mima.settings)
+  .jsSettings(Mima.settings)
+  .settings(
+    shared,
+    name := "case-app-cats-effect-2",
+    Compile / sources := (catsJVM / Compile / sources).value,
+    mimaPreviousArtifacts := {
+      mimaPreviousArtifacts.value.filter(_.revision != "2.1.0-M6")
+    },
+    libraryDependencies ++= Seq(
+      Deps.catsEffect2.value
+    ),
+    libraryDependencies += Deps.utest.value % Test,
+    testFrameworks += new TestFramework("utest.runner.Framework")
+  )
+
+lazy val cats2JVM = cats2.jvm
+lazy val cats2JS = cats2.js
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .nativeConfigure(_.disablePlugins(MimaPlugin))

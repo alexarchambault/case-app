@@ -8,6 +8,7 @@ import dataclass._
   commandName: fansi.Attrs = fansi.Attrs.Empty,
   option: fansi.Attrs = fansi.Attrs.Empty,
   newLine: String = System.lineSeparator(),
+  @deprecated("This field is now ignored, use terminalWidthOpt instead", "2.1.0-M7")
   terminalWidth: Int = 80,
   @since("2.1.0")
   sortGroups: Option[Seq[String] => Seq[String]] = None,
@@ -16,7 +17,9 @@ import dataclass._
   sortCommandGroups: Option[Seq[String] => Seq[String]] = None,
   sortedCommandGroups: Option[Seq[String]] = None,
   @since("2.1.0")
-  hidden: fansi.Attrs = fansi.Attrs.Empty
+  hidden: fansi.Attrs = fansi.Attrs.Empty,
+  @since("2.1.0")
+  terminalWidthOpt: Option[Int] = None
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],
