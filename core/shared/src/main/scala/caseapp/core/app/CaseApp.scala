@@ -72,17 +72,13 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     exit(0)
   }
 
-  def helpAsked(): Nothing =
-    helpAsked("")
-  def helpAsked(progName: String): Nothing = {
+  def helpAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
     println(help.help(helpFormat, showHidden = false))
     exit(0)
   }
 
-  def usageAsked(): Nothing =
-    usageAsked("")
-  def usageAsked(progName: String): Nothing = {
+  def usageAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
     println(help.usage(helpFormat))
     exit(0)
@@ -144,16 +140,16 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
       parser.withFullHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
         case Left(err) => error(err)
         case Right((WithFullHelp(_, true), _)) => fullHelpAsked(progName)
-        case Right((WithFullHelp(WithHelp(_, true, _), _), _)) => helpAsked(progName)
-        case Right((WithFullHelp(WithHelp(true, _, _), _), _)) => usageAsked(progName)
+        case Right((WithFullHelp(WithHelp(_, true, maybeOptions), _), _)) => helpAsked(progName, maybeOptions)
+        case Right((WithFullHelp(WithHelp(true, _, maybeOptions), _), _)) => usageAsked(progName, maybeOptions)
         case Right((WithFullHelp(WithHelp(_, _, Left(err)), _), _)) => error(err)
         case Right((WithFullHelp(WithHelp(_, _, Right(t)), _), remainingArgs)) => run(t, remainingArgs)
       }
     else if (hasHelp)
       parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
         case Left(err) => error(err)
-        case Right((WithHelp(_, true, _), _)) => helpAsked(progName)
-        case Right((WithHelp(true, _, _), _)) => usageAsked(progName)
+        case Right((WithHelp(_, true, maybeOptions), _)) => helpAsked(progName, maybeOptions)
+        case Right((WithHelp(true, _, maybeOptions), _)) => usageAsked(progName, maybeOptions)
         case Right((WithHelp(_, _, Left(err)), _)) => error(err)
         case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
       }
