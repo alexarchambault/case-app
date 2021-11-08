@@ -86,6 +86,25 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
+    test("hidden group of options") {
+
+      val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
+      val groupFormat = format.withSortGroups(Some { groups =>
+        groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
+      })
+      val message = Help[HiddenGroupOptions].help(groupFormat)
+
+      val expectedMessage =
+        """Usage: hidden-group [options]
+          |Example help message
+          |
+          |Something options:
+          |  --foo string
+          |  --other double""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
     test("group ordering") {
 
       val orderedGroups = Seq("Something", "Bb")
