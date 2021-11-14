@@ -139,9 +139,11 @@ import caseapp.HelpMessage
       val groupedArgs = args.groupBy(_.group.fold("")(_.name))
       val groups = format.sortGroupValues(groupedArgs.toVector)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
-      for (((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex) {
-        val argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter, showHidden).toVector.map(_.toVector))
-
+      for {
+        ((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex
+        argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter, showHidden).toVector.map(_.toVector))
+        if argsAndDescriptions.lines.nonEmpty
+      } {
         if (groupIdx > 0) {
           b.append(format.newLine)
           b.append(format.newLine)

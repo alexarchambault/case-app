@@ -39,6 +39,20 @@ object HelpDefinitions {
       something: Boolean
   )
 
+  @HelpMessage("Example help message")
+  final case class HiddenGroupOptions(
+    @Group("Something")
+      foo: String,
+    @Group("Bb")
+    @Hidden
+      bar: Int,
+    @Group("Something")
+      other: Double,
+    @Group("Bb")
+    @Hidden
+      something: Boolean
+  )
+
   object CommandGroups {
     object First extends Command[FirstOptions] {
       override def group = "Aa"
