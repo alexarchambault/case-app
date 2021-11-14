@@ -5,7 +5,7 @@ import sbt.Keys._
 object Settings {
 
   private def scala212 = "2.12.15"
-  private def scala213 = "2.13.6"
+  private def scala213 = "2.13.7"
 
   private lazy val isAtLeastScala213 = Def.setting {
     import Ordering.Implicits._
