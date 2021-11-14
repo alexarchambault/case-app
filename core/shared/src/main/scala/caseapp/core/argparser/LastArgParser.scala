@@ -8,9 +8,12 @@ import dataclass.data
   def apply(current: Option[Last[T]], value: String): Either[Error, Last[T]] =
     parser(None, value).map(Last(_))
 
-  override def optional(current: Option[Last[T]], value: String): (Consumed, Either[Error, Last[T]]) = {
+  override def optional(
+    current: Option[Last[T]],
+    value: String
+  ): (Consumed, Either[Error, Last[T]]) = {
     val (consumed, res) = parser.optional(None, value)
-    val res0 = res.map(t => Last(t))
+    val res0            = res.map(t => Last(t))
     (consumed, res0)
   }
 

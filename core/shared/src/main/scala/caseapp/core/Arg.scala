@@ -3,15 +3,20 @@ package caseapp.core
 import caseapp.{Group, HelpMessage, Name, ValueDescription}
 import dataclass._
 
-/**
-  * Infos about an argument / option an application can accept.
+/** Infos about an argument / option an application can accept.
   *
-  * @param name: main name of the argument
-  * @param extraNames: extra names
-  * @param valueDescription: description of its value (optional)
-  * @param helpMessage: help message for this argument (optional)
-  * @param noHelp: if true, this argument should not appear in help messages
-  * @param isFlag: if true, passing an actual value to this argument is optional
+  * @param name:
+  *   main name of the argument
+  * @param extraNames:
+  *   extra names
+  * @param valueDescription:
+  *   description of its value (optional)
+  * @param helpMessage:
+  *   help message for this argument (optional)
+  * @param noHelp:
+  *   if true, this argument should not appear in help messages
+  * @param isFlag:
+  *   if true, passing an actual value to this argument is optional
   */
 @data class Arg(
   name: Name,

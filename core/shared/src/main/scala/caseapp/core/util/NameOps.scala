@@ -18,9 +18,9 @@ class NameOps(val name: Name) extends AnyVal {
     else s"--${nameFormatter.format(name)}"
 
   def apply(
-      args: List[String],
-      isFlag: Boolean,
-      formatter: Formatter[Name]
+    args: List[String],
+    isFlag: Boolean,
+    formatter: Formatter[Name]
   ): Option[List[String]] =
     args match {
       case Nil => None

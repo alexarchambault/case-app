@@ -10,9 +10,9 @@ trait Argument[H] {
   def withDefaultOrigin(origin: String): Argument[H]
   def init: Option[H]
   def step(
-      args: List[String],
-      d: Option[H],
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: Option[H],
+    nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(Option[H], List[String])]]
   def get(d: Option[H], nameFormatter: Formatter[Name]): Either[Error, H]
 }

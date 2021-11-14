@@ -8,27 +8,43 @@ import caseapp.core.complete.CompletionItem
 
 object RuntimeCommandParser {
 
-  def parse(apps: Map[List[String], CaseApp[_]], args: List[String]): Option[(List[String], CaseApp[_], List[String])] = {
+  def parse(
+    apps: Map[List[String], CaseApp[_]],
+    args: List[String]
+  ): Option[(List[String], CaseApp[_], List[String])] = {
     val tree = CommandTree.fromCommandMap(apps)
     tree.command(args)
   }
 
-  def parse(defaultApp: CaseApp[_], apps: Map[List[String], CaseApp[_]], args: List[String]): (List[String], CaseApp[_], List[String]) = {
+  def parse(
+    defaultApp: CaseApp[_],
+    apps: Map[List[String], CaseApp[_]],
+    args: List[String]
+  ): (List[String], CaseApp[_], List[String]) = {
     val tree = CommandTree.fromCommandMap(apps)
     tree.command(args).getOrElse((Nil, defaultApp, args))
   }
 
   private def commandMap(commands: Seq[Command[_]]): Map[List[String], Command[_]] =
-    commands.flatMap(cmd => cmd.names.map(names => names -> cmd): Seq[(List[String], Command[_])]).toMap
+    commands.flatMap(cmd =>
+      cmd.names.map(names => names -> cmd): Seq[(List[String], Command[_])]
+    ).toMap
 
-  def parse(commands: Seq[Command[_]], args: List[String]): Option[(List[String], Command[_], List[String])] = {
-    val map = commandMap(commands)
+  def parse(
+    commands: Seq[Command[_]],
+    args: List[String]
+  ): Option[(List[String], Command[_], List[String])] = {
+    val map  = commandMap(commands)
     val tree = CommandTree.fromCommandMap(map)
     tree.command(args)
   }
 
-  def parse(defaultCommand: Command[_], commands: Seq[Command[_]], args: List[String]): (List[String], Command[_], List[String]) = {
-    val map = commandMap(commands)
+  def parse(
+    defaultCommand: Command[_],
+    commands: Seq[Command[_]],
+    args: List[String]
+  ): (List[String], Command[_], List[String]) = {
+    val map  = commandMap(commands)
     val tree = CommandTree.fromCommandMap(map)
     tree.command(args).getOrElse((Nil, defaultCommand, args))
   }
@@ -39,10 +55,11 @@ object RuntimeCommandParser {
     args: List[String],
     index: Int
   ): List[CompletionItem] = {
-    val map = commandMap(commands)
+    val map  = commandMap(commands)
     val tree = CommandTree.fromCommandMap(map)
-    val (commandName, command, commandArgs) = tree.command(args).getOrElse((Nil, defaultCommand, args))
-    val prefix = args.applyOrElse(index, (_: Int) => "")
+    val (commandName, command, commandArgs) =
+      tree.command(args).getOrElse((Nil, defaultCommand, args))
+    val prefix                 = args.applyOrElse(index, (_: Int) => "")
     val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
     val commandCompletions =
       if (index < commandName.length) Nil
@@ -59,9 +76,9 @@ object RuntimeCommandParser {
     args: List[String],
     index: Int
   ): List[CompletionItem] = {
-    val map = commandMap(commands)
-    val tree = CommandTree.fromCommandMap(map)
-    val prefix = args.applyOrElse(index, (_: Int) => "")
+    val map                    = commandMap(commands)
+    val tree                   = CommandTree.fromCommandMap(map)
+    val prefix                 = args.applyOrElse(index, (_: Int) => "")
     val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
     val commandArgsCompletions = tree.command(args).toList.flatMap {
       case (commandName, command, commandArgs) =>
@@ -85,7 +102,11 @@ object RuntimeCommandParser {
           byApps.toList.sortBy(_._2.head._1).map {
             case (appOpt, values) =>
               val values0 = values.map(_._1)
-              CompletionItem(values0.head, appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message)), values0.tail)
+              CompletionItem(
+                values0.head,
+                appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message)),
+                values0.tail
+              )
           }
         case h :: t =>
           map.get(h) match {
@@ -98,7 +119,10 @@ object RuntimeCommandParser {
     def command(args: List[String]): Option[(List[String], T, List[String])] =
       command(args, Nil)
 
-    def command(args: List[String], reverseName: List[String]): Option[(List[String], T, List[String])] =
+    def command(
+      args: List[String],
+      reverseName: List[String]
+    ): Option[(List[String], T, List[String])] =
       args match {
         case Nil => defaultApp.map((Nil, _, args))
         case h :: t =>

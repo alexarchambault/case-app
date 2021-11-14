@@ -13,13 +13,12 @@ abstract class AutoCommandParserImplicits {
   implicit def cnil: CommandParser[CNil] =
     NilCommandParser
 
-  implicit def ccons[K <: Symbol, H, T <: Coproduct]
-   (implicit
+  implicit def ccons[K <: Symbol, H, T <: Coproduct](implicit
     key: Witness.Aux[K],
     commandName: AnnotationOption[CommandName, H],
     parser: Strict[Parser[H]],
     tail: CommandParser[T]
-   ): CommandParser[FieldType[K, H] :+: T] = {
+  ): CommandParser[FieldType[K, H] :+: T] = {
 
     val name = commandName().map(_.commandName).getOrElse {
       CaseUtil.pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
@@ -31,18 +30,16 @@ abstract class AutoCommandParserImplicits {
       .mapHead(field[K](_))
   }
 
-  implicit def generic[S, C <: Coproduct]
-   (implicit
+  implicit def generic[S, C <: Coproduct](implicit
     lgen: LabelledGeneric.Aux[S, C],
     underlying: Strict[CommandParser[C]]
-   ): CommandParser[S] =
+  ): CommandParser[S] =
     underlying.value.map(lgen.from)
 
-  def derive[S, C <: Coproduct]
-   (implicit
+  def derive[S, C <: Coproduct](implicit
     lgen: LabelledGeneric.Aux[S, C],
     underlying: Strict[CommandParser[C]]
-   ): CommandParser[S] =
+  ): CommandParser[S] =
     generic[S, C](lgen, underlying)
 
 }

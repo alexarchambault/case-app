@@ -37,14 +37,13 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
   def println(x: String): IO[Unit] =
     IO(Console.println(x))
 
-  /**
-    * Arguments are expanded then parsed. By default, argument expansion is the identity function.
+  /** Arguments are expanded then parsed. By default, argument expansion is the identity function.
     * Overriding this method allows plugging in an arbitrary argument expansion logic.
     *
     * One such expansion logic involves replacing each argument of the form '@<file>' with the
-    * contents of that file where each line in the file becomes a distinct argument.
-    * To enable this behavior, override this method as shown below.
-
+    * contents of that file where each line in the file becomes a distinct argument. To enable this
+    * behavior, override this method as shown below.
+    *
     * @example
     * {{{
     * import caseapp.core.parser.PlatformArgsExpander
@@ -57,21 +56,18 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
     */
   def expandArgs(args: List[String]): List[String] = args
 
-  /**
-    * Whether to stop parsing at the first unrecognized argument.
+  /** Whether to stop parsing at the first unrecognized argument.
     *
-    * That is, stop parsing at the first non option (not starting with "-"), or
-    * the first unrecognized option. The unparsed arguments are put in the `args`
-    * argument of `run`.
+    * That is, stop parsing at the first non option (not starting with "-"), or the first
+    * unrecognized option. The unparsed arguments are put in the `args` argument of `run`.
     */
   def stopAtFirstUnrecognized: Boolean =
     false
 
-  /**
-    * Whether to ignore unrecognized arguments.
+  /** Whether to ignore unrecognized arguments.
     *
-    * That is, if there are unrecognized arguments, the parsing still succeeds.
-    * The unparsed arguments are put in the `args` argument of `run`.
+    * That is, if there are unrecognized arguments, the parsing still succeeds. The unparsed
+    * arguments are put in the `args` argument of `run`.
     */
   def ignoreUnrecognized: Boolean =
     false
@@ -80,11 +76,15 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
     Formatter.DefaultNameFormatter
 
   override def run(args: List[String]): IO[ExitCode] =
-    parser.withHelp.detailedParse(expandArgs(args), stopAtFirstUnrecognized, ignoreUnrecognized) match {
-      case Left(err) => error(err)
-      case Right((WithHelp(_, true, _), _)) => helpAsked
-      case Right((WithHelp(true, _, _), _)) => usageAsked
-      case Right((WithHelp(_, _, Left(err)), _)) => error(err)
+    parser.withHelp.detailedParse(
+      expandArgs(args),
+      stopAtFirstUnrecognized,
+      ignoreUnrecognized
+    ) match {
+      case Left(err)                                        => error(err)
+      case Right((WithHelp(_, true, _), _))                 => helpAsked
+      case Right((WithHelp(true, _, _), _))                 => usageAsked
+      case Right((WithHelp(_, _, Left(err)), _))            => error(err)
       case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
     }
 }

@@ -8,16 +8,14 @@ import caseapp.core.Error
 
 abstract class PlatformArgParsers {
 
-  implicit val path: ArgParser[Path] = {
+  implicit val path: ArgParser[Path] =
     SimpleArgParser.from("path/to/file") { pathString =>
-      try {
-        Right(Paths.get(pathString))
-      } catch {
+      try Right(Paths.get(pathString))
+      catch {
         case e: InvalidPathException =>
           Left(Error.MalformedValue("path", e.getMessage))
       }
     }
-  }
 
   implicit val calendar: ArgParser[Calendar] =
     SimpleArgParser.from("yyyy-MM-dd") { s =>
@@ -26,7 +24,8 @@ abstract class PlatformArgParsers {
       try {
         c.setTime(PlatformArgParsers.fmt.parse(s))
         Right(c)
-      } catch {
+      }
+      catch {
         case e: ParseException =>
           Left(Error.MalformedValue("date", Option(e.getMessage).getOrElse("")))
       }

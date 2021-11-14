@@ -23,7 +23,6 @@ object SimpleArgParser {
   def from[T](description: String)(parse: String => Either[Error, T]): SimpleArgParser[T] =
     SimpleArgParser(description, parse)
 
-
   val int: SimpleArgParser[Int] =
     from("int") { s =>
       try Right(s.toInt)

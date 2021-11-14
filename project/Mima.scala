@@ -1,4 +1,3 @@
-
 import com.typesafe.tools.mima.core._
 import com.typesafe.tools.mima.plugin.MimaPlugin
 import sbt._

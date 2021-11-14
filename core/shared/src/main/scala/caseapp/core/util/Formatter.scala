@@ -8,8 +8,7 @@ abstract class Formatter[T] {
 
 object Formatter {
 
-  /**
-    * Formats option arguments to a given format.
+  /** Formats option arguments to a given format.
     *
     * Default formatter will format option arguments as `foo-bar`.
     */

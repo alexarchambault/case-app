@@ -1,4 +1,3 @@
-
 import sbt._
 import sbt.Keys._
 
@@ -13,7 +12,7 @@ object Settings {
   }
 
   lazy val shared = Seq(
-    scalaVersion := scala213,
+    scalaVersion       := scala213,
     crossScalaVersions := Seq(scala212, scala213),
     scalacOptions ++= Seq(
       "-target:jvm-1.8",

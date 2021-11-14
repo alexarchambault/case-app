@@ -11,17 +11,16 @@ import caseapp.core.complete.Completer
 import caseapp.core.complete.CompletionItem
 import scala.annotation.tailrec
 
-/**
-  * Parses arguments, resulting in a `T` in case of success.
+/** Parses arguments, resulting in a `T` in case of success.
   *
-  * @tparam T: success result type
+  * @tparam T:
+  *   success result type
   */
 abstract class Parser[T] {
 
   import Parser.Step
 
-  /**
-    * Intermediate result type.
+  /** Intermediate result type.
     *
     * Used during parsing, while checking the arguments one after the other.
     *
@@ -29,63 +28,72 @@ abstract class Parser[T] {
     */
   type D
 
-  /**
-    * Initial value used to accumulate parsed arguments.
+  /** Initial value used to accumulate parsed arguments.
     */
   def init: D
 
   def step(
-      args: List[String],
-      d: D
+    args: List[String],
+    d: D
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     step(args, d, defaultNameFormatter)
 
-  /**
-    * Process the next argument.
+  /** Process the next argument.
     *
-    * If some arguments were successfully processed (third case in return below), the returned remaining argument
-    * sequence must be shorter than the passed `args`.
+    * If some arguments were successfully processed (third case in return below), the returned
+    * remaining argument sequence must be shorter than the passed `args`.
     *
-    * This method doesn't fully process `args`. It tries just to parse *one* argument (typically one option `--foo` and
-    * its value `bar`, so two elements from `args` - it can also be only one element in case of a flag), if possible.
-    * If you want to fully process a sequence of arguments, see `parse` or `detailedParse`.
+    * This method doesn't fully process `args`. It tries just to parse *one* argument (typically one
+    * option `--foo` and its value `bar`, so two elements from `args` - it can also be only one
+    * element in case of a flag), if possible. If you want to fully process a sequence of arguments,
+    * see `parse` or `detailedParse`.
     *
-    * @param args: arguments to process
-    * @param d: current intermediate result
-    * @param nameFormatter: formats name to the appropriate format
-    * @return if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
+    * @param args:
+    *   arguments to process
+    * @param d:
+    *   current intermediate result
+    * @param nameFormatter:
+    *   formats name to the appropriate format
+    * @return
+    *   if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in
+    *   [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the
+    *   remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
     */
   def step(
-      args: List[String],
-      d: D,
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: D,
+    nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]]
 
-  /**
-    * Get the final result from the final intermediate value.
+  /** Get the final result from the final intermediate value.
     *
-    * Typically fails if some mandatory arguments were not specified, so are missing in `d`, preventing building a `T`
-    * out of it.
+    * Typically fails if some mandatory arguments were not specified, so are missing in `d`,
+    * preventing building a `T` out of it.
     *
-    * @param d: final intermediate value
-    * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
+    * @param d:
+    *   final intermediate value
+    * @return
+    *   in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in
+    *   [[caseapp.core.Error]] and [[scala.Left]]
     */
   final def get(d: D): Either[Error, T] = get(d, defaultNameFormatter)
 
-  /**
-    * Get the final result from the final intermediate value.
+  /** Get the final result from the final intermediate value.
     *
-    * Typically fails if some mandatory arguments were not specified, so are missing in `d`, preventing building a `T`
-    * out of it.
+    * Typically fails if some mandatory arguments were not specified, so are missing in `d`,
+    * preventing building a `T` out of it.
     *
-    * @param d: final intermediate value
-    * @param nameFormatter: formats names to the appropriate format
-    * @return in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
+    * @param d:
+    *   final intermediate value
+    * @param nameFormatter:
+    *   formats names to the appropriate format
+    * @return
+    *   in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in
+    *   [[caseapp.core.Error]] and [[scala.Left]]
     */
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T]
 
-  /**
-    * Arguments this parser accepts.
+  /** Arguments this parser accepts.
     *
     * Used to generate help / usage messages.
     */
@@ -149,9 +157,10 @@ abstract class Parser[T] {
 
     def consumed(initial: List[String], updated: List[String]): Int =
       initial match {
-        case _ :: tail if tail eq updated => 1
+        case _ :: tail if tail eq updated      => 1
         case _ :: _ :: tail if tail eq updated => 2
-        case _ => initial.length - updated.length  // kind of meh, might make parsing O(args.length^2)
+        case _ =>
+          initial.length - updated.length // kind of meh, might make parsing O(args.length^2)
       }
 
     def runHelper(
@@ -189,8 +198,8 @@ abstract class Parser[T] {
             else
               (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
           }
-          val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
-          (res, reverseSteps0.reverse)
+        val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
+        (res, reverseSteps0.reverse)
       }
 
       def unrecognized(headArg: String, tailArgs: List[String]) =
@@ -201,10 +210,20 @@ abstract class Parser[T] {
             .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
           val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
           (res, reverseSteps0.reverse)
-        } else {
+        }
+        else {
           val err = Error.UnrecognizedArgument(headArg)
-          val (remaining, steps) = runHelper(current, tailArgs, extraArgsReverse, Step.Unrecognized(index, err) :: reverseSteps, index + 1)
-          val res = Left((remaining.fold(t => err.append(t._1), _ => err), remaining.fold(_._2, t => Right(t._1))))
+          val (remaining, steps) = runHelper(
+            current,
+            tailArgs,
+            extraArgsReverse,
+            Step.Unrecognized(index, err) :: reverseSteps,
+            index + 1
+          )
+          val res = Left((
+            remaining.fold(t => err.append(t._1), _ => err),
+            remaining.fold(_._2, t => Right(t._1))
+          ))
           (res, steps)
         }
 
@@ -224,18 +243,29 @@ abstract class Parser[T] {
             case Right(None) =>
               if (headArg == "--")
                 stopParsing(tailArgs)
-              else if (headArg.startsWith("-") && headArg != "-") {
+              else if (headArg.startsWith("-") && headArg != "-")
                 if (ignoreUnrecognized)
-                  helper(current, tailArgs, headArg :: extraArgsReverse, Step.IgnoredUnrecognized(index) :: reverseSteps, index + 1)
+                  helper(
+                    current,
+                    tailArgs,
+                    headArg :: extraArgsReverse,
+                    Step.IgnoredUnrecognized(index) :: reverseSteps,
+                    index + 1
+                  )
                 else
                   unrecognized(headArg, tailArgs)
-              } else if (stopAtFirstUnrecognized)
+              else if (stopAtFirstUnrecognized)
                 stoppingAtUnrecognized
               else
-                helper(current, tailArgs, headArg :: extraArgsReverse, Step.StandardArgument(index) :: reverseSteps, index + 1)
+                helper(
+                  current,
+                  tailArgs,
+                  headArg :: extraArgsReverse,
+                  Step.StandardArgument(index) :: reverseSteps,
+                  index + 1
+                )
 
             case Right(Some((newC, matchedArg, newArgs))) =>
-
               assert(
                 newArgs != args,
                 s"From $args, an ArgParser is supposed to have consumed arguments, but returned the same argument list"
@@ -244,13 +274,28 @@ abstract class Parser[T] {
               val consumed0 = consumed(args, newArgs)
               assert(consumed0 > 0)
 
-              helper(newC, newArgs.toList, extraArgsReverse, Step.MatchedOption(index, consumed0, matchedArg) :: reverseSteps, index + consumed0)
+              helper(
+                newC,
+                newArgs.toList,
+                extraArgsReverse,
+                Step.MatchedOption(index, consumed0, matchedArg) :: reverseSteps,
+                index + consumed0
+              )
 
             case Left((msg, matchedArg, rem)) =>
               val consumed0 = consumed(args, rem)
               assert(consumed0 > 0)
-              val (remaining, steps) = runHelper(current, rem, extraArgsReverse, Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps, index + consumed0)
-              val res = Left((remaining.fold(errs => msg.append(errs._1), _ => msg), remaining.fold(_._2, t => Right(t._1))))
+              val (remaining, steps) = runHelper(
+                current,
+                rem,
+                extraArgsReverse,
+                Step.ErroredOption(index, consumed0, matchedArg, msg) :: reverseSteps,
+                index + consumed0
+              )
+              val res = Left((
+                remaining.fold(errs => msg.append(errs._1), _ => msg),
+                remaining.fold(_._2, t => Right(t._1))
+              ))
               (res, steps)
           }
       }
@@ -272,8 +317,8 @@ abstract class Parser[T] {
     val (res, steps) = scan(args0, stopAtFirstUnrecognized, ignoreUnrecognized)
     lazy val stateOpt = res match {
       case Left((_, Left(state))) => get(state).toOption
-      case Left((_, Right(t))) => Some(t)
-      case Right((t, _)) => Some(t)
+      case Left((_, Right(t)))    => Some(t)
+      case Right((t, _))          => Some(t)
     }
 
     assert(index >= 0)
@@ -324,8 +369,7 @@ abstract class Parser[T] {
     }
   }
 
-  /**
-    * Creates a [[Parser]] accepting help / usage arguments, out of this one.
+  /** Creates a [[Parser]] accepting help / usage arguments, out of this one.
     */
   final def withHelp: Parser[WithHelp[T]] = {
     implicit val parser: Parser.Aux[T, D] = this
@@ -362,22 +406,18 @@ object Parser extends LowPriorityParserImplicits {
 
   type Aux[T, D0] = Parser[T] { type D = D0 }
 
-
-  /**
-    * An empty [[Parser]].
+  /** An empty [[Parser]].
     *
     * Can be made non empty by successively calling `add` on it.
     */
   def nil: Parser.Aux[HNil, HNil] =
     NilParser
 
-
   implicit def option[T, D](implicit parser: Aux[T, D]): Parser.Aux[Option[T], D] =
     OptionParser(parser)
 
   implicit def either[T, D](implicit parser: Aux[T, D]): Parser.Aux[Either[Error, T], D] =
     EitherParser(parser)
-
 
   implicit def toParserOps[T <: HList, D <: HList](parser: Aux[T, D]): ParserOps[T, D] =
     new ParserOps(parser)
@@ -390,12 +430,12 @@ object Parser extends LowPriorityParserImplicits {
     sealed abstract class SingleArg extends Step {
       final def consumed: Int = 1
     }
-    final case class DoubleDash(index: Int) extends SingleArg
-    final case class IgnoredUnrecognized(index: Int) extends SingleArg
-    final case class FirstUnrecognized(index: Int, isOption: Boolean) extends SingleArg
+    final case class DoubleDash(index: Int)                                      extends SingleArg
+    final case class IgnoredUnrecognized(index: Int)                             extends SingleArg
+    final case class FirstUnrecognized(index: Int, isOption: Boolean)            extends SingleArg
     final case class Unrecognized(index: Int, error: Error.UnrecognizedArgument) extends SingleArg
-    final case class StandardArgument(index: Int) extends SingleArg
-    final case class MatchedOption(index: Int, consumed: Int, arg: Arg) extends Step
+    final case class StandardArgument(index: Int)                                extends SingleArg
+    final case class MatchedOption(index: Int, consumed: Int, arg: Arg)          extends Step
     final case class ErroredOption(index: Int, consumed: Int, arg: Arg, error: Error) extends Step
   }
 }

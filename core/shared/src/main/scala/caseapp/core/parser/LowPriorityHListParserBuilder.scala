@@ -69,7 +69,14 @@ abstract class LowPriorityHListParserBuilder {
   ] =
     instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
 
-      val tailParser = tail.value(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, groups.tail, noHelp.tail)
+      val tailParser = tail.value(
+        default0().tail,
+        names.tail,
+        valueDescriptions.tail,
+        helpMessages.tail,
+        groups.tail,
+        noHelp.tail
+      )
 
       val arg = Arg(
         Name(name.value.name),

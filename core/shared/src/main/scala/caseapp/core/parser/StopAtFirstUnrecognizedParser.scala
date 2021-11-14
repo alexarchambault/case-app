@@ -9,9 +9,9 @@ import caseapp.Name
   type D = D0
   def init: D = underlying.init
   def step(
-      args: List[String],
-      d: D,
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: D,
+    nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     underlying.step(args, d, nameFormatter)
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T] =

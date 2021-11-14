@@ -20,9 +20,9 @@ import caseapp.Name
     None
 
   def step(
-      args: List[String],
-      d: Option[H],
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: Option[H],
+    nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(Option[H], List[String])]] =
     args match {
       case Nil =>
@@ -37,7 +37,6 @@ import caseapp.Name
 
         matchedOpt match {
           case Some((name, valueOpt)) =>
-
             val (res, rem0) = valueOpt match {
               case Some(value) =>
                 val res0 = argParser(d, value)
@@ -51,7 +50,7 @@ import caseapp.Name
                     (res0, Nil)
                   case th :: tRem =>
                     val (Consumed(usedArg), res) = argParser.optional(d, th)
-                    val res0 = res.map(h => Some(Some(h)))
+                    val res0                     = res.map(h => Some(Some(h)))
                     (res0, if (usedArg) tRem else rem)
                 }
             }

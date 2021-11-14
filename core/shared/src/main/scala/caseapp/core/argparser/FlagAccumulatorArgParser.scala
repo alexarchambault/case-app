@@ -25,9 +25,12 @@ import dataclass.data
 
 object FlagAccumulatorArgParser {
 
-  def from[T](description: String)(parse: (Option[T], Option[String]) => Either[Error, T]): FlagAccumulatorArgParser[T] =
+  def from[T](
+    description: String
+  )(
+    parse: (Option[T], Option[String]) => Either[Error, T]
+  ): FlagAccumulatorArgParser[T] =
     FlagAccumulatorArgParser(description, parse)
-
 
   val counter: FlagAccumulatorArgParser[Int @@ Counter] =
     from("counter") { (prevOpt, _) =>

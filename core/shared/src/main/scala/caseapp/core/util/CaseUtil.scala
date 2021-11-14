@@ -8,10 +8,12 @@ object CaseUtil {
     else if (!s.head.isUpper) {
       val (w, tail) = s.span(!_.isUpper)
       w.mkString :: pascalCaseSplit(tail)
-    } else if (s.tail.headOption.forall(!_.isUpper)) {
+    }
+    else if (s.tail.headOption.forall(!_.isUpper)) {
       val (w, tail) = s.tail.span(!_.isUpper)
       (s.head :: w).mkString :: pascalCaseSplit(tail)
-    } else {
+    }
+    else {
       val (w, tail) = s.span(_.isUpper)
       if (tail.isEmpty)
         w.mkString :: pascalCaseSplit(tail)

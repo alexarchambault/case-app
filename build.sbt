@@ -1,12 +1,11 @@
-
 import sbtcrossproject.crossProject
 
 import Settings._
 
 inThisBuild(List(
   organization := "com.github.alexarchambault",
-  homepage := Some(url("https://github.com/alexarchambault/case-app")),
-  licenses := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
+  homepage     := Some(url("https://github.com/alexarchambault/case-app")),
+  licenses     := Seq("Apache 2.0" -> url("http://opensource.org/licenses/Apache-2.0")),
   developers := List(
     Developer(
       "alexarchambault",
@@ -26,8 +25,8 @@ lazy val annotations = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     caseAppPrefix
   )
 
-lazy val annotationsJVM = annotations.jvm
-lazy val annotationsJS = annotations.js
+lazy val annotationsJVM    = annotations.jvm
+lazy val annotationsJS     = annotations.js
 lazy val annotationsNative = annotations.native
 
 lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -40,12 +39,12 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     libraryDependencies ++= Seq(
       Deps.shapeless.value,
       Deps.scalaCompiler.value % "provided",
-      Deps.scalaReflect.value % "provided"
+      Deps.scalaReflect.value  % "provided"
     )
   )
 
-lazy val utilJVM = util.jvm
-lazy val utilJS = util.js
+lazy val utilJVM    = util.jvm
+lazy val utilJS     = util.js
 lazy val utilNative = util.native
 
 lazy val cats = crossProject(JSPlatform, JVMPlatform)
@@ -63,7 +62,7 @@ lazy val cats = crossProject(JSPlatform, JVMPlatform)
   )
 
 lazy val catsJVM = cats.jvm
-lazy val catsJS = cats.js
+lazy val catsJS  = cats.js
 
 lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
   .dependsOn(core)
@@ -71,7 +70,7 @@ lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
   .jsSettings(Mima.settings)
   .settings(
     shared,
-    name := "case-app-cats-effect-2",
+    name              := "case-app-cats-effect-2",
     Compile / sources := (catsJVM / Compile / sources).value,
     libraryDependencies ++= Seq(
       Deps.catsEffect2.value
@@ -81,7 +80,7 @@ lazy val cats2 = crossProject(JSPlatform, JVMPlatform)
   )
 
 lazy val cats2JVM = cats2.jvm
-lazy val cats2JS = cats2.js
+lazy val cats2JS  = cats2.js
 
 lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .nativeConfigure(_.disablePlugins(MimaPlugin))
@@ -97,8 +96,8 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
     )
   )
 
-lazy val coreJVM = core.jvm
-lazy val coreJS = core.js
+lazy val coreJVM    = core.jvm
+lazy val coreJS     = core.js
 lazy val coreNative = core.native
 
 lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
@@ -107,13 +106,13 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
-    skip.in(publish) := true,
+    skip.in(publish)                       := true,
     libraryDependencies += Deps.utest.value % Test,
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
-lazy val testsJVM = tests.jvm
-lazy val testsJS = tests.js
+lazy val testsJVM    = tests.jvm
+lazy val testsJS     = tests.js
 lazy val testsNative = tests.native
 
 lazy val refined = crossProject(JSPlatform, JVMPlatform)
@@ -130,8 +129,8 @@ lazy val refined = crossProject(JSPlatform, JVMPlatform)
   )
 
 lazy val refinedJVM = refined.jvm
-lazy val refinedJS = refined.js
+lazy val refinedJS  = refined.js
 
 disablePlugins(MimaPlugin)
-skip.in(publish) := true
+skip.in(publish)   := true
 crossScalaVersions := Nil

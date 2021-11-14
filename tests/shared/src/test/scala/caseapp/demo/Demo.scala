@@ -10,22 +10,22 @@ final case class SharedOptions(
 
 object SharedOptions {
   implicit val parser: Parser[SharedOptions] = Parser.derive
-  implicit val help: Help[SharedOptions] = Help.derive
+  implicit val help: Help[SharedOptions]     = Help.derive
 }
 
 @AppVersion("0.1.0")
 @ArgsName("files")
 final case class DemoOptions(
   first: Boolean,
-  @ExtraName("V") @HelpMessage("Set a value") value : Option[String],
-  @ExtraName("v") @HelpMessage("Be verbose") verbose : Int @@ Counter,
-  @ExtraName("S") @ValueDescription("stages")  stages : List[String],
+  @ExtraName("V") @HelpMessage("Set a value") value: Option[String],
+  @ExtraName("v") @HelpMessage("Be verbose") verbose: Int @@ Counter,
+  @ExtraName("S") @ValueDescription("stages") stages: List[String],
   @Recurse shared: SharedOptions = SharedOptions()
 )
 
 object DemoOptions {
   implicit val parser: Parser[DemoOptions] = Parser.derive
-  implicit val help: Help[DemoOptions] = Help.derive
+  implicit val help: Help[DemoOptions]     = Help.derive
 }
 
 object Demo extends CaseApp[DemoOptions] {
@@ -45,7 +45,6 @@ object MyApp extends CaseApp[MyAppOptions] {
   def run(options: MyAppOptions, remainingArgs: RemainingArgs) = {}
 }
 
-
 @AppName("Demo")
 @AppVersion("1.0.0")
 @ProgName("demo-cli")
@@ -62,7 +61,7 @@ final case class Secondd(
   extra: List[Int],
   @ExtraName("S")
   @ValueDescription("stages")
-    stages : List[String]
+  stages: List[String]
 ) extends DemoCommand
 
 object CommandAppTest extends CommandApp[DemoCommand] {
@@ -76,19 +75,14 @@ object CommandAppTest extends CommandApp[DemoCommand] {
     }
 }
 
-
 object ManualCommandStuff {
 
   case object Command1 extends CaseApp[Command1Opts] {
-    def run(options: Command1Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: Command1Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command2 extends CaseApp[Command2Opts] {
-    def run(options: Command2Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: Command2Opts, args: RemainingArgs): Unit = {}
   }
 
   val parser = CommandParser.nil
@@ -104,44 +98,32 @@ object ManualCommandStuff {
 }
 
 object ManualCommand extends CommandApp()(ManualCommandStuff.parser, ManualCommandStuff.help) {
-  def run(options: ManualCommandOptions, args: RemainingArgs): Unit = {
-
-  }
+  def run(options: ManualCommandOptions, args: RemainingArgs): Unit = {}
 }
 
 object ManualCommandNotAdtStuff {
 
   case object Command1 extends CaseApp[ManualCommandNotAdtOptions.Command1Opts] {
-    def run(options: ManualCommandNotAdtOptions.Command1Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: ManualCommandNotAdtOptions.Command1Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command2 extends CaseApp[ManualCommandNotAdtOptions.Command2Opts] {
-    def run(options: ManualCommandNotAdtOptions.Command2Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: ManualCommandNotAdtOptions.Command2Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command3StopAtUnreco extends CaseApp[ManualCommandNotAdtOptions.Command3Opts] {
-    override def stopAtFirstUnrecognized = true
-    def run(options: ManualCommandNotAdtOptions.Command3Opts, args: RemainingArgs): Unit = {
-
-    }
+    override def stopAtFirstUnrecognized                                                 = true
+    def run(options: ManualCommandNotAdtOptions.Command3Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command4NameFormatter extends CaseApp[ManualCommandNotAdtOptions.Command4Opts] {
     override def nameFormatter: Formatter[Name] = (name: Name) => name.name
-    def run(options: ManualCommandNotAdtOptions.Command4Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: ManualCommandNotAdtOptions.Command4Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command5IgnoreUnrecognized extends CaseApp[ManualCommandNotAdtOptions.Command5Opts] {
-    override def ignoreUnrecognized = true
-    def run(options: ManualCommandNotAdtOptions.Command5Opts, args: RemainingArgs): Unit = {
-
-    }
+    override def ignoreUnrecognized                                                      = true
+    def run(options: ManualCommandNotAdtOptions.Command5Opts, args: RemainingArgs): Unit = {}
   }
 
   val parser = CommandParser.nil
@@ -162,24 +144,19 @@ object ManualCommandNotAdtStuff {
 
 }
 
-object ManualCommandNotAdt extends CommandAppA(ManualCommandNotAdtStuff.parser, ManualCommandNotAdtStuff.help) {
-  def runA = args => options => {
-
-  }
+object ManualCommandNotAdt
+    extends CommandAppA(ManualCommandNotAdtStuff.parser, ManualCommandNotAdtStuff.help) {
+  def runA = args => options => {}
 }
 
 object ManualSubCommandStuff {
 
   case object Command1 extends CaseApp[ManualSubCommandOptions.Command1Opts] {
-    def run(options: ManualSubCommandOptions.Command1Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: ManualSubCommandOptions.Command1Opts, args: RemainingArgs): Unit = {}
   }
 
   case object Command2 extends CaseApp[ManualSubCommandOptions.Command2Opts] {
-    def run(options: ManualSubCommandOptions.Command2Opts, args: RemainingArgs): Unit = {
-
-    }
+    def run(options: ManualSubCommandOptions.Command2Opts, args: RemainingArgs): Unit = {}
   }
 
   val parser = CommandParser.nil
@@ -194,8 +171,7 @@ object ManualSubCommandStuff {
 
 }
 
-object ManualSubCommand extends CommandAppA(ManualSubCommandStuff.parser, ManualSubCommandStuff.help) {
-  def runA = args => options => {
-
-  }
+object ManualSubCommand
+    extends CommandAppA(ManualSubCommandStuff.parser, ManualSubCommandStuff.help) {
+  def runA = args => options => {}
 }

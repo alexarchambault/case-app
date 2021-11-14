@@ -11,7 +11,10 @@ final class CommandParserOps[T <: Coproduct](val commandParser: CommandParser[T]
   def add[H](name: String)(implicit parser: Parser[H], foo: Unit = ()): CommandParser[H :+: T] =
     add(Seq(name))
 
-  def add[H](name: Seq[String])(implicit parser: Parser[H], unused: Parser[H]): CommandParser[H :+: T] =
+  def add[H](name: Seq[String])(implicit
+    parser: Parser[H],
+    unused: Parser[H]
+  ): CommandParser[H :+: T] =
     ConsCommandParser(name, parser, commandParser)
 
   def add[H](name: String, parser: Parser[H]): CommandParser[H :+: T] =
@@ -55,11 +58,10 @@ object CommandParserOps {
     def apply(parser: CommandParser[T]): CommandParser[F]
   }
 
-  implicit def defaultAsHelper[F, T <: Coproduct, R <: Coproduct]
-   (implicit
-     gen: Generic.Aux[F, R],
-     rev: ops.coproduct.Reverse.Aux[T, R]
-   ): AsHelper[T, F] =
+  implicit def defaultAsHelper[F, T <: Coproduct, R <: Coproduct](implicit
+    gen: Generic.Aux[F, R],
+    rev: ops.coproduct.Reverse.Aux[T, R]
+  ): AsHelper[T, F] =
     new AsHelper[T, F] {
       def apply(parser: CommandParser[T]) =
         parser

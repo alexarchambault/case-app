@@ -12,13 +12,24 @@ import dataclass.data
         lines.iterator.map(_(i).length).max
       }
 
-  def render(colSeparator: String, linePrefix: String, lineSeparator: String, defaultWidths: IndexedSeq[Int]): String = {
+  def render(
+    colSeparator: String,
+    linePrefix: String,
+    lineSeparator: String,
+    defaultWidths: IndexedSeq[Int]
+  ): String = {
     val b = new StringBuilder
     render(b, colSeparator, linePrefix, lineSeparator, defaultWidths)
     b.result()
   }
 
-  def render(b: StringBuilder, colSeparator: String, linePrefix: String, lineSeparator: String, defaultWidths: IndexedSeq[Int]): Unit =
+  def render(
+    b: StringBuilder,
+    colSeparator: String,
+    linePrefix: String,
+    lineSeparator: String,
+    defaultWidths: IndexedSeq[Int]
+  ): Unit =
     for ((line, lineIdx) <- lines.zipWithIndex) {
       b.append(linePrefix)
       val trailingEmptyCount = line.reverseIterator.takeWhile(_.length == 0).length

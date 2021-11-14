@@ -44,7 +44,10 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   }
 
   def commandHelpAsked(command: Seq[String]): Nothing = {
-    println(commandsMessages.messagesMap(command).helpMessage(beforeCommandMessages.progName, command))
+    println(commandsMessages.messagesMap(command).helpMessage(
+      beforeCommandMessages.progName,
+      command
+    ))
     exit(0)
   }
 
@@ -56,22 +59,25 @@ abstract class CommandAppWithPreCommand[D, T](implicit
   }
 
   def commandUsageAsked(command: Seq[String]): Nothing = {
-    println(commandsMessages.messagesMap(command).usageMessage(beforeCommandMessages.progName, command))
+    println(commandsMessages.messagesMap(command).usageMessage(
+      beforeCommandMessages.progName,
+      command
+    ))
     exit(0)
   }
 
-
-  def appName: String = Help[D].appName
+  def appName: String    = Help[D].appName
   def appVersion: String = Help[D].appVersion
-  def progName: String = Help[D].progName
+  def progName: String   = Help[D].progName
 
   def main(args: Array[String]): Unit =
-    commandParser.withHelp.detailedParse(PlatformUtil.arguments(args).toVector)(beforeCommandParser.withHelp) match {
+    commandParser.withHelp.detailedParse(PlatformUtil.arguments(args).toVector)(
+      beforeCommandParser.withHelp
+    ) match {
       case Left(err) =>
         error(err)
 
       case Right((WithHelp(usage, help, d), dArgs, optCmd)) =>
-
         if (help)
           helpAsked()
 
@@ -88,7 +94,6 @@ abstract class CommandAppWithPreCommand[D, T](implicit
             error(err)
 
           case Right((c, WithHelp(commandUsage, commandHelp, t), commandArgs)) =>
-
             if (commandHelp)
               commandHelpAsked(c)
 

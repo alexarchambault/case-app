@@ -1,9 +1,7 @@
-
-/**
-  * caseapp root package
+/** caseapp root package
   *
-  * Simply importing things directly under this package should make it possible not to have to import things
-  * from [[caseapp.core]].
+  * Simply importing things directly under this package should make it possible not to have to
+  * import things from [[caseapp.core]].
   */
 package object caseapp {
 
@@ -24,7 +22,6 @@ package object caseapp {
   type CommandsHelp[T] = core.help.CommandsHelp[T]
   val CommandsHelp = core.help.CommandsHelp
 
-
   type CaseApp[T] = core.app.CaseApp[T]
   val CaseApp = core.app.CaseApp
 
@@ -33,13 +30,11 @@ package object caseapp {
   @deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
   type CommandApp[T] = core.app.CommandApp[T]
 
-
   type RemainingArgs = core.RemainingArgs
   val RemainingArgs = core.RemainingArgs
 
   type Last[T] = core.argparser.Last[T]
   val Last = core.argparser.Last
-
 
   // Running into weird errors with this one when using Tag.of, so let's use newtype below instead
   // type @@[+T, Tag] = shapeless.tag.@@[T, Tag]
@@ -55,7 +50,7 @@ package object caseapp {
       def apply[T](t: T): T @@ Tag = t.asInstanceOf[T @@ Tag]
     }
 
-    def of[Tag]: TagBuilder[Tag] = new TagBuilder[Tag]
+    def of[Tag]: TagBuilder[Tag]       = new TagBuilder[Tag]
     def unwrap[T, Tag](t: T @@ Tag): T = t.asInstanceOf[T]
   }
 

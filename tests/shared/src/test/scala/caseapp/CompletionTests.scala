@@ -22,7 +22,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("--a"), 0)
+        val res      = App.complete(Seq("--a"), 0)
         val expected = Nil
         assert(res == expected)
       }
@@ -54,7 +54,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("--a"), 0)
+        val res      = App.complete(Seq("--a"), 0)
         val expected = Nil
         assert(res == expected)
       }

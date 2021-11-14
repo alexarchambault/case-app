@@ -58,16 +58,14 @@ object ParserOps {
       RecursiveConsParser(other, parser)
   }
 
-
   sealed abstract class AsHelper[T, F] {
     def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[F, D]
   }
 
-  implicit def defaultAsHelper[F, T <: HList, R <: HList]
-   (implicit
-     gen: Generic.Aux[F, R],
-     rev: ops.hlist.Reverse.Aux[T, R]
-   ): AsHelper[T, F] =
+  implicit def defaultAsHelper[F, T <: HList, R <: HList](implicit
+    gen: Generic.Aux[F, R],
+    rev: ops.hlist.Reverse.Aux[T, R]
+  ): AsHelper[T, F] =
     new AsHelper[T, F] {
       def apply[D](parser: Parser.Aux[T, D]) =
         parser
@@ -79,26 +77,23 @@ object ParserOps {
     def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[F, D]
   }
 
-  implicit def defaultToHelper[F, T <: HList]
-   (implicit
-     gen: Generic.Aux[F, T]
-   ): ToHelper[T, F] =
+  implicit def defaultToHelper[F, T <: HList](implicit
+    gen: Generic.Aux[F, T]
+  ): ToHelper[T, F] =
     new ToHelper[T, F] {
       def apply[D](parser: Parser.Aux[T, D]) =
         parser
           .map(gen.from)
     }
 
-
   sealed abstract class TupledHelper[T, P] {
     def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[P, D]
   }
 
-  implicit def defaultTupledHelper[P, T <: HList, R <: HList]
-   (implicit
-     rev: ops.hlist.Reverse.Aux[T, R],
-     tupler: ops.hlist.Tupler.Aux[R, P]
-   ): TupledHelper[T, P] =
+  implicit def defaultTupledHelper[P, T <: HList, R <: HList](implicit
+    rev: ops.hlist.Reverse.Aux[T, R],
+    tupler: ops.hlist.Tupler.Aux[R, P]
+  ): TupledHelper[T, P] =
     new TupledHelper[T, P] {
       def apply[D](parser: Parser.Aux[T, D]) =
         parser
@@ -106,15 +101,13 @@ object ParserOps {
           .map(tupler.apply)
     }
 
-
   sealed abstract class ToTupleHelper[T, P] {
     def apply[D](parser: Parser.Aux[T, D]): Parser.Aux[P, D]
   }
 
-  implicit def defaultToTupleHelper[P, T <: HList]
-   (implicit
-     tupler: ops.hlist.Tupler.Aux[T, P]
-   ): ToTupleHelper[T, P] =
+  implicit def defaultToTupleHelper[P, T <: HList](implicit
+    tupler: ops.hlist.Tupler.Aux[T, P]
+  ): ToTupleHelper[T, P] =
     new ToTupleHelper[T, P] {
       def apply[D](parser: Parser.Aux[T, D]) =
         parser
