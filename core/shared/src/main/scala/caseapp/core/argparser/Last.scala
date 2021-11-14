@@ -10,4 +10,4 @@ package caseapp.core.argparser
   * @param value: actual value of type [[T]]
   * @tparam T: wrapped type
   */
-final case class Last[T](value: T) extends AnyVal
+final case class Last[T](value: T) // extends AnyVal // having issues since Scala Native 0.4.1

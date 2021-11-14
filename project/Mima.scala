@@ -9,13 +9,12 @@ import scala.sys.process._
 object Mima {
 
   def binaryCompatibilityVersions: Set[String] =
-    Seq("git", "tag", "--merged", "HEAD^", "--contains", "c22dc2712ca7f7a9c60709b6f299f0f4de285299")
+    Seq("git", "tag", "--merged", "HEAD^", "--contains", "706a1d90cca205b69e4cff583abb9411526e7d58")
       .!!
       .linesIterator
       .map(_.trim)
       .filter(_.startsWith("v"))
       .map(_.stripPrefix("v"))
-      .filter(_ != "2.1.0-M5")
       .toSet
 
   def settings = Def.settings(
