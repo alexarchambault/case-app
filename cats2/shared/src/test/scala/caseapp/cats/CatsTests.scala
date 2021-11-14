@@ -19,7 +19,8 @@ sealed trait RecordedApp {
   def run(args: List[String]): IO[ExitCode]
 }
 
-private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T]) extends IOCaseApp[T]()(parser0, messages) with RecordedApp {
+private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T])
+    extends IOCaseApp[T]()(parser0, messages) with RecordedApp {
 
   override def error(message: Error): IO[ExitCode] =
     stderrBuff.update(message.message :: _)
@@ -32,7 +33,8 @@ private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T
     println(s"run: $options").as(ExitCode.Success)
 }
 
-private class RecordedIOCommandApp[T](implicit parser0: CommandParser[T], messages: CommandsHelp[T]) extends IOCommandApp[T]()(parser0, messages) with RecordedApp {
+private class RecordedIOCommandApp[T](implicit parser0: CommandParser[T], messages: CommandsHelp[T])
+    extends IOCommandApp[T]()(parser0, messages) with RecordedApp {
 
   override def error(message: Error): IO[ExitCode] =
     stderrBuff.update(message.message :: _)
@@ -50,18 +52,43 @@ object CatsTests extends TestSuite {
   import Definitions._
 
   private def testCaseStdout(args: List[String], expected: String) =
-    testRunFuture(new RecordedIOCaseApp[FewArgs](), args, expectedStdout = List(expected), expectedStderr = List.empty)
+    testRunFuture(
+      new RecordedIOCaseApp[FewArgs](),
+      args,
+      expectedStdout = List(expected),
+      expectedStderr = List.empty
+    )
 
   private def testCaseStderr(args: List[String], expected: String) =
-    testRunFuture(new RecordedIOCaseApp[FewArgs](), args, expectedStdout = List.empty, expectedStderr = List(expected))
+    testRunFuture(
+      new RecordedIOCaseApp[FewArgs](),
+      args,
+      expectedStdout = List.empty,
+      expectedStderr = List(expected)
+    )
 
   private def testCommandStdout(args: List[String], expected: String) =
-    testRunFuture(new RecordedIOCommandApp[Command](), args, expectedStdout = List(expected), expectedStderr = List.empty)
+    testRunFuture(
+      new RecordedIOCommandApp[Command](),
+      args,
+      expectedStdout = List(expected),
+      expectedStderr = List.empty
+    )
 
   private def testCommandStderr(args: List[String], expected: String) =
-    testRunFuture(new RecordedIOCommandApp[Command](), args, expectedStdout = List.empty, expectedStderr = List(expected))
+    testRunFuture(
+      new RecordedIOCommandApp[Command](),
+      args,
+      expectedStdout = List.empty,
+      expectedStderr = List(expected)
+    )
 
-  private def testRunFuture(app: RecordedApp, args: List[String], expectedStdout: List[String], expectedStderr: List[String]) = {
+  private def testRunFuture(
+    app: RecordedApp,
+    args: List[String],
+    expectedStdout: List[String],
+    expectedStderr: List[String]
+  ) =
     app.run(args)
       .flatMap { _ =>
         for {
@@ -70,7 +97,6 @@ object CatsTests extends TestSuite {
         } yield assert(stdoutRes == expectedStdout, stderrRes == expectedStderr)
       }
       .unsafeToFuture()
-  }
 
   override def tests: Tests = Tests {
     test("IOCaseApp") {
@@ -92,10 +118,16 @@ object CatsTests extends TestSuite {
         testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
       }
       test("output command usage") {
-        testCommandStdout(List("first", "--usage"), CommandsHelp[Command].messagesMap(List("first")).usageMessage("none.type", List("first")))
+        testCommandStdout(
+          List("first", "--usage"),
+          CommandsHelp[Command].messagesMap(List("first")).usageMessage("none.type", List("first"))
+        )
       }
       test("output command help") {
-        testCommandStdout(List("first", "--help"), CommandsHelp[Command].messagesMap(List("first")).helpMessage("none.type", List("first")))
+        testCommandStdout(
+          List("first", "--help"),
+          CommandsHelp[Command].messagesMap(List("first")).helpMessage("none.type", List("first"))
+        )
       }
       test("run") {
         testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")

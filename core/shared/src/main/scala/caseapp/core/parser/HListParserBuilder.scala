@@ -8,17 +8,24 @@ import shapeless.{HList, HNil, Strict, Witness, ::}
 import shapeless.labelled.{FieldType, field}
 
 sealed abstract class HListParserBuilder[
-   L <: HList,
-   D <: HList,
+  L <: HList,
+  D <: HList,
   -N <: HList,
   -V <: HList,
   -M <: HList,
   -G <: HList,
   -H <: HList,
-   R <: HList
+  R <: HList
 ] {
   type P <: HList
-  def apply(default: => D, names: N, valueDescriptions: V, helpMessages: M, groups: G, noHelp: H): Parser.Aux[L, P]
+  def apply(
+    default: => D,
+    names: N,
+    valueDescriptions: V,
+    helpMessages: M,
+    groups: G,
+    noHelp: H
+  ): Parser.Aux[L, P]
 }
 
 object HListParserBuilder extends LowPriorityHListParserBuilder {
@@ -37,7 +44,17 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
   ): Aux[L, D, N, V, M, G, H, R, args.P] =
     args
 
-  type Aux[L <: HList, D <: HList, N <: HList, V <: HList, M <: HList, G <: HList, H <: HList, R <: HList, P0 <: HList] =
+  type Aux[
+    L <: HList,
+    D <: HList,
+    N <: HList,
+    V <: HList,
+    M <: HList,
+    G <: HList,
+    H <: HList,
+    R <: HList,
+    P0 <: HList
+  ] =
     HListParserBuilder[L, D, N, V, M, G, H, R] { type P = P0 }
 
   def instance[
@@ -55,7 +72,14 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
   ): Aux[L, D, N, V, M, G, H, R, P0] =
     new HListParserBuilder[L, D, N, V, M, G, H, R] {
       type P = P0
-      def apply(default: => D, names: N, valueDescriptions: V, helpMessages: M, group: G, noHelp: H) =
+      def apply(
+        default: => D,
+        names: N,
+        valueDescriptions: V,
+        helpMessages: M,
+        group: G,
+        noHelp: H
+      ) =
         p(() => default, names, valueDescriptions, helpMessages, group, noHelp)
     }
 
@@ -83,7 +107,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     argParser: Strict[ArgParser[H @@ Tag]],
     default: Strict[Default[H @@ Tag]],
     tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
-   ): Aux[
+  ): Aux[
     FieldType[K, H @@ Tag] :: T,
     Option[H @@ Tag] :: DT,
     List[Name] :: NT,
@@ -113,7 +137,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     argParser: Strict[ArgParser[H]],
     default: Strict[Default[H]],
     tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
-   ): Aux[
+  ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
     List[Name] :: NT,
@@ -126,7 +150,14 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
   ] =
     instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
 
-      val tailParser = tail.value(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, groups.tail, noHelp.tail)
+      val tailParser = tail.value(
+        default0().tail,
+        names.tail,
+        valueDescriptions.tail,
+        helpMessages.tail,
+        groups.tail,
+        noHelp.tail
+      )
 
       val arg = Arg(
         Name(name.value.name),
@@ -138,16 +169,17 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         groups.head
       )
 
-      val argument = Argument(arg, argParser.value, () => default0().head.orElse(Some(default.value.value)))
+      val argument =
+        Argument(arg, argParser.value, () => default0().head.orElse(Some(default.value.value)))
 
       ConsParser(argument, tailParser)
         .mapHead(field[K](_))
     }
 
   implicit def hconsRecursive[
-     K <: Symbol,
-     H,
-     T <: HList,
+    K <: Symbol,
+    H,
+    T <: HList,
     PT <: HList,
     DT <: HList,
     NT <: HList,
@@ -157,9 +189,9 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     HT <: HList,
     RT <: HList
   ](implicit
-     headParser: Strict[Parser[H]],
-     tail: Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]
-   ): Aux[
+    headParser: Strict[Parser[H]],
+    tail: Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]
+  ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
     Nil.type :: NT,
@@ -172,10 +204,16 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
   ] =
     instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
 
-      val tailParser = tail(default0().tail, names.tail, valueDescriptions.tail, helpMessages.tail, groups.tail, noHelp.tail)
+      val tailParser = tail(
+        default0().tail,
+        names.tail,
+        valueDescriptions.tail,
+        helpMessages.tail,
+        groups.tail,
+        noHelp.tail
+      )
 
       RecursiveConsParser(headParser.value, tailParser)
         .mapHead(field[K](_))
     }
 }
-

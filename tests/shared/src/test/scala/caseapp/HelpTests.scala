@@ -12,7 +12,7 @@ object HelpTests extends TestSuite {
   case class Options(
     first: Int,
     @Hidden
-      second: String
+    second: String
   )
 
   case class WithValueDescription(
@@ -25,7 +25,7 @@ object HelpTests extends TestSuite {
 
     def lines(s: String) = s.linesIterator.toVector
     def checkLines(message: String, expectedMessage: String) = {
-      val messageLines = lines(message)
+      val messageLines  = lines(message)
       val expectedLines = lines(expectedMessage)
 
       for (((a, b), idx) <- messageLines.zip(expectedLines).zipWithIndex if a != b)
@@ -108,8 +108,8 @@ object HelpTests extends TestSuite {
     test("group ordering") {
 
       val orderedGroups = Seq("Something", "Bb")
-      val groupFormat = format.withSortedGroups(Some(orderedGroups))
-      val message = Help[GroupedOptions].help(groupFormat)
+      val groupFormat   = format.withSortedGroups(Some(orderedGroups))
+      val message       = Help[GroupedOptions].help(groupFormat)
 
       val expectedMessage =
         """Usage: grouped [options]
@@ -179,12 +179,12 @@ object HelpTests extends TestSuite {
       val helpLines = Help[Options].help(format).linesIterator.toVector
 
       test {
-        val res = helpLines.count(_.contains("--first"))
+        val res         = helpLines.count(_.contains("--first"))
         val expectedRes = 1
         assert(res == expectedRes)
       }
       test {
-        val res = helpLines.count(_.contains("--second"))
+        val res         = helpLines.count(_.contains("--second"))
         val expectedRes = 0
         assert(res == expectedRes)
       }
@@ -195,12 +195,12 @@ object HelpTests extends TestSuite {
       val helpLines = Help[Options].help(format, showHidden = true).linesIterator.toVector
 
       test {
-        val res = helpLines.count(_.contains("--first"))
+        val res         = helpLines.count(_.contains("--first"))
         val expectedRes = 1
         assert(res == expectedRes)
       }
       test {
-        val res = helpLines.count(_.contains("--second"))
+        val res         = helpLines.count(_.contains("--second"))
         val expectedRes = 1
         assert(res == expectedRes)
       }
@@ -215,7 +215,7 @@ object HelpTests extends TestSuite {
         assert(dup.nonEmpty)
 
         val expected = Map("--foo-bar" -> Seq("fooBar", "foo-bar"))
-        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        val res      = dup.mapValues(_.map(_.name.name)).iterator.toMap
         assert(res == expected)
       }
 
@@ -224,7 +224,7 @@ object HelpTests extends TestSuite {
         assert(dup.nonEmpty)
 
         val expected = Map("--foo-bar" -> Seq("fooBar", "other"))
-        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        val res      = dup.mapValues(_.map(_.name.name)).iterator.toMap
         assert(res == expected)
       }
 
@@ -233,7 +233,7 @@ object HelpTests extends TestSuite {
         assert(dup.nonEmpty)
 
         val expected = Map("--foo-bar" -> Seq("fooBar", "foo-bar"))
-        val res = dup.mapValues(_.map(_.name.name)).iterator.toMap
+        val res      = dup.mapValues(_.map(_.name.name)).iterator.toMap
         assert(res == expected)
       }
 
@@ -242,7 +242,7 @@ object HelpTests extends TestSuite {
     test("generate a help message with custom formatter") {
 
       implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
-      val message = Help[FewArgs].help(format)
+      val message    = Help[FewArgs].help(format)
 
       val expectedMessage =
         """Usage: few-args [options]
@@ -267,9 +267,9 @@ object HelpTests extends TestSuite {
 
     test("generate help message for commands") {
       val entryPoint = new CommandsEntryPoint {
-        def progName = "foo"
+        def progName                = "foo"
         override def defaultCommand = Some(First)
-        def commands = Seq(First, Second, Third)
+        def commands                = Seq(First, Second, Third)
       }
       val help = entryPoint.help.help(format)
       val expected =
@@ -293,7 +293,7 @@ object HelpTests extends TestSuite {
 
     test("group commands in help message") {
       val entryPoint = new CommandsEntryPoint {
-        def progName = "foo"
+        def progName                = "foo"
         override def defaultCommand = Some(CommandGroups.First)
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
@@ -321,7 +321,7 @@ object HelpTests extends TestSuite {
 
     test("hidden commands in help message") {
       val entryPoint = new CommandsEntryPoint {
-        def progName = "foo"
+        def progName                = "foo"
         override def defaultCommand = Some(HiddenCommands.First)
         def commands = Seq(HiddenCommands.First, HiddenCommands.Second, HiddenCommands.Third)
       }

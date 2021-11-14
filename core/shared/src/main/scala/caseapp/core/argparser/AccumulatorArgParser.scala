@@ -15,10 +15,12 @@ import dataclass.data
 
 object AccumulatorArgParser {
 
-  def from[T](description: String)(parse: (Option[T], String) => Either[Error, T]): AccumulatorArgParser[T] =
+  def from[T](
+    description: String
+  )(
+    parse: (Option[T], String) => Either[Error, T]
+  ): AccumulatorArgParser[T] =
     AccumulatorArgParser(description, parse)
-
-
 
   // FIXME (former comment, deprecated?) may not be fine with sequences/options of flags
 
@@ -41,6 +43,5 @@ object AccumulatorArgParser {
     from(parser.description + "?") { (prevOpt, s) =>
       parser(prevOpt.flatten, s).map(Some(_))
     }
-
 
 }

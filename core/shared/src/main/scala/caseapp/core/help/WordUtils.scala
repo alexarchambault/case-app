@@ -5,7 +5,13 @@ import java.util.regex.Pattern
 object WordUtils {
 
   // adapted from https://github.com/apache/commons-lang/blob/601e976b0d5a9bb323fd2625c8d3751d1547a5d2/src/main/java/org/apache/commons/lang3/text/WordUtils.java#L273-L346
-  def wrap(str: String, wrapLength: Int, newLineStrOpt: Option[String], wrapLongWords: Boolean, wrapOn: String): String = {
+  def wrap(
+    str: String,
+    wrapLength: Int,
+    newLineStrOpt: Option[String],
+    wrapLongWords: Boolean,
+    wrapOn: String
+  ): String = {
 
     val newLineStr = newLineStrOpt.getOrElse(System.lineSeparator())
 
@@ -19,20 +25,26 @@ object WordUtils {
 
     val patternToWrapOn = Pattern.compile(wrapOn0)
     val inputLineLength = str.length
-    var offset = 0
-    val wrappedLine = new java.lang.StringBuilder(inputLineLength + 32)
+    var offset          = 0
+    val wrappedLine     = new java.lang.StringBuilder(inputLineLength + 32)
 
     var shouldStop = false
 
     while (!shouldStop && offset < inputLineLength) {
       var spaceToWrapAt = -1
       var matcher = patternToWrapOn.matcher(
-        str.substring(offset, Math.min(Math.min(Integer.MAX_VALUE.toLong, offset + wrapLength0 + 1L).toInt, inputLineLength))
+        str.substring(
+          offset,
+          Math.min(
+            Math.min(Integer.MAX_VALUE.toLong, offset + wrapLength0 + 1L).toInt,
+            inputLineLength
+          )
+        )
       )
       val found = matcher.find()
-      if (found && matcher.start() == 0) {
+      if (found && matcher.start() == 0)
         offset += matcher.end()
-      } else {
+      else {
         if (found)
           spaceToWrapAt = matcher.start() + offset
 
@@ -48,13 +60,15 @@ object WordUtils {
             wrappedLine.append(str.drop(offset).take(spaceToWrapAt))
             wrappedLine.append(newLineStr)
             offset = spaceToWrapAt + 1
-          } else // really long word or URL
+          }
+          else // really long word or URL
           if (wrapLongWords) {
             // wrap really long word one line at a time
             wrappedLine.append(str.drop(offset).take(wrapLength0 + offset))
             wrappedLine.append(newLineStr)
             offset += wrapLength0
-          } else {
+          }
+          else {
             // do not wrap really long word, just extend beyond limit
             matcher = patternToWrapOn.matcher(str.substring(offset + wrapLength0))
             if (matcher.find())
@@ -64,7 +78,8 @@ object WordUtils {
               wrappedLine.append(str.drop(offset).take(spaceToWrapAt))
               wrappedLine.append(newLineStr)
               offset = spaceToWrapAt + 1
-            } else {
+            }
+            else {
               wrappedLine.append(str.drop(offset).take(str.length()))
               offset = inputLineLength
             }
@@ -82,5 +97,5 @@ object WordUtils {
   // adapted from https://github.com/apache/commons-lang/blob/601e976b0d5a9bb323fd2625c8d3751d1547a5d2/src/main/java/org/apache/commons/lang3/StringUtils.java#L3573-L3584
   private def isBlank(cs: CharSequence): Boolean =
     cs.length == 0 ||
-      (0 until cs.length).forall(i => Character.isWhitespace(cs.charAt(i)))
+    (0 until cs.length).forall(i => Character.isWhitespace(cs.charAt(i)))
 }

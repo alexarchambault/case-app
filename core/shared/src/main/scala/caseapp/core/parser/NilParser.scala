@@ -13,9 +13,9 @@ case object NilParser extends Parser[HNil] {
     HNil
 
   def step(
-      args: List[String],
-      d: HNil,
-      formatter: Formatter[Name]
+    args: List[String],
+    d: HNil,
+    formatter: Formatter[Name]
   ): Right[(Error, Arg, List[String]), None.type] =
     Right(None)
 

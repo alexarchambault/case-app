@@ -9,20 +9,20 @@ object Bash {
 
   def script(progName: String): String = {
     val ifs = "\\n"
-   s"""_${progName}_completions() {
-      |  local IFS=$$'$ifs'
-      |  eval "$$($progName complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
-      |}
-      |
-      |complete -F _${progName}_completions $progName
-      |""".stripMargin
+    s"""_${progName}_completions() {
+       |  local IFS=$$'$ifs'
+       |  eval "$$($progName complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
+       |}
+       |
+       |complete -F _${progName}_completions $progName
+       |""".stripMargin
   }
 
   private def escape(s: String): String =
     s.replace("\"", "\\\"")
   def print(items: Seq[CompletionItem]): String = {
-    val newLine = System.lineSeparator()
-    val b = new StringBuilder
+    val newLine     = System.lineSeparator()
+    val b           = new StringBuilder
     val singleValue = items.iterator.flatMap(_.values).drop(1).isEmpty
     for (item <- items; value <- item.values) {
       b.append("\"")

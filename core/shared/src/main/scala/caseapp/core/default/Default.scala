@@ -3,8 +3,7 @@ package caseapp.core.default
 import caseapp.{@@, Tag}
 import caseapp.core.Counter
 
-/**
-  * Default value for type `T`
+/** Default value for type `T`
   *
   * Allows to give fields of type `T` a default value, even if none was explicitly specified.
   */

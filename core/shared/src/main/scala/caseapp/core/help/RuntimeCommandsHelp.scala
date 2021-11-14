@@ -75,10 +75,23 @@ import dataclass._
           commands
             .iterator
             .map { help =>
-              val names0 = help.names.map(_.mkString(" ")).map(format.commandName(_).render).mkString(", ")
-              val baseDescOpt = help.help.helpMessage.flatMap(_.message.linesIterator.map(_.trim).filter(_.nonEmpty).toStream.headOption)
+              val names0 =
+                help.names.map(_.mkString(" ")).map(format.commandName(_).render).mkString(", ")
+              val baseDescOpt = help.help.helpMessage
+                .flatMap { m =>
+                  m.message
+                    .linesIterator
+                    .map(_.trim)
+                    .filter(_.nonEmpty)
+                    .toStream
+                    .headOption
+                }
               val descOpt =
-                if (help.hidden) Some(format.hidden("(hidden)") ++ (baseDescOpt.map(" " + _).getOrElse(""): String))
+                if (help.hidden)
+                  Some {
+                    format.hidden("(hidden)") ++
+                      (baseDescOpt.map(" " + _).getOrElse(""): String)
+                  }
                 else baseDescOpt.map(x => x: fansi.Str)
               Seq(names0: fansi.Str, descOpt.getOrElse("": fansi.Str))
             }
@@ -95,10 +108,10 @@ import dataclass._
               b.append(format.newLine)
             }
             val printedName =
-              if (groupName.isEmpty) {
+              if (groupName.isEmpty)
                 if (grouped.length == 1) "Commands:"
                 else "Other commands:"
-              } else s"$groupName commands:"
+              else s"$groupName commands:"
             b.append(printedName)
             b.append(format.newLine)
             val table0 = table(groupCommands)

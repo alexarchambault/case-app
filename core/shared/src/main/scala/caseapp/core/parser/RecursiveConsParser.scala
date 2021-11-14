@@ -17,9 +17,9 @@ import dataclass.data
     headParser.init :: tailParser.init
 
   def step(
-      args: List[String],
-      d: D,
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: D,
+    nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
       .step(args, d.head, nameFormatter)
@@ -40,9 +40,9 @@ import dataclass.data
 
     (maybeHead, maybeTail) match {
       case (Left(headErrs), Left(tailErrs)) => Left(headErrs.append(tailErrs))
-      case (Left(headErrs), _) => Left(headErrs)
-      case (_, Left(tailErrs)) => Left(tailErrs)
-      case (Right(h), Right(t)) => Right(h :: t)
+      case (Left(headErrs), _)              => Left(headErrs)
+      case (_, Left(tailErrs))              => Left(tailErrs)
+      case (Right(h), Right(t))             => Right(h :: t)
     }
   }
 

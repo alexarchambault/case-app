@@ -9,7 +9,7 @@ import caseapp.core.util.Formatter
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
-  def hasHelp: Boolean = true
+  def hasHelp: Boolean     = true
   def hasFullHelp: Boolean = false
 
   def parser: Parser[T] = {
@@ -90,14 +90,13 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
   def ensureNoDuplicates(): Unit =
     finalHelp.ensureNoDuplicates()
 
-  /**
-    * Arguments are expanded then parsed. By default, argument expansion is the identity function.
+  /** Arguments are expanded then parsed. By default, argument expansion is the identity function.
     * Overriding this method allows plugging in an arbitrary argument expansion logic.
     *
     * One such expansion logic involves replacing each argument of the form '@<file>' with the
-    * contents of that file where each line in the file becomes a distinct argument.
-    * To enable this behavior, override this method as shown below.
-
+    * contents of that file where each line in the file becomes a distinct argument. To enable this
+    * behavior, override this method as shown below.
+    *
     * @example
     * {{{
     * import caseapp.core.parser.PlatformArgsExpander
@@ -110,21 +109,18 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     */
   def expandArgs(args: List[String]): List[String] = args
 
-  /**
-   * Whether to stop parsing at the first unrecognized argument.
-   *
-   * That is, stop parsing at the first non option (not starting with "-"), or
-   * the first unrecognized option. The unparsed arguments are put in the `args`
-   * argument of `run`.
-  */
+  /** Whether to stop parsing at the first unrecognized argument.
+    *
+    * That is, stop parsing at the first non option (not starting with "-"), or the first
+    * unrecognized option. The unparsed arguments are put in the `args` argument of `run`.
+    */
   def stopAtFirstUnrecognized: Boolean =
     false
 
-  /**
-    * Whether to ignore unrecognized arguments.
+  /** Whether to ignore unrecognized arguments.
     *
-    * That is, if there are unrecognized arguments, the parsing still succeeds.
-    * The unparsed arguments are put in the `args` argument of `run`.
+    * That is, if there are unrecognized arguments, the parsing still succeeds. The unparsed
+    * arguments are put in the `args` argument of `run`.
     */
   def ignoreUnrecognized: Boolean =
     false
@@ -137,25 +133,40 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
 
   def main(progName: String, args: Array[String]): Unit =
     if (hasFullHelp)
-      parser.withFullHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
-        case Left(err) => error(err)
+      parser.withFullHelp.detailedParse(
+        expandArgs(args.toList),
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      ) match {
+        case Left(err)                         => error(err)
         case Right((WithFullHelp(_, true), _)) => fullHelpAsked(progName)
-        case Right((WithFullHelp(WithHelp(_, true, maybeOptions), _), _)) => helpAsked(progName, maybeOptions)
-        case Right((WithFullHelp(WithHelp(true, _, maybeOptions), _), _)) => usageAsked(progName, maybeOptions)
+        case Right((WithFullHelp(WithHelp(_, true, maybeOptions), _), _)) =>
+          helpAsked(progName, maybeOptions)
+        case Right((WithFullHelp(WithHelp(true, _, maybeOptions), _), _)) =>
+          usageAsked(progName, maybeOptions)
         case Right((WithFullHelp(WithHelp(_, _, Left(err)), _), _)) => error(err)
-        case Right((WithFullHelp(WithHelp(_, _, Right(t)), _), remainingArgs)) => run(t, remainingArgs)
+        case Right((WithFullHelp(WithHelp(_, _, Right(t)), _), remainingArgs)) =>
+          run(t, remainingArgs)
       }
     else if (hasHelp)
-      parser.withHelp.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
-        case Left(err) => error(err)
-        case Right((WithHelp(_, true, maybeOptions), _)) => helpAsked(progName, maybeOptions)
-        case Right((WithHelp(true, _, maybeOptions), _)) => usageAsked(progName, maybeOptions)
-        case Right((WithHelp(_, _, Left(err)), _)) => error(err)
+      parser.withHelp.detailedParse(
+        expandArgs(args.toList),
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      ) match {
+        case Left(err)                                        => error(err)
+        case Right((WithHelp(_, true, maybeOptions), _))      => helpAsked(progName, maybeOptions)
+        case Right((WithHelp(true, _, maybeOptions), _))      => usageAsked(progName, maybeOptions)
+        case Right((WithHelp(_, _, Left(err)), _))            => error(err)
         case Right((WithHelp(_, _, Right(t)), remainingArgs)) => run(t, remainingArgs)
       }
     else
-      parser.detailedParse(expandArgs(args.toList), stopAtFirstUnrecognized, ignoreUnrecognized) match {
-        case Left(err) => error(err)
+      parser.detailedParse(
+        expandArgs(args.toList),
+        stopAtFirstUnrecognized,
+        ignoreUnrecognized
+      ) match {
+        case Left(err)                 => error(err)
         case Right((t, remainingArgs)) => run(t, remainingArgs)
       }
 }
@@ -168,13 +179,17 @@ object CaseApp {
   def detailedParse[T: Parser](args: Seq[String]): Either[Error, (T, RemainingArgs)] =
     Parser[T].detailedParse(args)
 
-  def parseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, Seq[String])] =
+  def parseWithHelp[T](args: Seq[String])(implicit
+    parser: Parser[T]
+  ): Either[Error, (Either[Error, T], Boolean, Boolean, Seq[String])] =
     parser.withHelp.parse(args).map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)
     }
 
-  def detailedParseWithHelp[T](args: Seq[String])(implicit parser: Parser[T]): Either[Error, (Either[Error, T], Boolean, Boolean, RemainingArgs)] =
+  def detailedParseWithHelp[T](args: Seq[String])(implicit
+    parser: Parser[T]
+  ): Either[Error, (Either[Error, T], Boolean, Boolean, RemainingArgs)] =
     parser.withHelp.detailedParse(args).map {
       case (WithHelp(usage, help, base), rem) =>
         (base, help, usage, rem)

@@ -8,30 +8,30 @@ object Definitions {
   final case class NoArgs()
 
   final case class FewArgs(
-    value  : String = "default",
-    numFoo : Int = -10
+    value: String = "default",
+    numFoo: Int = -10
   )
 
   final case class FewArgs1(
-    value  : String = "default",
-    numFoo : Last[Int] = Last(-10)
+    value: String = "default",
+    numFoo: Last[Int] = Last(-10)
   )
 
   final case class MoreArgs(
-    count  : Int @@ Counter,
-    @Recurse few    : FewArgs
+    count: Int @@ Counter,
+    @Recurse few: FewArgs
   )
 
   final case class WithList(
-    list   : List[Int]
+    list: List[Int]
   )
 
   final case class WithTaggedList(
-    list   : List[String]
+    list: List[String]
   )
 
   final case class OptBool(
-    opt    : Option[Boolean]
+    opt: Option[Boolean]
   )
 
   final case class Custom(s: String)
@@ -43,7 +43,7 @@ object Definitions {
 
   @AppName("WithCustom")
   final case class WithCustom(
-    custom   : Custom = Custom("")
+    custom: Custom = Custom("")
   )
 
   final case class Demo(
@@ -61,7 +61,6 @@ object Definitions {
         .add[Int]("count")
         .as[OverriddenParser]
   }
-
 
   Parser[NoArgs]
   Parser[FewArgs]
@@ -121,7 +120,7 @@ object Definitions {
 
   case class First(
     @ExtraName("f")
-      foo: String = "",
+    foo: String = "",
     bar: Int = 0
   ) extends Command
 

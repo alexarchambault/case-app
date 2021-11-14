@@ -1,7 +1,6 @@
 package caseapp.core
 
-/**
-  * Things related to parsing a single argument.
+/** Things related to parsing a single argument.
   *
   * Mostly revolves around [[caseapp.core.argparser.ArgParser]].
   */

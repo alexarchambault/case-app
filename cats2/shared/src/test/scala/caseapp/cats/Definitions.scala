@@ -6,8 +6,8 @@ import _root_.cats.data.NonEmptyList
 object Definitions {
 
   final case class FewArgs(
-    value  : String = "default",
-    numFoo : Int = -10
+    value: String = "default",
+    numFoo: Int = -10
   )
 
   final case class WithNonEmptyList(nel: NonEmptyList[String])
@@ -16,7 +16,7 @@ object Definitions {
 
   case class First(
     @ExtraName("f")
-      foo: String = "",
+    foo: String = "",
     bar: Int = 0
   ) extends Command
 

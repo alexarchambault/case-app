@@ -25,28 +25,28 @@ object DslTests extends TestSuite {
       val derivedParser = Parser[Result]
 
       test {
-        val args = Seq("--foo", "2", "--bar", "bzz", "--value", "2.0")
-        val dslRes = dslParser.parse(args)
-        val derivedRes = derivedParser.parse(args)
+        val args        = Seq("--foo", "2", "--bar", "bzz", "--value", "2.0")
+        val dslRes      = dslParser.parse(args)
+        val derivedRes  = derivedParser.parse(args)
         val expectedRes = Right((Result(2, "bzz", 2.0), Nil))
         assert(dslRes == expectedRes)
         assert(derivedRes == expectedRes)
 
         val expectedTupledRes = Right(((2, "bzz", 2.0), Nil))
-        val tupledRes = tupledParser.parse(args)
+        val tupledRes         = tupledParser.parse(args)
         assert(tupledRes == expectedTupledRes)
       }
 
       test {
-        val args = Seq("--foo", "2", "--value", "2.0")
-        val dslRes = dslParser.parse(args)
-        val derivedRes = derivedParser.parse(args)
+        val args        = Seq("--foo", "2", "--value", "2.0")
+        val dslRes      = dslParser.parse(args)
+        val derivedRes  = derivedParser.parse(args)
         val expectedRes = Right((Result(2, "ab", 2.0), Nil))
         assert(dslRes == expectedRes)
         assert(derivedRes == expectedRes)
 
         val expectedTupledRes = Right(((2, "ab", 2.0), Nil))
-        val tupledRes = tupledParser.parse(args)
+        val tupledRes         = tupledParser.parse(args)
         assert(tupledRes == expectedTupledRes)
       }
     }

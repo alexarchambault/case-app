@@ -1,14 +1,14 @@
 package caseapp.util
 
 import scala.language.experimental.macros
-import shapeless.{ HList, DepFn0 }
+import shapeless.{HList, DepFn0}
 
-sealed abstract class AnnotationList[A,T] extends DepFn0 with Serializable {
+sealed abstract class AnnotationList[A, T] extends DepFn0 with Serializable {
   type Out <: HList
 }
 
 object AnnotationList {
-  def apply[A,T](implicit annotations: AnnotationList[A,T]): Aux[A, T, annotations.Out] =
+  def apply[A, T](implicit annotations: AnnotationList[A, T]): Aux[A, T, annotations.Out] =
     annotations
 
   type Aux[A, T, Out0 <: HList] = AnnotationList[A, T] { type Out = Out0 }

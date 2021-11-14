@@ -15,11 +15,13 @@ abstract class IOCommandAppWithPreCommand[D, T](implicit
   val commandsMessages: CommandsHelp[T]
 ) extends IOApp {
 
-  /**
-    * Override to support conditional early exit, suppressing a run.
-    * @param options parsed options
-    * @param remainingArgs extra arguments
-    * @return exit code for early exit, none to call run
+  /** Override to support conditional early exit, suppressing a run.
+    * @param options
+    *   parsed options
+    * @param remainingArgs
+    *   extra arguments
+    * @return
+    *   exit code for early exit, none to call run
     */
   def beforeCommand(options: D, remainingArgs: Seq[String]): IO[Option[ExitCode]]
 
@@ -46,12 +48,16 @@ abstract class IOCommandAppWithPreCommand[D, T](implicit
          |Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}
          |
          |Type  $progName command --help  for help on an individual command"""
-        .stripMargin)
-        .as(ExitCode.Success)
+        .stripMargin
+    )
+      .as(ExitCode.Success)
 
   def commandHelpAsked(command: Seq[String]): IO[ExitCode] =
-    println(commandsMessages.messagesMap(command).helpMessage(beforeCommandMessages.progName, command))
-        .as(ExitCode.Success)
+    println(commandsMessages.messagesMap(command).helpMessage(
+      beforeCommandMessages.progName,
+      command
+    ))
+      .as(ExitCode.Success)
 
   def usageAsked(): IO[ExitCode] =
     println(
@@ -59,21 +65,25 @@ abstract class IOCommandAppWithPreCommand[D, T](implicit
          |Available commands: ${commands.map(_.mkString(" ")).mkString(", ")}
          |
          |Type  $progName command --usage  for usage of an individual command"""
-        .stripMargin)
-    .as(ExitCode.Success)
+        .stripMargin
+    )
+      .as(ExitCode.Success)
 
   def commandUsageAsked(command: Seq[String]): IO[ExitCode] =
-    println(commandsMessages.messagesMap(command).usageMessage(beforeCommandMessages.progName, command))
+    println(commandsMessages.messagesMap(command).usageMessage(
+      beforeCommandMessages.progName,
+      command
+    ))
       .as(ExitCode.Success)
 
   def println(x: String): IO[Unit] =
     IO(Console.println(x))
 
-  def appName: String = Help[D].appName
+  def appName: String    = Help[D].appName
   def appVersion: String = Help[D].appVersion
-  def progName: String = Help[D].progName
+  def progName: String   = Help[D].progName
 
-  override def run(args: List[String]): IO[ExitCode] = {
+  override def run(args: List[String]): IO[ExitCode] =
     commandParser.withHelp.detailedParse(args.toVector)(beforeCommandParser.withHelp) match {
       case Left(err) =>
         error(err)
@@ -104,6 +114,5 @@ abstract class IOCommandAppWithPreCommand[D, T](implicit
               .getOrElse(IO(ExitCode.Success))
         }
     }
-  }
 
 }

@@ -27,7 +27,6 @@ object Default {
 
   implicit def materialize[T, L <: HList]: Aux[T, L] = macro DefaultMacros.materialize[T, L]
 
-
   trait AsOptions[T] extends DepFn0 with Serializable {
     type Out <: HList
   }
@@ -42,7 +41,9 @@ object Default {
     }
 
     object Helper {
-      def apply[L <: HList, Repr <: HList](implicit helper: Helper[L, Repr]): Aux[L, Repr, helper.Out] = helper
+      def apply[L <: HList, Repr <: HList](implicit
+        helper: Helper[L, Repr]
+      ): Aux[L, Repr, helper.Out] = helper
 
       type Aux[L <: HList, Repr <: HList, Out0 <: HList] = Helper[L, Repr] { type Out = Out0 }
 
@@ -52,31 +53,28 @@ object Default {
           def apply(l: HNil) = HNil
         }
 
-      implicit def hconsSomeHelper[H, T <: HList, ReprT <: HList, OutT <: HList]
-       (implicit
-         tailHelper: Aux[T, ReprT, OutT]
-       ): Aux[Some[H] :: T, H :: ReprT, Option[H] :: OutT] =
+      implicit def hconsSomeHelper[H, T <: HList, ReprT <: HList, OutT <: HList](implicit
+        tailHelper: Aux[T, ReprT, OutT]
+      ): Aux[Some[H] :: T, H :: ReprT, Option[H] :: OutT] =
         new Helper[Some[H] :: T, H :: ReprT] {
           type Out = Option[H] :: OutT
           def apply(l: Some[H] :: T) = l.head :: tailHelper(l.tail)
         }
 
-      implicit def hconsNoneHelper[H, T <: HList, ReprT <: HList, OutT <: HList]
-       (implicit
-         tailHelper: Aux[T, ReprT, OutT]
-       ): Aux[None.type :: T, H :: ReprT, Option[H] :: OutT] =
+      implicit def hconsNoneHelper[H, T <: HList, ReprT <: HList, OutT <: HList](implicit
+        tailHelper: Aux[T, ReprT, OutT]
+      ): Aux[None.type :: T, H :: ReprT, Option[H] :: OutT] =
         new Helper[None.type :: T, H :: ReprT] {
           type Out = Option[H] :: OutT
           def apply(l: None.type :: T) = None :: tailHelper(l.tail)
         }
     }
 
-    implicit def asOption[T, Repr <: HList, Options <: HList, Out0 <: HList]
-     (implicit
-       default: Default.Aux[T, Options],
-       gen: Generic.Aux[T, Repr],
-       helper: Helper.Aux[Options, Repr, Out0]
-     ): Aux[T, Out0] =
+    implicit def asOption[T, Repr <: HList, Options <: HList, Out0 <: HList](implicit
+      default: Default.Aux[T, Options],
+      gen: Generic.Aux[T, Repr],
+      helper: Helper.Aux[Options, Repr, Out0]
+    ): Aux[T, Out0] =
       new AsOptions[T] {
         type Out = Out0
         def apply() = helper(default())
@@ -95,9 +93,9 @@ class DefaultMacros(val c: whitebox.Context) extends CaseClassMacros {
     val cls = classSym(tpe)
 
     lazy val companion = companionRef(tpe)
-    def altCompanion = companion.symbol.info
+    def altCompanion   = companion.symbol.info
 
-    val none = q"_root_.scala.None"
+    val none              = q"_root_.scala.None"
     def some(value: Tree) = q"_root_.scala.Some($value)"
 
     // Symbol.alternatives is missing in Scala 2.10
@@ -119,20 +117,23 @@ class DefaultMacros(val c: whitebox.Context) extends CaseClassMacros {
         alt => alt.isMethod && hasDefaultParams(alt.asMethod)
       }
 
-    def defaultsFor(fields: List[(TermName, Type)]) = for {
-      ((_, argTpe), i) <- fields.zipWithIndex
-      default = tpe.companion.member(TermName(s"apply$$default$$${i + 1}")) orElse
-        altCompanion.member(TermName(s"$$lessinit$$greater$$default$$${i + 1}"))
-    } yield if (default.isTerm) {
-      val defaultTpe = appliedType(someTpe, devarargify(argTpe))
-      val defaultVal = some(q"$companion.$default")
-      (defaultTpe, defaultVal)
-    } else (noneTpe, none)
+    def defaultsFor(fields: List[(TermName, Type)]) =
+      for {
+        ((_, argTpe), i) <- fields.zipWithIndex
+        default = tpe.companion.member(TermName(s"apply$$default$$${i + 1}")) orElse
+          altCompanion.member(TermName(s"$$lessinit$$greater$$default$$${i + 1}"))
+      } yield
+        if (default.isTerm) {
+          val defaultTpe = appliedType(someTpe, devarargify(argTpe))
+          val defaultVal = some(q"$companion.$default")
+          (defaultTpe, defaultVal)
+        }
+        else (noneTpe, none)
 
     def mkDefault(defaults: List[(Type, Tree)]) = {
       val (types, values) = defaults.unzip
-      val outTpe = mkHListTpe(types)
-      val outVal = mkHListValue(values)
+      val outTpe          = mkHListTpe(types)
+      val outVal          = mkHListValue(values)
       q"_root_.caseapp.util.Default.mkDefault[$tpe, $outTpe]($outVal)"
     }
 

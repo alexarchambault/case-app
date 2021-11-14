@@ -35,20 +35,22 @@ object Error {
   case object ArgumentMissing extends SimpleError("argument missing")
 
   @data class ArgumentAlreadySpecified(name: String, extraNames: Seq[String] = Nil)
-    extends SimpleError(s"argument ${(name +: extraNames).mkString(" / ")} already specified")
+      extends SimpleError(s"argument ${(name +: extraNames).mkString(" / ")} already specified")
 
   case object CannotBeDisabled extends SimpleError("Option cannot be explicitly disabled")
 
-  @data class UnrecognizedFlagValue(value: String) extends SimpleError(s"Unrecognized flag value: $value")
+  @data class UnrecognizedFlagValue(value: String)
+      extends SimpleError(s"Unrecognized flag value: $value")
 
   @data class UnrecognizedArgument(arg: String) extends SimpleError(s"Unrecognized argument: $arg")
 
   @data class CommandNotFound(command: String) extends SimpleError(s"Command not found: $command")
 
   @data class RequiredOptionNotSpecified(name: String, extraNames: Seq[String] = Nil)
-    extends SimpleError(s"Required option ${(name +: extraNames).mkString(" / ")} not specified")
+      extends SimpleError(s"Required option ${(name +: extraNames).mkString(" / ")} not specified")
 
-  @data class MalformedValue(`type`: String, error: String) extends SimpleError(s"Malformed ${`type`}: $error")
+  @data class MalformedValue(`type`: String, error: String)
+      extends SimpleError(s"Malformed ${`type`}: $error")
 
   @data class Other(override val message: String) extends SimpleError(message)
   @data class ParsingArgument(name: Name, error: Error, nameFormatter: Formatter[Name])

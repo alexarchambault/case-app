@@ -27,10 +27,10 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
   private def commandProgName(commandName: List[String]): String =
     (progName +: commandName).mkString(" ")
 
-  def enableCompleteCommand: Boolean = false
+  def enableCompleteCommand: Boolean    = false
   def completeCommandName: List[String] = List("complete")
 
-  def enableCompletionsCommand: Boolean = false
+  def enableCompletionsCommand: Boolean    = false
   def completionsCommandName: List[String] = List("completions")
 
   def completionsMain(args: Array[String]): Unit = {
@@ -38,7 +38,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     def script(format: String): String =
       format match {
         case Bash.shellName | Bash.id => Bash.script(progName)
-        case Zsh.shellName | Zsh.id => Zsh.script(progName)
+        case Zsh.shellName | Zsh.id   => Zsh.script(progName)
         case _ =>
           System.err.println(s"Unrecognized completion format '$format'")
           PlatformUtil.exit(1)
@@ -67,7 +67,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
   def completeMain(args: Array[String]): Unit =
     args match {
       case Array(format, indexStr, userArgs @ _*) =>
-        val index = indexStr.toInt - 2 // -1 for argv[0], and -1 as indices start at 1
+        val index          = indexStr.toInt - 2 // -1 for argv[0], and -1 as indices start at 1
         val prefix: String = userArgs.applyOrElse(index + 1, (_: Int) => "")
         val items = complete(userArgs.toList.drop(1), index)
           .flatMap { item =>
@@ -93,7 +93,9 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     val actualArgs = PlatformUtil.arguments(args)
     if (enableCompleteCommand && actualArgs.startsWith(completeCommandName.toArray[String]))
       completeMain(actualArgs.drop(completeCommandName.length))
-    else if (enableCompletionsCommand && actualArgs.startsWith(completionsCommandName.toArray[String]))
+    else if (
+      enableCompletionsCommand && actualArgs.startsWith(completionsCommandName.toArray[String])
+    )
       completionsMain(actualArgs.drop(completionsCommandName.length))
     else
       defaultCommand match {
@@ -111,5 +113,5 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
           command.main(commandProgName(commandName), commandArgs.toArray)
       }
-    }
+  }
 }

@@ -8,19 +8,19 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
   import c.universe._
 
   def consTpe = typeOf[scala.::[_]].typeConstructor
-  def nilTpe = typeOf[Nil.type]
+  def nilTpe  = typeOf[Nil.type]
 
   // FIXME Most of the content of this method is cut-n-pasted from generic.scala
   def construct(tpe: Type): List[Tree] => Tree = {
     // FIXME Cut-n-pasted from generic.scala
-    val sym = tpe.typeSymbol
+    val sym         = tpe.typeSymbol
     val isCaseClass = sym.asClass.isCaseClass
     def hasNonGenericCompanionMember(name: String): Boolean = {
       val mSym = sym.companion.typeSignature.member(TermName(name))
       mSym != NoSymbol && !isNonGeneric(mSym)
     }
 
-    if(isCaseClass || hasNonGenericCompanionMember("apply"))
+    if (isCaseClass || hasNonGenericCompanionMember("apply"))
       args => q"${companionRef(tpe)}(..$args)"
     else
       args => q"new $tpe(..$args)"
@@ -43,7 +43,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
           .asMethod
           .paramLists
           .flatten
-          .map { sym => nameAsString(sym.name) -> sym }
+          .map(sym => nameAsString(sym.name) -> sym)
           .toMap
 
         val fields = fieldsOf(tpe)
@@ -60,7 +60,8 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
             case ann if ann.tree.tpe =:= annTpe => construct0(ann.tree.children.tail)
           }
         }
-      } else if (isCoproduct(tpe))
+      }
+      else if (isCoproduct(tpe))
         ctorsOf(tpe).map { cTpe =>
           cTpe.typeSymbol.annotations.collect {
             case ann if ann.tree.tpe =:= annTpe => construct0(ann.tree.children.tail)
@@ -75,7 +76,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
         def listTree(trees: List[Tree]): Tree = {
           import scala.::
           trees match {
-            case Nil => q"_root_.scala.Nil"
+            case Nil    => q"_root_.scala.Nil"
             case h :: t => q"_root_.scala.::($h, ${listTree(t)})"
           }
         }

@@ -20,13 +20,13 @@ object RuntimeCommandTests extends TestSuite {
       )
 
       test {
-        val res = RuntimeCommandParser.parse(commands, List("c1", "-s", "aa"))
+        val res         = RuntimeCommandParser.parse(commands, List("c1", "-s", "aa"))
         val expectedRes = Some((List("c1"), ManualCommandNotAdtStuff.Command1, List("-s", "aa")))
         assert(res == expectedRes)
       }
 
       test {
-        val res = RuntimeCommandParser.parse(commands, List("c2", "-b"))
+        val res         = RuntimeCommandParser.parse(commands, List("c2", "-b"))
         val expectedRes = Some((List("c2"), ManualCommandNotAdtStuff.Command2, List("-b")))
         assert(res == expectedRes)
       }
@@ -34,17 +34,17 @@ object RuntimeCommandTests extends TestSuite {
 
     test("sub commands") {
       val commands = Map(
-        List("foo") -> ManualSubCommandStuff.Command1,
+        List("foo")         -> ManualSubCommandStuff.Command1,
         List("foo", "list") -> ManualSubCommandStuff.Command2
       )
       test {
-        val res = RuntimeCommandParser.parse(commands, List("foo", "-s", "aa"))
+        val res         = RuntimeCommandParser.parse(commands, List("foo", "-s", "aa"))
         val expectedRes = Some((List("foo"), ManualSubCommandStuff.Command1, List("-s", "aa")))
         assert(res == expectedRes)
       }
 
       test {
-        val res = RuntimeCommandParser.parse(commands, List("foo", "list", "-b"))
+        val res         = RuntimeCommandParser.parse(commands, List("foo", "list", "-b"))
         val expectedRes = Some((List("foo", "list"), ManualSubCommandStuff.Command2, List("-b")))
         assert(res == expectedRes)
       }

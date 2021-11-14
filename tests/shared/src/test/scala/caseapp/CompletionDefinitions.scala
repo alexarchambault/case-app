@@ -20,7 +20,10 @@ object CompletionDefinitions {
   }
 
   object ArgCompletion {
-    case class Options(@Name("V") @HelpMessage("A value") value: String = "", @Name("n") other: Int = 0)
+    case class Options(
+      @Name("V") @HelpMessage("A value") value: String = "",
+      @Name("n") other: Int = 0
+    )
     object App extends CaseApp[Options] {
       override def completer: Completer[Options] = {
         val parent = super.completer
@@ -48,8 +51,14 @@ object CompletionDefinitions {
   }
 
   object Commands {
-    case class FirstOptions(@Name("V") @HelpMessage("A value") value: String = "", @Name("n") other: Int = 0)
-    case class SecondOptions(@Name("g") @HelpMessage("A pattern") glob: String = "", @Name("d") count: Int = 0)
+    case class FirstOptions(
+      @Name("V") @HelpMessage("A value") value: String = "",
+      @Name("n") other: Int = 0
+    )
+    case class SecondOptions(
+      @Name("g") @HelpMessage("A pattern") glob: String = "",
+      @Name("d") count: Int = 0
+    )
     object First extends Command[FirstOptions] {
       def run(options: FirstOptions, args: RemainingArgs): Unit = ???
     }
@@ -67,8 +76,14 @@ object CompletionDefinitions {
   }
 
   object CommandsWithDefault {
-    case class FirstOptions(@Name("V") @HelpMessage("A value") value: String = "", @Name("n") other: Int = 0)
-    case class SecondOptions(@Name("g") @HelpMessage("A pattern") glob: String = "", @Name("d") count: Int = 0)
+    case class FirstOptions(
+      @Name("V") @HelpMessage("A value") value: String = "",
+      @Name("n") other: Int = 0
+    )
+    case class SecondOptions(
+      @Name("g") @HelpMessage("A pattern") glob: String = "",
+      @Name("d") count: Int = 0
+    )
     object First extends Command[FirstOptions] {
       def run(options: FirstOptions, args: RemainingArgs): Unit = ???
     }
@@ -77,7 +92,7 @@ object CompletionDefinitions {
     }
 
     object Prog extends CommandsEntryPoint {
-      def progName = "prog"
+      def progName                = "prog"
       override def defaultCommand = Some(First)
       def commands = Seq(
         First,

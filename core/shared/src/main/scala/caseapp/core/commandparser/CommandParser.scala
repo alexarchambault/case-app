@@ -10,20 +10,23 @@ import shapeless.{CNil, Coproduct}
 import scala.collection.mutable
 import scala.annotation.tailrec
 
-/**
-  * Parses arguments, handling sub-commands.
+/** Parses arguments, handling sub-commands.
   *
-  * @tparam T: result type
+  * @tparam T:
+  *   result type
   */
 @deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
 abstract class CommandParser[T] {
 
-  /**
-    * Check if this [[caseapp.core.commandparser.CommandParser]] accepts a command, and return its [[caseapp.core.parser.Parser]] if it does.
+  /** Check if this [[caseapp.core.commandparser.CommandParser]] accepts a command, and return its
+    * [[caseapp.core.parser.Parser]] if it does.
     *
-    * @param command: command name to check
+    * @param command:
+    *   command name to check
     *
-    * @return in case of success, `Parser[T]` of `command`, wrapped in [[scala.Some]]; [[scala.None]] in case of failure
+    * @return
+    *   in case of success, `Parser[T]` of `command`, wrapped in [[scala.Some]]; [[scala.None]] in
+    *   case of failure
     */
   def get(command: Seq[String]): Option[Parser[T]] =
     commandMap.get(command)
@@ -32,23 +35,25 @@ abstract class CommandParser[T] {
 
   def commandMap: Map[Seq[String], Parser[T]]
 
-  /**
-    * Creates a [[CommandParser]] accepting help / usage arguments, out of this one.
+  /** Creates a [[CommandParser]] accepting help / usage arguments, out of this one.
     */
   final def withHelp: CommandParser[WithHelp[T]] =
     WithHelpCommandParser(this)
 
-  /**
-    * Parse arguments.
+  /** Parse arguments.
     *
     * Arguments before any command are parsed with `beforeCommandParser` as a `D`.
     *
-    * @param args: arguments to parse
-    * @param beforeCommandParser: parser for arguments before a command name
-    * @tparam D: type for arguments before a command name
-    * @return in case of error, an [[caseapp.core.Error]], wrapped in [[scala.Left]]; in case of success, a `D`, the
-    *         non option arguments, wrapped in a [[scala.Right]], along with the result of parsing the specified command
-    *         if any.
+    * @param args:
+    *   arguments to parse
+    * @param beforeCommandParser:
+    *   parser for arguments before a command name
+    * @tparam D:
+    *   type for arguments before a command name
+    * @return
+    *   in case of error, an [[caseapp.core.Error]], wrapped in [[scala.Left]]; in case of success,
+    *   a `D`, the non option arguments, wrapped in a [[scala.Right]], along with the result of
+    *   parsing the specified command if any.
     */
   final def parse[D](
     args: Seq[String]
@@ -57,23 +62,30 @@ abstract class CommandParser[T] {
   ): Either[Error, (D, Seq[String], Option[Either[Error, (Seq[String], T, Seq[String])]])] =
     detailedParse(args).map {
       case (d, args0, cmdOpt) =>
-        (d, args0, cmdOpt.map(_.map {
-          case (cmd, t, rem) =>
-            (cmd, t, rem.all)
-        }))
+        (
+          d,
+          args0,
+          cmdOpt.map(_.map {
+            case (cmd, t, rem) =>
+              (cmd, t, rem.all)
+          })
+        )
     }
 
-  /**
-    * Parse arguments.
+  /** Parse arguments.
     *
     * Like `parse`, but keeps the non option arguments in a [[caseapp.core.RemainingArgs]].
     *
-    * @param args: arguments to parse
-    * @param beforeCommandParser: parser for arguments before a command name
-    * @tparam D: type for arguments before a command name
-    * @return in case of error, an [[caseapp.core.Error]], wrapped in [[scala.Left]]; in case of success, a `D`, the
-    *         non option arguments, wrapped in a [[scala.Right]], along with the result of parsing the specified command
-    *         if any.
+    * @param args:
+    *   arguments to parse
+    * @param beforeCommandParser:
+    *   parser for arguments before a command name
+    * @tparam D:
+    *   type for arguments before a command name
+    * @return
+    *   in case of error, an [[caseapp.core.Error]], wrapped in [[scala.Left]]; in case of success,
+    *   a `D`, the non option arguments, wrapped in a [[scala.Right]], along with the result of
+    *   parsing the specified command if any.
     */
   final def detailedParse[D](
     args: Seq[String]
@@ -96,7 +108,7 @@ abstract class CommandParser[T] {
               case "--" :: t =>
                 beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
               case opt :: rem if opt startsWith "-" =>
-                val err = Error.UnrecognizedArgument(opt)
+                val err                                          = Error.UnrecognizedArgument(opt)
                 val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
               case rem =>
@@ -147,8 +159,7 @@ object CommandParser extends AutoCommandParserImplicits {
 
   def apply[T](implicit parser: CommandParser[T]): CommandParser[T] = parser
 
-  /**
-    * An empty [[CommandParser]].
+  /** An empty [[CommandParser]].
     *
     * Can be made non empty by successively calling `add` on it.
     */
@@ -163,7 +174,10 @@ object CommandParser extends AutoCommandParserImplicits {
     def command(args: Seq[String]): Option[(Seq[String], Parser[T], Seq[String])] =
       command(args, Nil)
 
-    def command(args: Seq[String], reverseName: List[String]): Option[(Seq[String], Parser[T], Seq[String])] = {
+    def command(
+      args: Seq[String],
+      reverseName: List[String]
+    ): Option[(Seq[String], Parser[T], Seq[String])] = {
       assert(args.nonEmpty)
       map.get(args.head) match {
         case None => None
@@ -189,7 +203,8 @@ object CommandParser extends AutoCommandParserImplicits {
         if (command.lengthCompare(1) == 0) {
           val mutable0 = map.get(command.head).map(_._1).getOrElse(Mutable[T]())
           map.put(command.head, (mutable0, Some(parser)))
-        } else {
+        }
+        else {
           val (mutable0, _) = map.getOrElseUpdate(command.head, (Mutable[T](), None))
           mutable0.add(command.tail, parser)
         }

@@ -11,9 +11,8 @@ import shapeless.Typeable
 import caseapp.core.util.Formatter
 import caseapp.HelpMessage
 
-/**
- * Provides usage and help messages related to `T`
- */
+/** Provides usage and help messages related to `T`
+  */
 @data class Help[T](
   args: Seq[Arg] = Nil,
   appName: String = "",
@@ -38,18 +37,15 @@ import caseapp.HelpMessage
   /** Options description for `T` */
   def options: String = Help.optionsMessage(args, nameFormatter, showHidden = false)
 
-  /**
-    * Full multi-line help message for `T`.
+  /** Full multi-line help message for `T`.
     *
     * Includes both `usageMessage` and `optionsMessage`
-    *
     */
   def help: String =
     help(HelpFormat.default(), showHidden = false)
 
-  /**
-   * Add help and usage options.
-   */
+  /** Add help and usage options.
+    */
   def withHelp: Help[WithHelp[T]] = {
     final case class Dummy()
     val helpArgs = Parser[WithHelp[Dummy]].args
@@ -136,41 +132,51 @@ import caseapp.HelpMessage
 
   def printOptions(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (args.nonEmpty) {
-      val groupedArgs = args.groupBy(_.group.fold("")(_.name))
-      val groups = format.sortGroupValues(groupedArgs.toVector)
+      val groupedArgs  = args.groupBy(_.group.fold("")(_.name))
+      val groups       = format.sortGroupValues(groupedArgs.toVector)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
       for {
         ((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex
-        argsAndDescriptions = Table(Help.optionsTable(groupArgs, format, nameFormatter, showHidden).toVector.map(_.toVector))
+        argsAndDescriptions = Table(Help.optionsTable(
+          groupArgs,
+          format,
+          nameFormatter,
+          showHidden
+        ).toVector.map(_.toVector))
         if argsAndDescriptions.lines.nonEmpty
       } {
         if (groupIdx > 0) {
           b.append(format.newLine)
           b.append(format.newLine)
         }
-        if (groupName.isEmpty) {
+        if (groupName.isEmpty)
           if (groups.length > 1)
             b.append("Other options:")
           else
             b.append("Options:")
-        } else {
+        else {
           b.append(groupName)
           b.append(" options:")
         }
         b.append(format.newLine)
-        argsAndDescriptions.render(b, "  ", "  ", format.newLine, argsAndDescriptions.widths.map(_.min(45)).toVector)
+        argsAndDescriptions.render(
+          b,
+          "  ",
+          "  ",
+          format.newLine,
+          argsAndDescriptions.widths.map(_.min(45)).toVector
+        )
       }
     }
 }
 
 object Help {
-  val DefaultOptionsDesc = "[options]"
+  val DefaultOptionsDesc   = "[options]"
   val DefaultNameFormatter = Formatter.DefaultNameFormatter
-  val DefaultHelpMessage = Option.empty[HelpMessage]
+  val DefaultHelpMessage   = Option.empty[HelpMessage]
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
-
 
   /** Option message for `args` */
   def optionsMessage(args: Seq[Arg]): String =
@@ -181,7 +187,6 @@ object Help {
     args
       .collect {
         case arg if showHidden || !arg.noHelp =>
-
           val names = (arg.name +: arg.extraNames).distinct
 
           // FIXME Flags that accept no value are not given the right help message here
@@ -198,19 +203,17 @@ object Help {
       }
       .mkString(Help.NL)
 
-
   // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
 
-  def derive[T]
-   (implicit
-     parser: Parser[T],
-     typeable: Typeable[T],
-     appName: AnnotationOption[AppName, T],
-     appVersion: AnnotationOption[AppVersion, T],
-     progName: AnnotationOption[ProgName, T],
-     argsName: AnnotationOption[ArgsName, T],
-     helpMessage: AnnotationOption[HelpMessage, T],
-   ): Help[T] =
+  def derive[T](implicit
+    parser: Parser[T],
+    typeable: Typeable[T],
+    appName: AnnotationOption[AppName, T],
+    appVersion: AnnotationOption[AppVersion, T],
+    progName: AnnotationOption[ProgName, T],
+    argsName: AnnotationOption[ArgsName, T],
+    helpMessage: AnnotationOption[HelpMessage, T]
+  ): Help[T] =
     help[T](
       parser,
       typeable,
@@ -222,16 +225,15 @@ object Help {
     )
 
   /** Implicitly derives a `Help[T]` for `T` */
-  implicit def help[T]
-   (implicit
-     parser: Parser[T],
-     typeable: Typeable[T],
-     appName: AnnotationOption[AppName, T],
-     appVersion: AnnotationOption[AppVersion, T],
-     progName: AnnotationOption[ProgName, T],
-     argsName: AnnotationOption[ArgsName, T],
-     helpMessage: AnnotationOption[HelpMessage, T],
-   ): Help[T] = {
+  implicit def help[T](implicit
+    parser: Parser[T],
+    typeable: Typeable[T],
+    appName: AnnotationOption[AppName, T],
+    appVersion: AnnotationOption[AppVersion, T],
+    progName: AnnotationOption[ProgName, T],
+    argsName: AnnotationOption[ArgsName, T],
+    helpMessage: AnnotationOption[HelpMessage, T]
+  ): Help[T] = {
 
     val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
 
@@ -239,7 +241,9 @@ object Help {
       parser.args,
       appName0,
       appVersion().fold("")(_.appVersion),
-      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(_.progName),
+      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(
+        _.progName
+      ),
       argsName().map(_.argsName),
       Help.DefaultOptionsDesc,
       parser.defaultNameFormatter,
@@ -252,7 +256,12 @@ object Help {
   val WW = "  "
   val TB = "        "
 
-  private def optionsTable(args: Seq[Arg], format: HelpFormat, nameFormatter: Formatter[Name], showHidden: Boolean): Seq[Seq[fansi.Str]] =
+  private def optionsTable(
+    args: Seq[Arg],
+    format: HelpFormat,
+    nameFormatter: Formatter[Name],
+    showHidden: Boolean
+  ): Seq[Seq[fansi.Str]] =
     for (arg <- args if showHidden || !arg.noHelp) yield {
       val sortedNames = (arg.name +: arg.extraNames)
         .map(name => format.option(name.option(nameFormatter)))
@@ -273,7 +282,9 @@ object Help {
         else options ++ " " ++ arg.valueDescription.fold("value")(_.description)
 
       val desc: fansi.Str =
-        if (arg.noHelp) format.hidden("(hidden)") ++ arg.helpMessage.map(_.message).filter(_.nonEmpty).fold("")(" " + _)
+        if (arg.noHelp)
+          format.hidden("(hidden)") ++
+            arg.helpMessage.map(_.message).filter(_.nonEmpty).fold("")(" " + _)
         else arg.helpMessage.fold("")(_.message)
 
       Seq[fansi.Str](optionsAndValue, desc)
@@ -285,7 +296,12 @@ object Help {
     else
       WordUtils.wrap(input, terminalWidth, Some(newLine), wrapLongWords = true, wrapOn = " ")
 
-  def printDescription(b: StringBuilder, desc: String, newLine: String, terminalWidth: Int): Unit = {
+  def printDescription(
+    b: StringBuilder,
+    desc: String,
+    newLine: String,
+    terminalWidth: Int
+  ): Unit = {
     val wrappedDesc = reflowed(desc, newLine, terminalWidth)
     b.append(wrappedDesc)
     if (!wrappedDesc.endsWith(newLine))

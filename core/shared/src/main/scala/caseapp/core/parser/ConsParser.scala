@@ -19,9 +19,9 @@ import caseapp.Name
     argument.init :: tail.init
 
   def step(
-      args: List[String],
-      d: Option[H] :*: tail.D,
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: Option[H] :*: tail.D,
+    nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     argument.step(args, d.head, nameFormatter) match {
       case Left((err, rem)) => Left((err, argument.arg, rem))
@@ -42,9 +42,9 @@ import caseapp.Name
 
     (maybeHead, maybeTail) match {
       case (Left(headErr), Left(tailErrs)) => Left(headErr.append(tailErrs))
-      case (Left(headErr), _) => Left(headErr)
-      case (_, Left(tailErrs)) => Left(tailErrs)
-      case (Right(h), Right(t)) => Right(h :: t)
+      case (Left(headErr), _)              => Left(headErr)
+      case (_, Left(tailErrs))             => Left(tailErrs)
+      case (Right(h), Right(t))            => Right(h :: t)
     }
   }
 

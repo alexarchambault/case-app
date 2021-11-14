@@ -16,19 +16,19 @@ object Zsh {
     s"$shellName-v1"
 
   def script(progName: String): String =
-   s"""#compdef _$progName $progName
-      |typeset -A opt_args
-      |
-      |function _$progName {
-      |  eval "$$($progName complete $id $$CURRENT $$words[@])"
-      |}
-      |""".stripMargin
+    s"""#compdef _$progName $progName
+       |typeset -A opt_args
+       |
+       |function _$progName {
+       |  eval "$$($progName complete $id $$CURRENT $$words[@])"
+       |}
+       |""".stripMargin
 
   private def md5(content: Iterator[String]): String = {
     val md = MessageDigest.getInstance("MD5")
     for (s <- content) md.update(s.getBytes(StandardCharsets.UTF_8))
     val digest = md.digest()
-    val res = new BigInteger(1, digest).toString(16)
+    val res    = new BigInteger(1, digest).toString(16)
     if (res.length < 32)
       ("0" * (32 - res.length)) + res
     else
@@ -41,7 +41,7 @@ object Zsh {
       if (options.isEmpty) Nil
       else {
         val escapedOptions = options
-        val desc = item.description.map(":" + _.replace("'", "\\'")).getOrElse("")
+        val desc           = item.description.map(":" + _.replace("'", "\\'")).getOrElse("")
         options.map { opt =>
           "\"" + opt + desc + "\""
         }

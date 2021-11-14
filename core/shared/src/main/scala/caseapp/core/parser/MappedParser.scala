@@ -13,9 +13,9 @@ import caseapp.Name
     underlying.init
 
   def step(
-      args: List[String],
-      d: D,
-      nameFormatter: Formatter[Name]
+    args: List[String],
+    d: D,
+    nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     underlying.step(args, d, nameFormatter)
 

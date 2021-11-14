@@ -3,7 +3,7 @@ package caseapp
 object HelpDefinitions {
   case class FirstOptions(
     @ExtraName("f")
-      foo: String = "",
+    foo: String = "",
     bar: Int = 0
   )
 
@@ -30,56 +30,56 @@ object HelpDefinitions {
   @HelpMessage("Example help message")
   final case class GroupedOptions(
     @Group("Something")
-      foo: String,
+    foo: String,
     @Group("Bb")
-      bar: Int,
+    bar: Int,
     @Group("Something")
-      other: Double,
+    other: Double,
     @Group("Bb")
-      something: Boolean
+    something: Boolean
   )
 
   @HelpMessage("Example help message")
   final case class HiddenGroupOptions(
     @Group("Something")
-      foo: String,
+    foo: String,
     @Group("Bb")
     @Hidden
-      bar: Int,
+    bar: Int,
     @Group("Something")
-      other: Double,
+    other: Double,
     @Group("Bb")
     @Hidden
-      something: Boolean
+    something: Boolean
   )
 
   object CommandGroups {
     object First extends Command[FirstOptions] {
-      override def group = "Aa"
+      override def group                                  = "Aa"
       def run(options: FirstOptions, args: RemainingArgs) = ???
     }
     object Second extends Command[SecondOptions] {
-      override def group = "Bb"
+      override def group                                   = "Bb"
       def run(options: SecondOptions, args: RemainingArgs) = ???
     }
     object Third extends Command[ThirdOptions] {
-      override def group = "Aa"
+      override def group                                  = "Aa"
       def run(options: ThirdOptions, args: RemainingArgs) = ???
     }
   }
 
   object HiddenCommands {
     object First extends Command[FirstOptions] {
-      override def group = "Aa"
-      override def hidden = true
+      override def group                                  = "Aa"
+      override def hidden                                 = true
       def run(options: FirstOptions, args: RemainingArgs) = ???
     }
     object Second extends Command[SecondOptions] {
-      override def group = "Bb"
+      override def group                                   = "Bb"
       def run(options: SecondOptions, args: RemainingArgs) = ???
     }
     object Third extends Command[ThirdOptions] {
-      override def group = "Aa"
+      override def group                                  = "Aa"
       def run(options: ThirdOptions, args: RemainingArgs) = ???
     }
   }

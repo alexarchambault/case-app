@@ -27,8 +27,7 @@ object FlagArgParser {
   def from[T](description: String)(parse: Option[String] => Either[Error, T]): FlagArgParser[T] =
     FlagArgParser(description, parse)
 
-
-  private val trues = Set("true", "1")
+  private val trues  = Set("true", "1")
   private val falses = Set("false", "0")
 
   val unit: FlagArgParser[Unit] =

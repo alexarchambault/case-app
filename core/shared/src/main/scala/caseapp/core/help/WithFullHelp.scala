@@ -5,11 +5,11 @@ import caseapp.{ExtraName, Group, HelpMessage, Recurse}
 
 final case class WithFullHelp[T](
   @Recurse
-    withHelp: WithHelp[T],
+  withHelp: WithHelp[T],
   @Group("Help")
   @HelpMessage("Print help message, including hidden options, and exit")
   @ExtraName("fullHelp")
-    helpFull: Boolean = false
+  helpFull: Boolean = false
 ) {
   def map[U](f: T => U): WithFullHelp[U] =
     copy(withHelp = withHelp.map(f))
