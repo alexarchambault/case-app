@@ -17,8 +17,10 @@ object ValueDescription {
 }
 
 /** Help message for the annotated argument
+  * @messageMd
+  *   not used by case-app itself, only there as a convenience for case-app users
   */
-final case class HelpMessage(message: String) extends StaticAnnotation
+final case class HelpMessage(message: String, messageMd: String = "") extends StaticAnnotation
 
 /** Name for the annotated case class of arguments E.g. MyApp
   */

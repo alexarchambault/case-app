@@ -34,14 +34,15 @@ object Zsh {
     else
       res
   }
-
+  private def escape(s: String): String =
+    s.replace("'", "\\'").replace("`", "\\`").linesIterator.toStream.headOption.getOrElse("")
   private def defs(item: CompletionItem): Seq[String] = {
     val (options, arguments) = item.values.partition(_.startsWith("-"))
     val optionsOutput =
       if (options.isEmpty) Nil
       else {
         val escapedOptions = options
-        val desc           = item.description.map(":" + _.replace("'", "\\'")).getOrElse("")
+        val desc           = item.description.map(desc => ":" + escape(desc)).getOrElse("")
         options.map { opt =>
           "\"" + opt + desc + "\""
         }
@@ -49,7 +50,7 @@ object Zsh {
     val argumentsOutput =
       if (arguments.isEmpty) Nil
       else {
-        val desc = item.description.map(":" + _.replace("'", "\\'")).getOrElse("")
+        val desc = item.description.map(desc => ":" + escape(desc)).getOrElse("")
         arguments.map("'" + _.replace(":", "\\:") + desc + "'")
       }
     optionsOutput ++ argumentsOutput
