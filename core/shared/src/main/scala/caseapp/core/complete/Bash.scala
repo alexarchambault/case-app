@@ -19,7 +19,7 @@ object Bash {
   }
 
   private def escape(s: String): String =
-    s.replace("\"", "\\\"")
+    s.replace("\"", "\\\"").replace("`", "\\`").linesIterator.toStream.headOption.getOrElse("")
   def print(items: Seq[CompletionItem]): String = {
     val newLine     = System.lineSeparator()
     val b           = new StringBuilder

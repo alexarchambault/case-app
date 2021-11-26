@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.complete.CompletionItem
+import caseapp.core.complete.{Bash, CompletionItem, Zsh}
 import utest._
 
 object CompletionTests extends TestSuite {
@@ -110,6 +110,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq(""), 0)
         val expected = List(
+          CompletionItem("back-tick", None, Nil),
           CompletionItem("first", None, Nil),
           CompletionItem("second", None, Nil)
         )
@@ -139,6 +140,33 @@ object CompletionTests extends TestSuite {
           CompletionItem("--count", None, List("-d"))
         )
         assert(res == expected)
+      }
+
+      test("bash") {
+        val res = Prog.complete(Seq("back-tick", "-"), 1)
+        val expected = List(
+          CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
+          CompletionItem("--count", None, List("-d"))
+        )
+        assert(res == expected)
+
+        val compRely         = Bash.print(res)
+        val expectedCompRely = """"--backtick  -- A pattern with backtick \`--\`"""".stripMargin
+
+        assert(compRely.contains(expectedCompRely))
+      }
+      test("zsh") {
+        val res = Prog.complete(Seq("back-tick", "-"), 1)
+        val expected = List(
+          CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
+          CompletionItem("--count", None, List("-d"))
+        )
+        assert(res == expected)
+
+        val compRely         = Zsh.print(res)
+        val expectedCompRely = """"--backtick:A pattern with backtick \`--\`"""".stripMargin
+
+        assert(compRely.contains(expectedCompRely))
       }
     }
 

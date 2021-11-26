@@ -8,7 +8,7 @@ import scala.sys.process._
 object Mima {
 
   def binaryCompatibilityVersions: Set[String] =
-    Seq("git", "tag", "--merged", "HEAD^", "--contains", "706a1d90cca205b69e4cff583abb9411526e7d58")
+    Seq("git", "tag", "--merged", "HEAD^", "--contains", "c8abc969f219357022ea8cf816b4e7653833c620")
       .!!
       .linesIterator
       .map(_.trim)

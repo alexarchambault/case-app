@@ -59,18 +59,29 @@ object CompletionDefinitions {
       @Name("g") @HelpMessage("A pattern") glob: String = "",
       @Name("d") count: Int = 0
     )
+    case class BackTickOptions(
+      @HelpMessage(
+        """A pattern with backtick `--`
+          |with multiline""".stripMargin
+      ) backtick: String = "",
+      @Name("d") count: Int = 0
+    )
     object First extends Command[FirstOptions] {
       def run(options: FirstOptions, args: RemainingArgs): Unit = ???
     }
     object Second extends Command[SecondOptions] {
       def run(options: SecondOptions, args: RemainingArgs): Unit = ???
     }
+    object BackTick extends Command[BackTickOptions] {
+      def run(options: BackTickOptions, args: RemainingArgs): Unit = ???
+    }
 
     object Prog extends CommandsEntryPoint {
       def progName = "prog"
       def commands = Seq(
         First,
-        Second
+        Second,
+        BackTick
       )
     }
   }
