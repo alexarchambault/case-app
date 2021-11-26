@@ -1,12 +1,6 @@
 package caseapp.core.complete
 
-import java.math.BigInteger
-import java.nio.charset.StandardCharsets
-import java.security.MessageDigest
-
-import dataclass.data
-
-import scala.collection.mutable
+import scala.util.hashing.MurmurHash3
 
 object Zsh {
 
@@ -24,15 +18,10 @@ object Zsh {
        |}
        |""".stripMargin
 
-  private def md5(content: Iterator[String]): String = {
-    val md = MessageDigest.getInstance("MD5")
-    for (s <- content) md.update(s.getBytes(StandardCharsets.UTF_8))
-    val digest = md.digest()
-    val res    = new BigInteger(1, digest).toString(16)
-    if (res.length < 32)
-      ("0" * (32 - res.length)) + res
-    else
-      res
+  private def hash(content: Iterator[String]): String = {
+    val hash = MurmurHash3.arrayHash(content.toArray)
+    if (hash < 0) (hash * -1).toString
+    else hash.toString
   }
   private def escape(s: String): String =
     s.replace("'", "\\'").replace("`", "\\`").linesIterator.toStream.headOption.getOrElse("")
@@ -59,7 +48,7 @@ object Zsh {
   private def render(commands: Seq[String]): String =
     if (commands.isEmpty) "_files" + System.lineSeparator()
     else {
-      val id = md5(commands.iterator)
+      val id = hash(commands.iterator)
       s"""local -a args$id
          |args$id=(
          |${commands.mkString(System.lineSeparator())}
