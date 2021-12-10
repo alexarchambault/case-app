@@ -1,7 +1,7 @@
 package caseapp.core.commandparser
 
 import scala.language.implicitConversions
-import caseapp.core.Error
+import caseapp.core.{Error, Indexed}
 import caseapp.core.help.WithHelp
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
@@ -101,19 +101,25 @@ abstract class CommandParser[T] {
       if (args.isEmpty)
         beforeCommandParser
           .get(current)
-          .map((_, RemainingArgs(Nil, args)))
+          .map((_, RemainingArgs(Nil, Nil)))
       else
         beforeCommandParser.step(args, index, current) match {
           case Right(None) =>
             args match {
               case "--" :: t =>
-                beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
+                beforeCommandParser.get(current).map((
+                  _,
+                  RemainingArgs(Indexed.seq(t, index + 1), Nil)
+                ))
               case opt :: rem if opt startsWith "-" =>
                 val err                                          = Error.UnrecognizedArgument(opt)
                 val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem, index)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
               case rem =>
-                beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
+                beforeCommandParser.get(current).map((
+                  _,
+                  RemainingArgs(Nil, Indexed.seq(rem, index))
+                ))
             }
 
           case Right(Some((newD, _, newArgs))) =>

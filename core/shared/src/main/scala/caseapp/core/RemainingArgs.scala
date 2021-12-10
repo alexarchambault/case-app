@@ -10,9 +10,12 @@ import dataclass.data
   *   arguments after a first `--`, if any
   */
 @data class RemainingArgs(
-  remaining: Seq[String],
-  unparsed: Seq[String]
+  indexedRemaining: Seq[Indexed[String]],
+  indexedUnparsed: Seq[Indexed[String]]
 ) {
+
+  def remaining: Seq[String] = indexedRemaining.map(_.value)
+  def unparsed: Seq[String]  = indexedUnparsed.map(_.value)
 
   /** Arguments both before and after a `--`.
     *

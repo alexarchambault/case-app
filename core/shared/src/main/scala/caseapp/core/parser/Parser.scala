@@ -1,7 +1,7 @@
 package caseapp.core.parser
 
 import scala.language.implicitConversions
-import caseapp.core.{Arg, Error}
+import caseapp.core.{Arg, Error, Indexed}
 import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
@@ -160,7 +160,7 @@ abstract class Parser[T] {
     def runHelper(
       current: D,
       args: List[String],
-      extraArgsReverse: List[String],
+      extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
     ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
@@ -170,7 +170,7 @@ abstract class Parser[T] {
     def helper(
       current: D,
       args: List[String],
-      extraArgsReverse: List[String],
+      extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
     ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
@@ -188,9 +188,9 @@ abstract class Parser[T] {
           .map { t =>
             if (stopAtFirstUnrecognized)
               // extraArgsReverse should be empty anyway here
-              (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
+              (t, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil))
             else
-              (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
+              (t, RemainingArgs(extraArgsReverse.reverse, Indexed.seq(tailArgs, index + 1)))
           }
         val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
         (res, reverseSteps0.reverse)
@@ -201,7 +201,7 @@ abstract class Parser[T] {
           val res = get(current)
             .left.map((_, Left(current)))
             // extraArgsReverse should be empty anyway here
-            .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+            .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
           val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
           (res, reverseSteps0.reverse)
         }
@@ -225,7 +225,7 @@ abstract class Parser[T] {
         val res = get(current)
           .left.map((_, Left(current)))
           // extraArgsReverse should be empty anyway here
-          .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+          .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
         val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
         (res, reverseSteps0.reverse)
       }
@@ -242,7 +242,7 @@ abstract class Parser[T] {
                   helper(
                     current,
                     tailArgs,
-                    headArg :: extraArgsReverse,
+                    Indexed(index, 1, headArg) :: extraArgsReverse,
                     Step.IgnoredUnrecognized(index) :: reverseSteps,
                     index + 1
                   )
@@ -254,7 +254,7 @@ abstract class Parser[T] {
                 helper(
                   current,
                   tailArgs,
-                  headArg :: extraArgsReverse,
+                  Indexed(index, 1, headArg) :: extraArgsReverse,
                   Step.StandardArgument(index) :: reverseSteps,
                   index + 1
                 )

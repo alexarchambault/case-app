@@ -13,6 +13,18 @@ object Indexed {
   def apply[T](value: T): Indexed[T] =
     Indexed(-1, 0, value)
 
+  def list[T](seq: List[T], startIdx: Int): List[Indexed[T]] =
+    seq.zipWithIndex.map {
+      case (elem, idx) =>
+        Indexed(startIdx + idx, 1, elem)
+    }
+
+  def seq[T](seq: Seq[T], startIdx: Int): Seq[Indexed[T]] =
+    seq.zipWithIndex.map {
+      case (elem, idx) =>
+        Indexed(startIdx + idx, 1, elem)
+    }
+
   implicit def argParser[T: ArgParser]: ArgParser[Indexed[T]] =
     new ArgParser[Indexed[T]] {
       private val underlying = ArgParser[T]
