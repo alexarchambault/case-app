@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.{Arg, Error}
+import caseapp.core.{Arg, Error, Indexed}
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.parser.ParserOps
 import caseapp.core.util.Formatter
@@ -120,6 +120,66 @@ object ParserTests extends TestSuite {
       val res      = parser.to[Helper].parse(Seq("-n", "2", "-Xa", "foo", "-Xb"))
       val expected = Right((Helper(2, List("-Xa", "-Xb")), List("foo")))
       assert(res == expected)
+    }
+
+    test("Indexed") {
+      import Definitions.{FewArgsWithIndexed, WithIndexed}
+      val parser = Parser[WithIndexed]
+      test {
+        val res = parser.parse(Seq("--aa", "foo"))
+        val expected = Right((
+          WithIndexed(aa = Some(Indexed(0, 1, true))),
+          Seq("foo")
+        ))
+        assert(res == expected)
+      }
+      test {
+        val res = parser.parse(Seq("foo", "--aa"))
+        val expected = Right((
+          WithIndexed(aa = Some(Indexed(1, 1, true))),
+          Seq("foo")
+        ))
+        assert(res == expected)
+      }
+      test {
+        val res = parser.parse(Seq("foo", "--aa", "--value", "foo"))
+        val expected = Right((
+          WithIndexed(
+            aa = Some(Indexed(1, 1, true)),
+            few = FewArgsWithIndexed(
+              value = Indexed(2, 2, "foo")
+            )
+          ),
+          Seq("foo")
+        ))
+        assert(res == expected)
+      }
+      test {
+        val res = parser.parse(Seq("foo", "--num-foo=2", "--value", "foo"))
+        val expected = Right((
+          WithIndexed(
+            few = FewArgsWithIndexed(
+              numFoo = Indexed(1, 1, 2),
+              value = Indexed(2, 2, "foo")
+            )
+          ),
+          Seq("foo")
+        ))
+        assert(res == expected)
+      }
+      test {
+        val res = parser.parse(Seq("--elem=a", "--elem", "b"))
+        val expected = Right((
+          WithIndexed(
+            elem = List(
+              Indexed(0, 1, "a"),
+              Indexed(1, 2, "b")
+            )
+          ),
+          Nil
+        ))
+        assert(res == expected)
+      }
     }
   }
 }
