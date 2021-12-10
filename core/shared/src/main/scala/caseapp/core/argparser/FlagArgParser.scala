@@ -5,17 +5,22 @@ import dataclass.data
 
 @data class FlagArgParser[T](
   description: String,
-  parse: Option[String] => Either[Error, T]
+  parse: (Option[String], Int, Int) => Either[Error, T]
 ) extends ArgParser[T] {
 
-  def apply(current: Option[T], value: String): Either[Error, T] =
-    parse(Some(value))
+  def apply(current: Option[T], index: Int, span: Int, value: String): Either[Error, T] =
+    parse(Some(value), index, span)
 
-  override def optional(current: Option[T], value: String): (Consumed, Either[Error, T]) =
-    (Consumed(false), parse(None))
+  override def optional(
+    current: Option[T],
+    index: Int,
+    span: Int,
+    value: String
+  ): (Consumed, Either[Error, T]) =
+    (Consumed(false), parse(None, index, span))
 
-  override def apply(current: Option[T]): Either[Error, T] =
-    parse(None)
+  override def apply(current: Option[T], index: Int): Either[Error, T] =
+    parse(None, index, 1)
 
   override def isFlag: Boolean =
     true
@@ -25,7 +30,7 @@ import dataclass.data
 object FlagArgParser {
 
   def from[T](description: String)(parse: Option[String] => Either[Error, T]): FlagArgParser[T] =
-    FlagArgParser(description, parse)
+    FlagArgParser(description, (valueOpt, _, _) => parse(valueOpt))
 
   private val trues  = Set("true", "1")
   private val falses = Set("false", "0")

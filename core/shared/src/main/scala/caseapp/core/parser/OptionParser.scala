@@ -14,10 +14,11 @@ import caseapp.Name
 
   def step(
     args: List[String],
+    index: Int,
     d: D,
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
-    underlying.step(args, d, nameFormatter)
+    underlying.step(args, index, d, nameFormatter)
 
   def get(d: D, nameFormatter: Formatter[Name]): Right[Error, Option[T]] =
     Right(underlying.get(d, nameFormatter).toOption)

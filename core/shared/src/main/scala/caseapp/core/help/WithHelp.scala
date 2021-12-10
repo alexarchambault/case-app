@@ -66,12 +66,13 @@ object WithHelp {
         def init = baseHelpArgument.init
         def step(
           args: List[String],
+          index: Int,
           d: Option[Boolean],
           nameFormatter: Formatter[ExtraName]
         ): Either[(Error, List[String]), Option[(Option[Boolean], List[String])]] =
           args match {
             case "-help" :: rem => Right(Some((Some(true), rem)))
-            case _              => baseHelpArgument.step(args, d, nameFormatter)
+            case _              => baseHelpArgument.step(args, index, d, nameFormatter)
           }
         def get(d: Option[Boolean], nameFormatter: Formatter[ExtraName]) =
           baseHelpArgument.get(d, nameFormatter)

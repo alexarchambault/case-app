@@ -22,7 +22,7 @@ abstract class ArgParser[T] {
     *   in case of success, a `T`, wrapped in [[scala.Right]]; else, and error message, wrapped in
     *   [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def apply(current: Option[T], value: String): Either[Error, T]
+  def apply(current: Option[T], index: Int, span: Int, value: String): Either[Error, T]
 
   /** Parses a value.
     *
@@ -39,10 +39,15 @@ abstract class ArgParser[T] {
     *   in case of success, whether `value` was consumed and a `T`, wrapped in [[scala.Right]];
     *   else, and error message, wrapped in [[caseapp.core.Error]] and [[scala.Left]]
     */
-  def optional(current: Option[T], value: String): (Consumed, Either[Error, T]) =
-    (Consumed(true), apply(current, value))
+  def optional(
+    current: Option[T],
+    index: Int,
+    span: Int,
+    value: String
+  ): (Consumed, Either[Error, T]) =
+    (Consumed(true), apply(current, index, span, value))
 
-  /** Called when the corresponding argument was specific with no value.
+  /** Called when the corresponding argument was specified with no value.
     *
     * Can happen if the option was enabled as very last argument, like `--bar` in `--foo 1 other
     * --bar`.
@@ -53,7 +58,7 @@ abstract class ArgParser[T] {
     *   a `T` wrapped in [[scala.Right]] in case of success, or an error message wrapped in
     *   [[caseapp.core.Error]] and [[scala.Left]] else
     */
-  def apply(current: Option[T]): Either[Error, T] =
+  def apply(current: Option[T], index: Int): Either[Error, T] =
     Left(Error.ArgumentMissing)
 
   /** Whether the parsed value corresponds to a flag.

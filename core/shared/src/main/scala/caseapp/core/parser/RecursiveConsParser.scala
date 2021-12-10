@@ -18,15 +18,16 @@ import dataclass.data
 
   def step(
     args: List[String],
+    index: Int,
     d: D,
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
-      .step(args, d.head, nameFormatter)
+      .step(args, index, d.head, nameFormatter)
       .flatMap {
         case None =>
           tailParser
-            .step(args, d.tail, nameFormatter)
+            .step(args, index, d.tail, nameFormatter)
             .map(_.map {
               case (t, arg, args) => (d.head :: t, arg, args)
             })

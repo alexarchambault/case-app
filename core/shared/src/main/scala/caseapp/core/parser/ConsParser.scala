@@ -20,16 +20,17 @@ import caseapp.Name
 
   def step(
     args: List[String],
+    index: Int,
     d: Option[H] :*: tail.D,
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
-    argument.step(args, d.head, nameFormatter) match {
+    argument.step(args, index, d.head, nameFormatter) match {
       case Left((err, rem)) => Left((err, argument.arg, rem))
       case Right(Some((dHead, rem))) =>
         Right(Some((dHead :: d.tail, argument.arg, rem)))
       case Right(None) =>
         tail
-          .step(args, d.tail, nameFormatter)
+          .step(args, index, d.tail, nameFormatter)
           .map(_.map {
             case (t, arg, args) => (d.head :: t, arg, args)
           })

@@ -95,21 +95,22 @@ abstract class CommandParser[T] {
 
     def helper(
       current: beforeCommandParser.D,
-      args: List[String]
+      args: List[String],
+      index: Int
     ): Either[Error, (D, RemainingArgs)] =
       if (args.isEmpty)
         beforeCommandParser
           .get(current)
           .map((_, RemainingArgs(Nil, args)))
       else
-        beforeCommandParser.step(args, current) match {
+        beforeCommandParser.step(args, index, current) match {
           case Right(None) =>
             args match {
               case "--" :: t =>
                 beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
               case opt :: rem if opt startsWith "-" =>
                 val err                                          = Error.UnrecognizedArgument(opt)
-                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
+                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem, index)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
               case rem =>
                 beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
@@ -117,14 +118,16 @@ abstract class CommandParser[T] {
 
           case Right(Some((newD, _, newArgs))) =>
             assert(newArgs != args)
-            helper(newD, newArgs)
+            val consumed = Parser.consumed(args, newArgs)
+            assert(consumed > 0)
+            helper(newD, newArgs, index + consumed)
 
           case Left((msg, _, rem)) =>
-            val remaining = helper(current, rem)
+            val remaining = helper(current, rem, index)
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
         }
 
-    helper(beforeCommandParser.init, args.toList).map {
+    helper(beforeCommandParser.init, args.toList, 0).map {
       case (d, dArgs) =>
         val args0 = dArgs.unparsed.toList
 

@@ -94,6 +94,7 @@ object ParserTests extends TestSuite {
         def init: Option[List[String]]                                = Some(Nil)
         def step(
           args: List[String],
+          index: Int,
           d: Option[List[String]],
           nameFormatter: Formatter[Name]
         ): Either[(Error, List[String]), Option[(Option[List[String]], List[String])]] =
