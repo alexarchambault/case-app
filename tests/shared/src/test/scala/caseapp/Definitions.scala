@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.Error
+import caseapp.core.{Error, Indexed}
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 
 object Definitions {
@@ -159,5 +159,16 @@ object Definitions {
   object DefaultsThrow {
     final class DefaultCalled(varName: String) extends Exception(s"$varName default called")
   }
+
+  final case class FewArgsWithIndexed(
+    value: Indexed[String] = Indexed("default"),
+    numFoo: Indexed[Int] = Indexed(-10)
+  )
+
+  final case class WithIndexed(
+    @Recurse few: FewArgsWithIndexed = FewArgsWithIndexed(),
+    aa: Option[Indexed[Boolean]] = None,
+    elem: List[Indexed[String]] = Nil
+  )
 
 }

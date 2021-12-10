@@ -5,13 +5,13 @@ import dataclass.data
 
 @data class SimpleArgParser[T](
   description: String,
-  parse: String => Either[Error, T]
+  parse: (String, Int, Int) => Either[Error, T]
 ) extends ArgParser[T] {
 
-  def apply(current: Option[T], value: String): Either[Error, T] =
+  def apply(current: Option[T], index: Int, span: Int, value: String): Either[Error, T] =
     current match {
       case None =>
-        parse(value)
+        parse(value, index, span)
       case Some(_) =>
         Left(Error.ArgumentAlreadySpecified("???"))
     }
@@ -21,7 +21,7 @@ import dataclass.data
 object SimpleArgParser {
 
   def from[T](description: String)(parse: String => Either[Error, T]): SimpleArgParser[T] =
-    SimpleArgParser(description, parse)
+    SimpleArgParser(description, (value, _, _) => parse(value))
 
   val int: SimpleArgParser[Int] =
     from("int") { s =>

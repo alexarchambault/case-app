@@ -1,7 +1,7 @@
 package caseapp.core.commandparser
 
 import scala.language.implicitConversions
-import caseapp.core.Error
+import caseapp.core.{Error, Indexed}
 import caseapp.core.help.WithHelp
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
@@ -95,36 +95,45 @@ abstract class CommandParser[T] {
 
     def helper(
       current: beforeCommandParser.D,
-      args: List[String]
+      args: List[String],
+      index: Int
     ): Either[Error, (D, RemainingArgs)] =
       if (args.isEmpty)
         beforeCommandParser
           .get(current)
-          .map((_, RemainingArgs(Nil, args)))
+          .map((_, RemainingArgs(Nil, Nil)))
       else
-        beforeCommandParser.step(args, current) match {
+        beforeCommandParser.step(args, index, current) match {
           case Right(None) =>
             args match {
               case "--" :: t =>
-                beforeCommandParser.get(current).map((_, RemainingArgs(t, Nil)))
+                beforeCommandParser.get(current).map((
+                  _,
+                  RemainingArgs(Indexed.seq(t, index + 1), Nil)
+                ))
               case opt :: rem if opt startsWith "-" =>
                 val err                                          = Error.UnrecognizedArgument(opt)
-                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem)
+                val remaining: Either[Error, (D, RemainingArgs)] = helper(current, rem, index)
                 Left(remaining.fold(errs => err.append(errs), _ => err))
               case rem =>
-                beforeCommandParser.get(current).map((_, RemainingArgs(Nil, rem)))
+                beforeCommandParser.get(current).map((
+                  _,
+                  RemainingArgs(Nil, Indexed.seq(rem, index))
+                ))
             }
 
           case Right(Some((newD, _, newArgs))) =>
             assert(newArgs != args)
-            helper(newD, newArgs)
+            val consumed = Parser.consumed(args, newArgs)
+            assert(consumed > 0)
+            helper(newD, newArgs, index + consumed)
 
           case Left((msg, _, rem)) =>
-            val remaining = helper(current, rem)
+            val remaining = helper(current, rem, index)
             Left(remaining.fold(errs => msg.append(errs), _ => msg))
         }
 
-    helper(beforeCommandParser.init, args.toList).map {
+    helper(beforeCommandParser.init, args.toList, 0).map {
       case (d, dArgs) =>
         val args0 = dArgs.unparsed.toList
 

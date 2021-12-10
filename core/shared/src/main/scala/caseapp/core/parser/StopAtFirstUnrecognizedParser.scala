@@ -10,10 +10,11 @@ import caseapp.Name
   def init: D = underlying.init
   def step(
     args: List[String],
+    index: Int,
     d: D,
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
-    underlying.step(args, d, nameFormatter)
+    underlying.step(args, index, d, nameFormatter)
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T] =
     underlying.get(d, nameFormatter)
   def args: Seq[Arg] =

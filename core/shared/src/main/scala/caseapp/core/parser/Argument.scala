@@ -11,6 +11,7 @@ trait Argument[H] {
   def init: Option[H]
   def step(
     args: List[String],
+    index: Int,
     d: Option[H],
     nameFormatter: Formatter[Name]
   ): Either[(Error, List[String]), Option[(Option[H], List[String])]]

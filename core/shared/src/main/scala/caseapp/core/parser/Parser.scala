@@ -1,7 +1,7 @@
 package caseapp.core.parser
 
 import scala.language.implicitConversions
-import caseapp.core.{Arg, Error}
+import caseapp.core.{Arg, Error, Indexed}
 import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.RemainingArgs
 import shapeless.{HList, HNil}
@@ -34,9 +34,10 @@ abstract class Parser[T] {
 
   def step(
     args: List[String],
+    index: Int,
     d: D
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
-    step(args, d, defaultNameFormatter)
+    step(args, index, d, defaultNameFormatter)
 
   /** Process the next argument.
     *
@@ -61,6 +62,7 @@ abstract class Parser[T] {
     */
   def step(
     args: List[String],
+    index: Int,
     d: D,
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]]
@@ -155,18 +157,10 @@ abstract class Parser[T] {
     ignoreUnrecognized: Boolean
   ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
 
-    def consumed(initial: List[String], updated: List[String]): Int =
-      initial match {
-        case _ :: tail if tail eq updated      => 1
-        case _ :: _ :: tail if tail eq updated => 2
-        case _ =>
-          initial.length - updated.length // kind of meh, might make parsing O(args.length^2)
-      }
-
     def runHelper(
       current: D,
       args: List[String],
-      extraArgsReverse: List[String],
+      extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
     ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
@@ -176,7 +170,7 @@ abstract class Parser[T] {
     def helper(
       current: D,
       args: List[String],
-      extraArgsReverse: List[String],
+      extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
     ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
@@ -194,9 +188,9 @@ abstract class Parser[T] {
           .map { t =>
             if (stopAtFirstUnrecognized)
               // extraArgsReverse should be empty anyway here
-              (t, RemainingArgs(extraArgsReverse.reverse ::: args, Nil))
+              (t, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil))
             else
-              (t, RemainingArgs(extraArgsReverse.reverse, tailArgs))
+              (t, RemainingArgs(extraArgsReverse.reverse, Indexed.seq(tailArgs, index + 1)))
           }
         val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
         (res, reverseSteps0.reverse)
@@ -207,7 +201,7 @@ abstract class Parser[T] {
           val res = get(current)
             .left.map((_, Left(current)))
             // extraArgsReverse should be empty anyway here
-            .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+            .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
           val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
           (res, reverseSteps0.reverse)
         }
@@ -231,7 +225,7 @@ abstract class Parser[T] {
         val res = get(current)
           .left.map((_, Left(current)))
           // extraArgsReverse should be empty anyway here
-          .map((_, RemainingArgs(extraArgsReverse.reverse ::: args, Nil)))
+          .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
         val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
         (res, reverseSteps0.reverse)
       }
@@ -239,7 +233,7 @@ abstract class Parser[T] {
       args match {
         case Nil => done
         case headArg :: tailArgs =>
-          step(args, current) match {
+          step(args, index, current) match {
             case Right(None) =>
               if (headArg == "--")
                 stopParsing(tailArgs)
@@ -248,7 +242,7 @@ abstract class Parser[T] {
                   helper(
                     current,
                     tailArgs,
-                    headArg :: extraArgsReverse,
+                    Indexed(index, 1, headArg) :: extraArgsReverse,
                     Step.IgnoredUnrecognized(index) :: reverseSteps,
                     index + 1
                   )
@@ -260,7 +254,7 @@ abstract class Parser[T] {
                 helper(
                   current,
                   tailArgs,
-                  headArg :: extraArgsReverse,
+                  Indexed(index, 1, headArg) :: extraArgsReverse,
                   Step.StandardArgument(index) :: reverseSteps,
                   index + 1
                 )
@@ -271,7 +265,7 @@ abstract class Parser[T] {
                 s"From $args, an ArgParser is supposed to have consumed arguments, but returned the same argument list"
               )
 
-              val consumed0 = consumed(args, newArgs)
+              val consumed0 = Parser.consumed(args, newArgs)
               assert(consumed0 > 0)
 
               helper(
@@ -283,7 +277,7 @@ abstract class Parser[T] {
               )
 
             case Left((msg, matchedArg, rem)) =>
-              val consumed0 = consumed(args, rem)
+              val consumed0 = Parser.consumed(args, rem)
               assert(consumed0 > 0)
               val (remaining, steps) = runHelper(
                 current,
@@ -438,4 +432,13 @@ object Parser extends LowPriorityParserImplicits {
     final case class MatchedOption(index: Int, consumed: Int, arg: Arg)          extends Step
     final case class ErroredOption(index: Int, consumed: Int, arg: Arg, error: Error) extends Step
   }
+
+  def consumed(initial: List[String], updated: List[String]): Int =
+    initial match {
+      case _ :: tail if tail eq updated      => 1
+      case _ :: _ :: tail if tail eq updated => 2
+      case _ =>
+        initial.length - updated.length // kind of meh, might make parsing O(args.length^2)
+    }
+
 }

@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.Error
+import caseapp.core.{Error, Indexed}
 import caseapp.core.Error.SeveralErrors
 import caseapp.core.help.{Help, WithHelp}
 import caseapp.demo._
@@ -27,8 +27,18 @@ object CaseAppTests extends TestSuite {
     }
 
     test("handle extra user arguments") {
-      val res         = Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other"))
-      val expectedRes = Right((NoArgs(), RemainingArgs(Seq(), Seq("b", "-a", "--other"))))
+      val res = Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other"))
+      val expectedRes = Right((
+        NoArgs(),
+        RemainingArgs(
+          Seq(),
+          Seq(
+            Indexed(1, 1, "b"),
+            Indexed(2, 1, "-a"),
+            Indexed(3, 1, "--other")
+          )
+        )
+      ))
       assert(res == expectedRes)
     }
 
@@ -587,7 +597,16 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = false,
           ignoreUnrecognized = true
         )
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--foo", "bar"), Nil)))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(0, 1, "--foo"),
+              Indexed(1, 1, "bar")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -596,7 +615,15 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = false,
           ignoreUnrecognized = true
         )
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--other"), Nil)))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(2, 1, "--other")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -614,7 +641,15 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = false,
           ignoreUnrecognized = true
         )
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Nil, Seq("--other"))))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Nil,
+            Seq(
+              Indexed(3, 1, "--other")
+            )
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -623,7 +658,15 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = false,
           ignoreUnrecognized = true
         )
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("foo"), Nil)))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(0, 1, "foo")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -632,7 +675,17 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = false,
           ignoreUnrecognized = true
         )
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("foo"), Seq("--other"))))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(2, 1, "foo")
+            ),
+            Seq(
+              Indexed(4, 1, "--other")
+            )
+          )
+        ))
         assert(res == expected)
       }
     }
@@ -647,7 +700,15 @@ object CaseAppTests extends TestSuite {
       test {
         val res =
           parser.detailedParse(Seq("--value", "a", "--other"), stopAtFirstUnrecognized = true)
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--other"), Nil)))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(2, 1, "--other")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -658,12 +719,31 @@ object CaseAppTests extends TestSuite {
       test {
         val res =
           parser.detailedParse(Seq("--value", "a", "--", "--other"), stopAtFirstUnrecognized = true)
-        val expected = Right((FewArgs(value = "a"), RemainingArgs(Seq("--", "--other"), Nil)))
+        val expected = Right((
+          FewArgs(value = "a"),
+          RemainingArgs(
+            Seq(
+              Indexed(2, 1, "--"),
+              Indexed(3, 1, "--other")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
         val res = parser.detailedParse(Seq("foo", "--value", "a"), stopAtFirstUnrecognized = true)
-        val expected = Right((FewArgs(), RemainingArgs(Seq("foo", "--value", "a"), Nil)))
+        val expected = Right((
+          FewArgs(),
+          RemainingArgs(
+            Seq(
+              Indexed(0, 1, "foo"),
+              Indexed(1, 1, "--value"),
+              Indexed(2, 1, "a")
+            ),
+            Nil
+          )
+        ))
         assert(res == expected)
       }
       test {
@@ -672,7 +752,17 @@ object CaseAppTests extends TestSuite {
           stopAtFirstUnrecognized = true
         )
         val expected =
-          Right((FewArgs(value = "a"), RemainingArgs(Seq("foo", "--", "--other"), Nil)))
+          Right((
+            FewArgs(value = "a"),
+            RemainingArgs(
+              Seq(
+                Indexed(2, 1, "foo"),
+                Indexed(3, 1, "--"),
+                Indexed(4, 1, "--other")
+              ),
+              Nil
+            )
+          ))
         assert(res == expected)
       }
     }
