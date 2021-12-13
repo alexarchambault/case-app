@@ -25,6 +25,8 @@ import caseapp.HelpMessage
   helpMessage: Option[HelpMessage] = Help.DefaultHelpMessage
 ) {
 
+  def nonEmpty = args.nonEmpty
+
   /** One-line usage message for `T` */
   def usage: String =
     usage(HelpFormat.default())

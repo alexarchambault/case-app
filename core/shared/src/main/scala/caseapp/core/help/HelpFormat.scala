@@ -13,6 +13,7 @@ import dataclass._
   @since("2.1.0")
   sortGroups: Option[Seq[String] => Seq[String]] = None,
   sortedGroups: Option[Seq[String]] = None,
+  hiddenGroups: Option[Seq[String]] = None,
   @since("2.1.0")
   sortCommandGroups: Option[Seq[String] => Seq[String]] = None,
   sortedCommandGroups: Option[Seq[String]] = None,
@@ -25,8 +26,8 @@ import dataclass._
     sortGroups: Option[Seq[String] => Seq[String]],
     sortedGroups: Option[Seq[String]],
     elems: Seq[(String, T)]
-  ): Seq[(String, T)] =
-    sortGroups match {
+  ): Seq[(String, T)] = {
+    val sortedGroups0 = sortGroups match {
       case None =>
         sortedGroups match {
           case None =>
@@ -39,6 +40,9 @@ import dataclass._
         val sorted = sort(elems.map(_._1)).zipWithIndex.toMap
         elems.sortBy { case (group, _) => sorted.getOrElse(group, Int.MaxValue) }
     }
+    sortedGroups0.filter { case (group, _) => hiddenGroups.forall(!_.contains(group)) }
+  }
+
   def sortGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
     sortValues(sortGroups, sortedGroups, elems)
   def sortCommandGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =

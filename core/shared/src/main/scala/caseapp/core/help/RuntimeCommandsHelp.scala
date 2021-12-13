@@ -10,7 +10,8 @@ import dataclass._
   progName: String,
   description: Option[String],
   defaultHelp: Help[_],
-  commands: Seq[RuntimeCommandHelp[_]]
+  commands: Seq[RuntimeCommandHelp[_]],
+  summaryDesc: Option[String]
 ) {
 
   def help(): String =
@@ -47,14 +48,21 @@ import dataclass._
         format.terminalWidthOpt.getOrElse(Int.MaxValue)
       )
 
-    b.append(format.newLine)
-
-    defaultHelp.printOptions(b, format, showHidden)
+    if (defaultHelp.nonEmpty) {
+      b.append(format.newLine)
+      defaultHelp.printOptions(b, format, showHidden)
+      b.append(format.newLine)
+    }
 
     if (commands.nonEmpty) {
       b.append(format.newLine)
-      b.append(format.newLine)
       printCommands(b, format, showHidden)
+    }
+
+    for (argName <- summaryDesc) {
+      b.append(format.newLine)
+      b.append(format.newLine)
+      b.append(argName)
     }
 
     b.result()
