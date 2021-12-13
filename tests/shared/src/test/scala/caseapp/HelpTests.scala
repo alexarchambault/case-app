@@ -1,7 +1,7 @@
 package caseapp
 
 import caseapp.core.app.CommandsEntryPoint
-import caseapp.core.help.{Help, HelpFormat}
+import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 import utest._
 
 object HelpTests extends TestSuite {
@@ -318,7 +318,94 @@ object HelpTests extends TestSuite {
 
       assert(help == expected)
     }
+    test("empty help in help message") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName                = "foo"
+        override def defaultCommand = Some(CommandGroups.First)
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
 
+        override def help: RuntimeCommandsHelp = new RuntimeCommandsHelp(
+          progName,
+          None,
+          Help[Unit](),
+          commands.map(cmd =>
+            new RuntimeCommandHelp(cmd.names, cmd.finalHelp, cmd.group, cmd.hidden)
+          ),
+          None
+        )
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND>
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
+    test("help message with summary description") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName                = "foo"
+        override def defaultCommand = Some(CommandGroups.First)
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+
+        override def help: RuntimeCommandsHelp = new RuntimeCommandsHelp(
+          progName,
+          Some("Description"),
+          Help[Unit](),
+          commands.map(cmd =>
+            new RuntimeCommandHelp(cmd.names, cmd.finalHelp, cmd.group, cmd.hidden)
+          ),
+          Some("Summary Description")
+        )
+      }
+      val help = entryPoint.help.help(format)
+      val expected =
+        """Usage: foo <COMMAND>
+          |Description
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message
+          |
+          |Bb commands:
+          |  second
+          |
+          |Summary Description""".stripMargin
+
+      assert(help == expected)
+    }
+    test("help message with hidden group") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName                = "foo"
+        override def defaultCommand = Some(CommandGroups.First)
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val formatWithHiddenGroup = format.withHiddenGroups(Some(Seq(
+        CommandGroups.First.group,
+        CommandGroups.Third.group
+      )))
+      val help = entryPoint.help.help(formatWithHiddenGroup)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage            Print usage and exit
+          |  -h, -help, --help  Print help message and exit
+          |
+          |Other options:
+          |  -f, --foo string
+          |  --bar int
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
     test("hidden commands in help message") {
       val entryPoint = new CommandsEntryPoint {
         def progName                = "foo"
