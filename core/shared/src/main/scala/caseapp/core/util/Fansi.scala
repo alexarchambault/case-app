@@ -731,7 +731,7 @@ object Back extends ColorCategory(offset = 28, width = 25, colorCode = 48) {
   */
 private[this] final class Trie[T](strings: Seq[(String, T)]) {
 
-  val (min, max, arr, value) = {
+  val (min, max, arr, value) =
     strings.partition(_._1.isEmpty) match {
       case (Nil, continuations) =>
         val allChildChars = continuations.map(_._1(0))
@@ -754,7 +754,6 @@ private[this] final class Trie[T](strings: Seq[(String, T)]) {
 
       case _ => ???
     }
-  }
 
   def apply(c: Char): Trie[T] =
     if (c > max || c < min) null

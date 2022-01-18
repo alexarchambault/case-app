@@ -36,7 +36,7 @@ object Settings {
     autoAPIMappings := true
   )
 
-  lazy val caseAppPrefix = {
+  lazy val caseAppPrefix =
     name := {
       val shortenedName = name.value
         .stripSuffix("JVM")
@@ -44,6 +44,5 @@ object Settings {
         .stripSuffix("Native")
       "case-app-" + shortenedName
     }
-  }
 
 }
