@@ -183,12 +183,12 @@ object Str {
     * of bits within each long:
     *
     * 61... 55 54 53 52 51 .... 31 30 29 28 27 26 25 ..... 6 5 4 3 2 1 0
-    * \|--------| |-----------------------| |-----------------------| | | |bold
-    * \| | | | |reversed
-    * \| | | |underlined
-    * \| | |foreground-color
-    * \| |background-color
-    * \|unused
+    * |--------| |-----------------------| |-----------------------| | | |bold
+    * | | | | |reversed
+    * | | | |underlined
+    * | | |foreground-color
+    * | |background-color
+    * |unused
     *
     * The `0000 0000 0000 0000` long corresponds to plain text with no decoration
     */

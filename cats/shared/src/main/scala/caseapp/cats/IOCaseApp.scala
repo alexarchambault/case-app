@@ -45,11 +45,11 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
     * behavior, override this method as shown below.
     *
     * @example
-    *   {{{
+    * {{{
     * import caseapp.core.parser.PlatformArgsExpander
     * override def expandArgs(args: List[String]): List[String]
     * = PlatformArgsExpander.expand(args)
-    *   }}}
+    * }}}
     *
     * @param args
     * @return
