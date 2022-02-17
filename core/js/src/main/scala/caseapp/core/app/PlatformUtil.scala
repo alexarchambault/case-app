@@ -11,7 +11,10 @@ object PlatformUtil {
   }
   def arguments(args: Array[String]): Array[String] =
     if (args.isEmpty)
-      process.argv.asInstanceOf[js.Array[String]].toArray
+      process.argv
+        .asInstanceOf[js.Array[String]]
+        .toArray
+        .drop(2) // drop "node" and "/path/to/app.js"
     else
       args
 }
