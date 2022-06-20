@@ -4,7 +4,6 @@ import scala.language.implicitConversions
 import caseapp.core.{Arg, Error, Indexed}
 import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.RemainingArgs
-import shapeless.{HList, HNil}
 import caseapp.core.util.Formatter
 import caseapp.Name
 import caseapp.core.complete.Completer
@@ -393,28 +392,18 @@ abstract class Parser[T] {
   def withDefaultOrigin(origin: String): Parser.Aux[T, D]
 }
 
-object Parser extends LowPriorityParserImplicits {
+object Parser extends ParserCompanion with LowPriorityParserImplicits {
 
   /** Look for an implicit `Parser[T]` */
   def apply[T](implicit parser: Parser[T]): Aux[T, parser.D] = parser
 
   type Aux[T, D0] = Parser[T] { type D = D0 }
 
-  /** An empty [[Parser]].
-    *
-    * Can be made non empty by successively calling `add` on it.
-    */
-  def nil: Parser.Aux[HNil, HNil] =
-    NilParser
-
   implicit def option[T, D](implicit parser: Aux[T, D]): Parser.Aux[Option[T], D] =
     OptionParser(parser)
 
   implicit def either[T, D](implicit parser: Aux[T, D]): Parser.Aux[Either[Error, T], D] =
     EitherParser(parser)
-
-  implicit def toParserOps[T <: HList, D <: HList](parser: Aux[T, D]): ParserOps[T, D] =
-    new ParserOps(parser)
 
   sealed abstract class Step extends Product with Serializable {
     def index: Int

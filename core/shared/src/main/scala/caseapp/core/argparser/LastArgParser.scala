@@ -3,7 +3,7 @@ package caseapp.core.argparser
 import caseapp.core.Error
 import dataclass.data
 
-@data class LastArgParser[T](parser: ArgParser[T]) extends ArgParser[Last[T]] {
+@data case class LastArgParser[T](parser: ArgParser[T]) extends ArgParser[Last[T]] {
 
   def apply(
     current: Option[Last[T]],

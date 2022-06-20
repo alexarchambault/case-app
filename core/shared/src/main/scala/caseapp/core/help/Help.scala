@@ -1,19 +1,18 @@
 package caseapp.core.help
 
 import caseapp.core.Arg
-import caseapp.{AppName, AppVersion, ArgsName, Name, ProgName, ValueDescription}
+import caseapp.core.Scala3Helpers._
+import caseapp.{Name, ValueDescription}
 import caseapp.core.parser.Parser
-import caseapp.core.util.{CaseUtil, fansi}
-import caseapp.util.AnnotationOption
+import caseapp.core.util.fansi
 import caseapp.core.util.NameOps.toNameOps
 import dataclass._
-import shapeless.Typeable
 import caseapp.core.util.Formatter
 import caseapp.HelpMessage
 
 /** Provides usage and help messages related to `T`
   */
-@data class Help[T](
+@data case class Help[T](
   args: Seq[Arg] = Nil,
   appName: String = "",
   appVersion: String = "",
@@ -52,7 +51,7 @@ import caseapp.HelpMessage
     final case class Dummy()
     val helpArgs = Parser[WithHelp[Dummy]].args
 
-    withArgs(helpArgs ++ args)
+    this.withArgs(helpArgs ++ args)
       // circumventing a possible data-class issue here (getting a Help[Nothing] else)
       .asInstanceOf[Help[WithHelp[T]]]
   }
@@ -61,7 +60,7 @@ import caseapp.HelpMessage
     final case class Dummy()
     val helpArgs = Parser[WithFullHelp[Dummy]].args
 
-    withArgs(helpArgs ++ args)
+    this.withArgs(helpArgs ++ args)
       // circumventing a possible data-class issue here (getting a Help[Nothing] else)
       .asInstanceOf[Help[WithFullHelp[T]]]
   }
@@ -172,7 +171,7 @@ import caseapp.HelpMessage
     }
 }
 
-object Help {
+object Help extends HelpCompanion {
   val DefaultOptionsDesc   = "[options]"
   val DefaultNameFormatter = Formatter.DefaultNameFormatter
   val DefaultHelpMessage   = Option.empty[HelpMessage]
@@ -204,54 +203,6 @@ object Help {
           (usage :: message.toList).mkString(Help.NL)
       }
       .mkString(Help.NL)
-
-  // FIXME Not sure Typeable is fine on Scala JS, should be replaced by something else
-
-  def derive[T](implicit
-    parser: Parser[T],
-    typeable: Typeable[T],
-    appName: AnnotationOption[AppName, T],
-    appVersion: AnnotationOption[AppVersion, T],
-    progName: AnnotationOption[ProgName, T],
-    argsName: AnnotationOption[ArgsName, T],
-    helpMessage: AnnotationOption[HelpMessage, T]
-  ): Help[T] =
-    help[T](
-      parser,
-      typeable,
-      appName,
-      appVersion,
-      progName,
-      argsName,
-      helpMessage
-    )
-
-  /** Implicitly derives a `Help[T]` for `T` */
-  implicit def help[T](implicit
-    parser: Parser[T],
-    typeable: Typeable[T],
-    appName: AnnotationOption[AppName, T],
-    appVersion: AnnotationOption[AppVersion, T],
-    progName: AnnotationOption[ProgName, T],
-    argsName: AnnotationOption[ArgsName, T],
-    helpMessage: AnnotationOption[HelpMessage, T]
-  ): Help[T] = {
-
-    val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
-
-    Help(
-      parser.args,
-      appName0,
-      appVersion().fold("")(_.appVersion),
-      progName().fold(CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-"))(
-        _.progName
-      ),
-      argsName().map(_.argsName),
-      Help.DefaultOptionsDesc,
-      parser.defaultNameFormatter,
-      helpMessage()
-    )
-  }
 
   // From scopt
   val NL = PlatformUtil.NL

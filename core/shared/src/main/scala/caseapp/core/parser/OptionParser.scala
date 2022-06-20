@@ -1,11 +1,12 @@
 package caseapp.core.parser
 
+import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
 import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
+@data case class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
 
   type D = D0
 
@@ -36,5 +37,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[Option[T], D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    this.withUnderlying(underlying.withDefaultOrigin(origin))
 }

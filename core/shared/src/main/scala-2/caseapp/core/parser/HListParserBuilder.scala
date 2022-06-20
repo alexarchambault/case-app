@@ -88,38 +88,6 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
       NilParser
     }
 
-  @deprecated("Redundant with hcons", "2.0.7")
-  def hconsTagged[
-    K <: Symbol,
-    Tag,
-    H,
-    T <: HList,
-    PT <: HList,
-    DT <: HList,
-    NT <: HList,
-    VT <: HList,
-    MT <: HList,
-    GT <: HList,
-    HT <: HList,
-    RT <: HList
-  ](implicit
-    name: Witness.Aux[K],
-    argParser: Strict[ArgParser[H @@ Tag]],
-    default: Strict[Default[H @@ Tag]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
-  ): Aux[
-    FieldType[K, H @@ Tag] :: T,
-    Option[H @@ Tag] :: DT,
-    List[Name] :: NT,
-    Option[ValueDescription] :: VT,
-    Option[HelpMessage] :: MT,
-    Option[Group] :: GT,
-    Option[Hidden] :: HT,
-    None.type :: RT,
-    Option[H @@ Tag] :: PT
-  ] =
-    hcons[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, RT]
-
   implicit def hcons[
     K <: Symbol,
     H,

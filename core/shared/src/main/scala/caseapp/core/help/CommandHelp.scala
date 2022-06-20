@@ -4,7 +4,7 @@ import caseapp.core.Arg
 import dataclass.data
 import caseapp.HelpMessage
 
-@data class CommandHelp(
+@data case class CommandHelp(
   args: Seq[Arg],
   argsNameOption: Option[String],
   helpMessage: Option[HelpMessage]

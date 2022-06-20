@@ -1,11 +1,12 @@
 package caseapp.core.parser
 
+import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
 import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class IgnoreUnrecognizedParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[T] {
+@data case class IgnoreUnrecognizedParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[T] {
   type D = D0
   def init: D = underlying.init
   def step(
@@ -27,5 +28,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[T, D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    this.withUnderlying(underlying.withDefaultOrigin(origin))
 }

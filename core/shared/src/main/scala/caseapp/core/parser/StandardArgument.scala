@@ -1,20 +1,21 @@
 package caseapp.core.parser
 
 import caseapp.core.argparser.{ArgParser, Consumed}
+import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.NameOps.toNameOps
 import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class StandardArgument[H](
+@data case class StandardArgument[H](
   arg: Arg,
   argParser: ArgParser[H],
   default: () => Option[H] // FIXME Couldn't this be Option[() => H]?
 ) extends Argument[H] {
 
   def withDefaultOrigin(origin: String): Argument[H] =
-    withArg(arg.withDefaultOrigin(origin))
+    this.withArg(arg.withDefaultOrigin(origin))
 
   def init: Option[H] =
     None

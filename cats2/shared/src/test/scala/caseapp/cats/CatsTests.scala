@@ -5,7 +5,7 @@ import _root_.cats.effect.concurrent.Ref
 import _root_.cats.implicits._
 import _root_.cats.data.NonEmptyList
 import caseapp._
-import caseapp.core.help.{CommandsHelp, Help}
+import caseapp.core.help.Help
 import caseapp.core.Error
 import utest._
 

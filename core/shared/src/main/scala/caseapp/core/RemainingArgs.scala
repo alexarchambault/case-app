@@ -9,7 +9,7 @@ import dataclass.data
   * @param unparsed:
   *   arguments after a first `--`, if any
   */
-@data class RemainingArgs(
+@data case class RemainingArgs(
   indexedRemaining: Seq[Indexed[String]],
   indexedUnparsed: Seq[Indexed[String]]
 ) {

@@ -4,7 +4,7 @@ import caseapp.{HelpMessage, Group, Hidden, Name, Recurse, ValueDescription}
 import caseapp.util.AnnotationList
 import shapeless.{Annotations, HList, LabelledGeneric, Strict, Typeable}
 
-abstract class LowPriorityParserImplicits {
+trait LowPriorityParserImplicits {
 
   def derive[
     CC,

@@ -2,7 +2,7 @@ package caseapp.core.complete
 
 import dataclass.data
 
-@data class CompletionItem(
+@data case class CompletionItem(
   value: String,
   description: Option[String] = None,
   extraValues: Seq[String] = Nil

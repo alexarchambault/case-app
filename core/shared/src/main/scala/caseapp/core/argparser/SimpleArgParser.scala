@@ -3,7 +3,7 @@ package caseapp.core.argparser
 import caseapp.core.Error
 import dataclass.data
 
-@data class SimpleArgParser[T](
+@data case class SimpleArgParser[T](
   description: String,
   parse: (String, Int, Int) => Either[Error, T]
 ) extends ArgParser[T] {

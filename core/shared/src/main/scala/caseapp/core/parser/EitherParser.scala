@@ -1,11 +1,13 @@
 package caseapp.core.parser
 
+import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
 import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class EitherParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Either[Error, T]] {
+@data case class EitherParser[T, D0](underlying: Parser.Aux[T, D0])
+    extends Parser[Either[Error, T]] {
 
   type D = D0
 
@@ -35,5 +37,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[Either[Error, T], D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    this.withUnderlying(underlying.withDefaultOrigin(origin))
 }
