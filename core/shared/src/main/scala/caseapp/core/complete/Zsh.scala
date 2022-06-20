@@ -23,8 +23,16 @@ object Zsh {
     if (hash < 0) (hash * -1).toString
     else hash.toString
   }
-  private def escape(s: String): String =
-    s.replace("'", "\\'").replace("`", "\\`").linesIterator.toStream.headOption.getOrElse("")
+  private def escape(input: String): String =
+    input
+      .replace("'", "\\'")
+      .replace("`", "\\`")
+      .replace("|", "\\|")
+      .linesIterator
+      .take(1)
+      .toList
+      .headOption
+      .getOrElse("")
   private def defs(item: CompletionItem): Seq[String] = {
     val (options, arguments) = item.values.partition(_.startsWith("-"))
     val optionsOutput =
