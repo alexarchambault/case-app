@@ -36,11 +36,17 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
-    libraryDependencies ++= Seq(
-      Deps.shapeless.value,
-      Deps.scalaCompiler.value % "provided",
-      Deps.scalaReflect.value  % "provided"
-    )
+    libraryDependencies ++= {
+      val sv = scalaVersion.value
+      if (sv.startsWith("2."))
+        Seq(
+          Deps.shapeless.value,
+          Deps.scalaCompiler.value % "provided",
+          Deps.scalaReflect.value  % "provided"
+        )
+      else
+        Nil
+    }
   )
 
 lazy val utilJVM    = util.jvm
@@ -90,10 +96,13 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     name := "case-app",
-    libraryDependencies ++= Seq(
-      Deps.sourcecode.value,
-      Deps.dataClass % Provided
-    )
+    libraryDependencies ++= {
+      val sv = scalaVersion.value
+      val maybeDataClass =
+        if (sv.startsWith("2.")) Seq(Deps.dataClass % Provided)
+        else Nil
+      Seq(Deps.sourcecode.value) ++ maybeDataClass
+    }
   )
 
 lazy val coreJVM    = core.jvm

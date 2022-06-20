@@ -15,18 +15,21 @@ object CaseAppTests extends TestSuite {
   val tests = Tests {
 
     test("parse no args") {
-      val res         = Parser[NoArgs].parse(Seq.empty)
-      val expectedRes = Right((NoArgs(), Seq.empty))
+      val parser: Parser[NoArgs] = Parser.derive
+      val res                    = parser.parse(Seq.empty)
+      val expectedRes            = Right((NoArgs(), Seq.empty))
       assert(res == expectedRes)
     }
 
     test("find an illegal argument") {
-      val res = Parser[NoArgs].parse(Seq("-a")).isLeft
+      val parser: Parser[NoArgs] = Parser.derive
+      val res                    = parser.parse(Seq("-a")).isLeft
       assert(res)
     }
 
     test("handle extra user arguments") {
-      val res = Parser[NoArgs].detailedParse(Seq("--", "b", "-a", "--other"))
+      val parser: Parser[NoArgs] = Parser.derive
+      val res                    = parser.detailedParse(Seq("--", "b", "-a", "--other"))
       val expectedRes = Right((
         NoArgs(),
         RemainingArgs(
@@ -42,8 +45,9 @@ object CaseAppTests extends TestSuite {
     }
 
     test("give remaining args as is") {
-      val res         = Parser[NoArgs].parse(Seq("user arg", "other user arg"))
-      val expectedRes = Right((NoArgs(), Seq("user arg", "other user arg")))
+      val parser: Parser[NoArgs] = Parser.derive
+      val res                    = parser.parse(Seq("user arg", "other user arg"))
+      val expectedRes            = Right((NoArgs(), Seq("user arg", "other user arg")))
       assert(res == expectedRes)
     }
 
@@ -337,8 +341,6 @@ object CaseAppTests extends TestSuite {
     }
 
     test("don't compute default values when creating parser") {
-      caseapp.util.Default[DefaultsThrow]
-      shapeless.lazily[caseapp.util.Default.AsOptions[DefaultsThrow]]
       val parser = Parser[DefaultsThrow]
     }
 

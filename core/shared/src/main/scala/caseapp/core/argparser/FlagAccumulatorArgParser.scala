@@ -4,7 +4,7 @@ import caseapp.core.{Counter, Error}
 import caseapp.{@@, Tag}
 import dataclass.data
 
-@data class FlagAccumulatorArgParser[T](
+@data case class FlagAccumulatorArgParser[T](
   description: String,
   parse: (Option[T], Int, Int, Option[String]) => Either[Error, T]
 ) extends ArgParser[T] {

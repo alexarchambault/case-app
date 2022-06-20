@@ -1,5 +1,6 @@
 package caseapp.core
 
+import caseapp.core.Scala3Helpers._
 import caseapp.{Group, HelpMessage, Name, Tag, ValueDescription}
 import dataclass._
 
@@ -18,7 +19,7 @@ import dataclass._
   * @param isFlag:
   *   if true, passing an actual value to this argument is optional
   */
-@data class Arg(
+@data case class Arg(
   name: Name,
   extraNames: Seq[Name] = Nil,
   valueDescription: Option[ValueDescription] = None,
@@ -33,7 +34,7 @@ import dataclass._
   tags: Seq[Tag] = Nil
 ) {
   def withDefaultOrigin(defaultOrigin: String): Arg =
-    if (origin.isEmpty) withOrigin(Some(defaultOrigin))
+    if (origin.isEmpty) this.withOrigin(Some(defaultOrigin))
     else this
 }
 

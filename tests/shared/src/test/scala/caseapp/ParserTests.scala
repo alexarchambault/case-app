@@ -4,6 +4,7 @@ import caseapp.core.{Arg, Error, Indexed}
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.parser.ParserOps
 import caseapp.core.util.Formatter
+import caseapp.core.Scala3Helpers._
 
 import utest._
 
@@ -19,6 +20,7 @@ object ParserTests extends TestSuite {
       val expected = Right((Helper(2, "foo"), Seq("something")))
       assert(res == expected)
     }
+
     test("tuple") {
       case class Helper(n: Int, value: String)
       val parser =
@@ -69,9 +71,9 @@ object ParserTests extends TestSuite {
     }
 
     test("Retain origin class of options") {
-      val parser  = Parser[Definitions.MoreArgs]
-      val args    = parser.args
-      val baseMap = args.groupBy(_.name.name)
+      val parser: Parser[Definitions.MoreArgs] = Parser.derive
+      val args                                 = parser.args
+      val baseMap                              = args.groupBy(_.name.name)
       assert(baseMap.size == 3)
       assert(baseMap.forall(_._2.length == 1))
       val map = baseMap.map { case (k, v) => (k, v.head) }
