@@ -8,4 +8,5 @@ trait PlatformCommandsMethods {
     val destPath = Paths.get(dest)
     Files.write(destPath, script.getBytes(StandardCharsets.UTF_8))
   }
+  protected def completeMainHook(args: Array[String]): Unit = ()
 }

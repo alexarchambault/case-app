@@ -6,4 +6,5 @@ trait PlatformCommandsMethods {
   private lazy val fs = g.require("fs")
   protected def writeCompletions(script: String, dest: String): Unit =
     fs.writeFileSync(dest, script)
+  protected def completeMainHook(args: Array[String]): Unit = ()
 }
