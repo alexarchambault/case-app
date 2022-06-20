@@ -87,7 +87,9 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             PlatformUtil.exit(1)
         }
       case _ =>
-        System.err.println(s"Usage: $progName $completeCommandName format index ...args...")
+        System.err.println(
+          s"Usage: $progName ${completeCommandName.mkString(" ")} format index ...args..."
+        )
         PlatformUtil.exit(1)
     }
 
