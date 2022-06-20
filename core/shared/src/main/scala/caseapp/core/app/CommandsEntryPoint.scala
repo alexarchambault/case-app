@@ -66,7 +66,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         RuntimeCommandParser.complete(defaultCommand0, commands, args.toList, index)
     }
 
-  def completeMain(args: Array[String]): Unit =
+  def completeMain(args: Array[String]): Unit = {
+    completeMainHook(args)
     args match {
       case Array(format, indexStr, userArgs @ _*) =>
         val index          = indexStr.toInt - 2 // -1 for argv[0], and -1 as indices start at 1
@@ -87,9 +88,12 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             PlatformUtil.exit(1)
         }
       case _ =>
-        System.err.println(s"Usage: $progName $completeCommandName format index ...args...")
+        System.err.println(
+          s"Usage: $progName ${completeCommandName.mkString(" ")} format index ...args..."
+        )
         PlatformUtil.exit(1)
     }
+  }
 
   def main(args: Array[String]): Unit = {
     val actualArgs = PlatformUtil.arguments(args)
