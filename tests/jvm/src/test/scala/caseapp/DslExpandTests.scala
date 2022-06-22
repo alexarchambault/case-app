@@ -2,12 +2,9 @@ package caseapp
 
 import java.nio.file.Paths
 
-import caseapp.core.{Error, Indexed}
-import caseapp.core.Error.SeveralErrors
-import caseapp.core.help.{Help, WithHelp}
+import caseapp.core.Indexed
 import caseapp.core.parser.PlatformArgsExpander
 import caseapp.demo._
-import shapeless.{Inl, Inr}
 import utest._
 
 object DslExpandTests extends TestSuite {

@@ -254,17 +254,6 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
-    test("generate help message for commands (legacy API)") {
-      val msg = CommandTest.commandsMessages
-        .messagesMap(List("third"))
-        .helpMessage
-        .map(_.message)
-        .getOrElse("")
-      val expected = "Third help message"
-
-      assert(msg == expected)
-    }
-
     test("generate help message for commands") {
       val entryPoint = new CommandsEntryPoint {
         def progName                = "foo"

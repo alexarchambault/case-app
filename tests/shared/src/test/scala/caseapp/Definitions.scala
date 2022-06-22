@@ -134,10 +134,6 @@ object Definitions {
     third: Int = 0
   ) extends Command
 
-  object CommandTest extends CommandApp[Command] {
-    def run(options: Command, remainingArgs: RemainingArgs): Unit = {}
-  }
-
   case class Default0(bah: Double = 0.0)
 
   object Duplicates {
