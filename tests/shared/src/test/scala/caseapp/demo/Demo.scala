@@ -1,7 +1,6 @@
 package caseapp
 package demo
 
-import caseapp.core.app.CommandAppA
 import caseapp.core.util.Formatter
 
 final case class SharedOptions(
@@ -64,17 +63,6 @@ final case class Secondd(
   stages: List[String]
 ) extends DemoCommand
 
-object CommandAppTest extends CommandApp[DemoCommand] {
-
-  def run(options: DemoCommand, remainingArgs: RemainingArgs): Unit =
-    options match {
-      case _: First =>
-        Console.err.println(s"First: $this")
-      case _: Secondd =>
-        Console.err.println(s"Second: $this")
-    }
-}
-
 object ManualCommandStuff {
 
   case object Command1 extends CaseApp[Command1Opts] {
@@ -84,21 +72,6 @@ object ManualCommandStuff {
   case object Command2 extends CaseApp[Command2Opts] {
     def run(options: Command2Opts, args: RemainingArgs): Unit = {}
   }
-
-  val parser = CommandParser.nil
-    .add(Command1)
-    .add(Command2)
-    .as[ManualCommandOptions]
-
-  val help = CommandsHelp.nil
-    .add(Command1)
-    .add(Command2)
-    .as[ManualCommandOptions]
-
-}
-
-object ManualCommand extends CommandApp()(ManualCommandStuff.parser, ManualCommandStuff.help) {
-  def run(options: ManualCommandOptions, args: RemainingArgs): Unit = {}
 }
 
 object ManualCommandNotAdtStuff {
@@ -125,28 +98,6 @@ object ManualCommandNotAdtStuff {
     override def ignoreUnrecognized                                                      = true
     def run(options: ManualCommandNotAdtOptions.Command5Opts, args: RemainingArgs): Unit = {}
   }
-
-  val parser = CommandParser.nil
-    .add(Command1)
-    .add(Command2)
-    .add(Command3StopAtUnreco)
-    .add(Command4NameFormatter)
-    .add(Command5IgnoreUnrecognized)
-    .reverse
-
-  val help = CommandsHelp.nil
-    .add(Command1)
-    .add(Command2)
-    .add(Command3StopAtUnreco)
-    .add(Command4NameFormatter)
-    .add(Command5IgnoreUnrecognized)
-    .reverse
-
-}
-
-object ManualCommandNotAdt
-    extends CommandAppA(ManualCommandNotAdtStuff.parser, ManualCommandNotAdtStuff.help) {
-  def runA = args => options => {}
 }
 
 object ManualSubCommandStuff {
@@ -158,20 +109,4 @@ object ManualSubCommandStuff {
   case object Command2 extends CaseApp[ManualSubCommandOptions.Command2Opts] {
     def run(options: ManualSubCommandOptions.Command2Opts, args: RemainingArgs): Unit = {}
   }
-
-  val parser = CommandParser.nil
-    .add(Command1, "foo")
-    .add(Command2, Seq("foo", "list"))
-    .reverse
-
-  val help = CommandsHelp.nil
-    .add(Command1, "foo")
-    .add(Command2, Seq("foo", "list").mkString("-"))
-    .reverse
-
-}
-
-object ManualSubCommand
-    extends CommandAppA(ManualSubCommandStuff.parser, ManualSubCommandStuff.help) {
-  def runA = args => options => {}
 }

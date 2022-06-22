@@ -32,20 +32,6 @@ private class RecordedIOCaseApp[T](implicit parser0: Parser[T], messages: Help[T
     println(s"run: $options").as(ExitCode.Success)
 }
 
-private class RecordedIOCommandApp[T](implicit parser0: CommandParser[T], messages: CommandsHelp[T])
-    extends IOCommandApp[T]()(parser0, messages) with RecordedApp {
-
-  override def error(message: Error): IO[ExitCode] =
-    stderrBuff.update(message.message :: _)
-      .as(ExitCode.Error)
-
-  override def println(x: String): IO[Unit] =
-    stdoutBuff.update(x :: _)
-
-  override def run(options: T, remainingArgs: RemainingArgs): IO[ExitCode] =
-    println(s"run: $options").as(ExitCode.Success)
-}
-
 object CatsTests extends TestSuite {
 
   import Definitions._
@@ -61,22 +47,6 @@ object CatsTests extends TestSuite {
   private def testCaseStderr(args: List[String], expected: String) =
     testRunFuture(
       new RecordedIOCaseApp[FewArgs](),
-      args,
-      expectedStdout = List.empty,
-      expectedStderr = List(expected)
-    )
-
-  private def testCommandStdout(args: List[String], expected: String) =
-    testRunFuture(
-      new RecordedIOCommandApp[Command](),
-      args,
-      expectedStdout = List(expected),
-      expectedStderr = List.empty
-    )
-
-  private def testCommandStderr(args: List[String], expected: String) =
-    testRunFuture(
-      new RecordedIOCommandApp[Command](),
       args,
       expectedStdout = List.empty,
       expectedStderr = List(expected)
@@ -110,26 +80,6 @@ object CatsTests extends TestSuite {
       }
       test("run") {
         testCaseStdout(List("--value", "foo", "--num-foo", "42"), "run: FewArgs(foo,42)")
-      }
-    }
-    test("IOCommandApp") {
-      test("parse error") {
-        testCommandStderr(List("--invalid"), "Unrecognized argument: --invalid")
-      }
-      test("output command usage") {
-        testCommandStdout(
-          List("first", "--usage"),
-          CommandsHelp[Command].messagesMap(List("first")).usageMessage("none.type", List("first"))
-        )
-      }
-      test("output command help") {
-        testCommandStdout(
-          List("first", "--help"),
-          CommandsHelp[Command].messagesMap(List("first")).helpMessage("none.type", List("first"))
-        )
-      }
-      test("run") {
-        testCommandStdout(List("first", "--foo", "foo", "--bar", "42"), "run: First(foo,42)")
       }
     }
 

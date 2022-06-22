@@ -36,7 +36,6 @@ object CommandsHelp {
     tail: CommandsHelp[T],
     helpMessage: AnnotationOption[HelpMessage, H]
   ): CommandsHelp[FieldType[K, H] :+: T] = {
-    // FIXME Duplicated in CommandParser.ccons
     val name = commandName().map(_.commandName).getOrElse {
       CaseUtil.pascalCaseSplit(key.value.name.toList.takeWhile(_ != '$'))
         .map(_.toLowerCase)

@@ -14,11 +14,6 @@ package object caseapp {
   type Help[T] = core.help.Help[T]
   val Help = core.help.Help
 
-  @deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
-  type CommandParser[T] = core.commandparser.CommandParser[T]
-  @deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
-  val CommandParser = core.commandparser.CommandParser
-
   type CommandsHelp[T] = core.help.CommandsHelp[T]
   val CommandsHelp = core.help.CommandsHelp
 
@@ -26,9 +21,6 @@ package object caseapp {
   val CaseApp = core.app.CaseApp
 
   type Command[T] = core.app.Command[T]
-
-  @deprecated("Use Command and CommandsEntryPoint instead", "2.1.0")
-  type CommandApp[T] = core.app.CommandApp[T]
 
   type RemainingArgs = core.RemainingArgs
   val RemainingArgs = core.RemainingArgs

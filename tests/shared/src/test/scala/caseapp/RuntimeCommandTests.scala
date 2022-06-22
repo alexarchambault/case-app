@@ -3,7 +3,6 @@ package caseapp
 import caseapp.demo._
 import caseapp.Definitions._
 import caseapp.core.commandparser.RuntimeCommandParser
-import shapeless.{Inl, Inr}
 import utest._
 
 object RuntimeCommandTests extends TestSuite {
