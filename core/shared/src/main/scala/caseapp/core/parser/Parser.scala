@@ -306,7 +306,7 @@ abstract class Parser[T] {
     ignoreUnrecognized: Boolean
   ): List[CompletionItem] = {
 
-    val args0 = if (index < args.length) args else (args ++ Seq.fill(index + 1 - args.length)(""))
+    val args0 = if (index < args.length) args else args ++ Seq.fill(index + 1 - args.length)("")
 
     val (res, steps) = scan(args0, stopAtFirstUnrecognized, ignoreUnrecognized)
     lazy val stateOpt = res match {
