@@ -9,7 +9,7 @@ object Deps {
 
   def catsEffect2   = setting("org.typelevel" %%% "cats-effect" % "2.5.5")
   def catsEffect3   = setting("org.typelevel" %%% "cats-effect" % "3.3.14")
-  def dataClass     = "io.github.alexarchambault" %% "data-class" % "0.2.5"
+  def dataClass     = "io.github.alexarchambault" %% "data-class" % "0.2.6"
   def macroParadise = "org.scalamacros"            % "paradise"   % "2.1.1" cross CrossVersion.patch
   def refined       = setting("eu.timepit" %%% "refined" % "0.10.1")
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
