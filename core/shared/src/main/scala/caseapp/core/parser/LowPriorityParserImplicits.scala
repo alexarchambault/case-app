@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.{HelpMessage, Group, Hidden, Name, Recurse, ValueDescription}
+import caseapp.{Group, HelpMessage, Hidden, Name, Recurse, ValueDescription}
 import caseapp.util.AnnotationList
 import shapeless.{Annotations, HList, LabelledGeneric, Strict, Typeable}
 
@@ -15,6 +15,7 @@ abstract class LowPriorityParserImplicits {
     M <: HList,
     G <: HList,
     H <: HList,
+    T <: HList,
     R <: HList,
     P <: HList
   ](implicit
@@ -26,12 +27,21 @@ abstract class LowPriorityParserImplicits {
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
     group: Annotations.Aux[Group, CC, G],
     noHelp: Annotations.Aux[Hidden, CC, H],
+    tags: AnnotationList.Aux[caseapp.Tag, CC, T],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, R, P]]
+    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, T, R, P]]
   ): Parser.Aux[CC, P] =
     parser
       .value
-      .apply(defaults(), names(), valuesDesc(), helpMessages(), group(), noHelp())
+      .apply(
+        defaults(),
+        names(),
+        valuesDesc(),
+        helpMessages(),
+        group(),
+        noHelp(),
+        tags()
+      )
       .map(gen.from)
       .withDefaultOrigin(typeable.describe)
 
@@ -44,6 +54,7 @@ abstract class LowPriorityParserImplicits {
     M <: HList,
     G <: HList,
     H <: HList,
+    T <: HList,
     R <: HList,
     P <: HList
   ](implicit
@@ -56,10 +67,11 @@ abstract class LowPriorityParserImplicits {
     helpMessages: Annotations.Aux[HelpMessage, CC, M],
     group: Annotations.Aux[Group, CC, G],
     noHelp: Annotations.Aux[Hidden, CC, H],
+    tags: AnnotationList.Aux[caseapp.Tag, CC, T],
     recurse: Annotations.Aux[Recurse, CC, R],
-    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, R, P]]
+    parser: Strict[HListParserBuilder.Aux[L, D, N, V, M, G, H, T, R, P]]
   ): Parser.Aux[CC, P] =
-    derive[CC, L, D, N, V, M, G, H, R, P](
+    derive[CC, L, D, N, V, M, G, H, T, R, P](
       gen,
       typeable,
       defaults,
@@ -68,6 +80,7 @@ abstract class LowPriorityParserImplicits {
       helpMessages,
       group,
       noHelp,
+      tags,
       recurse,
       parser
     )

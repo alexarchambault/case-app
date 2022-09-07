@@ -1,6 +1,6 @@
 package caseapp.core
 
-import caseapp.{Group, HelpMessage, Name, ValueDescription}
+import caseapp.{Group, HelpMessage, Name, Tag, ValueDescription}
 import dataclass._
 
 /** Infos about an argument / option an application can accept.
@@ -28,7 +28,9 @@ import dataclass._
   @since
   group: Option[Group] = None,
   @since
-  origin: Option[String] = None
+  origin: Option[String] = None,
+  @since
+  tags: Seq[Tag] = Nil
 ) {
   def withDefaultOrigin(defaultOrigin: String): Arg =
     if (origin.isEmpty) withOrigin(Some(defaultOrigin))

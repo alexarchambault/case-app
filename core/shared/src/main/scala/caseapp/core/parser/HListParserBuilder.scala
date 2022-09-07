@@ -15,6 +15,7 @@ sealed abstract class HListParserBuilder[
   -M <: HList,
   -G <: HList,
   -H <: HList,
+  -T <: HList,
   R <: HList
 ] {
   type P <: HList
@@ -24,7 +25,8 @@ sealed abstract class HListParserBuilder[
     valueDescriptions: V,
     helpMessages: M,
     groups: G,
-    noHelp: H
+    noHelp: H,
+    tags: T
   ): Parser.Aux[L, P]
 }
 
@@ -38,10 +40,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     M <: HList,
     G <: HList,
     H <: HList,
+    T <: HList,
     R <: HList
   ](implicit
-    args: HListParserBuilder[L, D, N, V, M, G, H, R]
-  ): Aux[L, D, N, V, M, G, H, R, args.P] =
+    args: HListParserBuilder[L, D, N, V, M, G, H, T, R]
+  ): Aux[L, D, N, V, M, G, H, T, R, args.P] =
     args
 
   type Aux[
@@ -52,10 +55,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     M <: HList,
     G <: HList,
     H <: HList,
+    T <: HList,
     R <: HList,
     P0 <: HList
   ] =
-    HListParserBuilder[L, D, N, V, M, G, H, R] { type P = P0 }
+    HListParserBuilder[L, D, N, V, M, G, H, T, R] { type P = P0 }
 
   def instance[
     L <: HList,
@@ -65,12 +69,13 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     M <: HList,
     G <: HList,
     H <: HList,
+    T <: HList,
     R <: HList,
     P0 <: HList
   ](
-    p: (() => D, N, V, M, G, H) => Parser.Aux[L, P0]
-  ): Aux[L, D, N, V, M, G, H, R, P0] =
-    new HListParserBuilder[L, D, N, V, M, G, H, R] {
+    p: (() => D, N, V, M, G, H, T) => Parser.Aux[L, P0]
+  ): Aux[L, D, N, V, M, G, H, T, R, P0] =
+    new HListParserBuilder[L, D, N, V, M, G, H, T, R] {
       type P = P0
       def apply(
         default: => D,
@@ -78,13 +83,14 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         valueDescriptions: V,
         helpMessages: M,
         group: G,
-        noHelp: H
+        noHelp: H,
+        tags: T
       ) =
-        p(() => default, names, valueDescriptions, helpMessages, group, noHelp)
+        p(() => default, names, valueDescriptions, helpMessages, group, noHelp, tags)
     }
 
-  implicit val hnil: Aux[HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil] =
-    instance { (_, _, _, _, _, _) =>
+  implicit val hnil: Aux[HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil, HNil] =
+    instance { (_, _, _, _, _, _, _) =>
       NilParser
     }
 
@@ -101,12 +107,13 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     MT <: HList,
     GT <: HList,
     HT <: HList,
+    TT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
     default: Strict[Default[H @@ Tag]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, TT, RT, PT]]
   ): Aux[
     FieldType[K, H @@ Tag] :: T,
     Option[H @@ Tag] :: DT,
@@ -115,10 +122,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     Option[HelpMessage] :: MT,
     Option[Group] :: GT,
     Option[Hidden] :: HT,
+    List[caseapp.Tag] :: TT,
     None.type :: RT,
     Option[H @@ Tag] :: PT
   ] =
-    hcons[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, RT]
+    hcons[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, TT, RT]
 
   implicit def hcons[
     K <: Symbol,
@@ -131,12 +139,13 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     MT <: HList,
     GT <: HList,
     HT <: HList,
+    TT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
     default: Strict[Default[H]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, TT, RT, PT]]
   ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
@@ -145,10 +154,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     Option[HelpMessage] :: MT,
     Option[Group] :: GT,
     Option[Hidden] :: HT,
+    List[caseapp.Tag] :: TT,
     None.type :: RT,
     Option[H] :: PT
   ] =
-    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
+    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp, tags) =>
 
       val tailParser = tail.value(
         default0().tail,
@@ -156,7 +166,8 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         valueDescriptions.tail,
         helpMessages.tail,
         groups.tail,
-        noHelp.tail
+        noHelp.tail,
+        tags.tail
       )
 
       val arg = Arg(
@@ -167,7 +178,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         noHelp.head.nonEmpty,
         argParser.value.isFlag,
         groups.head
-      )
+      ).withTags(tags.head)
 
       val argument =
         Argument(arg, argParser.value, () => default0().head.orElse(Some(default.value.value)))
@@ -187,10 +198,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     MT <: HList,
     GT <: HList,
     HT <: HList,
+    TT <: HList,
     RT <: HList
   ](implicit
     headParser: Strict[Parser[H]],
-    tail: Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]
+    tail: Aux[T, DT, NT, VT, MT, GT, HT, TT, RT, PT]
   ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
@@ -199,10 +211,11 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     None.type :: MT,
     None.type :: GT,
     None.type :: HT,
+    Nil.type :: TT,
     Some[Recurse] :: RT,
     headParser.value.D :: PT
   ] =
-    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
+    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp, tags) =>
 
       val tailParser = tail(
         default0().tail,
@@ -210,7 +223,8 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         valueDescriptions.tail,
         helpMessages.tail,
         groups.tail,
-        noHelp.tail
+        noHelp.tail,
+        tags.tail
       )
 
       RecursiveConsParser(headParser.value, tailParser)

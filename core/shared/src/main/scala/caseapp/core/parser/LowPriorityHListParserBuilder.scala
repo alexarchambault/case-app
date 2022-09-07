@@ -22,11 +22,12 @@ abstract class LowPriorityHListParserBuilder {
     MT <: HList,
     GT <: HList,
     HT <: HList,
+    TT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H @@ Tag]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, TT, RT, PT]]
   ): Aux[
     FieldType[K, H @@ Tag] :: T,
     Option[H @@ Tag] :: DT,
@@ -35,10 +36,11 @@ abstract class LowPriorityHListParserBuilder {
     Option[HelpMessage] :: MT,
     Option[Group] :: GT,
     Option[Hidden] :: HT,
+    List[caseapp.Tag] :: TT,
     None.type :: RT,
     Option[H @@ Tag] :: PT
   ] =
-    hconsNoDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, RT]
+    hconsNoDefault[K, H @@ Tag, T, PT, DT, NT, VT, MT, GT, HT, TT, RT]
 
   implicit def hconsNoDefault[
     K <: Symbol,
@@ -51,11 +53,12 @@ abstract class LowPriorityHListParserBuilder {
     MT <: HList,
     GT <: HList,
     HT <: HList,
+    TT <: HList,
     RT <: HList
   ](implicit
     name: Witness.Aux[K],
     argParser: Strict[ArgParser[H]],
-    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, RT, PT]]
+    tail: Strict[Aux[T, DT, NT, VT, MT, GT, HT, TT, RT, PT]]
   ): Aux[
     FieldType[K, H] :: T,
     Option[H] :: DT,
@@ -64,10 +67,11 @@ abstract class LowPriorityHListParserBuilder {
     Option[HelpMessage] :: MT,
     Option[Group] :: GT,
     Option[Hidden] :: HT,
+    List[caseapp.Tag] :: TT,
     None.type :: RT,
     Option[H] :: PT
   ] =
-    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp) =>
+    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp, tags) =>
 
       val tailParser = tail.value(
         default0().tail,
@@ -75,7 +79,8 @@ abstract class LowPriorityHListParserBuilder {
         valueDescriptions.tail,
         helpMessages.tail,
         groups.tail,
-        noHelp.tail
+        noHelp.tail,
+        tags.tail
       )
 
       val arg = Arg(
@@ -86,7 +91,7 @@ abstract class LowPriorityHListParserBuilder {
         noHelp.head.nonEmpty,
         argParser.value.isFlag,
         groups.head
-      )
+      ).withTags(tags.head)
 
       val argument = Argument(arg, argParser.value, () => default0().head)
 
