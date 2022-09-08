@@ -11,7 +11,6 @@ object Zsh {
 
   def script(progName: String): String =
     s"""#compdef _$progName $progName
-       |typeset -A opt_args
        |
        |function _$progName {
        |  eval "$$($progName complete $id $$CURRENT $$words[@])"
