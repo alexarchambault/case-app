@@ -37,7 +37,13 @@ package object caseapp {
 
   // Custom tag implementation, see above for more details
   type @@[T, Tag] = shapeless.newtype.Newtype[T, Tag]
+  type Tag        = caseapp.annotation.Tag
   object Tag {
+    def apply(name: String): Tag =
+      caseapp.annotation.Tag(name)
+    def unapply(tag: Tag): Option[String] =
+      caseapp.annotation.Tag.unapply(tag)
+
     final class TagBuilder[Tag] {
       def apply[T](t: T): T @@ Tag = t.asInstanceOf[T @@ Tag]
     }

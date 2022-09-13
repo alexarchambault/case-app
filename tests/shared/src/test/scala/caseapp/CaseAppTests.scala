@@ -583,6 +583,16 @@ object CaseAppTests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    test("keep tags") {
+      val args     = DemoOptions.help.args
+      val valueArg = args.find(_.name.name == "value").getOrElse(sys.error("value arg not found"))
+      val stagesArg =
+        args.find(_.name.name == "stages").getOrElse(sys.error("stages arg not found"))
+
+      assert(valueArg.tags == Seq(Tag("foo")))
+      assert(stagesArg.tags == Seq(Tag("foo"), Tag("other")))
+    }
+
   }
 
 }
