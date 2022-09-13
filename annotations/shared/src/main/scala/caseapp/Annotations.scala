@@ -51,5 +51,3 @@ final class Recurse extends StaticAnnotation
 final class Hidden extends StaticAnnotation
 
 final case class Group(name: String) extends StaticAnnotation
-
-final case class Tag(name: String) extends StaticAnnotation

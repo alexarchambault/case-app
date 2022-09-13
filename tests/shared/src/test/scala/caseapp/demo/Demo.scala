@@ -16,9 +16,17 @@ object SharedOptions {
 @ArgsName("files")
 final case class DemoOptions(
   first: Boolean,
-  @ExtraName("V") @HelpMessage("Set a value") value: Option[String],
+  @Group("foo")
+  @Tag("foo")
+  @ExtraName("V")
+  @HelpMessage("Set a value")
+  value: Option[String],
   @ExtraName("v") @HelpMessage("Be verbose") verbose: Int @@ Counter,
-  @ExtraName("S") @ValueDescription("stages") stages: List[String],
+  @Tag("foo")
+  @Tag("other")
+  @ExtraName("S")
+  @ValueDescription("stages")
+  stages: List[String],
   @Recurse shared: SharedOptions = SharedOptions()
 )
 
