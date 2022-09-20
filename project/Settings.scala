@@ -3,7 +3,7 @@ import sbt.Keys._
 
 object Settings {
 
-  private def scala212 = "2.12.16"
+  private def scala212 = "2.12.17"
   private def scala213 = "2.13.8"
 
   private lazy val isAtLeastScala213 = Def.setting {
