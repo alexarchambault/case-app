@@ -173,6 +173,22 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
 
 object CaseApp {
 
+  def process[T](args: Seq[String])(implicit
+    parser: Parser[T],
+    help: Help[T]
+  ): (T, RemainingArgs) = {
+    var values = Option.empty[(T, RemainingArgs)]
+    val app: CaseApp[T] = new CaseApp[T] {
+      def run(options: T, args: RemainingArgs): Unit = {
+        values = Some((options, args))
+      }
+    }
+    app.main(args.toArray)
+    values.getOrElse {
+      sys.error("should not happen")
+    }
+  }
+
   def parse[T: Parser](args: Seq[String]): Either[Error, (T, Seq[String])] =
     Parser[T].parse(args)
 
