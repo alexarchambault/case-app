@@ -1,5 +1,6 @@
 package caseapp
 
+import caseapp.core.parser.Parser
 import caseapp.core.{Error, Indexed}
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}
 
@@ -11,6 +12,10 @@ object Definitions {
     value: String = "default",
     numFoo: Int = -10
   )
+
+  object FewArgs {
+    implicit val parser: Parser[FewArgs] = Parser.derive
+  }
 
   final case class FewArgs1(
     value: String = "default",
@@ -62,14 +67,14 @@ object Definitions {
         .as[OverriddenParser]
   }
 
-  Parser[NoArgs]
-  Parser[FewArgs]
-  Parser[MoreArgs]
-  Parser[WithList]
-  Parser[WithTaggedList]
-  Parser[OptBool]
-  Parser[WithCustom]
-  Parser[Demo]
+  val noArgsParser: Parser[NoArgs]                 = Parser.derive
+  val fewArgsParser: Parser[FewArgs]               = Parser.derive
+  val moreArgsParser: Parser[MoreArgs]             = Parser.derive
+  val withListParser: Parser[WithList]             = Parser.derive
+  val withTaggedListParser: Parser[WithTaggedList] = Parser.derive
+  val optBoolParser: Parser[OptBool]               = Parser.derive
+  val withCustomParser: Parser[WithCustom]         = Parser.derive
+  val demoParser: Parser[Demo]                     = Parser.derive
 
   final case class ReadmeOptions1(
     user: Option[String],

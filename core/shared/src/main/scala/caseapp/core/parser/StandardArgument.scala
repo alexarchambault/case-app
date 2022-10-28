@@ -7,14 +7,16 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class StandardArgument[H](
+@data case class StandardArgument[H](
   arg: Arg,
   argParser: ArgParser[H],
   default: () => Option[H] // FIXME Couldn't this be Option[() => H]?
 ) extends Argument[H] {
 
+  import StandardArgument._
+
   def withDefaultOrigin(origin: String): Argument[H] =
-    withArg(arg.withDefaultOrigin(origin))
+    this.withArg(arg.withDefaultOrigin(origin))
 
   def init: Option[H] =
     None
@@ -84,4 +86,11 @@ import caseapp.Name
 object StandardArgument {
   def apply[H: ArgParser](arg: Arg): StandardArgument[H] =
     StandardArgument[H](arg, ArgParser[H], () => None)
+
+  implicit class StandardArgumentWithOps[H](private val standardArg: StandardArgument[H])
+      extends AnyVal {
+    def withArg(arg: Arg): StandardArgument[H] =
+      standardArg.copy(arg = arg)
+  }
+
 }

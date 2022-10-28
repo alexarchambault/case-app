@@ -8,11 +8,10 @@ import scala.sys.process._
 object Mima {
 
   def binaryCompatibilityVersions: Set[String] =
-    Seq("git", "tag", "--merged", "HEAD^", "--contains", "be2a19c6c737f")
+    Seq("git", "tag", "--merged", "HEAD^", "--contains", "34a70d9ff42e0e75847ee7157bf8a81b675d7813")
       .!!
       .linesIterator
       .map(_.trim)
-      .filter(_ != "v2.1.0-M16")
       .filter(_.startsWith("v"))
       .map(_.stripPrefix("v"))
       .toSet

@@ -2,7 +2,7 @@ package caseapp.core.help
 
 import dataclass.data
 
-@data class RuntimeCommandHelp[T](
+@data case class RuntimeCommandHelp[T](
   names: List[List[String]],
   help: Help[T],
   group: String,

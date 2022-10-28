@@ -14,9 +14,6 @@ package object caseapp {
   type Help[T] = core.help.Help[T]
   val Help = core.help.Help
 
-  type CommandsHelp[T] = core.help.CommandsHelp[T]
-  val CommandsHelp = core.help.CommandsHelp
-
   type CaseApp[T] = core.app.CaseApp[T]
   val CaseApp = core.app.CaseApp
 
@@ -36,20 +33,20 @@ package object caseapp {
   // }
 
   // Custom tag implementation, see above for more details
-  type @@[T, Tag] = shapeless.newtype.Newtype[T, Tag]
-  type Tag        = caseapp.annotation.Tag
+  final case class @@[T, Tag](value: T) extends AnyVal
+  type Tag = caseapp.annotation.Tag
   object Tag {
     def apply(name: String): Tag =
       caseapp.annotation.Tag(name)
     def unapply(tag: Tag): Option[String] =
-      caseapp.annotation.Tag.unapply(tag)
+      Some(tag.name)
 
     final class TagBuilder[Tag] {
-      def apply[T](t: T): T @@ Tag = t.asInstanceOf[T @@ Tag]
+      def apply[T](t: T): T @@ Tag = @@(t)
     }
 
     def of[Tag]: TagBuilder[Tag]       = new TagBuilder[Tag]
-    def unwrap[T, Tag](t: T @@ Tag): T = t.asInstanceOf[T]
+    def unwrap[T, Tag](t: T @@ Tag): T = t.value
   }
 
   type Counter = core.Counter

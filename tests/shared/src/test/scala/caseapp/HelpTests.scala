@@ -2,6 +2,7 @@ package caseapp
 
 import caseapp.core.app.CommandsEntryPoint
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
+import caseapp.core.Scala3Helpers._
 import utest._
 
 object HelpTests extends TestSuite {
@@ -241,8 +242,11 @@ object HelpTests extends TestSuite {
 
     test("generate a help message with custom formatter") {
 
-      implicit val p = Parser[FewArgs].nameFormatter((n: Name) => n.name)
-      val message    = Help[FewArgs].help(format)
+      implicit val p: Parser[FewArgs] = {
+        val parser: Parser[FewArgs] = Parser.derive
+        parser.nameFormatter((n: Name) => n.name)
+      }
+      val message = Help[FewArgs].help(format)
 
       val expectedMessage =
         """Usage: few-args [options]

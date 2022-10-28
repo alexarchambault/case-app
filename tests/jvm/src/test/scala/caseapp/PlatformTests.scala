@@ -3,6 +3,8 @@ package caseapp
 import java.util.{Calendar, GregorianCalendar}
 import utest._
 import java.nio.file._
+import caseapp.core.Error
+import caseapp.core.help.WithHelp
 
 object PlatformTests extends TestSuite {
 
@@ -10,13 +12,21 @@ object PlatformTests extends TestSuite {
     date: Calendar
   )
 
-  val withCalendarParser = CaseApp.parseWithHelp[WithCalendar] _
+  implicit lazy val withCalendarParser0: Parser[WithCalendar] = Parser.derive
+
+  val withCalendarParser: Seq[String] => Either[
+    caseapp.core.Error,
+    (Either[Error, WithCalendar], Boolean, Boolean, Seq[String])
+  ] =
+    CaseApp.parseWithHelp[WithCalendar] _
 
   final case class WithPath(
     path: Path
   )
 
-  CaseApp.parseWithHelp[WithPath] _
+  // unused, but we check that this derives a Parser for WithPath
+  private def checkDerivation(args: Seq[String]) =
+    CaseApp.parseWithHelp[WithPath](args)
 
   val tests = TestSuite {
     test("parse a date") {

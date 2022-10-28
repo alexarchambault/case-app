@@ -3,7 +3,7 @@ package caseapp.core.help
 import caseapp.core.util.fansi
 import dataclass.data
 
-@data class Table(lines: IndexedSeq[Seq[fansi.Str]]) {
+@data case class Table(lines: IndexedSeq[Seq[fansi.Str]]) {
 
   def widths: Seq[Int] =
     if (lines.isEmpty) Nil

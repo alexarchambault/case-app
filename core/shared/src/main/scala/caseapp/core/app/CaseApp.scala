@@ -1,6 +1,7 @@
 package caseapp.core.app
 
 import caseapp.Name
+import caseapp.core.Scala3Helpers._
 import caseapp.core.{Error, RemainingArgs}
 import caseapp.core.complete.{Completer, CompletionItem, HelpCompleter}
 import caseapp.core.help.{Help, HelpFormat, WithFullHelp, WithHelp}

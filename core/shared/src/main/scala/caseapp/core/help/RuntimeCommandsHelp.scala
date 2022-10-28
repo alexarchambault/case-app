@@ -6,7 +6,7 @@ import caseapp.core.util.fansi
 import caseapp.core.util.NameOps.toNameOps
 import dataclass._
 
-@data class RuntimeCommandsHelp(
+@data case class RuntimeCommandsHelp(
   progName: String,
   description: Option[String],
   defaultHelp: Help[_],

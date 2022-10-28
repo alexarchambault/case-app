@@ -36,11 +36,17 @@ lazy val util = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
-    libraryDependencies ++= Seq(
-      Deps.shapeless.value,
-      Deps.scalaCompiler.value % "provided",
-      Deps.scalaReflect.value  % "provided"
-    )
+    libraryDependencies ++= {
+      val sv = scalaVersion.value
+      if (sv.startsWith("2."))
+        Seq(
+          Deps.shapeless.value,
+          Deps.scalaCompiler.value % "provided",
+          Deps.scalaReflect.value  % "provided"
+        )
+      else
+        Nil
+    }
   )
 
 lazy val utilJVM    = util.jvm
@@ -90,10 +96,13 @@ lazy val core = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     name := "case-app",
-    libraryDependencies ++= Seq(
-      Deps.sourcecode.value,
-      Deps.dataClass % Provided
-    )
+    libraryDependencies ++= {
+      val sv = scalaVersion.value
+      val maybeDataClass =
+        if (sv.startsWith("2.")) Seq(Deps.dataClass % Provided)
+        else Nil
+      Seq(Deps.sourcecode.value) ++ maybeDataClass
+    }
   )
 
 lazy val coreJVM    = core.jvm
@@ -115,22 +124,8 @@ lazy val testsJVM    = tests.jvm
 lazy val testsJS     = tests.js
 lazy val testsNative = tests.native
 
-lazy val refined = crossProject(JSPlatform, JVMPlatform)
-  .dependsOn(core)
-  .settings(
-    shared,
-    caseAppPrefix,
-    Mima.settings,
-    libraryDependencies ++= Seq(
-      Deps.refined.value,
-      Deps.utest.value % Test
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
-  )
-
-lazy val refinedJVM = refined.jvm
-lazy val refinedJS  = refined.js
-
 disablePlugins(MimaPlugin)
 publish / skip     := true
 crossScalaVersions := Nil
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
