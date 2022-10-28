@@ -115,22 +115,6 @@ lazy val testsJVM    = tests.jvm
 lazy val testsJS     = tests.js
 lazy val testsNative = tests.native
 
-lazy val refined = crossProject(JSPlatform, JVMPlatform)
-  .dependsOn(core)
-  .settings(
-    shared,
-    caseAppPrefix,
-    Mima.settings,
-    libraryDependencies ++= Seq(
-      Deps.refined.value,
-      Deps.utest.value % Test
-    ),
-    testFrameworks += new TestFramework("utest.runner.Framework")
-  )
-
-lazy val refinedJVM = refined.jvm
-lazy val refinedJS  = refined.js
-
 disablePlugins(MimaPlugin)
 publish / skip     := true
 crossScalaVersions := Nil
