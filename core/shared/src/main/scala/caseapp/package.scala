@@ -14,9 +14,6 @@ package object caseapp {
   type Help[T] = core.help.Help[T]
   val Help = core.help.Help
 
-  type CommandsHelp[T] = core.help.CommandsHelp[T]
-  val CommandsHelp = core.help.CommandsHelp
-
   type CaseApp[T] = core.app.CaseApp[T]
   val CaseApp = core.app.CaseApp
 
