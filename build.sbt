@@ -134,3 +134,5 @@ lazy val refinedJS  = refined.js
 disablePlugins(MimaPlugin)
 publish / skip     := true
 crossScalaVersions := Nil
+
+Global / onChangedBuildSource := ReloadOnSourceChanges
