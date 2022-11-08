@@ -47,7 +47,8 @@ abstract class Parser[T] extends ParserMethods[T] {
 
   final def withFullHelp: Parser[WithFullHelp[T]] = {
     implicit val parser: Parser[T] = this
-    val p = ParserWithNameFormatter(Parser[WithFullHelp[T]], defaultNameFormatter)
+    val p0                         = WithFullHelp.parser[T]
+    val p                          = ParserWithNameFormatter(p0, defaultNameFormatter)
     if (defaultIgnoreUnrecognized)
       p.ignoreUnrecognized
     else if (defaultStopAtFirstUnrecognized)
