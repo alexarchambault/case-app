@@ -2,6 +2,7 @@ package caseapp.core.help
 
 import caseapp.core.Error
 import caseapp.{ExtraName, Group, HelpMessage, Recurse}
+import caseapp.core.parser.Parser
 
 final case class WithFullHelp[T](
   @Recurse
@@ -14,3 +15,5 @@ final case class WithFullHelp[T](
   def map[U](f: T => U): WithFullHelp[U] =
     copy(withHelp = withHelp.map(f))
 }
+
+object WithFullHelp extends WithFullHelpCompanion

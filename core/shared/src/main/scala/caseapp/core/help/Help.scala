@@ -59,7 +59,7 @@ import caseapp.HelpMessage
 
   def withFullHelp: Help[WithFullHelp[T]] = {
     final case class Dummy()
-    val parser: Parser[WithFullHelp[Dummy]] = Parser.derive
+    val parser: Parser[WithFullHelp[Dummy]] = WithFullHelp.parser
     val helpArgs                            = parser.args
 
     this.withArgs(helpArgs ++ args)
