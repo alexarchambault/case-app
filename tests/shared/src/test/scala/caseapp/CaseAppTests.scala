@@ -2,7 +2,7 @@ package caseapp
 
 import caseapp.core.{Error, Indexed}
 import caseapp.core.Error.SeveralErrors
-import caseapp.core.help.{Help, WithHelp}
+import caseapp.core.help.{Help, WithFullHelp, WithHelp}
 import caseapp.demo._
 import utest._
 import caseapp.core.util.Formatter
@@ -581,6 +581,22 @@ object CaseAppTests extends TestSuite {
       val expectedRes =
         Right(
           (WithHelp(false, true, Right(FewArgs())), RemainingArgs(List(), List()))
+        )
+      assert(res == expectedRes)
+    }
+
+    test("accept -help with full help") {
+      val res =
+        Parser[FewArgs].withFullHelp.detailedParse(
+          Seq("-help")
+        )
+
+      val expectedRes =
+        Right(
+          (
+            WithFullHelp(WithHelp(false, true, Right(FewArgs())), false),
+            RemainingArgs(List(), List())
+          )
         )
       assert(res == expectedRes)
     }
