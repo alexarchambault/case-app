@@ -34,20 +34,33 @@ class ParserOps[T <: Tuple](val parser: Parser[T]) extends AnyVal {
     ConsParser(argument, parser)
   }
 
-  // def addAll[U]: ParserOps.AddAllHelper[T, D, U] =
-  //   new ParserOps.AddAllHelper[T, D, U](parser)
+  def addAll[H](using headParser: Parser[H]): Parser[H *: T] =
+    RecursiveConsParser(headParser, parser)
 
-  def as[F](implicit helper: ParserOps.AsHelper[T, F]): Parser[F] =
-    helper(parser)
+  def as[F](using
+    m: Mirror.ProductOf[F],
+    ev: T =:= ParserOps.Reverse[m.MirroredElemTypes],
+    ev0: ParserOps.Reverse[ParserOps.Reverse[m.MirroredElemTypes]] =:= m.MirroredElemTypes
+  ): Parser[F] =
+    parser
+      .map(ev)
+      .map(ParserOps.reverse[ParserOps.Reverse[m.MirroredElemTypes]])
+      .map(ev0)
+      .map(m.fromTuple)
 
   def tupled: Parser[ParserOps.Reverse[T]] =
     parser.map(ParserOps.reverse)
 
-  def to[F](implicit helper: ParserOps.ToHelper[T, F]): Parser[F] =
-    helper(parser)
+  def to[F](using
+    m: Mirror.ProductOf[F],
+    ev: T =:= m.MirroredElemTypes
+  ): Parser[F] =
+    parser.map(ev).map(m.fromTuple)
 
-  def toTuple[P](implicit helper: ParserOps.ToTupleHelper[T, P]): Parser[P] =
-    helper(parser)
+  def toTuple[P <: Tuple](using
+    m: Mirror.ProductOf[T] { type MirroredElemTypes = P }
+  ): Parser[P] =
+    parser.map(Tuple.fromProductTyped[T])
 
 }
 
@@ -60,48 +73,5 @@ object ParserOps {
 
   def reverse[T <: Tuple](t: T): Reverse[T] =
     Tuple.fromArray(t.toArray.reverse).asInstanceOf[Reverse[T]]
-
-  def reverse0[T <: Tuple](t: Reverse[T]): T =
-    Tuple.fromArray(t.toArray.reverse).asInstanceOf[T]
-
-  // class AddAllHelper[T <: Tuple, D <: Tuple, U](val parser: Parse[T]) extends AnyVal {
-  //   def apply[DU](implicit other: Parser[U]): Parser[U :: T] =
-  //     RecursiveConsParser(other, parser)
-  // }
-
-  abstract class AsHelper[T, F] {
-    def apply(parser: Parser[T]): Parser[F]
-  }
-
-  inline implicit def defaultAsHelper[T <: Tuple, F](implicit
-    m: Mirror.ProductOf[F],
-    ev: T =:= Reverse[m.MirroredElemTypes]
-  ): AsHelper[T, F] = {
-    parser =>
-      parser.map(reverse0).map(p => m.fromProduct(p))
-  }
-
-  abstract class ToHelper[T, F] {
-    def apply(parser: Parser[T]): Parser[F]
-  }
-
-  implicit def defaultToHelper[F, T <: Tuple](implicit
-    m: Mirror.ProductOf[F]
-  ): ToHelper[T, F] = {
-    parser =>
-      parser.map(m.fromProduct)
-  }
-
-  sealed abstract class ToTupleHelper[T, P] {
-    def apply(parser: Parser[T]): Parser[P]
-  }
-
-  implicit def defaultToTupleHelper[T <: Product](implicit
-    m: scala.deriving.Mirror.ProductOf[T]
-  ): ToTupleHelper[T, m.MirroredElemTypes] =
-    new ToTupleHelper[T, m.MirroredElemTypes] {
-      def apply(parser: Parser[T]): Parser[m.MirroredElemTypes] =
-        parser.map(Tuple.fromProductTyped[T](_))
-    }
 
 }

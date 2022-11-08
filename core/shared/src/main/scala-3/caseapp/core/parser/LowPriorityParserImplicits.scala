@@ -9,20 +9,6 @@ import scala.quoted.{given, *}
 
 object LowPriorityParserImplicits {
 
-  // adapted from https://github.com/com-lihaoyi/upickle/blob/3f9c98c3983a98c5e0716e42314d5f825bafa9e4/implicits/src-3/upickle/implicits/macros.scala#L51-L70
-  inline private def fieldLabels[T] = ${ fieldLabelsImpl[T] }
-  private def fieldLabelsImpl[T](using Quotes, Type[T]): Expr[List[String]] =
-    import quotes.reflect.*
-    val fields = TypeRepr.of[T].typeSymbol
-      .primaryConstructor
-      .paramSymss
-      .flatten
-      .filterNot(_.isType)
-      .map(_.name)
-
-    Expr.ofList(fields.map(Expr(_)))
-  end fieldLabelsImpl
-
   extension (comp: Expr.type) {
     def ofOption[T](opt: Option[Expr[T]])(using Quotes, Type[T]): Expr[Option[T]] =
       opt match {
@@ -37,15 +23,136 @@ object LowPriorityParserImplicits {
     fullName.takeWhile(_ != '[').split('.').last
   }
 
+  private def fields[U](using
+    q: Quotes,
+    t: Type[U]
+  ): List[(q.reflect.Symbol, q.reflect.TypeRepr)] = {
+    import quotes.reflect.*
+    val tpe = TypeRepr.of[U]
+    val sym = TypeRepr.of[U] match {
+      case AppliedType(base, params) =>
+        base.typeSymbol
+      case _ =>
+        TypeTree.of[U].symbol
+    }
+
+    // Many things inspired by https://github.com/plokhotnyuk/jsoniter-scala/blob/8f39e1d45fde2a04984498f036cad93286344c30/jsoniter-scala-macros/shared/src/main/scala-3/com/github/plokhotnyuk/jsoniter_scala/macros/JsonCodecMaker.scala#L564-L613
+    // and around, here
+
+    def typeArgs(tpe: TypeRepr): List[TypeRepr] = tpe match
+      case AppliedType(_, typeArgs) => typeArgs.map(_.dealias)
+      case _                        => Nil
+
+    def resolveParentTypeArg(
+      child: Symbol,
+      fromNudeChildTarg: TypeRepr,
+      parentTarg: TypeRepr,
+      binding: Map[String, TypeRepr]
+    ): Map[String, TypeRepr] =
+      if (fromNudeChildTarg.typeSymbol.isTypeParam) { // todo: check for paramRef instead ?
+        val paramName = fromNudeChildTarg.typeSymbol.name
+        binding.get(paramName) match
+          case None => binding.updated(paramName, parentTarg)
+          case Some(oldBinding) =>
+            if (oldBinding =:= parentTarg) binding
+            else sys.error(
+              s"Type parameter $paramName in class ${child.name} appeared in the constructor of " +
+                s"${tpe.show} two times differently, with ${oldBinding.show} and ${parentTarg.show}"
+            )
+      }
+      else if (fromNudeChildTarg <:< parentTarg)
+        binding // TODO: assupe parentTag is covariant, get covariance from tycon type parameters.
+      else
+        (fromNudeChildTarg, parentTarg) match
+          case (AppliedType(ctycon, ctargs), AppliedType(ptycon, ptargs)) =>
+            ctargs.zip(ptargs).foldLeft(resolveParentTypeArg(child, ctycon, ptycon, binding)) {
+              (b, e) =>
+                resolveParentTypeArg(child, e._1, e._2, b)
+            }
+          case _ =>
+            sys.error(s"Failed unification of type parameters of ${tpe.show} from child $child - " +
+              s"${fromNudeChildTarg.show} and ${parentTarg.show}")
+
+    def resolveParentTypeArgs(
+      child: Symbol,
+      nudeChildParentTags: List[TypeRepr],
+      parentTags: List[TypeRepr],
+      binding: Map[String, TypeRepr]
+    ): Map[String, TypeRepr] =
+      nudeChildParentTags.zip(parentTags).foldLeft(binding)((s, e) =>
+        resolveParentTypeArg(child, e._1, e._2, s)
+      )
+
+    val nudeSubtype      = TypeIdent(sym).tpe
+    val baseConst        = nudeSubtype.memberType(sym.primaryConstructor)
+    val tpeArgsFromChild = typeArgs(tpe)
+    val const = baseConst match {
+      case MethodType(_, _, resTp) => resTp
+      case PolyType(names, _, resPolyTp) =>
+        val targs     = typeArgs(tpe)
+        val tpBinding = resolveParentTypeArgs(sym, tpeArgsFromChild, targs, Map.empty)
+        val ctArgs = names.map { name =>
+          tpBinding.get(name).getOrElse(sys.error(
+            s"Type parameter $name of $sym can't be deduced from " +
+              s"type arguments of ${tpe.show}. Please provide a custom implicitly accessible codec for it."
+          ))
+        }
+        val polyRes = resPolyTp match
+          case MethodType(_, _, resTp) => resTp
+          case other                   => other // hope we have no multiple typed param lists yet.
+        if (ctArgs.isEmpty) polyRes
+        else polyRes match
+          case AppliedType(base, _) => base.appliedTo(ctArgs)
+          case AnnotatedType(AppliedType(base, _), annot) =>
+            AnnotatedType(base.appliedTo(ctArgs), annot)
+          case _ => polyRes.appliedTo(ctArgs)
+      case other =>
+        sys.error(s"Primary constructior for ${tpe.show} is not MethodType or PolyType but $other")
+    }
+    sym.primaryConstructor
+      .paramSymss
+      .flatten
+      .map(f => (f, f.tree))
+      .collect {
+        case (sym, v: ValDef) =>
+          (sym, v.tpt.tpe)
+      }
+  }
+
+  inline private def checkFieldCount[T, N <: Int]: Unit =
+    ${ checkFieldCountImpl[T, N] }
+  private def checkFieldCountImpl[T, N <: Int](using Quotes, Type[T], Type[N]): Expr[Unit] = {
+    import quotes.reflect.*
+
+    val viaMirror = TypeRepr.of[N] match {
+      case ConstantType(c) =>
+        c.value match {
+          case n: Int => n
+          case other => sys.error(
+              s"Expected literal integer type, got ${Type.show[N]} ($other, ${other.getClass})"
+            )
+        }
+      case other =>
+        sys.error(s"Expected literal integer type, got ${Type.show[N]} ($other, ${other.getClass})")
+    }
+
+    val viaReflect = fields[T].length
+
+    assert(
+      viaMirror == viaReflect,
+      s"Got Unexpected number of field via reflection for type ${Type.show[T]} (got $viaReflect, expected $viaMirror)"
+    )
+
+    '{ () }
+  }
+
   inline private def tupleParser[T]: Parser[_] =
     ${ tupleParserImpl[T] }
   private def tupleParserImpl[T](using q: Quotes, t: Type[T]): Expr[Parser[_]] = {
     import quotes.reflect.*
-    val tSym   = TypeTree.of[T].symbol
-    val origin = shortName[T]
-    val fields = tSym.primaryConstructor.paramSymss.flatten.map(f => (f, f.tree)).collect {
-      case (sym, v: ValDef) => (sym, v.tpt.tpe)
-    }
+    val tSym    = TypeTree.of[T].symbol
+    val origin  = shortName[T]
+    val fields0 = fields[T]
 
     val defaultMap: Map[String, Expr[Any]] = {
       val comp =
@@ -59,7 +166,7 @@ object LowPriorityParserImplicits {
         }
       bodyOpt match {
         case Some(body) =>
-          val names = fields
+          val names = fields0
             .map(_._1)
             .filter(_.flags.is(Flags.HasDefault))
             .map(_.name)
@@ -73,7 +180,7 @@ object LowPriorityParserImplicits {
       }
     }
 
-    val parserExpr = fields
+    val parserExpr = fields0
       .foldRight[(TypeRepr, Expr[Parser[_]])]((TypeRepr.of[EmptyTuple], '{ NilParser })) {
         case ((sym, symTpe), (tailType, tailParserExpr)) =>
           val isRecursive = sym.annotations.exists(_.tpe =:= TypeRepr.of[caseapp.Recurse])
@@ -189,8 +296,9 @@ object LowPriorityParserImplicits {
 }
 
 trait LowPriorityParserImplicits {
-  inline given derive[T](using m: Mirror.ProductOf[T]): Parser[T] =
-    LowPriorityParserImplicits.tupleParser[T].asInstanceOf[Parser[m.MirroredElemTypes]].map(
-      m.fromTuple
-    )
+  inline given derive[T](using m: Mirror.ProductOf[T]): Parser[T] = {
+    LowPriorityParserImplicits.checkFieldCount[T, Tuple.Size[m.MirroredElemTypes]]
+    val parser = LowPriorityParserImplicits.tupleParser[T]
+    parser.asInstanceOf[Parser[m.MirroredElemTypes]].map(m.fromTuple)
+  }
 }

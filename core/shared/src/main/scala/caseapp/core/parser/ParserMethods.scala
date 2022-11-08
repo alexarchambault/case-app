@@ -1,7 +1,6 @@
 package caseapp.core.parser
 
 import caseapp.core.{Arg, Error, Indexed}
-import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.RemainingArgs
 import caseapp.core.util.Formatter
 import caseapp.Name
