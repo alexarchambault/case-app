@@ -1,6 +1,7 @@
 package caseapp
 
 import caseapp.core.{Arg, Error, Indexed}
+import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.parser.ParserOps
 import caseapp.core.util.Formatter
@@ -85,6 +86,23 @@ object ParserTests extends TestSuite {
       assert(countArg.origin == Some("MoreArgs"))
       assert(valueArg.origin == Some("FewArgs"))
       assert(numFooArg.origin == Some("FewArgs"))
+    }
+
+    test("WithHelp args have an origin") {
+      case class Dummy()
+      val parser: Parser[WithHelp[Dummy]] = WithHelp.parser
+      val args                            = parser.args
+      assert(args.nonEmpty)
+      assert(args.forall(_.origin.contains("WithHelp")))
+    }
+
+    test("WithFullHelp args have an origin") {
+      case class Dummy()
+      val parser: Parser[WithFullHelp[Dummy]] = WithFullHelp.parser
+      val args                                = parser.args
+      assert(args.exists(_.origin.contains("WithHelp")))
+      assert(args.exists(_.origin.contains("WithFullHelp")))
+      assert(args.forall(_.origin.exists(o => o == "WithHelp" || o == "WithFullHelp")))
     }
 
     test("Custom Argument type") {
