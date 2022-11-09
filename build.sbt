@@ -115,8 +115,11 @@ lazy val tests = crossProject(JSPlatform, JVMPlatform, NativePlatform)
   .settings(
     shared,
     caseAppPrefix,
-    publish / skip                         := true,
-    libraryDependencies += Deps.utest.value % Test,
+    publish / skip := true,
+    libraryDependencies ++= Seq(
+      Deps.pprint.value % Test,
+      Deps.utest.value  % Test
+    ),
     testFrameworks += new TestFramework("utest.runner.Framework")
   )
 
