@@ -58,7 +58,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
     T <: HList,
     R <: HList,
     P0 <: HList
-  ] =
+  ]                                                        =
     HListParserBuilder[L, D, N, V, M, G, H, T, R] { type P = P0 }
 
   def instance[
