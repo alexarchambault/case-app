@@ -3,6 +3,7 @@ package caseapp
 object HelpDefinitions {
   case class FirstOptions(
     @ExtraName("f")
+    @Tag("foo")
     foo: String = "",
     bar: Int = 0
   )
