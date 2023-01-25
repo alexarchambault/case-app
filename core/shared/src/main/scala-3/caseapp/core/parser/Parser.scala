@@ -12,7 +12,7 @@ import scala.language.implicitConversions
   * @tparam T:
   *   success result type
   */
-abstract class Parser[T] extends ParserMethods[T] {
+abstract class Parser[+T] extends ParserMethods[T] {
 
   import Parser.Step
 

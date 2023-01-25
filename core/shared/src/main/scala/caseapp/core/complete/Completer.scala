@@ -3,7 +3,7 @@ package caseapp.core.complete
 import caseapp.core.Arg
 import caseapp.core.help.{WithFullHelp, WithHelp}
 
-trait Completer[T] { self =>
+trait Completer[-T] { self =>
   def optionName(prefix: String, state: Option[T]): List[CompletionItem]
   def optionValue(arg: Arg, prefix: String, state: Option[T]): List[CompletionItem]
   def argument(prefix: String, state: Option[T]): List[CompletionItem]

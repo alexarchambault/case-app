@@ -14,7 +14,7 @@ import caseapp.core.Error
   * @tparam T:
   *   type to which usage and help options are added
   */
-final case class WithHelp[T](
+final case class WithHelp[+T](
   @Group("Help")
   @HelpMessage("Print usage and exit")
   usage: Boolean = false,

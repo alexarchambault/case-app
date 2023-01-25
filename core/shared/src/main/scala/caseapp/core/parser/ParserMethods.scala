@@ -8,7 +8,7 @@ import caseapp.core.complete.Completer
 import caseapp.core.complete.CompletionItem
 import scala.annotation.tailrec
 
-trait ParserMethods[T] { parser: Parser[T] =>
+trait ParserMethods[+T] { parser: Parser[T] =>
 
   import Parser.Step
 
