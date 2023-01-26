@@ -58,6 +58,9 @@ object Scala3Helpers {
       helpFormat.copy(sortedGroups = sortedGroups)
     def withHiddenGroups(hiddenGroups: Option[Seq[String]]): HelpFormat =
       helpFormat.copy(hiddenGroups = hiddenGroups)
+
+    def withFilterArgs(filterArgs: Option[Arg => Boolean]): HelpFormat =
+      helpFormat.copy(filterArgs = filterArgs)
   }
 
   implicit class OptionParserWithOps[T](private val parser: OptionParser[T]) {

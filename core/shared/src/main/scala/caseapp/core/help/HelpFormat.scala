@@ -1,5 +1,6 @@
 package caseapp.core.help
 
+import caseapp.core.Arg
 import caseapp.core.Scala3Helpers._
 import caseapp.core.util.fansi
 import dataclass._
@@ -15,7 +16,8 @@ import dataclass._
   sortCommandGroups: Option[Seq[String] => Seq[String]] = None,
   sortedCommandGroups: Option[Seq[String]] = None,
   hidden: fansi.Attrs = fansi.Attrs.Empty,
-  terminalWidthOpt: Option[Int] = None
+  terminalWidthOpt: Option[Int] = None,
+  @since filterArgs: Option[Arg => Boolean] = None
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],

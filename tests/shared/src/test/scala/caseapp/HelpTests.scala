@@ -1,5 +1,6 @@
 package caseapp
 
+import caseapp.core.Arg
 import caseapp.core.app.CommandsEntryPoint
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 import caseapp.core.Scala3Helpers._
@@ -393,6 +394,36 @@ object HelpTests extends TestSuite {
           |Other options:
           |  -f, --foo string
           |  --bar int
+          |
+          |Bb commands:
+          |  second""".stripMargin
+
+      assert(help == expected)
+    }
+    test("help message with filtered args") {
+      val entryPoint: CommandsEntryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+
+        override def defaultCommand = Some(CommandGroups.First)
+
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val filterArgsFunction    = (a: Arg) => !a.tags.exists(_.name == "foo")
+      val formatWithHiddenGroup = format.withFilterArgs(Some(filterArgsFunction))
+      val help                  = entryPoint.help.help(formatWithHiddenGroup)
+      val expected =
+        """Usage: foo <COMMAND> [options]
+          |
+          |Help options:
+          |  --usage            Print usage and exit
+          |  -h, -help, --help  Print help message and exit
+          |
+          |Other options:
+          |  --bar int
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message
           |
           |Bb commands:
           |  second""".stripMargin
