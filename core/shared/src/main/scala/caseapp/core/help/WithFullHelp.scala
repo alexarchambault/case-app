@@ -4,7 +4,7 @@ import caseapp.core.Error
 import caseapp.{ExtraName, Group, HelpMessage, Recurse}
 import caseapp.core.parser.Parser
 
-final case class WithFullHelp[T](
+final case class WithFullHelp[+T](
   @Recurse
   withHelp: WithHelp[T],
   @Group("Help")

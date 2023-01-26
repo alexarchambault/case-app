@@ -6,9 +6,10 @@ import caseapp.core.util.Formatter
 import caseapp.Name
 import caseapp.core.complete.Completer
 import caseapp.core.complete.CompletionItem
+
 import scala.annotation.tailrec
 
-trait ParserMethods[T] { parser: Parser[T] =>
+trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
 
   import Parser.Step
 
