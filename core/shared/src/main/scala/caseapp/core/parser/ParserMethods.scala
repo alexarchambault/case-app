@@ -326,7 +326,7 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
             completer.optionName(value, stateOpt)
           case Step.Unrecognized(_, _) =>
             completer.optionName(value, stateOpt)
-          case Step.StandardArgument(idx) if args0(idx) == "-" =>
+          case Step.StandardArgument(idx) if value == "-" =>
             completer.optionName(value, stateOpt)
           case Step.MatchedOption(_, consumed, arg) if shift == 0 =>
             completer.optionName(value, stateOpt)
