@@ -125,15 +125,17 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     stopAtFirstUnrecognized: Boolean,
     ignoreUnrecognized: Boolean
   ): Either[Error, (T, RemainingArgs)] = {
-    val (res, _) = scan(args, stopAtFirstUnrecognized, ignoreUnrecognized)
-    res.left.map(_._1)
+    val (res, remArgs, _) = scan(args, stopAtFirstUnrecognized, ignoreUnrecognized)
+    res
+      .left.map(_._1)
+      .map((_, remArgs))
   }
 
   final def scan(
     args: Seq[String],
     stopAtFirstUnrecognized: Boolean,
     ignoreUnrecognized: Boolean
-  ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
+  ): (Either[(Error, Either[D, T]), T], RemainingArgs, List[Step]) = {
 
     def runHelper(
       current: D,
@@ -141,7 +143,7 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
-    ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) =
+    ): (Either[(Error, Either[D, T]), T], RemainingArgs, List[Step]) =
       helper(current, args, extraArgsReverse, reverseSteps, index)
 
     @tailrec
@@ -151,41 +153,40 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       extraArgsReverse: List[Indexed[String]],
       reverseSteps: List[Step],
       index: Int
-    ): (Either[(Error, Either[D, T]), (T, RemainingArgs)], List[Step]) = {
+    ): (Either[(Error, Either[D, T]), T], RemainingArgs, List[Step]) = {
 
       def done = {
+        val remArgs = RemainingArgs(extraArgsReverse.reverse, Nil)
         val res = get(current)
           .left.map((_, Left(current)))
-          .map((_, RemainingArgs(extraArgsReverse.reverse, Nil)))
-        (res, reverseSteps.reverse)
+        (res, remArgs, reverseSteps.reverse)
       }
 
       def stopParsing(tailArgs: List[String]) = {
+        val remArgs =
+          if (stopAtFirstUnrecognized)
+            // extraArgsReverse should be empty anyway here
+            RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)
+          else
+            RemainingArgs(extraArgsReverse.reverse, Indexed.seq(tailArgs, index + 1))
         val res = get(current)
           .left.map((_, Left(current)))
-          .map { t =>
-            if (stopAtFirstUnrecognized)
-              // extraArgsReverse should be empty anyway here
-              (t, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil))
-            else
-              (t, RemainingArgs(extraArgsReverse.reverse, Indexed.seq(tailArgs, index + 1)))
-          }
         val reverseSteps0 = Step.DoubleDash(index) :: reverseSteps.reverse
-        (res, reverseSteps0.reverse)
+        (res, remArgs, reverseSteps0.reverse)
       }
 
       def unrecognized(headArg: String, tailArgs: List[String]) =
         if (stopAtFirstUnrecognized) {
+          // extraArgsReverse should be empty anyway here
+          val remArgs = RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)
           val res = get(current)
             .left.map((_, Left(current)))
-            // extraArgsReverse should be empty anyway here
-            .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
           val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
-          (res, reverseSteps0.reverse)
+          (res, remArgs, reverseSteps0.reverse)
         }
         else {
           val err = Error.UnrecognizedArgument(headArg)
-          val (remaining, steps) = runHelper(
+          val (remaining, remArgs, steps) = runHelper(
             current,
             tailArgs,
             extraArgsReverse,
@@ -194,18 +195,18 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
           )
           val res = Left((
             remaining.fold(t => err.append(t._1), _ => err),
-            remaining.fold(_._2, t => Right(t._1))
+            remaining.fold(_._2, Right(_))
           ))
-          (res, steps)
+          (res, remArgs, steps)
         }
 
       def stoppingAtUnrecognized = {
+        // extraArgsReverse should be empty anyway here
+        val remArgs = RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)
         val res = get(current)
           .left.map((_, Left(current)))
-          // extraArgsReverse should be empty anyway here
-          .map((_, RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)))
         val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
-        (res, reverseSteps0.reverse)
+        (res, remArgs, reverseSteps0.reverse)
       }
 
       args match {
@@ -257,7 +258,7 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
             case Left((msg, matchedArg, rem)) =>
               val consumed0 = Parser.consumed(args, rem)
               assert(consumed0 > 0)
-              val (remaining, steps) = runHelper(
+              val (remaining, remArgs, steps) = runHelper(
                 current,
                 rem,
                 extraArgsReverse,
@@ -266,9 +267,9 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
               )
               val res = Left((
                 remaining.fold(errs => msg.append(errs._1), _ => msg),
-                remaining.fold(_._2, t => Right(t._1))
+                remaining.fold(_._2, Right(_))
               ))
-              (res, steps)
+              (res, remArgs, steps)
           }
       }
     }
@@ -286,11 +287,11 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
 
     val args0 = if (index < args.length) args else args ++ Seq.fill(index + 1 - args.length)("")
 
-    val (res, steps) = scan(args0, stopAtFirstUnrecognized, ignoreUnrecognized)
+    val (res, remArgs, steps) = scan(args0, stopAtFirstUnrecognized, ignoreUnrecognized)
     lazy val stateOpt = res match {
       case Left((_, Left(state))) => get(state).toOption
       case Left((_, Right(t)))    => Some(t)
-      case Right((t, _))          => Some(t)
+      case Right(t)               => Some(t)
     }
 
     assert(index >= 0)
@@ -305,38 +306,53 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     val value = args0(index)
 
     stepOpt match {
-      case None => Nil
+      case None =>
+        val isAfterDoubleDash = steps.lastOption.exists {
+          case Step.DoubleDash(ddIdx) => ddIdx < index
+          case _                      => false
+        }
+        if (isAfterDoubleDash)
+          completer.postDoubleDash(stateOpt, remArgs)
+            .map { completer =>
+              if (value.startsWith("-"))
+                completer.optionName(value, stateOpt, remArgs)
+              else
+                completer.argument(value, stateOpt, remArgs)
+            }
+            .getOrElse(Nil)
+        else
+          Nil
       case Some(step) =>
         val shift = index - step.index
         step match {
           case Step.DoubleDash(_) =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.ErroredOption(_, _, _, _) if shift == 0 =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.ErroredOption(_, consumed, arg, _) if consumed == 2 && shift == 1 =>
-            completer.optionValue(arg, value, stateOpt)
+            completer.optionValue(arg, value, stateOpt, remArgs)
           case Step.ErroredOption(_, _, _, _) =>
             // should not happen
             Nil
           case Step.FirstUnrecognized(_, true) =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.FirstUnrecognized(_, false) =>
-            completer.argument(value, stateOpt)
+            completer.argument(value, stateOpt, remArgs)
           case Step.IgnoredUnrecognized(_) =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.Unrecognized(_, _) =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.StandardArgument(idx) if value == "-" =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.MatchedOption(_, consumed, arg) if shift == 0 =>
-            completer.optionName(value, stateOpt)
+            completer.optionName(value, stateOpt, remArgs)
           case Step.MatchedOption(_, consumed, arg) if consumed == 2 && shift == 1 =>
-            completer.optionValue(arg, value, stateOpt)
+            completer.optionValue(arg, value, stateOpt, remArgs)
           case Step.MatchedOption(_, _, _) =>
             // should not happen
             Nil
           case Step.StandardArgument(_) =>
-            completer.argument(value, stateOpt)
+            completer.argument(value, stateOpt, remArgs)
         }
     }
   }

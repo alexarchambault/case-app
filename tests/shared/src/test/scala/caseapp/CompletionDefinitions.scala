@@ -28,12 +28,12 @@ object CompletionDefinitions {
       override def completer: Completer[Options] = {
         val parent = super.completer
         new Completer[Options] {
-          def optionName(prefix: String, state: Option[Options]) =
-            parent.optionName(prefix, state)
-          def optionValue(arg: Arg, prefix: String, state: Option[Options]) =
+          def optionName(prefix: String, state: Option[Options], args: RemainingArgs) =
+            parent.optionName(prefix, state, args)
+          def optionValue(arg: Arg, prefix: String, state: Option[Options], args: RemainingArgs) =
             if (arg.name.name == "value")
               state match {
-                case None => parent.optionValue(arg, prefix, state)
+                case None => parent.optionValue(arg, prefix, state, args)
                 case Some(state0) =>
                   (0 to 2)
                     .map(_ + state0.other * 1000)
@@ -41,9 +41,9 @@ object CompletionDefinitions {
                     .toList
               }
             else
-              parent.optionValue(arg, prefix, state)
-          def argument(prefix: String, state: Option[Options]) =
-            parent.argument(prefix, state)
+              parent.optionValue(arg, prefix, state, args)
+          def argument(prefix: String, state: Option[Options], args: RemainingArgs) =
+            parent.argument(prefix, state, args)
         }
       }
       def run(options: Options, args: RemainingArgs): Unit = ???
