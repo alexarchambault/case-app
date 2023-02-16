@@ -52,8 +52,14 @@ object HelpCompanion {
     val helpMessage = sym.annotations
       .find(_.tpe =:= TypeRepr.of[caseapp.HelpMessage])
       .collect {
-        case Apply(_, List(arg, argMd)) =>
-          '{ caseapp.HelpMessage(${ arg.asExprOf[String] }, ${ argMd.asExprOf[String] }) }
+        case Apply(_, List(arg, argMd, argDetailed)) =>
+          '{
+            caseapp.HelpMessage(
+              ${ arg.asExprOf[String] },
+              ${ argMd.asExprOf[String] },
+              ${ argDetailed.asExprOf[String] }
+            )
+          }
       }
     '{
       val parser   = $parserExpr

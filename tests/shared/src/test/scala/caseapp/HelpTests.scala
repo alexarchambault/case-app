@@ -65,6 +65,36 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
+    test("generate a help message with detailed description") {
+
+      val message = Help[ExampleWithHelpMessage].help(format, showHidden = true)
+
+      val expectedMessage =
+        """Usage: example-with-help-message [options]
+          |Example detailed help message
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    test("generate a help message falling back to standard description") {
+
+      val message = Help[SimpleExampleWithHelpMessage].help(format, showHidden = true)
+
+      val expectedMessage =
+        """Usage: simple-example-with-help-message [options]
+          |Example help message
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
     test("group options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap

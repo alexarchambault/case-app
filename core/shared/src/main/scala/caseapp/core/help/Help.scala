@@ -111,7 +111,13 @@ import caseapp.HelpMessage
     printUsage(b, format)
     b.append(format.newLine)
 
-    for (desc <- helpMessage.map(_.message))
+    val helpDescription = helpMessage.map {
+      case HelpMessage(_, _, detailedMessage) if showHidden && detailedMessage.nonEmpty =>
+        detailedMessage
+      case HelpMessage(message, _, _) => message
+    }
+
+    for (desc <- helpDescription)
       Help.printDescription(
         b,
         desc,
