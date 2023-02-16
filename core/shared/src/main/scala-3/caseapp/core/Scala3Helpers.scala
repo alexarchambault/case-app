@@ -64,6 +64,9 @@ object Scala3Helpers {
 
     def withFilterArgsWhenShowHidden(filterArgs: Option[Arg => Boolean]): HelpFormat =
       helpFormat.copy(filterArgsWhenShowHidden = filterArgs)
+
+    def withHiddenGroupsWhenShowHidden(hiddenGroups: Option[Seq[String]]): HelpFormat =
+      helpFormat.copy(hiddenGroupsWhenShowHidden = hiddenGroups)
   }
 
   implicit class OptionParserWithOps[T](private val parser: OptionParser[T]) {

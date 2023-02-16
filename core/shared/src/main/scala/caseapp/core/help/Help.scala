@@ -139,7 +139,7 @@ import caseapp.HelpMessage
         if (showHidden) format.filterArgsWhenShowHidden.map(args.filter).getOrElse(args)
         else format.filterArgs.map(args.filter).getOrElse(args)
       val groupedArgs  = filteredArgs.groupBy(_.group.fold("")(_.name))
-      val groups       = format.sortGroupValues(groupedArgs.toVector)
+      val groups       = format.sortGroupValues(groupedArgs.toVector, showHidden)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
       for {
         ((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex
