@@ -135,7 +135,9 @@ import caseapp.HelpMessage
 
   def printOptions(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (args.nonEmpty) {
-      val filteredArgs = format.filterArgs.map(args.filter).getOrElse(args)
+      val filteredArgs =
+        if (showHidden) format.filterArgsWhenShowHidden.map(args.filter).getOrElse(args)
+        else format.filterArgs.map(args.filter).getOrElse(args)
       val groupedArgs  = filteredArgs.groupBy(_.group.fold("")(_.name))
       val groups       = format.sortGroupValues(groupedArgs.toVector)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)

@@ -17,7 +17,8 @@ import dataclass._
   sortedCommandGroups: Option[Seq[String]] = None,
   hidden: fansi.Attrs = fansi.Attrs.Empty,
   terminalWidthOpt: Option[Int] = None,
-  @since filterArgs: Option[Arg => Boolean] = None
+  @since filterArgs: Option[Arg => Boolean] = None,
+  @since filterArgsWhenShowHidden: Option[Arg => Boolean] = None
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],
