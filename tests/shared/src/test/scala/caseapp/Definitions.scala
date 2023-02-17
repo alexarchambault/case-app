@@ -115,8 +115,14 @@ object Definitions {
     bar: Int
   )
 
-  @HelpMessage("Example help message")
+  @HelpMessage("Example help message", "", "Example detailed help message")
   final case class ExampleWithHelpMessage(
+    foo: String,
+    bar: Int
+  )
+
+  @HelpMessage("Example help message")
+  final case class SimpleExampleWithHelpMessage(
     foo: String,
     bar: Int
   )

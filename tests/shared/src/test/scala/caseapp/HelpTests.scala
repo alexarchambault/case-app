@@ -65,6 +65,36 @@ object HelpTests extends TestSuite {
       checkLines(message, expectedMessage)
     }
 
+    test("generate a help message with detailed description") {
+
+      val message = Help[ExampleWithHelpMessage].help(format, showHidden = true)
+
+      val expectedMessage =
+        """Usage: example-with-help-message [options]
+          |Example detailed help message
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
+    test("generate a help message falling back to standard description") {
+
+      val message = Help[SimpleExampleWithHelpMessage].help(format, showHidden = true)
+
+      val expectedMessage =
+        """Usage: simple-example-with-help-message [options]
+          |Example help message
+          |
+          |Options:
+          |  --foo string
+          |  --bar int""".stripMargin
+
+      checkLines(message, expectedMessage)
+    }
+
     test("group options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
@@ -373,7 +403,7 @@ object HelpTests extends TestSuite {
 
       assert(help == expected)
     }
-    test("help message with hidden group") {
+    test("short help message with hidden group") {
       val entryPoint = new CommandsEntryPoint {
         def progName                = "foo"
         override def defaultCommand = Some(CommandGroups.First)
@@ -383,24 +413,69 @@ object HelpTests extends TestSuite {
         CommandGroups.First.group,
         CommandGroups.Third.group
       )))
-      val help = entryPoint.help.help(formatWithHiddenGroup)
-      val expected =
-        """Usage: foo <COMMAND> [options]
-          |
-          |Help options:
-          |  --usage            Print usage and exit
-          |  -h, -help, --help  Print help message and exit
-          |
-          |Other options:
-          |  -f, --foo string
-          |  --bar int
-          |
-          |Bb commands:
-          |  second""".stripMargin
+      val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val hiddenGroupEntries = """
+                                 |
+                                 |Aa commands:
+                                 |  first
+                                 |  third  Third help message""".stripMargin
+      def expected(showHidden: Boolean) =
+        s"""Usage: foo <COMMAND> [options]
+           |
+           |Help options:
+           |  --usage            Print usage and exit
+           |  -h, -help, --help  Print help message and exit
+           |
+           |Other options:
+           |  -f, --foo string
+           |  --bar int${if (showHidden) hiddenGroupEntries else ""}
+           |
+           |Bb commands:
+           |  second""".stripMargin
 
-      assert(help == expected)
+      assert(shortHelp == expected(showHidden = false))
+      assert(fullHelp == expected(showHidden = true))
     }
-    test("help message with filtered args") {
+    test("full help message with hidden group") {
+      val entryPoint = new CommandsEntryPoint {
+        def progName = "foo"
+
+        override def defaultCommand = Some(CommandGroups.First)
+
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val formatWithHiddenGroup = format.withHiddenGroupsWhenShowHidden(Some(Seq(
+        CommandGroups.First.group,
+        CommandGroups.Third.group
+      )))
+      val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val hiddenGroupEntries =
+        """
+          |
+          |Aa commands:
+          |  first
+          |  third  Third help message""".stripMargin
+
+      def expected(showHidden: Boolean) =
+        s"""Usage: foo <COMMAND> [options]
+           |
+           |Help options:
+           |  --usage            Print usage and exit
+           |  -h, -help, --help  Print help message and exit
+           |
+           |Other options:
+           |  -f, --foo string
+           |  --bar int${if (showHidden) "" else hiddenGroupEntries}
+           |
+           |Bb commands:
+           |  second""".stripMargin
+
+      assert(shortHelp == expected(showHidden = false))
+      assert(fullHelp == expected(showHidden = true))
+    }
+    test("short help message with filtered args") {
       val entryPoint: CommandsEntryPoint = new CommandsEntryPoint {
         def progName = "foo"
 
@@ -410,25 +485,67 @@ object HelpTests extends TestSuite {
       }
       val filterArgsFunction    = (a: Arg) => !a.tags.exists(_.name == "foo")
       val formatWithHiddenGroup = format.withFilterArgs(Some(filterArgsFunction))
-      val help                  = entryPoint.help.help(formatWithHiddenGroup)
-      val expected =
-        """Usage: foo <COMMAND> [options]
-          |
-          |Help options:
-          |  --usage            Print usage and exit
-          |  -h, -help, --help  Print help message and exit
-          |
-          |Other options:
-          |  --bar int
-          |
-          |Aa commands:
-          |  first
-          |  third  Third help message
-          |
-          |Bb commands:
-          |  second""".stripMargin
+      val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val fooEntry =
+        """
+          |  -f, --foo string""".stripMargin
+      def expected(showHidden: Boolean) =
+        s"""Usage: foo <COMMAND> [options]
+           |
+           |Help options:
+           |  --usage            Print usage and exit
+           |  -h, -help, --help  Print help message and exit
+           |
+           |Other options:${if (showHidden) fooEntry else ""}
+           |  --bar int
+           |
+           |Aa commands:
+           |  first
+           |  third  Third help message
+           |
+           |Bb commands:
+           |  second""".stripMargin
+      assert(shortHelp == expected(showHidden = false))
+      assert(fullHelp == expected(showHidden =
+        true
+      )) // the filter shouldn't be applied for full help
+    }
+    test("full help message with filtered args") {
+      val entryPoint: CommandsEntryPoint = new CommandsEntryPoint {
+        def progName = "foo"
 
-      assert(help == expected)
+        override def defaultCommand = Some(CommandGroups.First)
+
+        def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
+      }
+      val filterArgsFunction    = (a: Arg) => !a.tags.exists(_.name == "foo")
+      val formatWithHiddenGroup = format.withFilterArgsWhenShowHidden(Some(filterArgsFunction))
+      val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val fooEntry =
+        """
+          |  -f, --foo string""".stripMargin
+      def expected(showHidden: Boolean) =
+        s"""Usage: foo <COMMAND> [options]
+           |
+           |Help options:
+           |  --usage            Print usage and exit
+           |  -h, -help, --help  Print help message and exit
+           |
+           |Other options:${if (showHidden) "" else fooEntry}
+           |  --bar int
+           |
+           |Aa commands:
+           |  first
+           |  third  Third help message
+           |
+           |Bb commands:
+           |  second""".stripMargin
+      assert(shortHelp == expected(showHidden =
+        false
+      )) // the filter shouldn't be applied for short help
+      assert(fullHelp == expected(showHidden = true))
     }
     test("hidden commands in help message") {
       val entryPoint = new CommandsEntryPoint {

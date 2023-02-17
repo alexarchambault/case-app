@@ -111,7 +111,13 @@ import caseapp.HelpMessage
     printUsage(b, format)
     b.append(format.newLine)
 
-    for (desc <- helpMessage.map(_.message))
+    val helpDescription = helpMessage.map {
+      case HelpMessage(_, _, detailedMessage) if showHidden && detailedMessage.nonEmpty =>
+        detailedMessage
+      case HelpMessage(message, _, _) => message
+    }
+
+    for (desc <- helpDescription)
       Help.printDescription(
         b,
         desc,
@@ -135,9 +141,11 @@ import caseapp.HelpMessage
 
   def printOptions(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (args.nonEmpty) {
-      val filteredArgs = format.filterArgs.map(args.filter).getOrElse(args)
+      val filteredArgs =
+        if (showHidden) format.filterArgsWhenShowHidden.map(args.filter).getOrElse(args)
+        else format.filterArgs.map(args.filter).getOrElse(args)
       val groupedArgs  = filteredArgs.groupBy(_.group.fold("")(_.name))
-      val groups       = format.sortGroupValues(groupedArgs.toVector)
+      val groups       = format.sortGroupValues(groupedArgs.toVector, showHidden)
       val sortedGroups = groups.filter(_._1.nonEmpty) ++ groupedArgs.get("").toSeq.map("" -> _)
       for {
         ((groupName, groupArgs), groupIdx) <- sortedGroups.zipWithIndex
