@@ -67,6 +67,9 @@ object Scala3Helpers {
 
     def withHiddenGroupsWhenShowHidden(hiddenGroups: Option[Seq[String]]): HelpFormat =
       helpFormat.copy(hiddenGroupsWhenShowHidden = hiddenGroups)
+
+    def withNamesLimit(newNamesLimit: Option[Int]): HelpFormat =
+      helpFormat.copy(namesLimit = newNamesLimit)
   }
 
   implicit class OptionParserWithOps[T](private val parser: OptionParser[T]) {
