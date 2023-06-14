@@ -6,6 +6,7 @@ import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.{Arg, Error}
 import caseapp.core.parser.{EitherParser, RecursiveConsParser}
 import caseapp.core.util.Formatter
+import caseapp.Recurse
 
 abstract class WithHelpCompanion {
 
@@ -55,7 +56,7 @@ abstract class WithHelpCompanion {
 
     val p = usageArgument ::
       helpArgument ::
-      RecursiveConsParser(either, NilParser)
+      RecursiveConsParser(either, NilParser, Recurse())
 
     p.to[WithHelp[T]]
   }

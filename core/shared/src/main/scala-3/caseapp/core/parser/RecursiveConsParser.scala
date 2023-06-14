@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.Name
+import caseapp.{Name, Recurse}
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.Formatter
 import caseapp.core.Scala3Helpers._
@@ -8,7 +8,8 @@ import dataclass.data
 
 case class RecursiveConsParser[H, T <: Tuple](
   headParser: Parser[H],
-  tailParser: Parser[T]
+  tailParser: Parser[T],
+  recurse: Recurse
 ) extends Parser[H *: T] {
 
   type D = headParser.D *: tailParser.D
@@ -23,7 +24,7 @@ case class RecursiveConsParser[H, T <: Tuple](
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
-      .step(args, index, runtime.Tuples(d, 0).asInstanceOf[headParser.D], nameFormatter)
+      .step(args, index, runtime.Tuples(d, 0).asInstanceOf[headParser.D], prefixedNameFormatter(nameFormatter))
       .flatMap {
         case None =>
           tailParser
@@ -61,4 +62,15 @@ case class RecursiveConsParser[H, T <: Tuple](
   def withDefaultOrigin(origin: String): Parser[H *: T] =
     this.withHeadParser(headParser.withDefaultOrigin(origin))
       .withTailParser(tailParser.withDefaultOrigin(origin))
+
+  def prefixedNameFormatter(formatter: Formatter[Name]): Formatter[Name] =
+    if (recurse.prefix.isEmpty()) formatter
+    else {
+      new Formatter[Name] {
+        def format(t: Name): String = {
+          val formattedPrefix = formatter.format(Name(recurse.prefix))
+          s"${formattedPrefix}-${formatter.format(t)}"
+        }
+      }
+    }
 }

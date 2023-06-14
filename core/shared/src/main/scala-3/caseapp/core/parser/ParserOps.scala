@@ -5,6 +5,7 @@ import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import caseapp.core.util.Formatter
 import scala.deriving.Mirror
+import caseapp.Recurse
 
 class ParserOps[T <: Tuple](val parser: Parser[T]) extends AnyVal {
 
@@ -35,7 +36,7 @@ class ParserOps[T <: Tuple](val parser: Parser[T]) extends AnyVal {
   }
 
   def addAll[H](using headParser: Parser[H]): Parser[H *: T] =
-    RecursiveConsParser(headParser, parser)
+    RecursiveConsParser(headParser, parser, Recurse())
 
   def as[F](using
     m: Mirror.ProductOf[F],
