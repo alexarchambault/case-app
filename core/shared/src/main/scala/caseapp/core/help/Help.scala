@@ -227,7 +227,13 @@ object Help extends HelpCompanion {
     showHidden: Boolean
   ): Seq[Seq[fansi.Str]] =
     for (arg <- args if showHidden || !arg.noHelp) yield {
-      val sortedNames = (arg.name +: arg.extraNames)
+      val namesToShow = format.namesLimit match {
+        case Some(limit) if !showHidden && limit >= 0 =>
+          (arg.name +: arg.extraNames).take(limit)
+        case _ => arg.name +: arg.extraNames
+      }
+
+      val sortedNames = namesToShow
         .map(name => format.option(name.option(nameFormatter)))
         .groupBy(_.length)
         .toVector

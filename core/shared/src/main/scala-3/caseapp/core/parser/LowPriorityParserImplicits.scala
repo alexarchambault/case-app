@@ -115,7 +115,7 @@ object LowPriorityParserImplicits {
             .collect {
               case Apply(_, List(arg)) =>
                 '{ caseapp.ExtraName(${ arg.asExprOf[String] }) }
-            }
+            }.reverse
           val valueDescription = sym.annotations
             .find(_.tpe =:= TypeRepr.of[caseapp.ValueDescription])
             .collect {
