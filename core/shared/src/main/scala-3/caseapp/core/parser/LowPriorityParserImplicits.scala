@@ -115,7 +115,7 @@ object LowPriorityParserImplicits {
             .collect {
               case Apply(_, List(arg)) =>
                 '{ caseapp.ExtraName(${ arg.asExprOf[String] }) }
-            }
+            }.reverse
           val valueDescription = sym.annotations
             .find(_.tpe =:= TypeRepr.of[caseapp.ValueDescription])
             .collect {
@@ -125,8 +125,14 @@ object LowPriorityParserImplicits {
           val helpMessage = sym.annotations
             .find(_.tpe =:= TypeRepr.of[caseapp.HelpMessage])
             .collect {
-              case Apply(_, List(arg, argMd)) =>
-                '{ caseapp.HelpMessage(${ arg.asExprOf[String] }, ${ argMd.asExprOf[String] }) }
+              case Apply(_, List(arg, argMd, argDetailed)) =>
+                '{
+                  caseapp.HelpMessage(
+                    ${ arg.asExprOf[String] },
+                    ${ argMd.asExprOf[String] },
+                    ${ argDetailed.asExprOf[String] }
+                  )
+                }
             }
           val hidden = sym.annotations.exists(_.tpe =:= TypeRepr.of[caseapp.Hidden])
           val group = sym.annotations

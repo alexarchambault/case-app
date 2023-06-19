@@ -17,12 +17,17 @@ import dataclass._
   sortedCommandGroups: Option[Seq[String]] = None,
   hidden: fansi.Attrs = fansi.Attrs.Empty,
   terminalWidthOpt: Option[Int] = None,
-  @since filterArgs: Option[Arg => Boolean] = None
+  @since filterArgs: Option[Arg => Boolean] = None,
+  @since filterArgsWhenShowHidden: Option[Arg => Boolean] = None,
+  hiddenGroupsWhenShowHidden: Option[Seq[String]] = None,
+  @since("2.1.0-M25")
+  namesLimit: Option[Int] = None
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],
     sortedGroups: Option[Seq[String]],
-    elems: Seq[(String, T)]
+    elems: Seq[(String, T)],
+    showHidden: Boolean
   ): Seq[(String, T)] = {
     val sortedGroups0 = sortGroups match {
       case None =>
@@ -37,13 +42,15 @@ import dataclass._
         val sorted = sort(elems.map(_._1)).zipWithIndex.toMap
         elems.sortBy { case (group, _) => sorted.getOrElse(group, Int.MaxValue) }
     }
-    sortedGroups0.filter { case (group, _) => hiddenGroups.forall(!_.contains(group)) }
+    sortedGroups0.filter { case (group, _) =>
+      (if (showHidden) hiddenGroupsWhenShowHidden else hiddenGroups).forall(!_.contains(group))
+    }
   }
 
-  def sortGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
-    sortValues(sortGroups, sortedGroups, elems)
-  def sortCommandGroupValues[T](elems: Seq[(String, T)]): Seq[(String, T)] =
-    sortValues(sortCommandGroups, sortedCommandGroups, elems)
+  def sortGroupValues[T](elems: Seq[(String, T)], showHidden: Boolean): Seq[(String, T)] =
+    sortValues(sortGroups, sortedGroups, elems, showHidden)
+  def sortCommandGroupValues[T](elems: Seq[(String, T)], showHidden: Boolean): Seq[(String, T)] =
+    sortValues(sortCommandGroups, sortedCommandGroups, elems, showHidden)
 }
 
 object HelpFormat {

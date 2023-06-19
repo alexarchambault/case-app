@@ -75,7 +75,8 @@ import dataclass._
         commands
           .filter(c => showHidden || !c.hidden)
           .groupBy(_.group)
-          .toVector
+          .toVector,
+        showHidden
       )
 
       def table(commands: Seq[RuntimeCommandHelp[_]]) =
