@@ -597,7 +597,67 @@ object HelpTests extends TestSuite {
         assert(help == expected)
       }
     }
+    test("help messages with names limit") {
+      val entryPoint: CommandsEntryPoint = new CommandsEntryPoint {
+        def progName                = "foo"
+        override def defaultCommand = Some(Fourth)
+        def commands                = Seq(Fourth)
+      }
 
+      for (namesLimit <- Seq(-1, 1, 2, 3, 4, 5, 6)) {
+        val formatWithNamesLimit = format.withNamesLimit(Some(namesLimit))
+        val shortHelp            = entryPoint.help.help(formatWithNamesLimit)
+        val fullHelp             = entryPoint.help.help(formatWithNamesLimit, showHidden = true)
+
+        def getOptionNamesTextRepresentation(optionNames: String*): String =
+          if (namesLimit < 1)
+            optionNames.sortBy(_.length).mkString(", ")
+          else
+            optionNames.take(namesLimit)
+              .sortBy(_.length)
+              .mkString(", ")
+              .padTo("--usage".length, ' ')
+
+        val expectedOptionNames = getOptionNamesTextRepresentation(
+          "--fourth",
+          "--four-option",
+          "-f",
+          "--four",
+          "--f-opt"
+        )
+
+        val expectedHelpNames = getOptionNamesTextRepresentation(
+          "--help",
+          "-h",
+          "-help"
+        )
+
+        val expectedShortHelp =
+          s"""  $expectedHelpNames  Print help message and exit
+             |
+             |Other options:
+             |  $expectedOptionNames int
+             |
+             |Commands:
+             |  fourth""".stripMargin
+
+        val expectedFullHelp =
+          """Usage: foo <COMMAND> [options]
+            |
+            |Help options:
+            |  --usage            Print usage and exit
+            |  -h, -help, --help  Print help message and exit
+            |
+            |Other options:
+            |  -f, --four, --f-opt, --fourth, --four-option int
+            |
+            |Commands:
+            |  fourth""".stripMargin
+
+        assert(shortHelp.endsWith(expectedShortHelp))
+        assert(fullHelp == expectedFullHelp) // the limit shouldn't be applied for full help
+      }
+    }
   }
 
 }

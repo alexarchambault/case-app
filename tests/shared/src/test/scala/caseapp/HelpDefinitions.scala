@@ -18,6 +18,15 @@ object HelpDefinitions {
     third: Int = 0
   )
 
+  case class FourthOptions(
+    @ExtraName("fourOption")
+    @ExtraName("f")
+    @ExtraName("four")
+    @ExtraName("fOpt")
+
+    fourth: Int = 0
+  )
+
   object First extends Command[FirstOptions] {
     def run(options: FirstOptions, args: RemainingArgs) = ???
   }
@@ -26,6 +35,10 @@ object HelpDefinitions {
   }
   object Third extends Command[ThirdOptions] {
     def run(options: ThirdOptions, args: RemainingArgs) = ???
+  }
+
+  object Fourth extends Command[FourthOptions] {
+    def run(options: FourthOptions, args: RemainingArgs) = ???
   }
 
   @HelpMessage("Example help message")
