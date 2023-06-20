@@ -69,11 +69,11 @@ jobs:
         jvm: 8
     - run: .github/scripts/gpg-setup.sh
       env:
-        PGP_SECRET: ${{ secrets.PGP_SECRET }}
+        PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
     - name: Release
       run: sbtn ci-release
       env:
-        PGP_PASSPHRASE: ${{ secrets.PGP_PASSPHRASE }}
-        PGP_SECRET: ${{ secrets.PGP_SECRET }}
+        PUBLISH_SECRET_KEY_PASSWORD: ${{ secrets.PUBLISH_SECRET_KEY_PASSWORD }}
+        PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
