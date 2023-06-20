@@ -55,7 +55,6 @@ jobs:
     - run: scalafmt --check
 
   publish:
-    needs: [test, bin-compat]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     steps:
