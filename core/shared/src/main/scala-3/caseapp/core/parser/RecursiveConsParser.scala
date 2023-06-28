@@ -24,7 +24,12 @@ case class RecursiveConsParser[H, T <: Tuple](
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
-      .step(args, index, runtime.Tuples(d, 0).asInstanceOf[headParser.D], Formatter.addRecursePrefix(recurse, nameFormatter))
+      .step(
+        args,
+        index,
+        runtime.Tuples(d, 0).asInstanceOf[headParser.D],
+        Formatter.addRecursePrefix(recurse, nameFormatter)
+      )
       .flatMap {
         case None =>
           tailParser

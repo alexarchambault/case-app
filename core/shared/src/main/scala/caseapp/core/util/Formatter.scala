@@ -26,12 +26,11 @@ object Formatter {
     */
   def addRecursePrefix(recurse: Recurse, formatter: Formatter[Name]): Formatter[Name] =
     if (recurse.prefix.isEmpty()) formatter
-    else {
+    else
       new Formatter[Name] {
         def format(t: Name): String = {
           val formattedPrefix = formatter.format(Name(recurse.prefix))
-          s"${formattedPrefix}-${formatter.format(t)}"
+          s"$formattedPrefix-${formatter.format(t)}"
         }
       }
-    }
 }
