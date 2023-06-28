@@ -24,7 +24,7 @@ case class RecursiveConsParser[H, T <: Tuple](
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
-      .step(args, index, runtime.Tuples(d, 0).asInstanceOf[headParser.D], prefixedNameFormatter(nameFormatter))
+      .step(args, index, runtime.Tuples(d, 0).asInstanceOf[headParser.D], Formatter.addRecursePrefix(recurse, nameFormatter))
       .flatMap {
         case None =>
           tailParser
@@ -63,14 +63,4 @@ case class RecursiveConsParser[H, T <: Tuple](
     this.withHeadParser(headParser.withDefaultOrigin(origin))
       .withTailParser(tailParser.withDefaultOrigin(origin))
 
-  def prefixedNameFormatter(formatter: Formatter[Name]): Formatter[Name] =
-    if (recurse.prefix.isEmpty()) formatter
-    else {
-      new Formatter[Name] {
-        def format(t: Name): String = {
-          val formattedPrefix = formatter.format(Name(recurse.prefix))
-          s"${formattedPrefix}-${formatter.format(t)}"
-        }
-      }
-    }
 }

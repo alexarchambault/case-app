@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.{HelpMessage, Name, ValueDescription}
+import caseapp.{HelpMessage, Name, Recurse, ValueDescription}
 import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import shapeless.{::, Generic, HList, ops}
@@ -55,7 +55,7 @@ object ParserOps {
 
   class AddAllHelper[T <: HList, D <: HList, U](val parser: Parser.Aux[T, D]) extends AnyVal {
     def apply[DU](implicit other: Parser.Aux[U, DU]): Parser.Aux[U :: T, DU :: D] =
-      RecursiveConsParser(other, parser)
+      RecursiveConsParser(other, parser, Recurse())
   }
 
   sealed abstract class AsHelper[T, F] {
