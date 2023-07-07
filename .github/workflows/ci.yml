@@ -70,6 +70,8 @@ jobs:
     - run: .github/scripts/gpg-setup.sh
       env:
         PGP_SECRET: ${{ secrets.PGP_SECRET }}
+    - name: Wrap GPG binary
+      run: .github/scripts/wrap-gpg.sh
     - name: Release
       run: sbtn ci-release
       env:
