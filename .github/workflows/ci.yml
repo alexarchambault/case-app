@@ -24,7 +24,7 @@ jobs:
       with:
         jvm: 8
     - name: Test
-      run: sbtn ++${{ matrix.SCALA_VERSION }} test
+      run: ./mill -i '__[${{ matrix.SCALA_VERSION }}].test'
 
   bin-compat:
     runs-on: ubuntu-latest
@@ -37,8 +37,8 @@ jobs:
     - uses: coursier/setup-action@v1.3
       with:
         jvm: 8
-    - name: Test
-      run: sbtn +mimaReportBinaryIssues
+    - name: Check
+      run: ./mill -i __.mimaReportBinaryIssues
 
   format:
     runs-on: ubuntu-latest
@@ -72,7 +72,7 @@ jobs:
     - name: Wrap GPG binary
       run: .github/scripts/wrap-gpg.sh
     - name: Release
-      run: sbtn ci-release
+      run: ./mill -i publishSonatype __.publishArtifacts
       env:
         PGP_PASSPHRASE: ${{ secrets.PUBLISH_SECRET_KEY_PASSWORD }}
         PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
