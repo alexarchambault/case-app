@@ -67,5 +67,4 @@ case class RecursiveConsParser[H, T <: Tuple](
   def withDefaultOrigin(origin: String): Parser[H *: T] =
     this.withHeadParser(headParser.withDefaultOrigin(origin))
       .withTailParser(tailParser.withDefaultOrigin(origin))
-
 }

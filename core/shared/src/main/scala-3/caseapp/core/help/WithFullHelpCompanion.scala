@@ -1,12 +1,11 @@
 package caseapp.core.help
 
-import caseapp.{ExtraName, Group, HelpMessage, Parser}
+import caseapp.{ExtraName, Group, HelpMessage, Parser, Recurse}
 import caseapp.core.Scala3Helpers.*
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.{Arg, Error}
 import caseapp.core.parser.RecursiveConsParser
 import caseapp.core.util.Formatter
-import caseapp.Recurse
 
 abstract class WithFullHelpCompanion {
 

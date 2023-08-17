@@ -197,7 +197,7 @@ object HListParserBuilder extends LowPriorityHListParserBuilder {
         recurse.tail
       )
 
-      RecursiveConsParser(headParser.value, tailParser, recurse.head.get)
+      RecursiveConsParser(headParser.value, tailParser, recurse.head.value)
         .mapHead(field[K](_))
     }
 }

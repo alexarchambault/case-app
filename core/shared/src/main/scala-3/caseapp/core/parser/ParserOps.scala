@@ -1,11 +1,10 @@
 package caseapp.core.parser
 
-import caseapp.{HelpMessage, Name, ValueDescription}
+import caseapp.{HelpMessage, Name, Recurse, ValueDescription}
 import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import caseapp.core.util.Formatter
 import scala.deriving.Mirror
-import caseapp.Recurse
 
 class ParserOps[T <: Tuple](val parser: Parser[T]) extends AnyVal {
 
