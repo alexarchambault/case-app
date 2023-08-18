@@ -1,5 +1,5 @@
 package caseapp
 
 object NativeUtil {
-  def scalaBinaryVersion = "3.2.2"
+  def scalaBinaryVersion = "3.3.0"
 }
