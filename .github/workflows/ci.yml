@@ -13,7 +13,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        SCALA_VERSION: ["2.12.18", "2.13.11", "3.3.0"]
+        SCALA_VERSION: ["2.12.18", "2.13.12", "3.3.0"]
     steps:
     - uses: actions/checkout@v3
       with:
