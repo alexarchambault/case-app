@@ -51,7 +51,7 @@ jobs:
     - uses: coursier/setup-action@v1.3.3
       with:
         jvm: 8
-        apps: scalafmt:3.0.8
+        apps: scalafmt:3.7.14
     - run: scalafmt --check
 
   publish:
