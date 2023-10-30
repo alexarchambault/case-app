@@ -36,7 +36,10 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
   def completionsCommandName: List[String] = List("completions")
 
   def completionsPrintUsage(): Nothing = {
-    printLine(s"Usage: $progName $completionsCommandName format [dest]", toStderr = true)
+    printLine(
+      s"Usage: $progName ${completionsCommandName.mkString(" ")} format [dest]",
+      toStderr = true
+    )
     exit(1)
   }
 
