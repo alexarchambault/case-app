@@ -35,6 +35,27 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
   def enableCompletionsCommand: Boolean    = false
   def completionsCommandName: List[String] = List("completions")
 
+  def completionsPrintUsage(): Nothing = {
+    printLine(
+      s"Usage: $progName ${completionsCommandName.mkString(" ")} format [dest]",
+      toStderr = true
+    )
+    exit(1)
+  }
+
+  def completeUnrecognizedFormat(format: String): Nothing = {
+    printLine(s"Unrecognized completion format '$format'", toStderr = true)
+    exit(1)
+  }
+
+  def completePrintUsage(): Nothing = {
+    printLine(
+      s"Usage: $progName ${completeCommandName.mkString(" ")} format index ...args...",
+      toStderr = true
+    )
+    exit(1)
+  }
+
   def completionsMain(args: Array[String]): Unit = {
 
     def script(format: String): String =
@@ -42,8 +63,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case Bash.shellName | Bash.id => Bash.script(progName)
         case Zsh.shellName | Zsh.id   => Zsh.script(progName)
         case _ =>
-          System.err.println(s"Unrecognized completion format '$format'")
-          PlatformUtil.exit(1)
+          completeUnrecognizedFormat(format)
       }
     args match {
       case Array(format, dest) =>
@@ -51,10 +71,9 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         writeCompletions(script0, dest)
       case Array(format) =>
         val script0 = script(format)
-        println(script0)
+        printLine(script0)
       case _ =>
-        System.err.println(s"Usage: $progName $completionsCommandName format [dest]")
-        PlatformUtil.exit(1)
+        completionsPrintUsage()
     }
   }
 
@@ -80,19 +99,31 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
           }
         format match {
           case Bash.id =>
-            println(Bash.print(items))
+            printLine(Bash.print(items))
           case Zsh.id =>
-            println(Zsh.print(items))
+            printLine(Zsh.print(items))
           case _ =>
-            System.err.println(s"Unrecognized completion format '$format'")
-            PlatformUtil.exit(1)
+            completeUnrecognizedFormat(format)
         }
       case _ =>
-        System.err.println(
-          s"Usage: $progName ${completeCommandName.mkString(" ")} format index ...args..."
-        )
-        PlatformUtil.exit(1)
+        completePrintUsage()
     }
+  }
+
+  def exit(code: Int): Nothing =
+    PlatformUtil.exit(code)
+  def printLine(line: String, toStderr: Boolean): Unit =
+    if (toStderr)
+      System.err.println(line)
+    else
+      println(line)
+  final def printLine(line: String): Unit =
+    printLine(line, toStderr = false)
+
+  def printUsage(): Nothing = {
+    val usage = help.help(helpFormat, showHidden = false)
+    printLine(usage)
+    exit(0)
   }
 
   def main(args: Array[String]): Unit = {
@@ -108,9 +139,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case None =>
           RuntimeCommandParser.parse(commands, actualArgs.toList) match {
             case None =>
-              val usage = help.help(helpFormat, showHidden = false)
-              println(usage)
-              PlatformUtil.exit(0)
+              printUsage()
             case Some((commandName, command, commandArgs)) =>
               command.main(commandProgName(commandName), commandArgs.toArray)
           }
