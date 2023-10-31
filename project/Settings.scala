@@ -5,7 +5,7 @@ object Settings {
 
   private def scala212 = "2.12.18"
   private def scala213 = "2.13.12"
-  private def scala3   = "3.3.0"
+  private def scala3   = "3.3.1"
 
   private lazy val isAtLeastScala213 = Def.setting {
     import Ordering.Implicits._
