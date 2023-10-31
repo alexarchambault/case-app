@@ -2,8 +2,7 @@ package caseapp.core.app
 
 import caseapp.core.commandparser.RuntimeCommandParser
 import caseapp.core.complete.{Bash, CompletionItem, Zsh}
-import caseapp.core.help.{Help, HelpFormat, RuntimeCommandsHelp}
-import caseapp.core.help.RuntimeCommandHelp
+import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 
 abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
@@ -34,12 +33,23 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
   def enableCompletionsCommand: Boolean    = false
   def completionsCommandName: List[String] = List("completions")
+  def completionsCommandAliases: List[List[String]] = List(
+    completionsCommandName,
+    List("completion")
+  )
 
-  def completionsPrintUsage(): Nothing = {
+  def completionsPrintInstructions(): Unit = {
+    printLine("To install completions, run", toStderr = true)
+    printLine("", toStderr = true)
     printLine(
-      s"Usage: $progName ${completionsCommandName.mkString(" ")} format [dest]",
+      s"  $progName ${completionsCommandName.mkString(" ")} install",
       toStderr = true
     )
+    printLine("", toStderr = true)
+  }
+
+  def completionsPrintUsage(): Nothing = {
+    completionsPrintInstructions()
     exit(1)
   }
 
@@ -49,12 +59,11 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
   }
 
   def completePrintUsage(): Nothing = {
-    printLine(
-      s"Usage: $progName ${completeCommandName.mkString(" ")} format index ...args...",
-      toStderr = true
-    )
+    completionsPrintInstructions()
     exit(1)
   }
+
+  def completionsWorkingDirectory: Option[String] = None
 
   def completionsMain(args: Array[String]): Unit = {
 
@@ -65,11 +74,16 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         case _ =>
           completeUnrecognizedFormat(format)
       }
-    args match {
-      case Array(format, dest) =>
+
+    (completionsWorkingDirectory, args) match {
+      case (Some(dir), Array("install", args0 @ _*)) =>
+        completionsInstall(dir, args0)
+      case (Some(dir), Array("uninstall", args0 @ _*)) =>
+        completionsUninstall(dir, args0)
+      case (_, Array(format, dest)) =>
         val script0 = script(format)
         writeCompletions(script0, dest)
-      case Array(format) =>
+      case (_, Array(format)) =>
         val script0 = script(format)
         printLine(script0)
       case _ =>
@@ -130,23 +144,28 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     val actualArgs = PlatformUtil.arguments(args)
     if (enableCompleteCommand && actualArgs.startsWith(completeCommandName.toArray[String]))
       completeMain(actualArgs.drop(completeCommandName.length))
-    else if (
-      enableCompletionsCommand && actualArgs.startsWith(completionsCommandName.toArray[String])
-    )
-      completionsMain(actualArgs.drop(completionsCommandName.length))
-    else
-      defaultCommand match {
+    else {
+      val completionAliasOpt =
+        if (enableCompletionsCommand) completionsCommandAliases.find(actualArgs.startsWith(_))
+        else None
+      completionAliasOpt match {
+        case Some(completionAlias) =>
+          completionsMain(actualArgs.drop(completionAlias.length))
         case None =>
-          RuntimeCommandParser.parse(commands, actualArgs.toList) match {
+          defaultCommand match {
             case None =>
-              printUsage()
-            case Some((commandName, command, commandArgs)) =>
+              RuntimeCommandParser.parse(commands, actualArgs.toList) match {
+                case None =>
+                  printUsage()
+                case Some((commandName, command, commandArgs)) =>
+                  command.main(commandProgName(commandName), commandArgs.toArray)
+              }
+            case Some(defaultCommand0) =>
+              val (commandName, command, commandArgs) =
+                RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
               command.main(commandProgName(commandName), commandArgs.toArray)
           }
-        case Some(defaultCommand0) =>
-          val (commandName, command, commandArgs) =
-            RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
-          command.main(commandProgName(commandName), commandArgs.toArray)
       }
+    }
   }
 }
