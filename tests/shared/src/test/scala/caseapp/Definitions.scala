@@ -178,4 +178,8 @@ object Definitions {
     elem: List[Indexed[String]] = Nil
   )
 
+  final case class RecurseWithPrefix(
+    noPrefix: Int,
+    @Recurse("prefix") withPrefix: FewArgs
+  )
 }

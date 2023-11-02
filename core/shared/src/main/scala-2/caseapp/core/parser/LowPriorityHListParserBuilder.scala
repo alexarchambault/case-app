@@ -38,7 +38,7 @@ abstract class LowPriorityHListParserBuilder {
     None.type :: RT,
     Option[H] :: PT
   ] =
-    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp, tags) =>
+    instance { (default0, names, valueDescriptions, helpMessages, groups, noHelp, tags, recurse) =>
 
       val tailParser = tail.value(
         default0().tail,
@@ -47,7 +47,8 @@ abstract class LowPriorityHListParserBuilder {
         helpMessages.tail,
         groups.tail,
         noHelp.tail,
-        tags.tail
+        tags.tail,
+        recurse.tail
       )
 
       val arg = Arg(
