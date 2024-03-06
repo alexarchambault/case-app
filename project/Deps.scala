@@ -8,7 +8,7 @@ object Deps {
   import Def.setting
 
   def catsEffect2   = setting("org.typelevel" %%% "cats-effect" % "2.5.5")
-  def catsEffect3   = setting("org.typelevel" %%% "cats-effect" % "3.5.2")
+  def catsEffect3   = setting("org.typelevel" %%% "cats-effect" % "3.5.4")
   def dataClass     = "io.github.alexarchambault" %% "data-class" % "0.2.6"
   def macroParadise = "org.scalamacros"            % "paradise"   % "2.1.1" cross CrossVersion.patch
   def pprint        = setting("com.lihaoyi" %%% "pprint" % "0.8.1")
