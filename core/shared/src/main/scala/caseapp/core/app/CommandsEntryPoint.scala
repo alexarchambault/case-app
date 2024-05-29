@@ -1,7 +1,7 @@
 package caseapp.core.app
 
 import caseapp.core.commandparser.RuntimeCommandParser
-import caseapp.core.complete.{Bash, CompletionItem, Zsh}
+import caseapp.core.complete.{Bash, CompletionItem, Fish, Zsh}
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 
 abstract class CommandsEntryPoint extends PlatformCommandsMethods {
@@ -70,6 +70,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     def script(format: String): String =
       format match {
         case Bash.shellName | Bash.id => Bash.script(progName)
+        case Fish.shellName | Fish.id => Fish.script(progName)
         case Zsh.shellName | Zsh.id   => Zsh.script(progName)
         case _ =>
           completeUnrecognizedFormat(format)
@@ -114,6 +115,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         format match {
           case Bash.id =>
             printLine(Bash.print(items))
+          case Fish.id =>
+            printLine(Fish.print(items))
           case Zsh.id =>
             printLine(Zsh.print(items))
           case _ =>

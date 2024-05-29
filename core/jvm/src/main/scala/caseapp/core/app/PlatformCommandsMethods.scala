@@ -1,6 +1,6 @@
 package caseapp.core.app
 
-import caseapp.core.complete.{Bash, Zsh}
+import caseapp.core.complete.{Bash, Fish, Zsh}
 
 import java.io.File
 import java.nio.charset.{Charset, StandardCharsets}
@@ -21,8 +21,61 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
   // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
   def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
+    val (options, _) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
+    PlatformCommandsMethods.completionsInstall(
+      completionsWorkingDirectory,
+      options,
+      progName = progName,
+      installCompletionsCommand = s"${completionsCommandName.mkString(" ")} install",
+      printLine = printLine(_, _),
+      exit = exit
+    )
+  }
 
+  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
+    val (options, _) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
+    PlatformCommandsMethods.completionsUninstall(
+      completionsWorkingDirectory,
+      options,
+      progName = progName,
+      printLine = printLine(_, _)
+    )
+  }
+}
+
+object PlatformCommandsMethods {
+  import caseapp.{HelpMessage, Name}
+  import caseapp.core.help.Help
+  import caseapp.core.parser.Parser
+
+  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletionsOptions.scala
+  // format: off
+  final case class CompletionsInstallOptions(
+    @HelpMessage("Print completions to stdout")
+      env: Boolean = false,
+    @HelpMessage("Custom completions name")
+      name: Option[String] = None,
+    @HelpMessage("Name of the shell, either zsh, fish or bash")
+    @Name("shell")
+      format: Option[String] = None,
+    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
+    @Name("o")
+      output: Option[String] = None,
+    @HelpMessage("Custom banner in comment placed in rc file (bash or zsh only)")
+      banner: String = "{NAME} completions",
+    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
+      rcFile: Option[String] = None
+  )
+  // format: on
+
+  def completionsInstall(
+    completionsWorkingDirectory: String,
+    options: PlatformCommandsMethods.CompletionsInstallOptions,
+    progName: String,
+    installCompletionsCommand: String,
+    printLine: (message: String, toStderr: Boolean) => Unit,
+    exit: (code: Int) => Nothing
+  ): Unit = {
     lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
 
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
@@ -32,14 +85,11 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
         toStderr = true
       )
       printLine("", toStderr = true)
-      printLine(
-        s"  $name ${completionsCommandName.mkString(" ")} install --shell zsh",
-        toStderr = true
-      )
-      printLine(
-        s"  $name ${completionsCommandName.mkString(" ")} install --shell bash",
-        toStderr = true
-      )
+      for (shell <- Seq(Bash.shellName, Zsh.shellName, Fish.shellName))
+        printLine(
+          s"  $name $installCompletionsCommand --shell $shell",
+          toStderr = true
+        )
       printLine("", toStderr = true)
       exit(1)
     }
@@ -48,6 +98,15 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
       case Bash.id | Bash.shellName =>
         val script        = Bash.script(name)
         val defaultRcFile = Paths.get(sys.props("user.home")).resolve(".bashrc")
+        (script, defaultRcFile)
+      case Fish.id | Fish.shellName =>
+        val script = Fish.script(name)
+        val defaultRcFile =
+          Option(System.getenv("XDG_CONFIG_HOME")).map(Paths.get(_))
+            .getOrElse(Paths.get(sys.props("user.home"), ".config"))
+            .resolve("fish")
+            .resolve("completions")
+            .resolve(s"$name.fish")
         (script, defaultRcFile)
       case Zsh.id | Zsh.shellName =>
         val completionScript = Zsh.script(name)
@@ -59,7 +118,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
         val needsWrite = !Files.exists(completionScriptDest) ||
           !Arrays.equals(Files.readAllBytes(completionScriptDest), content)
         if (needsWrite) {
-          printLine(s"Writing $completionScriptDest")
+          printLine(s"Writing $completionScriptDest", toStderr = false)
           Files.createDirectories(completionScriptDest.getParent)
           Files.write(completionScriptDest, content)
         }
@@ -69,14 +128,19 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
         ).map(_ + System.lineSeparator()).mkString
         (script, defaultRcFile)
       case _ =>
-        printLine(s"Unrecognized or unsupported shell: $format")
+        printLine(s"Unrecognized or unsupported shell: $format", toStderr = true)
         exit(1)
     }
 
     if (options.env)
       println(rcScript)
     else {
-      val rcFile = options.rcFile.map(Paths.get(_)).getOrElse(defaultRcFile)
+      val rcFile = format match {
+        case Fish.id | Fish.shellName =>
+          options.output.map(Paths.get(_, s"$name.fish")).getOrElse(defaultRcFile)
+        case _ =>
+          options.rcFile.map(Paths.get(_)).getOrElse(defaultRcFile)
+      }
       val banner = options.banner.replace("{NAME}", name)
       val updated = ProfileFileUpdater.addToProfileFile(
         rcFile,
@@ -87,7 +151,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
       val q = "\""
       val evalCommand =
-        s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
+        s"eval $q$$($progName $installCompletionsCommand --env)$q"
       if (updated) {
         printLine(s"Updated $rcFile", toStderr = true)
         printLine("", toStderr = true)
@@ -116,16 +180,24 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
     }
   }
 
-  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
-
+  def completionsUninstall(
+    completionsWorkingDirectory: String,
+    options: PlatformCommandsMethods.CompletionsUninstallOptions,
+    progName: String,
+    printLine: (message: String, toStderr: Boolean) => Unit
+  ): Unit = {
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
     val home    = Paths.get(sys.props("user.home"))
     val zDotDir = Option(System.getenv("ZDOTDIR")).map(Paths.get(_)).getOrElse(home)
+    val fishCompletionsDir = options.output.map(Paths.get(_))
+      .getOrElse(sys.env.get("XDG_CONFIG_HOME").map(Paths.get(_)).getOrElse(home)
+        .resolve("fish")
+        .resolve("completions"))
     val rcFiles = options.rcFile.map(file => Seq(Paths.get(file))).getOrElse(Seq(
       zDotDir.resolve(".zshrc"),
-      home.resolve(".bashrc")
+      home.resolve(".bashrc"),
+      fishCompletionsDir.resolve(s"$name.fish")
     )).filter(Files.exists(_))
 
     for (rcFile <- rcFiles) {
@@ -145,32 +217,6 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
         printLine(s"No $name completion section found in $rcFile", toStderr = true)
     }
   }
-}
-
-object PlatformCommandsMethods {
-  import caseapp.{HelpMessage, Name}
-  import caseapp.core.help.Help
-  import caseapp.core.parser.Parser
-
-  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletionsOptions.scala
-  // format: off
-  final case class CompletionsInstallOptions(
-    @HelpMessage("Print completions to stdout")
-      env: Boolean = false,
-    @HelpMessage("Custom completions name")
-      name: Option[String] = None,
-    @HelpMessage("Name of the shell, either zsh or bash")
-    @Name("shell")
-      format: Option[String] = None,
-    @HelpMessage("Completions output directory")
-    @Name("o")
-      output: Option[String] = None,
-    @HelpMessage("Custom banner in comment placed in rc file")
-      banner: String = "{NAME} completions",
-    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell")
-      rcFile: Option[String] = None
-  )
-  // format: on
 
   object CompletionsInstallOptions {
     implicit lazy val parser: Parser[CompletionsInstallOptions] = Parser.derive
@@ -180,10 +226,13 @@ object PlatformCommandsMethods {
   // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/uninstallcompletions/SharedUninstallCompletionsOptions.scala
   // format: off
   final case class CompletionsUninstallOptions(
-    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell")
+    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
       rcFile: Option[String] = None,
     @HelpMessage("Custom banner in comment placed in rc file")
       banner: String = "{NAME} completions",
+    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
+    @Name("o")
+      output: Option[String] = None,
     @HelpMessage("Custom completions name")
       name: Option[String] = None
   )
@@ -199,6 +248,7 @@ object PlatformCommandsMethods {
       .orElse {
         Option(System.getenv("SHELL")).map(_.split(File.separator).last).map {
           case Bash.shellName => Bash.id
+          case Fish.shellName => Fish.id
           case Zsh.shellName  => Zsh.id
           case other          => other
         }
