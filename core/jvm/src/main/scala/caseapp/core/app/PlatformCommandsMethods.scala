@@ -73,8 +73,10 @@ object PlatformCommandsMethods {
     options: PlatformCommandsMethods.CompletionsInstallOptions,
     progName: String,
     installCompletionsCommand: String,
-    printLine: (message: String, toStderr: Boolean) => Unit,
-    exit: (code: Int) => Nothing
+    /* (message: String, toStderr: Boolean) => Unit */
+    printLine: (String, Boolean) => Unit,
+    /* (code: Int) */
+    exit: Int => Nothing
   ): Unit = {
     lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
 
@@ -82,15 +84,15 @@ object PlatformCommandsMethods {
     val format = PlatformCommandsMethods.getFormat(options.format).getOrElse {
       printLine(
         "Cannot determine current shell, pass the shell you use with --shell, like",
-        toStderr = true
+        true
       )
-      printLine("", toStderr = true)
+      printLine("", true)
       for (shell <- Seq(Bash.shellName, Zsh.shellName, Fish.shellName))
         printLine(
           s"  $name $installCompletionsCommand --shell $shell",
-          toStderr = true
+          true
         )
-      printLine("", toStderr = true)
+      printLine("", true)
       exit(1)
     }
 
@@ -118,7 +120,7 @@ object PlatformCommandsMethods {
         val needsWrite = !Files.exists(completionScriptDest) ||
           !Arrays.equals(Files.readAllBytes(completionScriptDest), content)
         if (needsWrite) {
-          printLine(s"Writing $completionScriptDest", toStderr = false)
+          printLine(s"Writing $completionScriptDest", false)
           Files.createDirectories(completionScriptDest.getParent)
           Files.write(completionScriptDest, content)
         }
@@ -128,7 +130,7 @@ object PlatformCommandsMethods {
         ).map(_ + System.lineSeparator()).mkString
         (script, defaultRcFile)
       case _ =>
-        printLine(s"Unrecognized or unsupported shell: $format", toStderr = true)
+        printLine(s"Unrecognized or unsupported shell: $format", true)
         exit(1)
     }
 
@@ -153,29 +155,29 @@ object PlatformCommandsMethods {
       val evalCommand =
         s"eval $q$$($progName $installCompletionsCommand --env)$q"
       if (updated) {
-        printLine(s"Updated $rcFile", toStderr = true)
-        printLine("", toStderr = true)
+        printLine(s"Updated $rcFile", true)
+        printLine("", true)
         printLine(
           s"It is recommended to reload your shell, or source $rcFile in the " +
             "current session, for its changes to be taken into account.",
-          toStderr = true
+          true
         )
-        printLine("", toStderr = true)
+        printLine("", true)
         printLine(
           "Alternatively, enable completions in the current session with",
-          toStderr = true
+          true
         )
-        printLine("", toStderr = true)
-        printLine(s"  $evalCommand", toStderr = true)
-        printLine("", toStderr = true)
+        printLine("", true)
+        printLine(s"  $evalCommand", true)
+        printLine("", true)
       }
       else {
-        printLine(s"$rcFile already up-to-date.", toStderr = true)
-        printLine("", toStderr = true)
-        printLine("If needed, enable completions in the current session with", toStderr = true)
-        printLine("", toStderr = true)
-        printLine(s"  $evalCommand", toStderr = true)
-        printLine("", toStderr = true)
+        printLine(s"$rcFile already up-to-date.", true)
+        printLine("", true)
+        printLine("If needed, enable completions in the current session with", true)
+        printLine("", true)
+        printLine(s"  $evalCommand", true)
+        printLine("", true)
       }
     }
   }
@@ -184,7 +186,8 @@ object PlatformCommandsMethods {
     completionsWorkingDirectory: String,
     options: PlatformCommandsMethods.CompletionsUninstallOptions,
     progName: String,
-    printLine: (message: String, toStderr: Boolean) => Unit
+    /* (message: String, toStderr: Boolean) => Unit */
+    printLine: (String, Boolean) => Unit
   ): Unit = {
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
@@ -210,11 +213,11 @@ object PlatformCommandsMethods {
       )
 
       if (updated) {
-        printLine(s"Updated $rcFile", toStderr = true)
-        printLine(s"$name completions uninstalled successfully", toStderr = true)
+        printLine(s"Updated $rcFile", true)
+        printLine(s"$name completions uninstalled successfully", true)
       }
       else
-        printLine(s"No $name completion section found in $rcFile", toStderr = true)
+        printLine(s"No $name completion section found in $rcFile", true)
     }
   }
 
@@ -230,11 +233,11 @@ object PlatformCommandsMethods {
       rcFile: Option[String] = None,
     @HelpMessage("Custom banner in comment placed in rc file")
       banner: String = "{NAME} completions",
+    @HelpMessage("Custom completions name")
+      name: Option[String] = None,
     @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
     @Name("o")
       output: Option[String] = None,
-    @HelpMessage("Custom completions name")
-      name: Option[String] = None
   )
   // format: on
 
