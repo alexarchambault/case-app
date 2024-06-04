@@ -22,6 +22,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
   // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
   def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
     val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
+
     lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
 
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
@@ -128,6 +129,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
   def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
     val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
+
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
     val home    = Paths.get(sys.props("user.home"))
