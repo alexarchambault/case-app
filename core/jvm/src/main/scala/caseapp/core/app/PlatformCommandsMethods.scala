@@ -21,78 +21,22 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
   // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
   def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, _) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
-    PlatformCommandsMethods.completionsInstall(
-      completionsWorkingDirectory,
-      options,
-      progName = progName,
-      installCompletionsCommand = s"${completionsCommandName.mkString(" ")} install",
-      printLine = printLine(_, _),
-      exit = exit
-    )
-  }
-
-  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, _) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
-    PlatformCommandsMethods.completionsUninstall(
-      completionsWorkingDirectory,
-      options,
-      progName = progName,
-      printLine = printLine(_, _)
-    )
-  }
-}
-
-object PlatformCommandsMethods {
-  import caseapp.{HelpMessage, Name}
-  import caseapp.core.help.Help
-  import caseapp.core.parser.Parser
-
-  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletionsOptions.scala
-  // format: off
-  final case class CompletionsInstallOptions(
-    @HelpMessage("Print completions to stdout")
-      env: Boolean = false,
-    @HelpMessage("Custom completions name")
-      name: Option[String] = None,
-    @HelpMessage("Name of the shell, either zsh, fish or bash")
-    @Name("shell")
-      format: Option[String] = None,
-    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
-    @Name("o")
-      output: Option[String] = None,
-    @HelpMessage("Custom banner in comment placed in rc file (bash or zsh only)")
-      banner: String = "{NAME} completions",
-    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
-      rcFile: Option[String] = None
-  )
-  // format: on
-
-  def completionsInstall(
-    completionsWorkingDirectory: String,
-    options: PlatformCommandsMethods.CompletionsInstallOptions,
-    progName: String,
-    installCompletionsCommand: String,
-    /* (message: String, toStderr: Boolean) => Unit */
-    printLine: (String, Boolean) => Unit,
-    /* (code: Int) */
-    exit: Int => Nothing
-  ): Unit = {
+    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
     lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
 
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
     val format = PlatformCommandsMethods.getFormat(options.format).getOrElse {
       printLine(
         "Cannot determine current shell, pass the shell you use with --shell, like",
-        true
+        toStderr = true
       )
-      printLine("", true)
+      printLine("", toStderr = true)
       for (shell <- Seq(Bash.shellName, Zsh.shellName, Fish.shellName))
         printLine(
-          s"  $name $installCompletionsCommand --shell $shell",
-          true
+          s"  $name ${completionsCommandName.mkString(" ")} install --shell $shell",
+          toStderr = true
         )
-      printLine("", true)
+      printLine("", toStderr = true)
       exit(1)
     }
 
@@ -120,7 +64,7 @@ object PlatformCommandsMethods {
         val needsWrite = !Files.exists(completionScriptDest) ||
           !Arrays.equals(Files.readAllBytes(completionScriptDest), content)
         if (needsWrite) {
-          printLine(s"Writing $completionScriptDest", false)
+          printLine(s"Writing $completionScriptDest")
           Files.createDirectories(completionScriptDest.getParent)
           Files.write(completionScriptDest, content)
         }
@@ -130,7 +74,7 @@ object PlatformCommandsMethods {
         ).map(_ + System.lineSeparator()).mkString
         (script, defaultRcFile)
       case _ =>
-        printLine(s"Unrecognized or unsupported shell: $format", true)
+        printLine(s"Unrecognized or unsupported shell: $format", toStderr = true)
         exit(1)
     }
 
@@ -153,42 +97,37 @@ object PlatformCommandsMethods {
 
       val q = "\""
       val evalCommand =
-        s"eval $q$$($progName $installCompletionsCommand --env)$q"
+        s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
       if (updated) {
-        printLine(s"Updated $rcFile", true)
-        printLine("", true)
+        printLine(s"Updated $rcFile", toStderr = true)
+        printLine("", toStderr = true)
         printLine(
           s"It is recommended to reload your shell, or source $rcFile in the " +
             "current session, for its changes to be taken into account.",
-          true
+          toStderr = true
         )
-        printLine("", true)
+        printLine("", toStderr = true)
         printLine(
           "Alternatively, enable completions in the current session with",
-          true
+          toStderr = true
         )
-        printLine("", true)
-        printLine(s"  $evalCommand", true)
-        printLine("", true)
+        printLine("", toStderr = true)
+        printLine(s"  $evalCommand", toStderr = true)
+        printLine("", toStderr = true)
       }
       else {
-        printLine(s"$rcFile already up-to-date.", true)
-        printLine("", true)
-        printLine("If needed, enable completions in the current session with", true)
-        printLine("", true)
-        printLine(s"  $evalCommand", true)
-        printLine("", true)
+        printLine(s"$rcFile already up-to-date.", toStderr = true)
+        printLine("", toStderr = true)
+        printLine("If needed, enable completions in the current session with", toStderr = true)
+        printLine("", toStderr = true)
+        printLine(s"  $evalCommand", toStderr = true)
+        printLine("", toStderr = true)
       }
     }
   }
 
-  def completionsUninstall(
-    completionsWorkingDirectory: String,
-    options: PlatformCommandsMethods.CompletionsUninstallOptions,
-    progName: String,
-    /* (message: String, toStderr: Boolean) => Unit */
-    printLine: (String, Boolean) => Unit
-  ): Unit = {
+  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
+    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
     val home    = Paths.get(sys.props("user.home"))
@@ -213,13 +152,39 @@ object PlatformCommandsMethods {
       )
 
       if (updated) {
-        printLine(s"Updated $rcFile", true)
-        printLine(s"$name completions uninstalled successfully", true)
+        printLine(s"Updated $rcFile", toStderr = true)
+        printLine(s"$name completions uninstalled successfully", toStderr = true)
       }
       else
-        printLine(s"No $name completion section found in $rcFile", true)
+        printLine(s"No $name completion section found in $rcFile", toStderr = true)
     }
   }
+}
+
+object PlatformCommandsMethods {
+  import caseapp.{HelpMessage, Name}
+  import caseapp.core.help.Help
+  import caseapp.core.parser.Parser
+
+  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletionsOptions.scala
+  // format: off
+  final case class CompletionsInstallOptions(
+    @HelpMessage("Print completions to stdout")
+      env: Boolean = false,
+    @HelpMessage("Custom completions name")
+      name: Option[String] = None,
+    @HelpMessage("Name of the shell, either zsh, fish or bash")
+    @Name("shell")
+      format: Option[String] = None,
+    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
+    @Name("o")
+      output: Option[String] = None,
+    @HelpMessage("Custom banner in comment placed in rc file (bash or zsh only)")
+      banner: String = "{NAME} completions",
+    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
+      rcFile: Option[String] = None
+  )
+  // format: on
 
   object CompletionsInstallOptions {
     implicit lazy val parser: Parser[CompletionsInstallOptions] = Parser.derive
