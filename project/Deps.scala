@@ -14,7 +14,7 @@ object Deps {
   def pprint        = setting("com.lihaoyi" %%% "pprint" % "0.8.1")
   def scalaCompiler = setting("org.scala-lang" % "scala-compiler" % scalaVersion.value)
   def scalaReflect  = setting("org.scala-lang" % "scala-reflect" % scalaVersion.value)
-  def shapeless     = setting("com.chuusai" %%% "shapeless" % "2.3.11")
+  def shapeless     = setting("com.chuusai" %%% "shapeless" % "2.3.12")
   def sourcecode    = setting("com.lihaoyi" %%% "sourcecode" % "0.3.1")
   def utest         = setting("com.lihaoyi" %%% "utest" % "0.8.2")
 
