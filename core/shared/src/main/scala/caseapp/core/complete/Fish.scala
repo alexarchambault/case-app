@@ -13,7 +13,7 @@ object Fish {
        |""".stripMargin
 
   private def escape(s: String): String =
-    s.replace("\t", "  ").linesIterator.to(LazyList).headOption.getOrElse("")
+    s.replace("\t", "  ").linesIterator.find(_ => true).getOrElse("")
   def print(items: Seq[CompletionItem]): String = {
     val newLine = System.lineSeparator()
     val b       = new StringBuilder
