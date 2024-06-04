@@ -3,9 +3,9 @@ import sbt.Keys._
 
 object Settings {
 
-  private def scala212 = "2.12.18"
-  private def scala213 = "2.13.12"
-  private def scala3   = "3.3.1"
+  private def scala212 = "2.12.19"
+  private def scala213 = "2.13.14"
+  private def scala3   = "3.3.3"
 
   private lazy val isAtLeastScala213 = Def.setting {
     import Ordering.Implicits._
