@@ -19,7 +19,9 @@ import dataclass._
   terminalWidthOpt: Option[Int] = None,
   @since filterArgs: Option[Arg => Boolean] = None,
   @since filterArgsWhenShowHidden: Option[Arg => Boolean] = None,
-  hiddenGroupsWhenShowHidden: Option[Seq[String]] = None
+  hiddenGroupsWhenShowHidden: Option[Seq[String]] = None,
+  @since("2.1.0-M25")
+  namesLimit: Option[Int] = None
 ) {
   private def sortValues[T](
     sortGroups: Option[Seq[String] => Seq[String]],

@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.complete.{Bash, CompletionItem, Zsh}
+import caseapp.core.complete.{Bash, CompletionItem, Fish, Zsh}
 import utest._
 
 object CompletionTests extends TestSuite {
@@ -152,6 +152,13 @@ object CompletionTests extends TestSuite {
 
         val compRely         = Bash.print(res)
         val expectedCompRely = """"--backtick  -- A pattern with backtick \`--\`"""".stripMargin
+
+        assert(compRely.contains(expectedCompRely))
+      }
+      test("fish") {
+        val res              = Prog.complete(Seq("back-tick", "-"), 1)
+        val compRely         = Fish.print(res)
+        val expectedCompRely = "--backtick\tA pattern with backtick `--`\n".stripMargin
 
         assert(compRely.contains(expectedCompRely))
       }

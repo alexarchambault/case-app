@@ -56,9 +56,16 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
 
   def exit(code: Int): Nothing =
     PlatformUtil.exit(code)
+  def printLine(line: String, toStderr: Boolean): Unit =
+    if (toStderr)
+      System.err.println(line)
+    else
+      println(line)
+  final def printLine(line: String): Unit =
+    printLine(line, toStderr = false)
 
   def error(message: Error): Nothing = {
-    Console.err.println(message.message)
+    printLine(message.message, toStderr = true)
     exit(1)
   }
 
@@ -69,19 +76,19 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
 
   def fullHelpAsked(progName: String): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
-    println(help.help(helpFormat, showHidden = true))
+    printLine(help.help(helpFormat, showHidden = true))
     exit(0)
   }
 
   def helpAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
-    println(help.help(helpFormat, showHidden = false))
+    printLine(help.help(helpFormat, showHidden = false))
     exit(0)
   }
 
   def usageAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
-    println(help.usage(helpFormat))
+    printLine(help.usage(helpFormat))
     exit(0)
   }
 
