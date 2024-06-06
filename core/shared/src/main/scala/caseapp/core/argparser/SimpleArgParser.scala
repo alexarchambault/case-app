@@ -23,6 +23,24 @@ object SimpleArgParser {
   def from[T](description: String)(parse: String => Either[Error, T]): SimpleArgParser[T] =
     SimpleArgParser(description, (value, _, _) => parse(value))
 
+  val byte: SimpleArgParser[Byte] =
+    from("byte") { s =>
+      try Right(s.toByte)
+      catch {
+        case _: NumberFormatException =>
+          Left(Error.MalformedValue("byte-sized integer", s))
+      }
+    }
+
+  val short: SimpleArgParser[Short] =
+    from("short") { s =>
+      try Right(s.toShort)
+      catch {
+        case _: NumberFormatException =>
+          Left(Error.MalformedValue("short integer", s))
+      }
+    }
+
   val int: SimpleArgParser[Int] =
     from("int") { s =>
       try Right(s.toInt)
