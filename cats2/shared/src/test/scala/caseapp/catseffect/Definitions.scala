@@ -1,7 +1,7 @@
 package caseapp
-package cats
+package catseffect
 
-import _root_.cats.data.NonEmptyList
+import cats.data.NonEmptyList
 
 object Definitions {
 

@@ -1,9 +1,9 @@
-package caseapp.cats
+package caseapp
 
 import caseapp.core.argparser.{AccumulatorArgParser, ArgParser}
 import cats.data.NonEmptyList
 
-object CatsArgParser {
+package object catseffect {
   implicit def nonEmptyListArgParser[T](
     implicit parser: ArgParser[T]
   ): AccumulatorArgParser[NonEmptyList[T]] =

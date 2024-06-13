@@ -1,4 +1,4 @@
-package caseapp.cats
+package caseapp.catseffect
 
 import caseapp.core.Error
 import caseapp.core.help.{Help, WithHelp}
