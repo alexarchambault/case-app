@@ -156,7 +156,7 @@ object cats2 extends Module {
 
   trait Cats2Jvm extends Cats2 with MimaChecks {
     def moduleDeps = Seq(core.jvm())
-    def sources    = cats.jvm().sources()
+    def sources    = T.sources(cats.jvm().sources())
 
     object test extends Tests with TestCrossSources {
       def ivyDeps       = Agg(Deps.utest)
@@ -165,7 +165,7 @@ object cats2 extends Module {
   }
   trait Cats2Js extends Cats2 with CaseAppScalaJsModule with MimaChecks {
     def moduleDeps = Seq(core.js())
-    def sources    = cats.js().sources()
+    def sources    = T.sources(cats.js().sources())
 
     object test extends SbtModuleTests with ScalaJSTests with TestCrossSources {
       def ivyDeps       = Agg(Deps.utest)
