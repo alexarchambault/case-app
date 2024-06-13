@@ -14,13 +14,16 @@ import dataclass.data
   indexedUnparsed: Seq[Indexed[String]]
 ) {
 
-  def remaining: Seq[String] = indexedRemaining.map(_.value)
-  def unparsed: Seq[String]  = indexedUnparsed.map(_.value)
+  lazy val remaining: Seq[String] = indexedRemaining.map(_.value)
+  lazy val unparsed: Seq[String]  = indexedUnparsed.map(_.value)
 
   /** Arguments both before and after a `--`.
     *
     * The first `--`, if any, is not included in this list.
     */
-  def all: Seq[String] =
+  lazy val all: Seq[String] =
     remaining ++ unparsed
+
+  lazy val indexed: Seq[Indexed[String]] =
+    indexedRemaining ++ indexedUnparsed
 }

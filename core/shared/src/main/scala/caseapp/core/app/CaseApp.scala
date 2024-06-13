@@ -10,8 +10,13 @@ import caseapp.core.util.Formatter
 
 abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]) {
 
+  def name: String =
+    help.progName
+
   def hasHelp: Boolean     = true
   def hasFullHelp: Boolean = false
+
+  def help: Help[T] = messages
 
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)
@@ -69,10 +74,14 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     exit(1)
   }
 
-  lazy val finalHelp: Help[_] =
-    if (hasFullHelp) messages.withFullHelp
-    else if (hasHelp) messages.withHelp
-    else messages
+  lazy val finalHelp: Help[_] = {
+    val h =
+      if (hasFullHelp) messages.withFullHelp
+      else if (hasHelp) messages.withHelp
+      else messages
+    if (name == h.progName) h
+    else h.withProgName(name)
+  }
 
   def fullHelpAsked(progName: String): Nothing = {
     val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)

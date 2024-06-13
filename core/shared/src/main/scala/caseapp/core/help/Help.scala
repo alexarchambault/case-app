@@ -68,8 +68,7 @@ import caseapp.HelpMessage
   }
 
   def duplicates: Map[String, Seq[Arg]] = {
-    val pairs = args.map(a => a.name.option(nameFormatter) -> a) ++
-      args.flatMap(a => a.extraNames.map(n => n.option(nameFormatter) -> a))
+    val pairs = args.flatMap(a => a.names.map(n => n.option(nameFormatter) -> a))
     pairs
       .groupBy(_._1)
       .mapValues(_.map(_._2))
@@ -199,7 +198,7 @@ object Help extends HelpCompanion {
     args
       .collect {
         case arg if showHidden || !arg.noHelp =>
-          val names = (arg.name +: arg.extraNames).distinct
+          val names = arg.names.distinct
 
           // FIXME Flags that accept no value are not given the right help message here
           val valueDescription = arg
@@ -229,8 +228,9 @@ object Help extends HelpCompanion {
     for (arg <- args if showHidden || !arg.noHelp) yield {
       val namesToShow = format.namesLimit match {
         case Some(limit) if !showHidden && limit >= 0 =>
-          (arg.name +: arg.extraNames).take(limit)
-        case _ => arg.name +: arg.extraNames
+          arg.names.take(limit)
+        case _ =>
+          arg.names
       }
 
       val sortedNames = namesToShow

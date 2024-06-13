@@ -32,7 +32,8 @@ import caseapp.Name
         Right(None)
 
       case firstArg :: rem =>
-        val matchedOpt = (Iterator(arg.name) ++ arg.extraNames.iterator)
+        val matchedOpt = arg.names
+          .iterator
           .map(n => n -> n(firstArg, nameFormatter))
           .collectFirst {
             case (n, Right(valueOpt)) => n -> valueOpt

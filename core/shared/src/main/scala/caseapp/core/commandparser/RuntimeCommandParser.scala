@@ -8,19 +8,19 @@ import caseapp.core.complete.CompletionItem
 
 object RuntimeCommandParser {
 
-  def parse(
-    apps: Map[List[String], CaseApp[_]],
+  def parse[T](
+    apps: Map[List[String], T],
     args: List[String]
-  ): Option[(List[String], CaseApp[_], List[String])] = {
+  ): Option[(List[String], T, List[String])] = {
     val tree = CommandTree.fromCommandMap(apps)
     tree.command(args)
   }
 
-  def parse(
-    defaultApp: CaseApp[_],
-    apps: Map[List[String], CaseApp[_]],
+  def parse[T](
+    defaultApp: T,
+    apps: Map[List[String], T],
     args: List[String]
-  ): (List[String], CaseApp[_], List[String]) = {
+  ): (List[String], T, List[String]) = {
     val tree = CommandTree.fromCommandMap(apps)
     tree.command(args).getOrElse((Nil, defaultApp, args))
   }

@@ -17,7 +17,8 @@ package object caseapp {
   type CaseApp[T] = core.app.CaseApp[T]
   val CaseApp = core.app.CaseApp
 
-  type Command[T] = core.app.Command[T]
+  type Command[T]         = core.app.Command[T]
+  type CommandsEntryPoint = core.app.CommandsEntryPoint
 
   type RemainingArgs = core.RemainingArgs
   val RemainingArgs = core.RemainingArgs
