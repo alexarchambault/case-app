@@ -84,33 +84,18 @@ object core extends Module {
       annotations.jvm(),
       util.jvm()
     )
-
-    object test extends Tests with TestCrossSources {
-      def ivyDeps       = Agg(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-    }
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
     def moduleDeps = Seq(
       annotations.js(),
       util.js()
     )
-
-    object test extends SbtModuleTests with ScalaJSTests with TestCrossSources {
-      def ivyDeps       = Agg(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-    }
   }
   trait CoreNative extends Core with CaseAppScalaNativeModule {
     def moduleDeps = Seq(
       annotations.native(),
       util.native()
     )
-
-    object test extends SbtModuleTests with ScalaNativeTests with TestCrossSources {
-      def ivyDeps       = Agg(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-    }
   }
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
