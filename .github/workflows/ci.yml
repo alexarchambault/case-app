@@ -54,6 +54,21 @@ jobs:
         apps: scalafmt:3.7.14
     - run: scalafmt --check
 
+  doc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.4
+    - uses: coursier/setup-action@v1.3
+      with:
+        jvm: 17
+    - run: |
+        .github/scripts/setup-mkdocs.sh && \
+        ./mill -i docs.mkdocsBuild
+
   publish:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
@@ -78,3 +93,19 @@ jobs:
         PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
         SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
         SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+
+  update-website:
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v6.4
+    - uses: coursier/setup-action@v1.3
+      with:
+        jvm: 17
+    - run: |
+        .github/scripts/setup-mkdocs.sh && \
+        ./mill -i docs.mkdocsGhDeploy

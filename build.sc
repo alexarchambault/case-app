@@ -6,6 +6,8 @@ import mill.scalajslib._
 import mill.scalalib._
 import mill.scalanativelib._
 
+import java.io.File
+
 import scala.concurrent.duration.DurationInt
 
 object Versions {
@@ -23,6 +25,7 @@ object Deps {
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
+  def mdoc                      = ivy"org.scalameta::mdoc:2.5.2"
   def osLib                     = ivy"com.lihaoyi::os-lib::0.10.2"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
@@ -436,4 +439,86 @@ object ci extends Module {
     publisher.publishAll(isRelease, artifacts: _*)
   }
 
+}
+
+object docs extends ScalaModule {
+  private def sv   = Versions.scala213
+  def scalaVersion = sv
+  def ivyDeps = Agg(
+    Deps.mdoc
+  )
+  def mainClass = Some("mdoc.Main")
+
+  def mdocInput = T.sources {
+    Seq(PathRef(millModuleBasePath.value / "pages"))
+  }
+  def mkdocsConfigFile = T.sources {
+    Seq(PathRef(millModuleBasePath.value / "mkdocs.yml"))
+  }
+
+  def mdocOutput = T {
+    val dir = millModuleBasePath.value / "docs"
+    os.makeDir.all(dir)
+    PathRef(dir)
+  }
+  def mkdocsOutput = T {
+    PathRef(millModuleBasePath.value / "site")
+  }
+
+  def mdocArgs = T.task {
+    val mdocInput0 = mdocInput().map(_.path)
+    assert(mdocInput0.length == 1)
+    define.Args(
+      "--in",
+      mdocInput0.head,
+      "--out",
+      mdocOutput().path,
+      "--site.VERSION",
+      core.jvm(sv).publishVersion(),
+      "--classpath",
+      cats.jvm(sv).runClasspath().map(_.path).mkString(File.pathSeparator)
+    )
+  }
+  def mdocWatchArgs = T.task {
+    new define.Args(
+      mdocArgs().value :+ "--watch"
+    )
+  }
+
+  def mdoc() = T.command[Unit] {
+    run(mdocArgs)()
+  }
+  def mdocWatch() = T.command[Unit] {
+    run(mdocWatchArgs)()
+  }
+
+  def mkdocsConfigArgs = T {
+    val mkdocsConfigFile0 = mkdocsConfigFile().map(_.path)
+    assert(mkdocsConfigFile0.length == 1)
+    Seq("--config-file", mkdocsConfigFile0.head.toString)
+  }
+  def mkdocsSiteDirArgs = T {
+    Seq("--site-dir", mkdocsOutput().path.toString)
+  }
+  def mkdocsServe() = T.command[Unit] {
+    mdoc()()
+    os.proc("mkdocs", "serve", mkdocsConfigArgs())
+      .call(cwd = millModuleBasePath.value, stdin = os.Inherit, stdout = os.Inherit)
+
+    ()
+  }
+  def mkdocsBuild() = T.command[Unit] {
+    mdoc()()
+    os.proc("mkdocs", "build", mkdocsConfigArgs(), mkdocsSiteDirArgs())
+      .call(cwd = millModuleBasePath.value, stdin = os.Inherit, stdout = os.Inherit)
+
+    ()
+  }
+  def mkdocsGhDeploy() = T.command[Unit] {
+    mdoc()()
+    os.proc("mkdocs", "gh-deploy", mkdocsConfigArgs(), mkdocsSiteDirArgs())
+      .call(cwd = millModuleBasePath.value, stdin = os.Inherit, stdout = os.Inherit)
+
+    ()
+  }
 }

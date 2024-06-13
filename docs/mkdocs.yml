@@ -1,0 +1,84 @@
+site_name: case-app
+
+nav:
+  - Home: 'index.md'
+  - 'setup.md'
+  - 'define.md'
+  - 'types.md'
+  - 'parse.md'
+  - 'help.md'
+  - 'commands.md'
+  - 'completion.md'
+  - 'misc.md'
+  - 'advanced.md'
+  - 'develop.md'
+
+repo_url: https://github.com/alexarchambault/case-app
+edit_uri: edit/main/docs/
+
+theme:
+  name: material
+  palette:
+    # scheme: slate
+
+    # Palette toggle for automatic mode
+    - media: "(prefers-color-scheme)"
+      toggle:
+        icon: material/brightness-auto
+        name: Switch to light mode
+
+    # Palette toggle for light mode
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+
+    # Palette toggle for dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/brightness-4
+        name: Switch to system preference
+
+  features:
+    - content.action.edit
+    - navigation.instant
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.path
+    - navigation.top
+    - search.suggest
+    - search.highlight
+
+markdown_extensions:
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - tables
+  - def_list
+  - toc:
+      permalink: true
+
+plugins:
+  - git-revision-date-localized:
+      enable_creation_date: true
+  - git-committers:
+      repository: alexarchambault/case-app
+      branch: main
+      enabled: !ENV [CI, false]
+  - search
+
+extra:
+  version:
+    provider: mike
+
+validation:
+  links:
+    not_found:
+    anchors:
+    unrecognized_links:
