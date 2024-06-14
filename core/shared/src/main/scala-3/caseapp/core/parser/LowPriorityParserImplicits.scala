@@ -114,6 +114,8 @@ object LowPriorityParserImplicits {
             .collect {
               case Apply(_, List(arg)) =>
                 '{ caseapp.Recurse(${ arg.asExprOf[String] }) }
+              case Apply(_, Nil) =>
+                '{ caseapp.Recurse() }
             }
           val extraNames = sym.annotations
             .filter(_.tpe =:= TypeRepr.of[caseapp.ExtraName])
