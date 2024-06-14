@@ -2,8 +2,7 @@ package caseapp.core.app
 
 // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/internal/ProfileFileUpdater.scala
 
-import java.nio.charset.Charset
-import java.nio.file.{FileAlreadyExistsException, Files, Path}
+import caseapp.core.app.nio._
 
 // initially adapted from https://github.com/coursier/coursier/blob/d9a0fcc1af4876bec7f19a18f2c93d808e06df8d/modules/env/src/main/scala/coursier/env/ProfileUpdater.scala#L44-L137
 
@@ -25,8 +24,7 @@ object ProfileFileUpdater {
   def addToProfileFile(
     file: Path,
     title: String,
-    addition: String,
-    charset: Charset
+    addition: String
   ): Boolean = {
 
     def updated(content: String): Option[String] = {
@@ -52,11 +50,11 @@ object ProfileFileUpdater {
 
     var updatedSomething = false
     val contentOpt = Some(file)
-      .filter(Files.exists(_))
-      .map(f => new String(Files.readAllBytes(f), charset))
+      .filter(FileOps.exists(_))
+      .map(f => FileOps.readFile(f))
     for (updatedContent <- updated(contentOpt.getOrElse(""))) {
-      Option(file.getParent).map(createDirectories(_))
-      Files.write(file, updatedContent.getBytes(charset))
+      Option(file.getParent).map(FileOps.createDirectories(_))
+      FileOps.writeFile(file, updatedContent)
       updatedSomething = true
     }
     updatedSomething
@@ -64,8 +62,7 @@ object ProfileFileUpdater {
 
   def removeFromProfileFile(
     file: Path,
-    title: String,
-    charset: Charset
+    title: String
   ): Boolean = {
 
     def updated(content: String): Option[String] = {
@@ -80,21 +77,13 @@ object ProfileFileUpdater {
 
     var updatedSomething = false
     val contentOpt = Some(file)
-      .filter(Files.exists(_))
-      .map(f => new String(Files.readAllBytes(f), charset))
+      .filter(FileOps.exists(_))
+      .map(f => FileOps.readFile(f))
     for (updatedContent <- updated(contentOpt.getOrElse(""))) {
-      Option(file.getParent).map(createDirectories(_))
-      Files.write(file, updatedContent.getBytes(charset))
+      Option(file.getParent).map(FileOps.createDirectories(_))
+      FileOps.writeFile(file, updatedContent)
       updatedSomething = true
     }
     updatedSomething
   }
-
-  private def createDirectories(path: Path): Unit =
-    try Files.createDirectories(path)
-    catch {
-      // Ignored, see https://bugs.openjdk.java.net/browse/JDK-8130464
-      case _: FileAlreadyExistsException if Files.isDirectory(path) =>
-    }
-
 }

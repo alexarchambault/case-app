@@ -23,6 +23,7 @@ object Deps {
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
+  def osLib                     = ivy"com.lihaoyi::os-lib::0.10.2"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
@@ -84,6 +85,12 @@ object core extends Module {
       annotations.jvm(),
       util.jvm()
     )
+    def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+      scalaVersion(),
+      millSourcePath,
+      "jvm-native",
+      "main"
+    ))
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
     def moduleDeps = Seq(
@@ -96,6 +103,12 @@ object core extends Module {
       annotations.native(),
       util.native()
     )
+    def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+      scalaVersion(),
+      millSourcePath,
+      "jvm-native",
+      "main"
+    ))
   }
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
@@ -189,6 +202,7 @@ object tests extends Module {
 
     object test extends Tests with TestCrossSources {
       def ivyDeps = Agg(
+        Deps.osLib,
         Deps.pprint,
         Deps.utest
       )
@@ -204,6 +218,13 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
+      // not sure why we need to manually add this one
+      def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+        scalaVersion(),
+        millSourcePath,
+        "js",
+        "test"
+      ))
     }
   }
   trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
@@ -211,6 +232,7 @@ object tests extends Module {
 
     object test extends SbtModuleTests with ScalaNativeTests with TestCrossSources {
       def ivyDeps = Agg(
+        Deps.osLib,
         Deps.pprint,
         Deps.utest
       )
@@ -291,12 +313,17 @@ object CaseAppPublishModule {
 }
 
 object CrossSources {
-  def extraSourcesDirs(sv: String, millSourcePath: os.Path, scope: String): Seq[PathRef] = {
+  def extraSourcesDirs(
+    sv: String,
+    millSourcePath: os.Path,
+    kind: String,
+    scope: String
+  ): Seq[PathRef] = {
     val (maj, majMin) = sv.split('.') match {
       case Array(maj0, min, _*) => (maj0, s"$maj0.$min")
       case _                    => sys.error(s"Malformed Scala version: $sv")
     }
-    val baseDir = millSourcePath / os.up / "shared" / "src" / scope
+    val baseDir = millSourcePath / os.up / kind / "src" / scope
     Seq(
       PathRef(baseDir / "scala"),
       PathRef(baseDir / s"scala-$maj"),
@@ -309,7 +336,7 @@ trait CrossSources extends SbtModule {
   import CrossSources._
   def sources = T.sources {
     val sv = scalaVersion()
-    super.sources() ++ extraSourcesDirs(sv, millSourcePath, "main")
+    super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "main")
   }
 }
 
@@ -317,7 +344,7 @@ trait TestCrossSources extends SbtModule {
   import CrossSources._
   def sources = T.sources {
     val sv = scalaVersion()
-    super.sources() ++ extraSourcesDirs(sv, millSourcePath, "test")
+    super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "test")
   }
 }
 
