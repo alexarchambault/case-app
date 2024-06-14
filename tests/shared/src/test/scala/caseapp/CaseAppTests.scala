@@ -112,6 +112,22 @@ object CaseAppTests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    test("parse a args recursively with a prefix added") {
+      val res = Parser[RecurseWithPrefix].parse(Seq(
+        "--no-prefix",
+        "4",
+        "--prefix-value",
+        "value",
+        "--prefix-num-foo",
+        "10"
+      ))
+      val expectedRes = Right((
+        RecurseWithPrefix(noPrefix = 4, withPrefix = FewArgs(value = "value", numFoo = 10)),
+        Seq.empty
+      ))
+      assert(res == expectedRes)
+    }
+
     test("parse args") {
       val res = Parser[demo.DemoOptions].parse(Seq(
         "user arg",

@@ -40,7 +40,8 @@ trait LowPriorityParserImplicits {
         helpMessages(),
         group(),
         noHelp(),
-        tags()
+        tags(),
+        recurse()
       )
       .map(gen.from)
       .withDefaultOrigin(typeable.describe)

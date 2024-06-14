@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.Name
+import caseapp.{Name, Recurse}
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.Formatter
 import shapeless.{::, HList}
@@ -8,7 +8,8 @@ import dataclass.data
 
 @data class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   headParser: Parser.Aux[H, HD],
-  tailParser: Parser.Aux[T, TD]
+  tailParser: Parser.Aux[T, TD],
+  recurse: Recurse
 ) extends Parser[H :: T] {
 
   type D = HD :: TD
@@ -23,7 +24,7 @@ import dataclass.data
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     headParser
-      .step(args, index, d.head, nameFormatter)
+      .step(args, index, d.head, Formatter.addRecursePrefix(recurse, nameFormatter))
       .flatMap {
         case None =>
           tailParser
