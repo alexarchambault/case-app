@@ -9,7 +9,7 @@ class HelpCompleter[T](help: Help[T]) extends Completer[T] {
       .args
       .iterator
       .flatMap { arg =>
-        val names = (arg.name +: arg.extraNames)
+        val names = arg.names
           .map(help.nameFormatter.format)
           .map(n => (if (n.length == 1) "-" else "--") + n)
           .filter(_.startsWith(prefix))

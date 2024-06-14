@@ -36,6 +36,7 @@ import dataclass._
   def withDefaultOrigin(defaultOrigin: String): Arg =
     if (origin.isEmpty) this.withOrigin(Some(defaultOrigin))
     else this
+  lazy val names = name +: extraNames
 }
 
 object Arg {

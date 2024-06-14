@@ -1,15 +1,13 @@
-package caseapp.cats
+package caseapp.catseffect
 
-import _root_.cats.effect._
-import _root_.cats.effect.concurrent.Ref
-import _root_.cats.implicits._
-import _root_.cats.data.NonEmptyList
+import cats.effect._
+import cats.effect.concurrent.Ref
+import cats.implicits._
+import cats.data.NonEmptyList
 import caseapp._
 import caseapp.core.help.Help
 import caseapp.core.Error
 import utest._
-
-import caseapp.cats.CatsArgParser._
 
 sealed trait RecordedApp {
 

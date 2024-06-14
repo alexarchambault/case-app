@@ -41,7 +41,13 @@ abstract class HelpCompanion {
     helpMessage: AnnotationOption[HelpMessage, T]
   ): Help[T] = {
 
-    val appName0 = appName().fold(typeable.describe.stripSuffix("Options"))(_.appName)
+    val appName0 = appName() match {
+      case None =>
+        if (typeable.describe == "Options") typeable.describe
+        else typeable.describe.stripSuffix("Options")
+      case Some(name) =>
+        name.appName
+    }
 
     Help(
       parser.args,

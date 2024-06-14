@@ -86,6 +86,12 @@ object ArgParser extends PlatformArgParsers {
   /** Look for an implicit `ArgParser[T]` */
   def apply[T](implicit parser: ArgParser[T]): ArgParser[T] = parser
 
+  implicit def byte: ArgParser[Byte] =
+    SimpleArgParser.byte
+
+  implicit def short: ArgParser[Short] =
+    SimpleArgParser.short
+
   implicit def int: ArgParser[Int] =
     SimpleArgParser.int
 

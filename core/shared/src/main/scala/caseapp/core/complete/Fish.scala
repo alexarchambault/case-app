@@ -8,8 +8,7 @@ object Fish {
     s"$shellName-v1"
 
   def script(progName: String): String =
-    s"""
-    complete $progName -a '($progName complete $id (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+    s"""complete $progName -a '($progName complete $id (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
        |""".stripMargin
 
   private def escape(s: String): String =
