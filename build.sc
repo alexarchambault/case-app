@@ -207,12 +207,6 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
-        scalaVersion(),
-        millSourcePath,
-        "jvm-native",
-        "test"
-      ))
     }
   }
   trait TestsJs extends Tests0 with CaseAppScalaJsModule {
@@ -224,6 +218,13 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
+      // not sure why we need to manually add this one
+      def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+        scalaVersion(),
+        millSourcePath,
+        "js",
+        "test"
+      ))
     }
   }
   trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
@@ -236,12 +237,6 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
-        scalaVersion(),
-        millSourcePath,
-        "jvm-native",
-        "test"
-      ))
     }
   }
 

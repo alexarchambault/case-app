@@ -1,5 +1,6 @@
 package caseapp.core.app
 
+import caseapp.core.app.nio._
 import caseapp.core.commandparser.RuntimeCommandParser
 import caseapp.core.complete.{
   Bash,
@@ -11,7 +12,7 @@ import caseapp.core.complete.{
 }
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 
-abstract class CommandsEntryPoint extends PlatformCommandsMethods {
+abstract class CommandsEntryPoint {
 
   def defaultCommand: Option[Command[_]] = None
   def commands: Seq[Command[_]]
@@ -89,6 +90,175 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
   def completionsWorkingDirectory: Option[String] = None
 
+  protected def completeMainHook(args: Array[String]): Unit =
+    for (path <- completionDebugFile) {
+      val output = s"completeMain(${args.toSeq})"
+      FileOps.appendToFile(path, output)
+    }
+
+  def completionsInstalledMessage(
+    rcFile: String,
+    updated: Boolean
+  ): Iterator[String] = {
+    val q = "\""
+    val evalCommand =
+      s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
+    if (updated)
+      Iterator(
+        s"Updated $rcFile",
+        "",
+        s"It is recommended to reload your shell, or source $rcFile in the " +
+          "current session, for its changes to be taken into account.",
+        "",
+        "Alternatively, enable completions in the current session with",
+        "",
+        s"  $evalCommand",
+        ""
+      )
+    else
+      Iterator(
+        s"$rcFile already up-to-date.",
+        "",
+        "If needed, enable completions in the current session with",
+        "",
+        s"  $evalCommand",
+        ""
+      )
+  }
+
+  def shell: Option[String]           = FileOps.readEnv("SHELL")
+  def completionHome: Path            = FileOps.homeDir
+  def completionXdgHome: Option[Path] = FileOps.readEnv("XDG_CONFIG_HOME").map(Paths.get(_))
+  def completionZDotDir: Option[Path] = FileOps.readEnv("ZDOTDIR").map(Paths.get(_))
+  def completionDebugFile: Option[Path] =
+    FileOps.readEnv("CASEAPP_COMPLETION_DEBUG").map(Paths.get(_))
+
+  private def fishRcFile(name: String): Path =
+    completionXdgHome
+      .getOrElse(completionHome.resolve(".config"))
+      .resolve("fish")
+      .resolve("completions")
+      .resolve(s"$name.fish")
+
+  private def zshrcFile: Path =
+    completionZDotDir
+      .getOrElse(completionHome)
+      .resolve(".zshrc")
+  private def bashrcFile: Path =
+    completionHome.resolve(".bashrc")
+
+  private def zshCompletionWorkingDir(forcedOutputDir: Option[String]): Path =
+    forcedOutputDir
+      .orElse(completionsWorkingDirectory)
+      .map(Paths.get(_).resolve("zsh"))
+      .getOrElse {
+        val zDotDir = completionZDotDir.getOrElse(completionHome)
+        completionXdgHome
+          .getOrElse(zDotDir.resolve(".config"))
+          .resolve("zsh")
+          .resolve("completions")
+      }
+
+  // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
+  def completionsInstall(
+    completionsWorkingDirectory: Option[String],
+    options: CompletionsInstallOptions
+  ): Unit = {
+    val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
+    val format = CommandsEntryPoint.getFormat(options.format, shell, File.separator).getOrElse {
+      printLine(
+        "Cannot determine current shell, pass the shell you use with --shell, like",
+        toStderr = true
+      )
+      printLine("", toStderr = true)
+      for (shell <- Seq(Bash.shellName, Zsh.shellName, Fish.shellName))
+        printLine(
+          s"  $name ${completionsCommandName.mkString(" ")} install --shell $shell",
+          toStderr = true
+        )
+      printLine("", toStderr = true)
+      exit(1)
+    }
+
+    val (rcScript, defaultRcFile) = format match {
+      case Bash.id | Bash.shellName =>
+        (Bash.script(name), bashrcFile)
+      case Fish.id | Fish.shellName =>
+        (Fish.script(name), fishRcFile(name))
+      case Zsh.id | Zsh.shellName =>
+        val completionScript     = Zsh.script(name)
+        val dir                  = zshCompletionWorkingDir(options.output)
+        val completionScriptDest = dir.resolve(s"_$name")
+        val needsWrite = !FileOps.exists(completionScriptDest) ||
+          FileOps.readFile(completionScriptDest) != completionScript
+        if (needsWrite) {
+          printLine(s"Writing $completionScriptDest")
+          FileOps.createDirectories(completionScriptDest.getParent)
+          FileOps.writeFile(completionScriptDest, completionScript)
+        }
+        val script = Seq(s"""fpath=("$dir" $$fpath)""", "compinit")
+          .map(_ + System.lineSeparator())
+          .mkString
+        (script, zshrcFile)
+      case _ =>
+        printLine(s"Unrecognized or unsupported shell: $format", toStderr = true)
+        exit(1)
+    }
+
+    if (options.env)
+      println(rcScript)
+    else {
+      val rcFile = format match {
+        case Fish.id | Fish.shellName =>
+          options.output.map(Paths.get(_)).map(_.resolve(s"$name.fish")).getOrElse(defaultRcFile)
+        case _ =>
+          options.rcFile.map(Paths.get(_)).getOrElse(defaultRcFile)
+      }
+      val banner  = options.banner.replace("{NAME}", name)
+      val updated = ProfileFileUpdater.addToProfileFile(rcFile, banner, rcScript)
+
+      for (line <- completionsInstalledMessage(rcFile.toString, updated))
+        printLine(line, toStderr = true)
+    }
+  }
+
+  def completionsUninstall(
+    completionsWorkingDirectory: Option[String],
+    options: CompletionsUninstallOptions
+  ): Unit = {
+    val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
+
+    val rcFiles = options.rcFile
+      .map(file => Seq(Paths.get(file)))
+      .getOrElse(Seq(zshrcFile, bashrcFile))
+      .filter(FileOps.exists(_))
+
+    val maybeDelete = Seq(
+      zshCompletionWorkingDir(options.output).resolve(s"_$name"),
+      fishRcFile(name)
+    )
+
+    for (rcFile <- rcFiles) {
+      val banner = options.banner.replace("{NAME}", name)
+
+      val updated = ProfileFileUpdater.removeFromProfileFile(rcFile, banner)
+
+      if (updated) {
+        printLine(s"Updated $rcFile", toStderr = true)
+        printLine(s"$name completions uninstalled successfully", toStderr = true)
+      }
+      else
+        printLine(s"No $name completion section found in $rcFile", toStderr = true)
+    }
+
+    for (f <- maybeDelete)
+      if (FileOps.isRegularFile(f)) {
+        val deleted = FileOps.deleteIfExists(f)
+        if (deleted)
+          printLine(s"Removed $f", toStderr = true)
+      }
+  }
+
   def completionsMain(args: Array[String]): Unit = {
 
     def script(format: String): String =
@@ -111,7 +281,7 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
         completionsUninstall(completionsWorkingDirectory, options)
       case Array(format, dest) =>
         val script0 = script(format)
-        writeCompletions(script0, dest)
+        FileOps.writeFile(Paths.get(dest), script0)
       case Array(format) =>
         val script0 = script(format)
         printLine(script0)
@@ -202,4 +372,17 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
       }
     }
   }
+}
+
+object CommandsEntryPoint {
+  def getFormat(format: Option[String], shellOpt: Option[String], fileSep: String): Option[String] =
+    format.map(_.trim).filter(_.nonEmpty)
+      .orElse {
+        shellOpt.map(_.split(fileSep).last).map {
+          case Bash.shellName => Bash.id
+          case Fish.shellName => Fish.id
+          case Zsh.shellName  => Zsh.id
+          case other          => other
+        }
+      }
 }
