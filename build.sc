@@ -85,6 +85,12 @@ object core extends Module {
       annotations.jvm(),
       util.jvm()
     )
+    def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+      scalaVersion(),
+      millSourcePath,
+      "jvm-native",
+      "main"
+    ))
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
     def moduleDeps = Seq(
@@ -97,6 +103,12 @@ object core extends Module {
       annotations.native(),
       util.native()
     )
+    def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+      scalaVersion(),
+      millSourcePath,
+      "jvm-native",
+      "main"
+    ))
   }
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
@@ -198,7 +210,7 @@ object tests extends Module {
       def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
         scalaVersion(),
         millSourcePath,
-        "jvm",
+        "jvm-native",
         "test"
       ))
     }
@@ -219,10 +231,17 @@ object tests extends Module {
 
     object test extends SbtModuleTests with ScalaNativeTests with TestCrossSources {
       def ivyDeps = Agg(
+        Deps.osLib,
         Deps.pprint,
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
+      def sources = T.sources(super.sources() ++ CrossSources.extraSourcesDirs(
+        scalaVersion(),
+        millSourcePath,
+        "jvm-native",
+        "test"
+      ))
     }
   }
 
