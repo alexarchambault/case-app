@@ -1,6 +1,12 @@
 package caseapp.core.app
 
-import caseapp.core.complete.{Bash, Fish, Zsh}
+import caseapp.core.complete.{
+  Bash,
+  CompletionsInstallOptions,
+  CompletionsUninstallOptions,
+  Fish,
+  Zsh
+}
 
 import java.io.File
 import java.nio.charset.{Charset, StandardCharsets}
@@ -21,7 +27,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
   // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
   def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsInstallOptions](args)
+    val (options, rem) = CaseApp.process[CompletionsInstallOptions](args)
 
     lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
 
@@ -128,7 +134,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
   }
 
   def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[PlatformCommandsMethods.CompletionsUninstallOptions](args)
+    val (options, rem) = CaseApp.process[CompletionsUninstallOptions](args)
 
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
@@ -164,55 +170,6 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 }
 
 object PlatformCommandsMethods {
-  import caseapp.{HelpMessage, Name}
-  import caseapp.core.help.Help
-  import caseapp.core.parser.Parser
-
-  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletionsOptions.scala
-  // format: off
-  final case class CompletionsInstallOptions(
-    @HelpMessage("Print completions to stdout")
-      env: Boolean = false,
-    @HelpMessage("Custom completions name")
-      name: Option[String] = None,
-    @HelpMessage("Name of the shell, either zsh, fish or bash")
-    @Name("shell")
-      format: Option[String] = None,
-    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
-    @Name("o")
-      output: Option[String] = None,
-    @HelpMessage("Custom banner in comment placed in rc file (bash or zsh only)")
-      banner: String = "{NAME} completions",
-    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
-      rcFile: Option[String] = None
-  )
-  // format: on
-
-  object CompletionsInstallOptions {
-    implicit lazy val parser: Parser[CompletionsInstallOptions] = Parser.derive
-    implicit lazy val help: Help[CompletionsInstallOptions]     = Help.derive
-  }
-
-  // from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/uninstallcompletions/SharedUninstallCompletionsOptions.scala
-  // format: off
-  final case class CompletionsUninstallOptions(
-    @HelpMessage("Path to `*rc` file, defaults to `.bashrc` or `.zshrc` depending on shell (bash or zsh only)")
-      rcFile: Option[String] = None,
-    @HelpMessage("Custom banner in comment placed in rc file")
-      banner: String = "{NAME} completions",
-    @HelpMessage("Custom completions name")
-      name: Option[String] = None,
-    @HelpMessage("Completions output directory (defaults to $XDG_CONFIG_HOME/fish/completions on fish)")
-    @Name("o")
-      output: Option[String] = None,
-  )
-  // format: on
-
-  object CompletionsUninstallOptions {
-    implicit lazy val parser: Parser[CompletionsUninstallOptions] = Parser.derive
-    implicit lazy val help: Help[CompletionsUninstallOptions]     = Help.derive
-  }
-
   def getFormat(format: Option[String]): Option[String] =
     format.map(_.trim).filter(_.nonEmpty)
       .orElse {
