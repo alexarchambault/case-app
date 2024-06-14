@@ -14,7 +14,7 @@ nav:
   - 'develop.md'
 
 repo_url: https://github.com/alexarchambault/case-app
-edit_uri: edit/main/docs/
+edit_uri: edit/main/docs/pages/
 
 theme:
   name: material
