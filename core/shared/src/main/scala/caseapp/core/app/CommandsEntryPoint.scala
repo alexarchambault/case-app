@@ -48,26 +48,26 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     printLine("", toStderr = true)
   }
 
-  def completePrintInstructions(): Unit = {
+  def completePrintInstructions(toStderr: Boolean): Unit = {
     val formats = Seq(Bash.id, Zsh.id, Fish.id)
-    printLine("To manually get completions, run", toStderr = true)
-    printLine("", toStderr = true)
+    printLine("To manually get completions, run", toStderr = toStderr)
+    printLine("", toStderr = toStderr)
     printLine(
       s"  $progName ${completeCommandName.mkString(" ")} ${formats.mkString("|")} index command...",
-      toStderr = true
+      toStderr = toStderr
     )
-    printLine("", toStderr = true)
+    printLine("", toStderr = toStderr)
     printLine(
       "where index starts from one, and command... includes the command name, like",
-      toStderr = true
+      toStderr = toStderr
     )
-    printLine("", toStderr = true)
+    printLine("", toStderr = toStderr)
     printLine(
       s"  $progName ${completeCommandName.mkString(" ")} ${Zsh.id} 2 $progName --",
-      toStderr = true
+      toStderr = toStderr
     )
-    printLine("", toStderr = true)
-    printLine("to get completions for '--'", toStderr = true)
+    printLine("", toStderr = toStderr)
+    printLine("to get completions for '--'", toStderr = toStderr)
   }
 
   def completionsPrintUsage(): Nothing = {
@@ -139,8 +139,10 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
           case _ =>
             completeUnrecognizedFormat(format)
         }
+      case Array("--help" | "--usage" | "-h") =>
+        completePrintInstructions(toStderr = false)
       case _ =>
-        completePrintInstructions()
+        completePrintInstructions(toStderr = true)
         exit(1)
     }
   }
