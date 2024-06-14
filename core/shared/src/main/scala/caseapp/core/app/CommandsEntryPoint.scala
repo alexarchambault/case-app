@@ -48,6 +48,28 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
     printLine("", toStderr = true)
   }
 
+  def completePrintInstructions(): Unit = {
+    val formats = Seq(Bash.id, Zsh.id, Fish.id)
+    printLine("To manually get completions, run", toStderr = true)
+    printLine("", toStderr = true)
+    printLine(
+      s"  $progName ${completeCommandName.mkString(" ")} ${formats.mkString("|")} index command...",
+      toStderr = true
+    )
+    printLine("", toStderr = true)
+    printLine(
+      "where index starts from one, and command... includes the command name, like",
+      toStderr = true
+    )
+    printLine("", toStderr = true)
+    printLine(
+      s"  $progName ${completeCommandName.mkString(" ")} ${Zsh.id} 2 $progName --",
+      toStderr = true
+    )
+    printLine("", toStderr = true)
+    printLine("to get completions for '--'", toStderr = true)
+  }
+
   def completionsPrintUsage(): Nothing = {
     completionsPrintInstructions()
     exit(1)
@@ -55,11 +77,6 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
 
   def completeUnrecognizedFormat(format: String): Nothing = {
     printLine(s"Unrecognized completion format '$format'", toStderr = true)
-    exit(1)
-  }
-
-  def completePrintUsage(): Nothing = {
-    completionsPrintInstructions()
     exit(1)
   }
 
@@ -123,7 +140,8 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
             completeUnrecognizedFormat(format)
         }
       case _ =>
-        completePrintUsage()
+        completePrintInstructions()
+        exit(1)
     }
   }
 
