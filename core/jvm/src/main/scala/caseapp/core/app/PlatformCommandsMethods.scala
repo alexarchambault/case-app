@@ -2,6 +2,7 @@ package caseapp.core.app
 
 import caseapp.core.complete.{
   Bash,
+  CompletionItem,
   CompletionsInstallOptions,
   CompletionsUninstallOptions,
   Fish,
@@ -10,7 +11,8 @@ import caseapp.core.complete.{
 
 import java.io.File
 import java.nio.charset.{Charset, StandardCharsets}
-import java.nio.file.{Files, Paths, StandardOpenOption}
+import java.nio.file.{Files, Path, Paths, StandardOpenOption}
+
 import java.util.Arrays
 
 trait PlatformCommandsMethods { self: CommandsEntryPoint =>
@@ -18,21 +20,83 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
     val destPath = Paths.get(dest)
     Files.write(destPath, script.getBytes(StandardCharsets.UTF_8))
   }
+
   protected def completeMainHook(args: Array[String]): Unit =
-    Option(System.getenv("CASEAPP_COMPLETION_DEBUG")).foreach { pathStr =>
-      val path   = Paths.get(pathStr)
+    for (path <- completionDebugFile) {
       val output = s"completeMain(${args.toSeq})"
       Files.write(path, output.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND)
     }
 
+  def completionsInstalledMessage(
+    rcFile: String,
+    updated: Boolean
+  ): Iterator[String] = {
+    val q = "\""
+    val evalCommand =
+      s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
+    if (updated)
+      Iterator(
+        s"Updated $rcFile",
+        "",
+        s"It is recommended to reload your shell, or source $rcFile in the " +
+          "current session, for its changes to be taken into account.",
+        "",
+        "Alternatively, enable completions in the current session with",
+        "",
+        s"  $evalCommand",
+        ""
+      )
+    else
+      Iterator(
+        s"$rcFile already up-to-date.",
+        "",
+        "If needed, enable completions in the current session with",
+        "",
+        s"  $evalCommand",
+        ""
+      )
+  }
+
+  def shell: Option[String]           = Option(System.getenv("SHELL"))
+  def completionHome: Path            = Paths.get(sys.props("user.home"))
+  def completionXdgHome: Option[Path] = Option(System.getenv("XDG_CONFIG_HOME")).map(Paths.get(_))
+  def completionZDotDir: Option[Path] = Option(System.getenv("ZDOTDIR")).map(Paths.get(_))
+  def completionDebugFile: Option[Path] =
+    Option(System.getenv("CASEAPP_COMPLETION_DEBUG")).map(Paths.get(_))
+
+  private def fishRcFile(name: String): Path =
+    completionXdgHome
+      .getOrElse(completionHome.resolve(".config"))
+      .resolve("fish")
+      .resolve("completions")
+      .resolve(s"$name.fish")
+
+  private def zshrcFile: Path =
+    completionZDotDir
+      .getOrElse(completionHome)
+      .resolve(".zshrc")
+  private def bashrcFile: Path =
+    completionHome.resolve(".bashrc")
+
+  private def zshCompletionWorkingDir(forcedOutputDir: Option[String]): Path =
+    forcedOutputDir
+      .orElse(completionsWorkingDirectory)
+      .map(Paths.get(_).resolve("zsh"))
+      .getOrElse {
+        val zDotDir = completionZDotDir.getOrElse(completionHome)
+        completionXdgHome
+          .getOrElse(zDotDir.resolve(".config"))
+          .resolve("zsh")
+          .resolve("completions")
+      }
+
   // Adapted from https://github.com/VirtusLab/scala-cli/blob/eced0b35c769eca58ae6f1b1a3be0f29a8700859/modules/cli/src/main/scala/scala/cli/commands/installcompletions/InstallCompletions.scala
-  def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[CompletionsInstallOptions](args)
-
-    lazy val completionsDir = Paths.get(options.output.getOrElse(completionsWorkingDirectory))
-
+  def completionsInstall(
+    completionsWorkingDirectory: Option[String],
+    options: CompletionsInstallOptions
+  ): Unit = {
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
-    val format = PlatformCommandsMethods.getFormat(options.format).getOrElse {
+    val format = PlatformCommandsMethods.getFormat(options.format, shell).getOrElse {
       printLine(
         "Cannot determine current shell, pass the shell you use with --shell, like",
         toStderr = true
@@ -49,37 +113,28 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
 
     val (rcScript, defaultRcFile) = format match {
       case Bash.id | Bash.shellName =>
-        val script        = Bash.script(name)
-        val defaultRcFile = Paths.get(sys.props("user.home")).resolve(".bashrc")
-        (script, defaultRcFile)
+        (Bash.script(name), bashrcFile)
       case Fish.id | Fish.shellName =>
-        val script = Fish.script(name)
-        val defaultRcFile =
-          Option(System.getenv("XDG_CONFIG_HOME")).map(Paths.get(_))
-            .getOrElse(Paths.get(sys.props("user.home"), ".config"))
-            .resolve("fish")
-            .resolve("completions")
-            .resolve(s"$name.fish")
-        (script, defaultRcFile)
+        (Fish.script(name), fishRcFile(name))
       case Zsh.id | Zsh.shellName =>
-        val completionScript = Zsh.script(name)
-        val zDotDir = Paths.get(Option(System.getenv("ZDOTDIR")).getOrElse(sys.props("user.home")))
-        val defaultRcFile        = zDotDir.resolve(".zshrc")
-        val dir                  = completionsDir.resolve("zsh")
+        val completionScript     = Zsh.script(name)
+        val dir                  = zshCompletionWorkingDir(options.output)
         val completionScriptDest = dir.resolve(s"_$name")
-        val content              = completionScript.getBytes(Charset.defaultCharset())
-        val needsWrite = !Files.exists(completionScriptDest) ||
-          !Arrays.equals(Files.readAllBytes(completionScriptDest), content)
+        val needsWrite =
+          !Files.exists(completionScriptDest) ||
+          new String(
+            Files.readAllBytes(completionScriptDest),
+            StandardCharsets.UTF_8
+          ) != completionScript
         if (needsWrite) {
           printLine(s"Writing $completionScriptDest")
           Files.createDirectories(completionScriptDest.getParent)
-          Files.write(completionScriptDest, content)
+          Files.write(completionScriptDest, completionScript.getBytes(StandardCharsets.UTF_8))
         }
-        val script = Seq(
-          s"""fpath=("$dir" $$fpath)""",
-          "compinit"
-        ).map(_ + System.lineSeparator()).mkString
-        (script, defaultRcFile)
+        val script = Seq(s"""fpath=("$dir" $$fpath)""", "compinit")
+          .map(_ + System.lineSeparator())
+          .mkString
+        (script, zshrcFile)
       case _ =>
         printLine(s"Unrecognized or unsupported shell: $format", toStderr = true)
         exit(1)
@@ -90,7 +145,7 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
     else {
       val rcFile = format match {
         case Fish.id | Fish.shellName =>
-          options.output.map(Paths.get(_, s"$name.fish")).getOrElse(defaultRcFile)
+          options.output.map(Paths.get(_)).map(_.resolve(s"$name.fish")).getOrElse(defaultRcFile)
         case _ =>
           options.rcFile.map(Paths.get(_)).getOrElse(defaultRcFile)
       }
@@ -102,53 +157,26 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
         Charset.defaultCharset()
       )
 
-      val q = "\""
-      val evalCommand =
-        s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
-      if (updated) {
-        printLine(s"Updated $rcFile", toStderr = true)
-        printLine("", toStderr = true)
-        printLine(
-          s"It is recommended to reload your shell, or source $rcFile in the " +
-            "current session, for its changes to be taken into account.",
-          toStderr = true
-        )
-        printLine("", toStderr = true)
-        printLine(
-          "Alternatively, enable completions in the current session with",
-          toStderr = true
-        )
-        printLine("", toStderr = true)
-        printLine(s"  $evalCommand", toStderr = true)
-        printLine("", toStderr = true)
-      }
-      else {
-        printLine(s"$rcFile already up-to-date.", toStderr = true)
-        printLine("", toStderr = true)
-        printLine("If needed, enable completions in the current session with", toStderr = true)
-        printLine("", toStderr = true)
-        printLine(s"  $evalCommand", toStderr = true)
-        printLine("", toStderr = true)
-      }
+      for (line <- completionsInstalledMessage(rcFile.toString, updated))
+        printLine(line, toStderr = true)
     }
   }
 
-  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
-    val (options, rem) = CaseApp.process[CompletionsUninstallOptions](args)
-
+  def completionsUninstall(
+    completionsWorkingDirectory: Option[String],
+    options: CompletionsUninstallOptions
+  ): Unit = {
     val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
 
-    val home    = Paths.get(sys.props("user.home"))
-    val zDotDir = Option(System.getenv("ZDOTDIR")).map(Paths.get(_)).getOrElse(home)
-    val fishCompletionsDir = options.output.map(Paths.get(_))
-      .getOrElse(sys.env.get("XDG_CONFIG_HOME").map(Paths.get(_)).getOrElse(home)
-        .resolve("fish")
-        .resolve("completions"))
-    val rcFiles = options.rcFile.map(file => Seq(Paths.get(file))).getOrElse(Seq(
-      zDotDir.resolve(".zshrc"),
-      home.resolve(".bashrc"),
-      fishCompletionsDir.resolve(s"$name.fish")
-    )).filter(Files.exists(_))
+    val rcFiles = options.rcFile
+      .map(file => Seq(Paths.get(file)))
+      .getOrElse(Seq(zshrcFile, bashrcFile))
+      .filter(Files.exists(_))
+
+    val maybeDelete = Seq(
+      zshCompletionWorkingDir(options.output).resolve(s"_$name"),
+      fishRcFile(name)
+    )
 
     for (rcFile <- rcFiles) {
       val banner = options.banner.replace("{NAME}", name)
@@ -166,14 +194,22 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
       else
         printLine(s"No $name completion section found in $rcFile", toStderr = true)
     }
+
+    for (f <- maybeDelete)
+      if (Files.isRegularFile(f)) {
+        val deleted = Files.deleteIfExists(f)
+        if (deleted)
+          printLine(s"Removed $f", toStderr = true)
+      }
   }
+
 }
 
 object PlatformCommandsMethods {
-  def getFormat(format: Option[String]): Option[String] =
+  def getFormat(format: Option[String], shellOpt: Option[String]): Option[String] =
     format.map(_.trim).filter(_.nonEmpty)
       .orElse {
-        Option(System.getenv("SHELL")).map(_.split(File.separator).last).map {
+        shellOpt.map(_.split(File.separator).last).map {
           case Bash.shellName => Bash.id
           case Fish.shellName => Fish.id
           case Zsh.shellName  => Zsh.id

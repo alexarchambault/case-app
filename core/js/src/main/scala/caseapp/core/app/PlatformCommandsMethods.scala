@@ -1,5 +1,7 @@
 package caseapp.core.app
 
+import caseapp.core.complete.{CompletionsInstallOptions, CompletionsUninstallOptions}
+
 import scala.scalajs.js.Dynamic.{global => g}
 
 trait PlatformCommandsMethods { self: CommandsEntryPoint =>
@@ -8,12 +10,12 @@ trait PlatformCommandsMethods { self: CommandsEntryPoint =>
     fs.writeFileSync(dest, script)
   protected def completeMainHook(args: Array[String]): Unit = ()
 
-  def completionsInstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
+  def completionsInstall(completionsWorkingDirectory: Option[String], args: CompletionsInstallOptions): Unit = {
     printLine("Completion installation not available on Scala.js")
     exit(1)
   }
 
-  def completionsUninstall(completionsWorkingDirectory: String, args: Seq[String]): Unit = {
+  def completionsUninstall(completionsWorkingDirectory: Option[String], args: CompletionsUninstallOptions): Unit = {
     printLine("Completion uninstallation not available on Scala.js")
     exit(1)
   }

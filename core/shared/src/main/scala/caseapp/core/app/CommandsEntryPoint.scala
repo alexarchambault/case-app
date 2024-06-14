@@ -1,7 +1,14 @@
 package caseapp.core.app
 
 import caseapp.core.commandparser.RuntimeCommandParser
-import caseapp.core.complete.{Bash, CompletionItem, Fish, Zsh}
+import caseapp.core.complete.{
+  Bash,
+  CompletionItem,
+  CompletionsInstallOptions,
+  CompletionsUninstallOptions,
+  Fish,
+  Zsh
+}
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 
 abstract class CommandsEntryPoint extends PlatformCommandsMethods {
@@ -93,15 +100,19 @@ abstract class CommandsEntryPoint extends PlatformCommandsMethods {
           completeUnrecognizedFormat(format)
       }
 
-    (completionsWorkingDirectory, args) match {
-      case (Some(dir), Array("install", args0 @ _*)) =>
-        completionsInstall(dir, args0)
-      case (Some(dir), Array("uninstall", args0 @ _*)) =>
-        completionsUninstall(dir, args0)
-      case (_, Array(format, dest)) =>
+    args match {
+      case Array("install", args0 @ _*) =>
+        val (options, rem) = CaseApp.process[CompletionsInstallOptions](args0)
+        if (rem.all.nonEmpty)
+          sys.error(s"Unexpected arguments passed to completions install: ${rem.all.mkString(" ")}")
+        completionsInstall(completionsWorkingDirectory, options)
+      case Array("uninstall", args0 @ _*) =>
+        val (options, rem) = CaseApp.process[CompletionsUninstallOptions](args0)
+        completionsUninstall(completionsWorkingDirectory, options)
+      case Array(format, dest) =>
         val script0 = script(format)
         writeCompletions(script0, dest)
-      case (_, Array(format)) =>
+      case Array(format) =>
         val script0 = script(format)
         printLine(script0)
       case _ =>
