@@ -360,7 +360,7 @@ trait MimaChecks extends Mima {
       "--merged",
       "HEAD^",
       "--contains",
-      "27cdd86548d413c656b9493e625523b1e642c9be"
+      "993ac3020db84ba06231e0268c920c9f8b9f3520"
     )
       .call()
       .out.lines()
