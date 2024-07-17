@@ -44,8 +44,17 @@ final case class AppVersion(appVersion: String) extends StaticAnnotation
 final case class ArgsName(argsName: String) extends StaticAnnotation
 
 /** Don't parse the annotated field as a single argument. Recurse on its fields instead.
+  *
+  * Optionally, add a prefix to all the names of the fields.
   */
-final class Recurse extends StaticAnnotation
+final case class Recurse(prefix: String) extends StaticAnnotation {
+  def this() = this("")
+}
+
+object Recurse {
+  def apply(): Recurse =
+    new Recurse
+}
 
 /** Do not include this field / argument in the help message
   */
