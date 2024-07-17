@@ -109,14 +109,7 @@ object LowPriorityParserImplicits {
     val parserExpr = fields0
       .foldRight[(TypeRepr, Expr[Parser[_]])]((TypeRepr.of[EmptyTuple], '{ NilParser })) {
         case ((sym, symTpe), (tailType, tailParserExpr)) =>
-          val recurse = sym.annotations
-            .find(_.tpe =:= TypeRepr.of[caseapp.Recurse])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.Recurse(${ arg.asExprOf[String] }) }
-              case Apply(_, Nil) =>
-                '{ caseapp.Recurse() }
-            }
+          val isRecursive = sym.annotations.exists(_.tpe =:= TypeRepr.of[caseapp.Recurse])
           val extraNames = sym.annotations
             .filter(_.tpe =:= TypeRepr.of[caseapp.ExtraName])
             .collect {
@@ -193,42 +186,36 @@ object LowPriorityParserImplicits {
               }
               tailType.asType match {
                 case '[EmptyTuple] =>
-                  recurse match {
-                    case Some(recurseExpr) =>
-                      '{
-                        RecursiveConsParser[t, EmptyTuple](
-                          ${ headParserExpr.asExprOf[Parser[t]] },
-                          ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] },
-                          ${ recurseExpr }
-                        )
-                      }
-                    case None =>
-                      '{
-                        ConsParser[t, EmptyTuple](
-                          $argumentExpr,
-                          ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] }
-                        )
-                      }
-                  }
+                  if (isRecursive)
+                    '{
+                      RecursiveConsParser[t, EmptyTuple](
+                        ${ headParserExpr.asExprOf[Parser[t]] },
+                        ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] }
+                      )
+                    }
+                  else
+                    '{
+                      ConsParser[t, EmptyTuple](
+                        $argumentExpr,
+                        ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] }
+                      )
+                    }
 
                 case '[head *: tail] =>
-                  recurse match {
-                    case Some(recurseExpr) =>
-                      '{
-                        RecursiveConsParser[t, head *: tail](
-                          ${ headParserExpr.asExprOf[Parser[t]] },
-                          ${ tailParserExpr.asExprOf[Parser[head *: tail]] },
-                          ${ recurseExpr }
-                        )
-                      }
-                    case None =>
-                      '{
-                        ConsParser[t, head *: tail](
-                          $argumentExpr,
-                          ${ tailParserExpr.asExprOf[Parser[head *: tail]] }
-                        )
-                      }
-                  }
+                  if (isRecursive)
+                    '{
+                      RecursiveConsParser[t, head *: tail](
+                        ${ headParserExpr.asExprOf[Parser[t]] },
+                        ${ tailParserExpr.asExprOf[Parser[head *: tail]] }
+                      )
+                    }
+                  else
+                    '{
+                      ConsParser[t, head *: tail](
+                        $argumentExpr,
+                        ${ tailParserExpr.asExprOf[Parser[head *: tail]] }
+                      )
+                    }
               }
           }
           (newTailType, expr)

@@ -1,6 +1,6 @@
 package caseapp.core.help
 
-import caseapp.{ExtraName, Group, HelpMessage, Parser, Recurse}
+import caseapp.{ExtraName, Group, HelpMessage, Parser}
 import caseapp.core.Scala3Helpers.*
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.{Arg, Error}
@@ -51,7 +51,7 @@ abstract class WithFullHelpCompanion {
 
     val withHelpParser = WithHelp.parser[T](underlying)
 
-    val p = RecursiveConsParser(withHelpParser, helpArgument :: NilParser, Recurse())
+    val p = RecursiveConsParser(withHelpParser, helpArgument :: NilParser)
 
     p.to[WithFullHelp[T]]
   }

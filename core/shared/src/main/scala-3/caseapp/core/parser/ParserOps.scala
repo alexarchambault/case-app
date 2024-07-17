@@ -1,6 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.{HelpMessage, Name, Recurse, ValueDescription}
+import caseapp.{HelpMessage, Name, ValueDescription}
 import caseapp.core.argparser.ArgParser
 import caseapp.core.Arg
 import caseapp.core.util.Formatter
@@ -35,7 +35,7 @@ class ParserOps[T <: Tuple](val parser: Parser[T]) extends AnyVal {
   }
 
   def addAll[H](using headParser: Parser[H]): Parser[H *: T] =
-    RecursiveConsParser(headParser, parser, Recurse())
+    RecursiveConsParser(headParser, parser)
 
   def as[F](using
     m: Mirror.ProductOf[F],
