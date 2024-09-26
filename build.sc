@@ -12,7 +12,7 @@ import scala.concurrent.duration.DurationInt
 
 object Versions {
   def scala212 = "2.12.20"
-  def scala213 = "2.13.14"
+  def scala213 = "2.13.15"
   def scala3   = "3.3.4"
   def scala    = Seq(scala212, scala213, scala3)
 
