@@ -21,7 +21,7 @@ object Versions {
 }
 
 object Deps {
-  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.4"
+  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.7"
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
