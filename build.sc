@@ -21,11 +21,11 @@ object Versions {
 }
 
 object Deps {
-  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.4"
+  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.7"
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
-  def mdoc                      = ivy"org.scalameta::mdoc:2.5.4"
+  def mdoc                      = ivy"org.scalameta::mdoc:2.6.2"
   def osLib                     = ivy"com.lihaoyi::os-lib::0.10.7"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
