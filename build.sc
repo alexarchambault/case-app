@@ -351,7 +351,7 @@ trait TestCrossSources extends SbtModule {
   }
 }
 
-trait MimaChecks extends Mima {
+trait MimaChecks extends Mima with PublishModule {
 
   def mimaPreviousVersions = T {
     os.proc(
