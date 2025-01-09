@@ -11,7 +11,7 @@ import java.io.File
 import scala.concurrent.duration.DurationInt
 
 object Versions {
-  def scala212 = "2.12.19"
+  def scala212 = "2.12.20"
   def scala213 = "2.13.14"
   def scala3   = "3.3.3"
   def scala    = Seq(scala212, scala213, scala3)
@@ -21,18 +21,18 @@ object Versions {
 }
 
 object Deps {
-  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.4"
+  def catsEffect                = ivy"org.typelevel::cats-effect::3.5.7"
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
-  def mdoc                      = ivy"org.scalameta::mdoc:2.5.2"
+  def mdoc                      = ivy"org.scalameta::mdoc:2.6.2"
   def osLib                     = ivy"com.lihaoyi::os-lib::0.10.2"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = ivy"com.chuusai::shapeless::2.3.12"
   def sourcecode                = ivy"com.lihaoyi::sourcecode::0.4.2"
-  def utest                     = ivy"com.lihaoyi::utest::0.8.3"
+  def utest                     = ivy"com.lihaoyi::utest::0.8.4"
 }
 
 object annotations extends Module {
