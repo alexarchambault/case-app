@@ -17,7 +17,7 @@ object Versions {
   def scala    = Seq(scala212, scala213, scala3)
 
   def scalaJs     = "1.16.0"
-  def scalaNative = "0.5.2"
+  def scalaNative = "0.5.6"
 }
 
 object Deps {
