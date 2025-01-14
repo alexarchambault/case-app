@@ -178,9 +178,9 @@ case class Str private (private val chars: Array[Char], private val colors: Arra
 
 object Str {
 
-  /** An [[fansi.Str]]'s `color`s array is filled with Long, each representing the ANSI state of one
-    * character encoded in its bits. Each [[Attr]] belongs to a [[Category]] that occupies a range
-    * of bits within each long:
+  /** An [[fansi.Str]]'s `color` s array is filled with Long, each representing the ANSI state of
+    * one character encoded in its bits. Each [[Attr]] belongs to a [[Category]] that occupies a
+    * range of bits within each long:
     *
     * 61... 55 54 53 52 51 .... 31 30 29 28 27 26 25 ..... 6 5 4 3 2 1 0 \|--------|
     * \|-----------------------| |-----------------------| | | |bold \| | | | |reversed \| | |
@@ -190,7 +190,7 @@ object Str {
     */
   type State = Long
 
-  /** Make the construction of [[fansi.Str]]s from `String`s and other `CharSequence`s automatic
+  /** Make the construction of [[fansi.Str]]s from `String` s and other `CharSequence` s automatic
     */
   implicit def implicitApply(raw: CharSequence): fansi.Str = apply(raw)
 
