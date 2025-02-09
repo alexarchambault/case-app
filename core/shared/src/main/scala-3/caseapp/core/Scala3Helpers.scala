@@ -70,6 +70,9 @@ object Scala3Helpers {
 
     def withNamesLimit(newNamesLimit: Option[Int]): HelpFormat =
       helpFormat.copy(namesLimit = newNamesLimit)
+
+    def withSortedCommandGroups(newSortedCommandGroups: Option[Seq[String]]): HelpFormat =
+      helpFormat.copy(sortedCommandGroups = newSortedCommandGroups)
   }
 
   implicit class OptionParserWithOps[T](private val parser: OptionParser[T]) {
