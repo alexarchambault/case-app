@@ -12,7 +12,7 @@ import scala.concurrent.duration.DurationInt
 
 object Versions {
   def scala212 = "2.12.20"
-  def scala213 = "2.13.15"
+  def scala213 = "2.13.16"
   def scala3   = "3.3.5"
   def scala    = Seq(scala212, scala213, scala3)
 
@@ -26,7 +26,7 @@ object Deps {
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = ivy"org.scalameta::mdoc:2.6.3"
-  def osLib                     = ivy"com.lihaoyi::os-lib::0.10.7"
+  def osLib                     = ivy"com.lihaoyi::os-lib::0.11.3"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
