@@ -87,7 +87,7 @@ jobs:
     - name: Wrap GPG binary
       run: .github/scripts/wrap-gpg.sh
     - name: Release
-      run: ./mill -i ci.publishSonatype __.publishArtifacts
+      run: ./mill -i ci.publishSonatype --tasks __.publishArtifacts
       env:
         PGP_PASSPHRASE: ${{ secrets.PUBLISH_SECRET_KEY_PASSWORD }}
         PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
