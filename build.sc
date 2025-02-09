@@ -275,7 +275,7 @@ trait CaseAppScalaNativeModule extends ScalaNativeModule {
   def scalaNativeVersion = Versions.scalaNative
 }
 
-trait CaseAppPublishModule extends PublishModule {
+trait CaseAppPublishModule extends PublishModule with ScalaModule {
   import CaseAppPublishModule._
   import mill.scalalib.publish._
   def pomSettings = PomSettings(
@@ -289,6 +289,15 @@ trait CaseAppPublishModule extends PublishModule {
     )
   )
   def publishVersion = T(buildVersion)
+
+  def javacOptions = super.javacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
+  def scalacOptions = super.scalacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
 }
 
 object CaseAppPublishModule {
