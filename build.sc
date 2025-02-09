@@ -12,8 +12,8 @@ import scala.concurrent.duration.DurationInt
 
 object Versions {
   def scala212 = "2.12.20"
-  def scala213 = "2.13.15"
-  def scala3   = "3.3.4"
+  def scala213 = "2.13.16"
+  def scala3   = "3.3.5"
   def scala    = Seq(scala212, scala213, scala3)
 
   def scalaJs     = "1.16.0"
@@ -23,10 +23,10 @@ object Versions {
 object Deps {
   def catsEffect                = ivy"org.typelevel::cats-effect::3.5.7"
   def catsEffect2               = ivy"org.typelevel::cats-effect::2.5.5"
-  def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.6"
+  def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
-  def mdoc                      = ivy"org.scalameta::mdoc:2.6.2"
-  def osLib                     = ivy"com.lihaoyi::os-lib::0.10.7"
+  def mdoc                      = ivy"org.scalameta::mdoc:2.6.3"
+  def osLib                     = ivy"com.lihaoyi::os-lib::0.11.3"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
@@ -275,7 +275,7 @@ trait CaseAppScalaNativeModule extends ScalaNativeModule {
   def scalaNativeVersion = Versions.scalaNative
 }
 
-trait CaseAppPublishModule extends PublishModule {
+trait CaseAppPublishModule extends PublishModule with ScalaModule {
   import CaseAppPublishModule._
   import mill.scalalib.publish._
   def pomSettings = PomSettings(
@@ -289,6 +289,15 @@ trait CaseAppPublishModule extends PublishModule {
     )
   )
   def publishVersion = T(buildVersion)
+
+  def javacOptions = super.javacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
+  def scalacOptions = super.scalacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
 }
 
 object CaseAppPublishModule {
