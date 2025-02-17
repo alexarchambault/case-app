@@ -3,15 +3,17 @@ site_name: case-app
 nav:
   - Home: 'index.md'
   - 'setup.md'
-  - 'define.md'
-  - 'types.md'
-  - 'parse.md'
-  - 'help.md'
-  - 'commands.md'
-  - 'completion.md'
-  - 'misc.md'
-  - 'advanced.md'
-  - 'develop.md'
+  - API:
+    - 'define.md'
+    - 'types.md'
+    - 'parse.md'
+    - 'help.md'
+    - 'commands.md'
+    - 'completion.md'
+    - 'misc.md'
+    - 'advanced.md'
+  - Contributing:
+    - 'contrib-website.md'
 
 repo_url: https://github.com/alexarchambault/case-app
 edit_uri: edit/main/docs/pages/

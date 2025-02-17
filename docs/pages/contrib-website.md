@@ -1,4 +1,4 @@
-# Contributing
+# Website
 
 ## Building the website locally
 
