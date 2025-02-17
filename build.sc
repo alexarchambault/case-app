@@ -26,7 +26,7 @@ object Deps {
   def dataClass                 = ivy"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = ivy"org.scalameta::mdoc:2.6.4"
-  def osLib                     = ivy"com.lihaoyi::os-lib::0.11.3"
+  def osLib                     = ivy"com.lihaoyi::os-lib::0.11.4"
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
