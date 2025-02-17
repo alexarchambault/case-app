@@ -4,14 +4,9 @@
 
 ### Watch mode
 
-In a first terminal, run
+Run
 ```text
-$ ./mill -i -w docs.mdocWatch
-```
-
-Leave it running, and run in a second terminal
-```text
-$ ./mill -i -w docs.mkdocsServe
+$ ./mill -i docs.mkdocsServe
 ```
 
 Then open the URL printed in the console in your browser (it should be

@@ -511,9 +511,25 @@ object docs extends ScalaModule {
   }
   def mkdocsServe() = T.command[Unit] {
     mdoc()()
-    os.proc("mkdocs", "serve", mkdocsConfigArgs())
-      .call(cwd = millModuleBasePath.value, stdin = os.Inherit, stdout = os.Inherit)
+    val docsDir = T.workspace / "docs"
+    val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
+      .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
+    val mdocProc = os.proc(
+      "java",
+      "-cp",
+      compileClasspath().map(_.path).mkString(File.pathSeparator),
+      mainClass().getOrElse(???),
+      mdocWatchArgs().value
+    )
+      .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
 
+    while (serveProc.isAlive && mdocProc.isAlive)
+      Thread.sleep(1000L)
+
+    val serveRetCode = serveProc.waitFor()
+    val mdocRetCode  = mdocProc.waitFor()
+    if (serveRetCode != 0 || mdocRetCode != 0)
+      sys.error(s"Got exit code $serveRetCode for mkdocs serve and $mdocRetCode for mdoc")
     ()
   }
   def mkdocsBuild() = T.command[Unit] {
