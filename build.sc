@@ -453,6 +453,9 @@ object ci extends Module {
 object docs extends ScalaModule {
   private def sv   = Versions.scala213
   def scalaVersion = sv
+  def moduleDeps = Seq(
+    cats.jvm(sv)
+  )
   def ivyDeps = Agg(
     Deps.mdoc
   )
@@ -485,7 +488,7 @@ object docs extends ScalaModule {
       "--site.VERSION",
       core.jvm(sv).publishVersion(),
       "--classpath",
-      cats.jvm(sv).runClasspath().map(_.path).mkString(File.pathSeparator)
+      runClasspath().map(_.path).mkString(File.pathSeparator)
     )
   }
   def mdocWatchArgs = T.task {
