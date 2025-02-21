@@ -28,12 +28,13 @@ object LowPriorityParserImplicits {
     t: Type[U]
   ): List[(q.reflect.Symbol, q.reflect.TypeRepr)] = {
     import quotes.reflect.*
-    val sym = TypeRepr.of[U] match {
+    val (sym, typeParams) = TypeRepr.of[U] match {
       case AppliedType(base, params) =>
-        base.typeSymbol
+        (base.typeSymbol, params)
       case _ =>
-        TypeTree.of[U].symbol
+        (TypeTree.of[U].symbol, List())
     }
+    val typeParamSyms = sym.primaryConstructor.paramSymss.flatten.filter(_.isTypeParam)
 
     sym.primaryConstructor
       .paramSymss
@@ -41,7 +42,7 @@ object LowPriorityParserImplicits {
       .map(f => (f, f.tree))
       .collect {
         case (sym, v: ValDef) =>
-          (sym, v.tpt.tpe)
+          (sym, v.tpt.tpe.substituteTypes(typeParamSyms, typeParams))
       }
   }
 
