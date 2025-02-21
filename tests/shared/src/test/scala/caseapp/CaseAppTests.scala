@@ -635,7 +635,7 @@ object CaseAppTests extends TestSuite {
 
       val expectedRes =
         Right(
-          (GenericArgs("v1", SharedOptions("v2")), RemainingArgs(List(), List()))
+          (GenericArgs("v1", SharedOptions("v2"), ""), RemainingArgs(List(), List()))
         )
       assert(res == expectedRes)
     }
