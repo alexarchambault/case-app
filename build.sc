@@ -30,7 +30,7 @@ object Deps {
   def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
-  def shapeless                 = ivy"com.chuusai::shapeless::2.3.12"
+  def shapeless                 = ivy"com.chuusai::shapeless::2.3.13"
   def sourcecode                = ivy"com.lihaoyi::sourcecode::0.4.2"
   def utest                     = ivy"com.lihaoyi::utest::0.8.5"
 }
