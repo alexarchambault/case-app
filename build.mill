@@ -1,4 +1,4 @@
-//| mill-version: 0.13.0-M2-51-773072
+//| mill-version: 1.0.0-M1-13-54815e
 
 import mill._
 import mill.scalajslib._
