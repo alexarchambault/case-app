@@ -627,6 +627,19 @@ object CaseAppTests extends TestSuite {
       assert(stagesArg.tags == Seq(Tag("foo"), Tag("other")))
     }
 
+    test("support generic args class") {
+      val res =
+        Parser[GenericArgs[SharedOptions]].detailedParse(
+          Seq("--main", "v1", "--other", "v2")
+        )
+
+      val expectedRes =
+        Right(
+          (GenericArgs("v1", SharedOptions("v2"), ""), RemainingArgs(List(), List()))
+        )
+      assert(res == expectedRes)
+    }
+
   }
 
 }
