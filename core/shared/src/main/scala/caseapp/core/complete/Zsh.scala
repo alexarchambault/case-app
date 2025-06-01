@@ -34,7 +34,7 @@ object Zsh {
       .getOrElse("")
   private def defs(item: CompletionItem): Seq[String] = {
     val (options, arguments) = item.values.partition(_.startsWith("-"))
-    val optionsOutput =
+    val optionsOutput        =
       if (options.isEmpty) Nil
       else {
         val escapedOptions = options

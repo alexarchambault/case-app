@@ -18,7 +18,7 @@ object CompletionInstallTests extends TestSuite {
         override def completionZDotDir        = None
         override def enableCompletionsCommand = true
         def progName                          = "prog"
-        def commands = Seq(
+        def commands                          = Seq(
           CompletionDefinitions.Commands.First,
           CompletionDefinitions.Commands.Second,
           CompletionDefinitions.Commands.BackTick
