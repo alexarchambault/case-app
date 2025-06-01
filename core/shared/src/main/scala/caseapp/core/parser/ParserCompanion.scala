@@ -25,7 +25,7 @@ abstract class ParserCompanion {
     initial match {
       case _ :: tail if tail eq updated      => 1
       case _ :: _ :: tail if tail eq updated => 2
-      case _ =>
+      case _                                 =>
         initial.length - updated.length // kind of meh, might make parsing O(args.length^2)
     }
 

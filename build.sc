@@ -60,7 +60,7 @@ object util extends Module {
 
   trait Util extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app-util"
-    def ivyDeps = T {
+    def ivyDeps      = T {
       if (scalaVersion().startsWith("2."))
         Agg(Deps.shapeless)
       else
@@ -116,7 +116,7 @@ object core extends Module {
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app"
-    def ivyDeps = T {
+    def ivyDeps      = T {
       val maybeDataClass =
         if (scalaVersion().startsWith("2.")) Agg(Deps.dataClass)
         else Agg.empty
@@ -306,7 +306,7 @@ object CaseAppPublishModule {
       .call().out
       .trim()
   private lazy val buildVersion = {
-    val gitHead = os.proc("git", "rev-parse", "HEAD").call().out.trim()
+    val gitHead       = os.proc("git", "rev-parse", "HEAD").call().out.trim()
     val maybeExactTag = scala.util.Try {
       os.proc("git", "describe", "--exact-match", "--tags", "--always", gitHead)
         .call().out
@@ -453,7 +453,7 @@ object ci extends Module {
 object docs extends ScalaModule {
   private def sv   = Versions.scala213
   def scalaVersion = sv
-  def moduleDeps = Seq(
+  def moduleDeps   = Seq(
     cats.jvm(sv)
   )
   def ivyDeps = Agg(
@@ -514,7 +514,7 @@ object docs extends ScalaModule {
   }
   def mkdocsServe() = T.command[Unit] {
     mdoc()()
-    val docsDir = T.workspace / "docs"
+    val docsDir   = T.workspace / "docs"
     val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
       .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
     val mdocProc = os.proc(

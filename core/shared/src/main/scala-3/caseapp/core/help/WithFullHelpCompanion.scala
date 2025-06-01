@@ -31,7 +31,7 @@ abstract class WithFullHelpCompanion {
     // accept "-help" too (single dash)
     val helpArgument: Argument[Boolean] =
       new Argument[Boolean] {
-        def arg = baseHelpArgument.arg
+        def arg                               = baseHelpArgument.arg
         def withDefaultOrigin(origin: String) =
           this
         def init = baseHelpArgument.init
