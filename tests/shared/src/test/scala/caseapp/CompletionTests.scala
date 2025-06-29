@@ -8,14 +8,14 @@ object CompletionTests extends TestSuite {
     test("simple") {
       import CompletionDefinitions.Simple._
       test {
-        val res = App.complete(Seq("-"), 0)
+        val res      = App.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value")
         )
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("--v"), 0)
+        val res      = App.complete(Seq("--v"), 0)
         val expected = List(
           CompletionItem("--value")
         )
@@ -28,7 +28,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = App.complete(Seq("foo", "a", "--v"), 2)
+        val res      = App.complete(Seq("foo", "a", "--v"), 2)
         val expected = List(
           CompletionItem("--value")
         )
@@ -39,7 +39,7 @@ object CompletionTests extends TestSuite {
     test("multiple") {
       import CompletionDefinitions.Multiple._
       test {
-        val res = App.complete(Seq("-"), 0)
+        val res      = App.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-v")),
           CompletionItem("--other", None, List("-n"))
@@ -47,7 +47,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("--v"), 0)
+        val res      = App.complete(Seq("--v"), 0)
         val expected = List(
           CompletionItem("--value", Some("A value"), Nil)
         )
@@ -60,7 +60,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = App.complete(Seq("aa", "./f", "--v"), 2)
+        val res      = App.complete(Seq("aa", "./f", "--v"), 2)
         val expected = List(
           CompletionItem("--value", Some("A value"), Nil)
         )
@@ -71,7 +71,7 @@ object CompletionTests extends TestSuite {
     test("argument value") {
       import CompletionDefinitions.ArgCompletion._
       test {
-        val res = App.complete(Seq("-"), 0)
+        val res      = App.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-v")),
           CompletionItem("--other", None, List("-n"))
@@ -79,14 +79,14 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("--v"), 0)
+        val res      = App.complete(Seq("--v"), 0)
         val expected = List(
           CompletionItem("--value", Some("A value"), Nil)
         )
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("-n", "32", "--value", ""), 3)
+        val res      = App.complete(Seq("-n", "32", "--value", ""), 3)
         val expected = List(
           CompletionItem("32000", None, Nil),
           CompletionItem("32001", None, Nil),
@@ -95,7 +95,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = App.complete(Seq("-n", "41", "--value", ""), 3)
+        val res      = App.complete(Seq("-n", "41", "--value", ""), 3)
         val expected = List(
           CompletionItem("41000", None, Nil),
           CompletionItem("41001", None, Nil),
@@ -108,7 +108,7 @@ object CompletionTests extends TestSuite {
     test("commands") {
       import CompletionDefinitions.Commands._
       test {
-        val res = Prog.complete(Seq(""), 0)
+        val res      = Prog.complete(Seq(""), 0)
         val expected = List(
           CompletionItem("back-tick", None, Nil),
           CompletionItem("first", None, Nil),
@@ -117,7 +117,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = Prog.complete(Seq("f"), 0)
+        val res      = Prog.complete(Seq("f"), 0)
         val expected = List(
           CompletionItem("first", None, Nil)
         )
@@ -125,7 +125,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = Prog.complete(Seq("first", "-"), 1)
+        val res      = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-v")),
           CompletionItem("--other", None, List("-n"))
@@ -134,7 +134,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = Prog.complete(Seq("second", "-"), 1)
+        val res      = Prog.complete(Seq("second", "-"), 1)
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
@@ -143,7 +143,7 @@ object CompletionTests extends TestSuite {
       }
 
       test("bash") {
-        val res = Prog.complete(Seq("back-tick", "-"), 1)
+        val res      = Prog.complete(Seq("back-tick", "-"), 1)
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
@@ -163,7 +163,7 @@ object CompletionTests extends TestSuite {
         assert(compRely.contains(expectedCompRely))
       }
       test("zsh") {
-        val res = Prog.complete(Seq("back-tick", "-"), 1)
+        val res      = Prog.complete(Seq("back-tick", "-"), 1)
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
@@ -180,7 +180,7 @@ object CompletionTests extends TestSuite {
     test("commands with default") {
       import CompletionDefinitions.CommandsWithDefault._
       test {
-        val res = Prog.complete(Seq(""), 0)
+        val res      = Prog.complete(Seq(""), 0)
         val expected = List(
           CompletionItem("first", None, Nil),
           CompletionItem("second", None, Nil)
@@ -188,7 +188,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = Prog.complete(Seq("f"), 0)
+        val res      = Prog.complete(Seq("f"), 0)
         val expected = List(
           CompletionItem("first", None, Nil)
         )
@@ -196,7 +196,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = Prog.complete(Seq("-"), 0)
+        val res      = Prog.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-v")),
           CompletionItem("--other", None, List("-n"))
@@ -205,7 +205,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = Prog.complete(Seq("first", "-"), 1)
+        val res      = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-v")),
           CompletionItem("--other", None, List("-n"))
@@ -214,7 +214,7 @@ object CompletionTests extends TestSuite {
       }
 
       test {
-        val res = Prog.complete(Seq("second", "-"), 1)
+        val res      = Prog.complete(Seq("second", "-"), 1)
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
