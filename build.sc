@@ -32,7 +32,7 @@ object Deps {
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = ivy"com.chuusai::shapeless::2.3.12"
   def sourcecode                = ivy"com.lihaoyi::sourcecode::0.4.2"
-  def utest                     = ivy"com.lihaoyi::utest::0.8.5"
+  def utest                     = ivy"com.lihaoyi::utest::0.8.8"
 }
 
 object annotations extends Module {
