@@ -27,7 +27,7 @@ object Deps {
   def macroParadise             = ivy"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = ivy"org.scalameta::mdoc:2.6.5"
   def osLib                     = ivy"com.lihaoyi::os-lib::0.11.4"
-  def pprint                    = ivy"com.lihaoyi::pprint::0.9.0"
+  def pprint                    = ivy"com.lihaoyi::pprint::0.9.3"
   def scalaCompiler(sv: String) = ivy"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = ivy"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = ivy"com.chuusai::shapeless::2.3.12"
