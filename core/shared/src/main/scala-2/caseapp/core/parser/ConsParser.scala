@@ -25,7 +25,7 @@ import caseapp.Name
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     argument.step(args, index, d.head, nameFormatter) match {
-      case Left((err, rem)) => Left((err, argument.arg, rem))
+      case Left((err, rem))          => Left((err, argument.arg, rem))
       case Right(Some((dHead, rem))) =>
         Right(Some((dHead :: d.tail, argument.arg, rem)))
       case Right(None) =>

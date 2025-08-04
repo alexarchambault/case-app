@@ -33,7 +33,7 @@ object CompletionDefinitions {
           def optionValue(arg: Arg, prefix: String, state: Option[Options], args: RemainingArgs) =
             if (arg.name.name == "value")
               state match {
-                case None => parent.optionValue(arg, prefix, state, args)
+                case None         => parent.optionValue(arg, prefix, state, args)
                 case Some(state0) =>
                   (0 to 2)
                     .map(_ + state0.other * 1000)
@@ -105,7 +105,7 @@ object CompletionDefinitions {
     object Prog extends CommandsEntryPoint {
       def progName                = "prog"
       override def defaultCommand = Some(First)
-      def commands = Seq(
+      def commands                = Seq(
         First,
         Second
       )
