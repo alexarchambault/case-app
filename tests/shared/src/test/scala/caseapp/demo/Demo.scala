@@ -118,3 +118,9 @@ object ManualSubCommandStuff {
     def run(options: ManualSubCommandOptions.Command2Opts, args: RemainingArgs): Unit = {}
   }
 }
+
+case class GenericArgs[Shared](
+  main: String,
+  @Recurse shared: Shared,
+  opt: String = ""
+)

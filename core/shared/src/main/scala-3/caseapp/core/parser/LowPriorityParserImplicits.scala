@@ -28,12 +28,13 @@ object LowPriorityParserImplicits {
     t: Type[U]
   ): List[(q.reflect.Symbol, q.reflect.TypeRepr)] = {
     import quotes.reflect.*
-    val sym = TypeRepr.of[U] match {
+    val (sym, typeParams) = TypeRepr.of[U] match {
       case AppliedType(base, params) =>
-        base.typeSymbol
+        (base.typeSymbol, params)
       case _ =>
-        TypeTree.of[U].symbol
+        (TypeTree.of[U].symbol, List())
     }
+    val typeParamSyms = sym.primaryConstructor.paramSymss.flatten.filter(_.isTypeParam)
 
     sym.primaryConstructor
       .paramSymss
@@ -41,7 +42,7 @@ object LowPriorityParserImplicits {
       .map(f => (f, f.tree))
       .collect {
         case (sym, v: ValDef) =>
-          (sym, v.tpt.tpe)
+          (sym, v.tpt.tpe.substituteTypes(typeParamSyms, typeParams))
       }
   }
 
@@ -76,7 +77,10 @@ object LowPriorityParserImplicits {
     ${ tupleParserImpl[T] }
   private def tupleParserImpl[T](using q: Quotes, t: Type[T]): Expr[Parser[_]] = {
     import quotes.reflect.*
-    val tSym    = TypeTree.of[T].symbol
+    val (tSym, params) = TypeRepr.of[T] match {
+      case AppliedType(base, params) => (base.typeSymbol, Some(params))
+      case _                         => (TypeTree.of[T].symbol, None)
+    }
     val origin  = shortName[T]
     val fields0 = fields[T]
 
@@ -98,7 +102,8 @@ object LowPriorityParserImplicits {
             .map(_.name)
           val values = body.collect {
             case d @ DefDef(name, _, _, _) if name.startsWith("$lessinit$greater$default") =>
-              Ref(d.symbol).asExpr
+              val ref = Ref(d.symbol)
+              params.fold(ref)(ref.appliedToTypes).asExpr
           }
           names.zip(values).toMap
         case None =>
