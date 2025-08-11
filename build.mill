@@ -33,7 +33,7 @@ object Deps {
   def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = mvn"org.scalameta::mdoc:2.7.2"
   def osLib                     = mvn"com.lihaoyi::os-lib::0.11.4"
-  def pprint                    = mvn"com.lihaoyi::pprint::0.9.0"
+  def pprint                    = mvn"com.lihaoyi::pprint::0.9.3"
   def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = mvn"com.chuusai::shapeless::2.3.13"
