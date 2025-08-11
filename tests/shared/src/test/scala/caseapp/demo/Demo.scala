@@ -121,6 +121,6 @@ object ManualSubCommandStuff {
 
 case class GenericArgs[Shared](
   main: String,
-  @Recurse() shared: Shared,
+  @Recurse shared: Shared,
   opt: String = ""
 )
