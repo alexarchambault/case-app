@@ -27,7 +27,7 @@ object Versions {
 }
 
 object Deps {
-  def catsEffect                = mvn"org.typelevel::cats-effect::3.5.7"
+  def catsEffect                = mvn"org.typelevel::cats-effect::3.6.3"
   def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
