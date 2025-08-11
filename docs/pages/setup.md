@@ -23,8 +23,8 @@ def millMaybeAddSonatypeSnapshots() =
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def ivyDeps = Agg(
-    |  ivy"com.github.alexarchambault::case-app:@VERSION@"
+  """def mvnDeps = Agg(
+    |  mvn"com.github.alexarchambault::case-app:@VERSION@"
     |)""".stripMargin
 )
 println("```")
@@ -62,8 +62,8 @@ From [Mill](https://github.com/com-lihaoyi/Mill):
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def ivyDeps = Agg(
-    |  ivy"com.github.alexarchambault::case-app::@VERSION@"
+  """def mvnDeps = Agg(
+    |  mvn"com.github.alexarchambault::case-app::@VERSION@"
     |)""".stripMargin
 )
 println("```")
