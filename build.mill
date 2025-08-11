@@ -1,0 +1,587 @@
+//| mill-version: 1.0.1
+//| mvnDeps:
+//| - com.github.lolgab::mill-mima::0.2.0
+
+package build
+
+import com.github.lolgab.mill.mima.Mima
+import mill._
+import mill.javalib.api.JvmWorkerUtil.matchingVersions
+import mill.scalajslib._
+import mill.scalalib._
+import mill.scalanativelib._
+
+import java.io.File
+
+import scala.concurrent.duration.DurationInt
+import mill.api.{BuildCtx, Result, TaskCtx}
+
+object Versions {
+  def scala212 = "2.12.20"
+  def scala213 = "2.13.16"
+  def scala3   = "3.3.5"
+  def scala    = Seq(scala212, scala213, scala3)
+
+  def scalaJs     = "1.16.0"
+  def scalaNative = "0.5.6"
+}
+
+object Deps {
+  def catsEffect                = mvn"org.typelevel::cats-effect::3.5.7"
+  def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
+  def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.7"
+  def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
+  def mdoc                      = mvn"org.scalameta::mdoc:2.6.5"
+  def osLib                     = mvn"com.lihaoyi::os-lib::0.11.4"
+  def pprint                    = mvn"com.lihaoyi::pprint::0.9.3"
+  def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
+  def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
+  def shapeless                 = mvn"com.chuusai::shapeless::2.3.12"
+  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.2"
+  def utest                     = mvn"com.lihaoyi::utest::0.8.9"
+}
+
+object annotations extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs =
+      Seq(
+        os.sub / "src/main/java",
+        os.sub / "src/main/scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src/main" / s"scala-$sv"
+        }
+    def sources = Task.Sources(sourceDirs*)
+  }
+
+  object jvm    extends Cross[AnnotationsJvm](Versions.scala)
+  object js     extends Cross[AnnotationsJs](Versions.scala)
+  object native extends Cross[AnnotationsNative](Versions.scala)
+
+  trait AnnotationsJvm extends Annotations with MimaChecks {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+  trait AnnotationsJs extends Annotations with CaseAppScalaJsModule with MimaChecks {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+  trait AnnotationsNative extends Annotations with CaseAppScalaNativeModule {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+
+  trait Annotations extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+    def artifactName = "case-app-annotations"
+  }
+}
+
+object util extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs =
+      Seq(
+        os.sub / "src/main/java",
+        os.sub / "src/main/scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src/main" / s"scala-$sv"
+        }
+    def sources = Task.Sources(sourceDirs*)
+  }
+
+  object jvm    extends Cross[UtilJvm](Versions.scala)
+  object js     extends Cross[UtilJs](Versions.scala)
+  object native extends Cross[UtilNative](Versions.scala)
+
+  trait UtilJvm extends Util with MimaChecks {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+  trait UtilJs extends Util with CaseAppScalaJsModule with MimaChecks {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+  trait UtilNative extends Util with CaseAppScalaNativeModule {
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+
+  trait Util extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+    def artifactName = "case-app-util"
+    def mvnDeps = Task {
+      if (scalaVersion().startsWith("2."))
+        Seq(Deps.shapeless)
+      else
+        Nil
+    }
+    def compileMvnDeps = Task {
+      if (scalaVersion().startsWith("2."))
+        Seq(
+          Deps.scalaCompiler(scalaVersion()),
+          Deps.scalaReflect(scalaVersion())
+        )
+      else
+        Nil
+    }
+  }
+}
+
+object core extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs =
+      Seq(
+        os.sub / "src/main/java",
+        os.sub / "src/main/scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src/main" / s"scala-$sv"
+        }
+    def sources = Task.Sources(sourceDirs*)
+  }
+
+  object `jvm-native` extends Cross[Shared](Versions.scala)
+
+  object jvm    extends Cross[CoreJvm](Versions.scala)
+  object js     extends Cross[CoreJs](Versions.scala)
+  object native extends Cross[CoreNative](Versions.scala)
+
+  trait CoreJvm extends Core with MimaChecks {
+    def moduleDeps = Seq(
+      annotations.jvm(),
+      util.jvm()
+    )
+    def sources =
+      Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
+  }
+  trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
+    def moduleDeps = Seq(
+      annotations.js(),
+      util.js()
+    )
+    def sources = Task(super.sources() ++ shared(crossValue).sources())
+  }
+  trait CoreNative extends Core with CaseAppScalaNativeModule {
+    def moduleDeps = Seq(
+      annotations.native(),
+      util.native()
+    )
+    def sources =
+      Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
+  }
+
+  trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+    def artifactName = "case-app"
+    def mvnDeps = Task {
+      val maybeDataClass =
+        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
+        else Nil
+      Seq(Deps.sourcecode) ++ maybeDataClass
+    }
+    def scalacOptions = Task {
+      val maybeMacroAnn =
+        if (scalaVersion().startsWith("2.13."))
+          Seq("-Ymacro-annotations")
+        else
+          Nil
+      super.scalacOptions() ++ maybeMacroAnn
+    }
+    def scalacPluginMvnDeps = Task {
+      if (scalaVersion().startsWith("2.12."))
+        Seq(Deps.macroParadise)
+      else
+        Nil
+    }
+  }
+}
+
+object cats extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs(`type`: String = "main") =
+      Seq(
+        os.sub / "src" / `type` / "java",
+        os.sub / "src" / `type` / "scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src" / `type` / s"scala-$sv"
+        }
+    def sources     = Task.Sources(sourceDirs()*)
+    def testSources = Task.Sources(sourceDirs("test")*)
+  }
+
+  object jvm extends Cross[CatsJvm](Versions.scala)
+  object js  extends Cross[CatsJs](Versions.scala)
+
+  trait CatsJvm extends Cats with MimaChecks {
+    def moduleDeps = Seq(core.jvm())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
+
+    object test extends CrossSbtTests with TestCrossSources {
+      def mvnDeps       = Seq(Deps.utest)
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+  trait CatsJs extends Cats with CaseAppScalaJsModule with MimaChecks {
+    def moduleDeps = Seq(core.js())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
+
+    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+      def mvnDeps       = Seq(Deps.utest)
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+
+  trait Cats extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+    def artifactName = "case-app-cats"
+    def mvnDeps      = Seq(Deps.catsEffect)
+  }
+}
+
+object cats2 extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs(`type`: String = "main") =
+      Seq(
+        os.sub / "src" / `type` / "java",
+        os.sub / "src" / `type` / "scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src" / `type` / s"scala-$sv"
+        }
+    def sources     = Task.Sources(sourceDirs()*)
+    def testSources = Task.Sources(sourceDirs("test")*)
+  }
+
+  object jvm extends Cross[Cats2Jvm](Versions.scala)
+  object js  extends Cross[Cats2Js](Versions.scala)
+
+  trait Cats2Jvm extends Cats2 with MimaChecks {
+    def moduleDeps = Seq(core.jvm())
+    def sources    = Task(cats.jvm().sources())
+
+    object test extends CrossSbtTests with TestCrossSources {
+      def mvnDeps       = Seq(Deps.utest)
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+  trait Cats2Js extends Cats2 with CaseAppScalaJsModule with MimaChecks {
+    def moduleDeps = Seq(core.js())
+    def sources    = Task(cats.js().sources())
+
+    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+      def mvnDeps       = Seq(Deps.utest)
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+
+  trait Cats2 extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+    def artifactName = "case-app-cats-effect-2"
+    def mvnDeps      = Seq(Deps.catsEffect2)
+  }
+}
+
+object tests extends Module {
+  object shared extends Cross[Shared](Versions.scala)
+
+  trait Shared extends Cross.Module[String] {
+    private def sourceDirs(`type`: String = "main") =
+      Seq(
+        os.sub / "src" / `type` / "java",
+        os.sub / "src" / `type` / "scala"
+      ) ++
+        matchingVersions(crossValue).map { sv =>
+          os.sub / "src" / `type` / s"scala-$sv"
+        }
+    def sources     = Task.Sources(sourceDirs()*)
+    def testSources = Task.Sources(sourceDirs("test")*)
+  }
+
+  object `jvm-native` extends Cross[Shared](Versions.scala)
+
+  object jvm    extends Cross[TestsJvm](Versions.scala)
+  object js     extends Cross[TestsJs](Versions.scala)
+  object native extends Cross[TestsNative](Versions.scala)
+
+  trait TestsJvm extends Tests0 {
+    def moduleDeps = Seq(core.jvm())
+    def sources =
+      Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
+
+    object test extends CrossSbtTests with TestCrossSources {
+      def mvnDeps = Seq(
+        Deps.osLib,
+        Deps.pprint,
+        Deps.utest
+      )
+      def testFramework = "utest.runner.Framework"
+      def sources = Task {
+        super.sources() ++
+          shared(crossValue).testSources() ++
+          `jvm-native`(crossValue).testSources()
+      }
+    }
+  }
+  trait TestsJs extends Tests0 with CaseAppScalaJsModule {
+    def moduleDeps = Seq(core.js())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
+
+    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+      def mvnDeps = Seq(
+        Deps.pprint,
+        Deps.utest
+      )
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+  trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
+    def moduleDeps = Seq(core.native())
+    def sources =
+      Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
+
+    object test extends CrossSbtTests with ScalaNativeTests with TestCrossSources {
+      def mvnDeps = Seq(
+        Deps.osLib,
+        Deps.pprint,
+        Deps.utest
+      )
+      def testFramework = "utest.runner.Framework"
+      def sources = Task {
+        super.sources() ++
+          shared(crossValue).testSources() ++
+          `jvm-native`(crossValue).testSources()
+      }
+    }
+  }
+
+  trait Tests0 extends CrossSbtModule with CrossSources {
+    def mvnDeps = Task {
+      val maybeDataClass =
+        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
+        else Nil
+      Seq(Deps.sourcecode) ++ maybeDataClass
+    }
+  }
+}
+
+trait CaseAppScalaJsModule extends ScalaJSModule {
+  def scalaJSVersion = Versions.scalaJs
+}
+
+trait CaseAppScalaNativeModule extends ScalaNativeModule {
+  def scalaNativeVersion = Versions.scalaNative
+}
+
+trait CaseAppPublishModule extends PublishModule with ScalaModule {
+  import CaseAppPublishModule._
+  import mill.scalalib.publish._
+  def pomSettings = PomSettings(
+    description = artifactName(),
+    organization = "com.github.alexarchambault",
+    url = "https://github.com/alexarchambault/case-app",
+    licenses = Seq(License.`Apache-2.0`),
+    versionControl = VersionControl.github("alexarchambault", "case-app"),
+    developers = Seq(
+      Developer("alexarchambault", "Alex Archambault", "https://github.com/alexarchambault")
+    )
+  )
+  def publishVersion = Task(buildVersion)
+
+  def javacOptions = super.javacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
+  def scalacOptions = super.scalacOptions() ++ Seq(
+    "--release",
+    "8"
+  )
+}
+
+object CaseAppPublishModule {
+  private lazy val latestTaggedVersion =
+    os.proc("git", "describe", "--abbrev=0", "--tags", "--match", "v*")
+      .call().out
+      .trim()
+  private lazy val buildVersion = {
+    val gitHead = os.proc("git", "rev-parse", "HEAD").call().out.trim()
+    val maybeExactTag = scala.util.Try {
+      os.proc("git", "describe", "--exact-match", "--tags", "--always", gitHead)
+        .call().out
+        .trim()
+        .stripPrefix("v")
+    }
+    maybeExactTag.toOption.getOrElse {
+      val commitsSinceTaggedVersion =
+        os.proc("git", "rev-list", gitHead, "--not", latestTaggedVersion, "--count")
+          .call().out.trim()
+          .toInt
+      val gitHash = os.proc("git", "rev-parse", "--short", "HEAD").call().out.trim()
+      s"${latestTaggedVersion.stripPrefix("v")}-$commitsSinceTaggedVersion-$gitHash-SNAPSHOT"
+    }
+  }
+}
+
+object CrossSources {
+  def extraSourcesDirs(
+    sv: String,
+    millSourcePath: os.Path,
+    kind: String,
+    scope: String
+  ): Seq[PathRef] = {
+    val (maj, majMin) = sv.split('.') match {
+      case Array(maj0, min, _*) => (maj0, s"$maj0.$min")
+      case _                    => sys.error(s"Malformed Scala version: $sv")
+    }
+    val baseDir = millSourcePath / os.up / kind / "src" / scope
+    Seq(
+      PathRef(baseDir / "scala"),
+      PathRef(baseDir / s"scala-$maj"),
+      PathRef(baseDir / s"scala-$majMin")
+    )
+  }
+}
+
+trait CrossSources extends SbtModule {
+  import CrossSources._
+  // def sources = Task.sources {
+  //   val sv = scalaVersion()
+  //   super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "main")
+  // }
+}
+
+trait TestCrossSources extends SbtModule {
+  import CrossSources._
+  // def sources = Task.sources {
+  //   val sv = scalaVersion()
+  //   super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "test")
+  // }
+}
+
+trait MimaChecks extends Mima with PublishModule {
+  def mimaPreviousVersions = Task {
+    os.proc(
+      "git",
+      "tag",
+      "--merged",
+      "HEAD^",
+      "--contains",
+      "27cdd86548d413c656b9493e625523b1e642c9be"
+    )
+      .call()
+      .out.lines()
+      .map(_.trim)
+      .filter(_.startsWith("v"))
+      .map(_.stripPrefix("v"))
+  }
+
+  def mimaPreviousArtifacts = Task {
+    val versions = mimaPreviousVersions().distinct
+    Result.Success(
+      versions.map { version =>
+        mvn"${pomSettings().organization}:${artifactId()}:$version"
+      }
+    )
+  }
+}
+
+object docs extends ScalaModule {
+  private def sv   = Versions.scala213
+  def scalaVersion = sv
+  def moduleDeps = Seq(
+    cats.jvm(sv)
+  )
+  def mvnDeps = Seq(
+    Deps.mdoc
+  )
+  def mainClass = Some("mdoc.Main")
+
+  def mdocInput        = Task.Sources(os.sub / "pages")
+  def mkdocsConfigFile = Task.Sources(os.sub / "mkdocs.yml")
+
+  def mkdocsOutput = Task {
+    PathRef(moduleDir / "site")
+  }
+
+  def mdocArgs = Task.Anon {
+    val mdocInput0 = mdocInput().map(_.path)
+    assert(mdocInput0.length == 1)
+    val outDir = moduleDir / "docs"
+    os.makeDir.all(outDir)
+    Args(
+      "--in",
+      mdocInput0.head,
+      "--out",
+      outDir,
+      "--site.VERSION",
+      core.jvm(sv).publishVersion(),
+      "--classpath",
+      runClasspath().map(_.path).mkString(File.pathSeparator)
+    )
+  }
+  def mdocWatchArgs = Task.Anon {
+    new Args(
+      mdocArgs().value :+ "--watch"
+    )
+  }
+
+  def mdoc() = Task.Command[Unit] {
+    run(mdocArgs)()
+  }
+  def mdocWatch() = Task.Command[Unit] {
+    run(mdocWatchArgs)()
+  }
+
+  def mkdocsConfigArgs = Task {
+    val mkdocsConfigFile0 = mkdocsConfigFile().map(_.path)
+    assert(mkdocsConfigFile0.length == 1)
+    Seq("--config-file", mkdocsConfigFile0.head.toString)
+  }
+  def mkdocsSiteDirArgs = Task {
+    Seq("--site-dir", mkdocsOutput().path.toString)
+  }
+  def mkdocsServe() = Task.Command[Unit] {
+    mdoc()()
+    val docsDir = BuildCtx.workspaceRoot / "docs"
+    val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
+      .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
+    val mdocProc = os.proc(
+      "java",
+      "-cp",
+      compileClasspath().map(_.path).mkString(File.pathSeparator),
+      mainClass().getOrElse(???),
+      mdocWatchArgs().value
+    )
+      .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
+
+    while (serveProc.isAlive() && mdocProc.isAlive())
+      Thread.sleep(1000L)
+
+    serveProc.waitFor()
+    mdocProc.waitFor()
+    val serveRetCode = serveProc.exitCode()
+    val mdocRetCode  = mdocProc.exitCode()
+    if (serveRetCode != 0 || mdocRetCode != 0)
+      sys.error(s"Got exit code $serveRetCode for mkdocs serve and $mdocRetCode for mdoc")
+    ()
+  }
+  def mkdocsBuild() = Task.Command[Unit] {
+    mdoc()()
+    os.proc("mkdocs", "build", mkdocsConfigArgs(), mkdocsSiteDirArgs())
+      .call(cwd = moduleDir, stdin = os.Inherit, stdout = os.Inherit)
+
+    ()
+  }
+  def mkdocsGhDeploy() = Task.Command[Unit] {
+    mdoc()()
+    os.proc("mkdocs", "gh-deploy", mkdocsConfigArgs(), mkdocsSiteDirArgs())
+      .call(cwd = moduleDir, stdin = os.Inherit, stdout = os.Inherit)
+
+    ()
+  }
+}
