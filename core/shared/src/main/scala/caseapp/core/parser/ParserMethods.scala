@@ -157,7 +157,7 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
 
       def done = {
         val remArgs = RemainingArgs(extraArgsReverse.reverse, Nil)
-        val res = get(current)
+        val res     = get(current)
           .left.map((_, Left(current)))
         (res, remArgs, reverseSteps.reverse)
       }
@@ -179,13 +179,13 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
         if (stopAtFirstUnrecognized) {
           // extraArgsReverse should be empty anyway here
           val remArgs = RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)
-          val res = get(current)
+          val res     = get(current)
             .left.map((_, Left(current)))
           val reverseSteps0 = Step.FirstUnrecognized(index, isOption = true) :: reverseSteps
           (res, remArgs, reverseSteps0.reverse)
         }
         else {
-          val err = Error.UnrecognizedArgument(headArg)
+          val err                         = Error.UnrecognizedArgument(headArg)
           val (remaining, remArgs, steps) = runHelper(
             current,
             tailArgs,
@@ -203,14 +203,14 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       def stoppingAtUnrecognized = {
         // extraArgsReverse should be empty anyway here
         val remArgs = RemainingArgs(extraArgsReverse.reverse ::: Indexed.list(args, index), Nil)
-        val res = get(current)
+        val res     = get(current)
           .left.map((_, Left(current)))
         val reverseSteps0 = Step.FirstUnrecognized(index, isOption = false) :: reverseSteps
         (res, remArgs, reverseSteps0.reverse)
       }
 
       args match {
-        case Nil => done
+        case Nil                 => done
         case headArg :: tailArgs =>
           step(args, index, current) match {
             case Right(None) =>
@@ -288,7 +288,7 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     val args0 = if (index < args.length) args else args ++ Seq.fill(index + 1 - args.length)("")
 
     val (res, remArgs, steps) = scan(args0, stopAtFirstUnrecognized, ignoreUnrecognized)
-    lazy val stateOpt = res match {
+    lazy val stateOpt         = res match {
       case Left((_, Left(state))) => get(state).toOption
       case Left((_, Right(t)))    => Some(t)
       case Right(t)               => Some(t)

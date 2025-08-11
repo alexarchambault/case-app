@@ -155,13 +155,13 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
         stopAtFirstUnrecognized,
         ignoreUnrecognized
       ) match {
-        case Left(err)                         => error(err)
-        case Right((WithFullHelp(_, true), _)) => fullHelpAsked(progName)
+        case Left(err)                                                    => error(err)
+        case Right((WithFullHelp(_, true), _))                            => fullHelpAsked(progName)
         case Right((WithFullHelp(WithHelp(_, true, maybeOptions), _), _)) =>
           helpAsked(progName, maybeOptions)
         case Right((WithFullHelp(WithHelp(true, _, maybeOptions), _), _)) =>
           usageAsked(progName, maybeOptions)
-        case Right((WithFullHelp(WithHelp(_, _, Left(err)), _), _)) => error(err)
+        case Right((WithFullHelp(WithHelp(_, _, Left(err)), _), _))            => error(err)
         case Right((WithFullHelp(WithHelp(_, _, Right(t)), _), remainingArgs)) =>
           run(t, remainingArgs)
       }
@@ -194,7 +194,7 @@ object CaseApp {
     parser: Parser[T],
     help: Help[T]
   ): (T, RemainingArgs) = {
-    var values = Option.empty[(T, RemainingArgs)]
+    var values          = Option.empty[(T, RemainingArgs)]
     val app: CaseApp[T] = new CaseApp[T] {
       def run(options: T, args: RemainingArgs): Unit = {
         values = Some((options, args))
