@@ -81,18 +81,13 @@ jobs:
     - uses: coursier/setup-action@v1.3
       with:
         jvm: 21
-    - run: .github/scripts/gpg-setup.sh
-      env:
-        PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
-    - name: Wrap GPG binary
-      run: .github/scripts/wrap-gpg.sh
     - name: Release
-      run: ./mill -i ci.publishSonatype --tasks __.publishArtifacts
+      run: ./mill -i mill.scalalib.SonatypeCentralPublishModule/
       env:
-        PGP_PASSPHRASE: ${{ secrets.PUBLISH_SECRET_KEY_PASSWORD }}
-        PGP_SECRET: ${{ secrets.PUBLISH_SECRET_KEY }}
-        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
-        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        MILL_PGP_SECRET_BASE64: ${{ secrets.PUBLISH_SECRET_KEY }}
+        MILL_PGP_PASSPHRASE: ${{ secrets.PUBLISH_SECRET_KEY_PASSWORD }}
+        MILL_SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        MILL_SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
 
   update-website:
     if: startsWith(github.ref, 'refs/tags/v')
