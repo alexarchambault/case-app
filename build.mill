@@ -521,7 +521,8 @@ object docs extends ScalaModule {
       "--site.VERSION",
       core.jvm(sv).publishVersion(),
       "--classpath",
-      runClasspath().map(_.path).mkString(File.pathSeparator)
+      runClasspath().map(_.path).mkString(File.pathSeparator),
+      "--disableUsingDirectives"
     )
   }
   def mdocWatchArgs = Task.Anon {
