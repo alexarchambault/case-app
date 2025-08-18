@@ -7,7 +7,7 @@ Options are defined in case classes, like
 ```scala mdoc:silent
 case class Options(
   foo: Int, // --foo 2, --foo=2
-  enableThing: Boolean // --enableThing, --enableThing=false
+  enableThing: Boolean // --enable-thing, --enable-thing=false
 )
 ```
 
