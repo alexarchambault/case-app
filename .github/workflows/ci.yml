@@ -20,7 +20,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
     - name: Test
@@ -34,7 +34,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
     - name: Check
@@ -48,7 +48,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
         apps: scalafmt:3.7.14
@@ -62,7 +62,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
     - run: |
@@ -78,7 +78,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
     - name: Release
@@ -98,7 +98,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v7.0
-    - uses: coursier/setup-action@v1.3
+    - uses: coursier/setup-action@v2.0
       with:
         jvm: 21
     - run: |
