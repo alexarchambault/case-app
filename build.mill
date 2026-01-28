@@ -31,7 +31,7 @@ object Deps {
   def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
-  def mdoc                      = mvn"org.scalameta::mdoc:2.7.2"
+  def mdoc                      = mvn"org.scalameta::mdoc:2.8.2"
   def osLib                     = mvn"com.lihaoyi::os-lib::0.11.4"
   def pprint                    = mvn"com.lihaoyi::pprint::0.9.3"
   def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
