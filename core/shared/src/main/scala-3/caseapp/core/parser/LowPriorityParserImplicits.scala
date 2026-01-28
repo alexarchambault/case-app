@@ -55,7 +55,7 @@ object LowPriorityParserImplicits {
       case ConstantType(c) =>
         c.value match {
           case n: Int => n
-          case other => sys.error(
+          case other  => sys.error(
               s"Expected literal integer type, got ${Type.show[N]} ($other, ${other.getClass})"
             )
         }
@@ -147,7 +147,7 @@ object LowPriorityParserImplicits {
                 }
             }
           val hidden = sym.annotations.exists(_.tpe =:= TypeRepr.of[caseapp.Hidden])
-          val group = sym.annotations
+          val group  = sym.annotations
             .find(_.tpe =:= TypeRepr.of[caseapp.Group])
             .collect {
               case Apply(_, List(arg)) =>
@@ -160,9 +160,9 @@ object LowPriorityParserImplicits {
                 '{ caseapp.annotation.Tag(${ arg.asExprOf[String] }) }
             }
           val newTailType = TypeRepr.of[*:].appliedTo(List(symTpe, tailType))
-          val expr = symTpe.asType match {
+          val expr        = symTpe.asType match {
             case '[t] =>
-              given Quotes = q
+              given Quotes            = q
               lazy val headParserExpr = Implicits.search(TypeRepr.of[Parser[t]]) match {
                 case iss: ImplicitSearchSuccess =>
                   iss.tree.asExpr
@@ -170,7 +170,7 @@ object LowPriorityParserImplicits {
                   throw new Exception(s"No given ${Type.show[Parser[t]]} instance found")
               }
               lazy val argumentExpr = {
-                val default = defaultMap.get(sym.name).map(_.asExprOf[t])
+                val default       = defaultMap.get(sym.name).map(_.asExprOf[t])
                 val argParserExpr = Implicits.search(TypeRepr.of[ArgParser[t]]) match {
                   case iss: ImplicitSearchSuccess =>
                     iss.tree.asExpr.asExprOf[ArgParser[t]]

@@ -106,7 +106,7 @@ object util extends Module {
 
   trait Util extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app-util"
-    def mvnDeps = Task {
+    def mvnDeps      = Task {
       if (scalaVersion().startsWith("2."))
         Seq(Deps.shapeless)
       else
@@ -171,7 +171,7 @@ object core extends Module {
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app"
-    def mvnDeps = Task {
+    def mvnDeps      = Task {
       val maybeDataClass =
         if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
         else Nil
@@ -310,7 +310,7 @@ object tests extends Module {
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests with TestCrossSources {
@@ -320,7 +320,7 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = Task {
+      def sources       = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -342,7 +342,7 @@ object tests extends Module {
   }
   trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
     def moduleDeps = Seq(core.native())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests with ScalaNativeTests with TestCrossSources {
@@ -352,7 +352,7 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = Task {
+      def sources       = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -409,7 +409,7 @@ object CaseAppPublishModule {
       .call().out
       .trim()
   private lazy val buildVersion = {
-    val gitHead = os.proc("git", "rev-parse", "HEAD").call().out.trim()
+    val gitHead       = os.proc("git", "rev-parse", "HEAD").call().out.trim()
     val maybeExactTag = scala.util.Try {
       os.proc("git", "describe", "--exact-match", "--tags", "--always", gitHead)
         .call().out
@@ -493,7 +493,7 @@ trait MimaChecks extends Mima with PublishModule {
 object docs extends ScalaModule {
   private def sv   = Versions.scala213
   def scalaVersion = sv
-  def moduleDeps = Seq(
+  def moduleDeps   = Seq(
     cats.jvm(sv)
   )
   def mvnDeps = Seq(
@@ -548,7 +548,7 @@ object docs extends ScalaModule {
   }
   def mkdocsServe() = Task.Command[Unit] {
     mdoc()()
-    val docsDir = BuildCtx.workspaceRoot / "docs"
+    val docsDir   = BuildCtx.workspaceRoot / "docs"
     val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
       .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
     val mdocProc = os.proc(
