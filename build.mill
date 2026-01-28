@@ -37,7 +37,7 @@ object Deps {
   def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = mvn"com.chuusai::shapeless::2.3.13"
-  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.2"
+  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.4"
   def utest                     = mvn"com.lihaoyi::utest::0.8.9"
 }
 
