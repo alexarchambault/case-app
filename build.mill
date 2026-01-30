@@ -1,4 +1,4 @@
-//| mill-version: 1.0.1
+//| mill-version: 1.1.0-RC4
 //| mvnDeps:
 //| - com.github.lolgab::mill-mima::0.2.0
 
@@ -22,7 +22,7 @@ object Versions {
   def scala3   = "3.3.6"
   def scala    = Seq(scala212, scala213, scala3)
 
-  def scalaJs     = "1.19.0"
+  def scalaJs     = "1.20.2"
   def scalaNative = "0.5.10"
 }
 
@@ -38,7 +38,7 @@ object Deps {
   def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = mvn"com.chuusai::shapeless::2.3.13"
   def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.2"
-  def utest                     = mvn"com.lihaoyi::utest::0.8.9"
+  def utest                     = mvn"com.lihaoyi::utest::0.9.5"
 }
 
 object annotations extends Module {
@@ -352,6 +352,11 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
+      def resourceDir   = Task.Source(os.sub / "src/test/resources")
+      def forkEnv = super.forkEnv() ++ Seq(
+        "CASEAPP_NATIVE_TESTS_RESOURCES" -> resourceDir().path.toString
+      )
+      def testSandboxWorkingDir = false // not respected
       def sources = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
