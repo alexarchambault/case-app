@@ -18,7 +18,7 @@ import mill.api.{BuildCtx, Result, TaskCtx}
 
 object Versions {
   def scala212 = "2.12.20"
-  def scala213 = "2.13.16"
+  def scala213 = "2.13.18"
   def scala3   = "3.3.6"
   def scala    = Seq(scala212, scala213, scala3)
 
