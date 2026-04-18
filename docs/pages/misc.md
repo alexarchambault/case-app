@@ -17,7 +17,9 @@ println("```")
 ```
 (for other build tools, see [setup](setup.md) and change `case-app` to `case-app-cats`)
 
-Then use it like
+### Single command
+
+Use `IOCaseApp` for a single-command application:
 ```scala mdoc:silent
 import caseapp.catseffect._
 import cats.data.NonEmptyList
@@ -36,3 +38,52 @@ object IOCaseExample extends IOCaseApp[ExampleOptions] {
   }
 }
 ```
+
+### Multiple subcommands
+
+Use `IOCommand` and `IOCommandsEntryPoint` for applications with
+multiple subcommands — the cats-effect equivalents of `Command` and
+`CommandsEntryPoint`:
+
+```scala mdoc:reset-object:silent
+import caseapp._
+import caseapp.catseffect._
+import cats.effect._
+
+case class GrindOptions(
+  @HelpMessage("Type of beans")
+  beans: String = "arabica",
+  @HelpMessage("Grind size")
+  size: String = "medium"
+)
+
+object Grind extends IOCommand[GrindOptions] {
+  override def names = List(List("grind"))
+  def run(options: GrindOptions, args: RemainingArgs): IO[ExitCode] =
+    IO.println(s"Grinding ${options.beans} (${options.size})").as(ExitCode.Success)
+}
+
+case class BrewOptions(
+  @HelpMessage("Brewing method")
+  method: String = "pourover",
+  @HelpMessage("Water temperature in Celsius")
+  temp: Int = 96
+)
+
+object Brew extends IOCommand[BrewOptions] {
+  override def names = List(List("brew"))
+  def run(options: BrewOptions, args: RemainingArgs): IO[ExitCode] =
+    IO.println(s"Brewing with ${options.method} at ${options.temp}°C").as(ExitCode.Success)
+}
+
+object CoffeeApp extends IOCommandsEntryPoint {
+  def progName = "coffee"
+  def commands = Seq(Grind, Brew)
+}
+```
+
+`IOCommand` supports the same features as `Command`: custom `names`,
+`group`, `hidden`, and tab completion via `completer`.
+
+`IOCommandsEntryPoint` supports `defaultCommand` for a fallback
+when no subcommand is specified, just like `CommandsEntryPoint`.
