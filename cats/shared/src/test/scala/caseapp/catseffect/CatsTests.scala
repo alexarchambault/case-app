@@ -89,7 +89,7 @@ object CatsTests extends TestSuite {
     test("IOCommandsEntryPoint") {
       def mkEntryPoint() = {
         val firstCmd = new IOCommand[Definitions.First] with RecordedCommand {
-          override def names: List[List[String]] = List(List("first"))
+          override def names: List[List[String]]    = List(List("first"))
           override def println(x: String): IO[Unit] = stdoutBuff.update(x :: _)
           override def run(options: Definitions.First, remainingArgs: RemainingArgs): IO[ExitCode] =
             stdoutBuff.update(s"first: $options" :: _).as(ExitCode.Success)
@@ -97,9 +97,12 @@ object CatsTests extends TestSuite {
             stderrBuff.update(message.message :: _).as(ExitCode.Error)
         }
         val secondCmd = new IOCommand[Definitions.Second] with RecordedCommand {
-          override def names: List[List[String]] = List(List("second"))
+          override def names: List[List[String]]    = List(List("second"))
           override def println(x: String): IO[Unit] = stdoutBuff.update(x :: _)
-          override def run(options: Definitions.Second, remainingArgs: RemainingArgs): IO[ExitCode] =
+          override def run(
+            options: Definitions.Second,
+            remainingArgs: RemainingArgs
+          ): IO[ExitCode] =
             stdoutBuff.update(s"second: $options" :: _).as(ExitCode.Success)
           override def error(message: Error): IO[ExitCode] =
             stderrBuff.update(message.message :: _).as(ExitCode.Error)
@@ -111,7 +114,7 @@ object CatsTests extends TestSuite {
       }
 
       test("dispatch to first command") {
-        val app = mkEntryPoint()
+        val app      = mkEntryPoint()
         val firstCmd = app.commands.head.asInstanceOf[RecordedCommand]
         app.run(List("first", "--foo", "hello", "--bar", "42"))
           .flatMap { code =>
@@ -124,7 +127,7 @@ object CatsTests extends TestSuite {
       }
 
       test("dispatch to second command") {
-        val app = mkEntryPoint()
+        val app       = mkEntryPoint()
         val secondCmd = app.commands(1).asInstanceOf[RecordedCommand]
         app.run(List("second", "--fooh", "world", "--baz", "7"))
           .flatMap { code =>
