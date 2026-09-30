@@ -12,12 +12,19 @@ object DslExpandTests extends TestSuite {
 
   def sbv = NativeUtil.scalaBinaryVersion
 
+  private lazy val testResourceDir =
+    Option(System.getenv("CASEAPP_NATIVE_TESTS_RESOURCES"))
+      .map(os.Path(_))
+      .getOrElse {
+        sys.error("CASEAPP_NATIVE_TESTS_RESOURCES not set")
+      }
+
   val tests = TestSuite {
 
     test("handle expanded extra user arguments 1") {
       val parser: Parser[NoArgs] = Parser.derive
       val res = parser.detailedParse(
-        PlatformArgsExpander.expand(List(s"@./tests/native/target/scala-$sbv/test-classes/args1"))
+        PlatformArgsExpander.expand(List(s"@$testResourceDir/args1"))
       )
       val expectedRes = Right((
         NoArgs(),
@@ -37,7 +44,7 @@ object DslExpandTests extends TestSuite {
       val parser: Parser[NoArgs] = Parser.derive
       val res = parser.detailedParse(PlatformArgsExpander.expand(List(
         "--",
-        s"@./tests/native/target/scala-$sbv/test-classes/args2"
+        s"@$testResourceDir/args2"
       )))
       val expectedRes = Right((
         NoArgs(),
