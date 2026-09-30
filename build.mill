@@ -22,22 +22,22 @@ object Versions {
   def scala3   = "3.3.6"
   def scala    = Seq(scala212, scala213, scala3)
 
-  def scalaJs     = "1.20.2"
+  def scalaJs     = "1.22.0"
   def scalaNative = "0.5.10"
 }
 
 object Deps {
-  def catsEffect                = mvn"org.typelevel::cats-effect::3.6.3"
+  def catsEffect                = mvn"org.typelevel::cats-effect::3.7.0"
   def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
-  def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.7"
-  def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
+  def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.11"
+  def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1
   def mdoc                      = mvn"org.scalameta::mdoc:2.9.2"
-  def osLib                     = mvn"com.lihaoyi::os-lib::0.11.4"
+  def osLib                     = mvn"com.lihaoyi::os-lib::0.11.8"
   def pprint                    = mvn"com.lihaoyi::pprint::0.9.3"
   def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
   def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
   def shapeless                 = mvn"com.chuusai::shapeless::2.3.13"
-  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.2"
+  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.4"
   def utest                     = mvn"com.lihaoyi::utest::0.9.5"
 }
 
