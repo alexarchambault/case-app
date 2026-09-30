@@ -609,6 +609,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="cats-effect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-subcommands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple subcommands
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -747,6 +771,30 @@
     </span>
   </a>
   
+    <nav class="md-nav" aria-label="cats-effect">
+      <ul class="md-nav__list">
+        
+          <li class="md-nav__item">
+  <a href="#single-command" class="md-nav__link">
+    <span class="md-ellipsis">
+      Single command
+    </span>
+  </a>
+  
+</li>
+        
+          <li class="md-nav__item">
+  <a href="#multiple-subcommands" class="md-nav__link">
+    <span class="md-ellipsis">
+      Multiple subcommands
+    </span>
+  </a>
+  
+</li>
+        
+      </ul>
+    </nav>
+  
 </li>
       
     </ul>
@@ -776,10 +824,11 @@
 <h2 id="cats-effect">cats-effect<a class="headerlink" href="#cats-effect" title="Permanent link">&para;</a></h2>
 <p>case-app has a module helping using it in cats-effect applications.</p>
 <p>Add a dependency to it like</p>
-<p><div class="language-scala highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">//&gt; using dep com.github.alexarchambault::case-app-cats:2.1.0</span>
+<p><div class="language-scala highlight"><pre><span></span><code><span id="__span-0-1"><a id="__codelineno-0-1" name="__codelineno-0-1" href="#__codelineno-0-1"></a><span class="c1">//&gt; using dep com.github.alexarchambault::case-app-cats:2.1.1</span>
 </span></code></pre></div>
 (for other build tools, see <a href="../setup/">setup</a> and change <code>case-app</code> to <code>case-app-cats</code>)</p>
-<p>Then use it like
+<h3 id="single-command">Single command<a class="headerlink" href="#single-command" title="Permanent link">&para;</a></h3>
+<p>Use <code>IOCaseApp</code> for a single-command application:
 <div class="language-scala highlight"><pre><span></span><code><span id="__span-1-1"><a id="__codelineno-1-1" name="__codelineno-1-1" href="#__codelineno-1-1"></a><span class="k">import</span><span class="w"> </span><span class="nn">caseapp</span><span class="p">.</span><span class="nn">catseffect</span><span class="p">.</span><span class="n">_</span>
 </span><span id="__span-1-2"><a id="__codelineno-1-2" name="__codelineno-1-2" href="#__codelineno-1-2"></a><span class="k">import</span><span class="w"> </span><span class="nn">cats</span><span class="p">.</span><span class="nn">data</span><span class="p">.</span><span class="nc">NonEmptyList</span>
 </span><span id="__span-1-3"><a id="__codelineno-1-3" name="__codelineno-1-3" href="#__codelineno-1-3"></a><span class="k">import</span><span class="w"> </span><span class="nn">cats</span><span class="p">.</span><span class="nn">effect</span><span class="p">.</span><span class="n">_</span>
@@ -797,6 +846,51 @@
 </span><span id="__span-1-15"><a id="__codelineno-1-15" name="__codelineno-1-15" href="#__codelineno-1-15"></a><span class="w">  </span><span class="p">}</span>
 </span><span id="__span-1-16"><a id="__codelineno-1-16" name="__codelineno-1-16" href="#__codelineno-1-16"></a><span class="p">}</span>
 </span></code></pre></div></p>
+<h3 id="multiple-subcommands">Multiple subcommands<a class="headerlink" href="#multiple-subcommands" title="Permanent link">&para;</a></h3>
+<p>Use <code>IOCommand</code> and <code>IOCommandsEntryPoint</code> for applications with
+multiple subcommands — the cats-effect equivalents of <code>Command</code> and
+<code>CommandsEntryPoint</code>:</p>
+<div class="language-scala highlight"><pre><span></span><code><span id="__span-2-1"><a id="__codelineno-2-1" name="__codelineno-2-1" href="#__codelineno-2-1"></a><span class="k">import</span><span class="w"> </span><span class="nn">caseapp</span><span class="p">.</span><span class="n">_</span>
+</span><span id="__span-2-2"><a id="__codelineno-2-2" name="__codelineno-2-2" href="#__codelineno-2-2"></a><span class="k">import</span><span class="w"> </span><span class="nn">caseapp</span><span class="p">.</span><span class="nn">catseffect</span><span class="p">.</span><span class="n">_</span>
+</span><span id="__span-2-3"><a id="__codelineno-2-3" name="__codelineno-2-3" href="#__codelineno-2-3"></a><span class="k">import</span><span class="w"> </span><span class="nn">cats</span><span class="p">.</span><span class="nn">effect</span><span class="p">.</span><span class="n">_</span>
+</span><span id="__span-2-4"><a id="__codelineno-2-4" name="__codelineno-2-4" href="#__codelineno-2-4"></a>
+</span><span id="__span-2-5"><a id="__codelineno-2-5" name="__codelineno-2-5" href="#__codelineno-2-5"></a><span class="k">case</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">GrindOptions</span><span class="p">(</span>
+</span><span id="__span-2-6"><a id="__codelineno-2-6" name="__codelineno-2-6" href="#__codelineno-2-6"></a><span class="w">  </span><span class="nd">@HelpMessage</span><span class="p">(</span><span class="s">&quot;Type of beans&quot;</span><span class="p">)</span>
+</span><span id="__span-2-7"><a id="__codelineno-2-7" name="__codelineno-2-7" href="#__codelineno-2-7"></a><span class="w">  </span><span class="n">beans</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;arabica&quot;</span><span class="p">,</span>
+</span><span id="__span-2-8"><a id="__codelineno-2-8" name="__codelineno-2-8" href="#__codelineno-2-8"></a><span class="w">  </span><span class="nd">@HelpMessage</span><span class="p">(</span><span class="s">&quot;Grind size&quot;</span><span class="p">)</span>
+</span><span id="__span-2-9"><a id="__codelineno-2-9" name="__codelineno-2-9" href="#__codelineno-2-9"></a><span class="w">  </span><span class="n">size</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;medium&quot;</span>
+</span><span id="__span-2-10"><a id="__codelineno-2-10" name="__codelineno-2-10" href="#__codelineno-2-10"></a><span class="p">)</span>
+</span><span id="__span-2-11"><a id="__codelineno-2-11" name="__codelineno-2-11" href="#__codelineno-2-11"></a>
+</span><span id="__span-2-12"><a id="__codelineno-2-12" name="__codelineno-2-12" href="#__codelineno-2-12"></a><span class="k">object</span><span class="w"> </span><span class="nc">Grind</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nc">IOCommand</span><span class="p">[</span><span class="nc">GrindOptions</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-13"><a id="__codelineno-2-13" name="__codelineno-2-13" href="#__codelineno-2-13"></a><span class="w">  </span><span class="k">override</span><span class="w"> </span><span class="k">def</span><span class="w"> </span><span class="nf">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">List</span><span class="p">(</span><span class="nc">List</span><span class="p">(</span><span class="s">&quot;grind&quot;</span><span class="p">))</span>
+</span><span id="__span-2-14"><a id="__codelineno-2-14" name="__codelineno-2-14" href="#__codelineno-2-14"></a><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="nc">GrindOptions</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">:</span><span class="w"> </span><span class="nc">RemainingArgs</span><span class="p">):</span><span class="w"> </span><span class="nc">IO</span><span class="p">[</span><span class="nc">ExitCode</span><span class="p">]</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-2-15"><a id="__codelineno-2-15" name="__codelineno-2-15" href="#__codelineno-2-15"></a><span class="w">    </span><span class="nc">IO</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">s&quot;Grinding </span><span class="si">${</span><span class="n">options</span><span class="p">.</span><span class="n">beans</span><span class="si">}</span><span class="s"> (</span><span class="si">${</span><span class="n">options</span><span class="p">.</span><span class="n">size</span><span class="si">}</span><span class="s">)&quot;</span><span class="p">).</span><span class="n">as</span><span class="p">(</span><span class="nc">ExitCode</span><span class="p">.</span><span class="nc">Success</span><span class="p">)</span>
+</span><span id="__span-2-16"><a id="__codelineno-2-16" name="__codelineno-2-16" href="#__codelineno-2-16"></a><span class="p">}</span>
+</span><span id="__span-2-17"><a id="__codelineno-2-17" name="__codelineno-2-17" href="#__codelineno-2-17"></a>
+</span><span id="__span-2-18"><a id="__codelineno-2-18" name="__codelineno-2-18" href="#__codelineno-2-18"></a><span class="k">case</span><span class="w"> </span><span class="k">class</span><span class="w"> </span><span class="nc">BrewOptions</span><span class="p">(</span>
+</span><span id="__span-2-19"><a id="__codelineno-2-19" name="__codelineno-2-19" href="#__codelineno-2-19"></a><span class="w">  </span><span class="nd">@HelpMessage</span><span class="p">(</span><span class="s">&quot;Brewing method&quot;</span><span class="p">)</span>
+</span><span id="__span-2-20"><a id="__codelineno-2-20" name="__codelineno-2-20" href="#__codelineno-2-20"></a><span class="w">  </span><span class="n">method</span><span class="p">:</span><span class="w"> </span><span class="nc">String</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;pourover&quot;</span><span class="p">,</span>
+</span><span id="__span-2-21"><a id="__codelineno-2-21" name="__codelineno-2-21" href="#__codelineno-2-21"></a><span class="w">  </span><span class="nd">@HelpMessage</span><span class="p">(</span><span class="s">&quot;Water temperature in Celsius&quot;</span><span class="p">)</span>
+</span><span id="__span-2-22"><a id="__codelineno-2-22" name="__codelineno-2-22" href="#__codelineno-2-22"></a><span class="w">  </span><span class="n">temp</span><span class="p">:</span><span class="w"> </span><span class="nc">Int</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="mi">96</span>
+</span><span id="__span-2-23"><a id="__codelineno-2-23" name="__codelineno-2-23" href="#__codelineno-2-23"></a><span class="p">)</span>
+</span><span id="__span-2-24"><a id="__codelineno-2-24" name="__codelineno-2-24" href="#__codelineno-2-24"></a>
+</span><span id="__span-2-25"><a id="__codelineno-2-25" name="__codelineno-2-25" href="#__codelineno-2-25"></a><span class="k">object</span><span class="w"> </span><span class="nc">Brew</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nc">IOCommand</span><span class="p">[</span><span class="nc">BrewOptions</span><span class="p">]</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-26"><a id="__codelineno-2-26" name="__codelineno-2-26" href="#__codelineno-2-26"></a><span class="w">  </span><span class="k">override</span><span class="w"> </span><span class="k">def</span><span class="w"> </span><span class="nf">names</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">List</span><span class="p">(</span><span class="nc">List</span><span class="p">(</span><span class="s">&quot;brew&quot;</span><span class="p">))</span>
+</span><span id="__span-2-27"><a id="__codelineno-2-27" name="__codelineno-2-27" href="#__codelineno-2-27"></a><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">run</span><span class="p">(</span><span class="n">options</span><span class="p">:</span><span class="w"> </span><span class="nc">BrewOptions</span><span class="p">,</span><span class="w"> </span><span class="n">args</span><span class="p">:</span><span class="w"> </span><span class="nc">RemainingArgs</span><span class="p">):</span><span class="w"> </span><span class="nc">IO</span><span class="p">[</span><span class="nc">ExitCode</span><span class="p">]</span><span class="w"> </span><span class="o">=</span>
+</span><span id="__span-2-28"><a id="__codelineno-2-28" name="__codelineno-2-28" href="#__codelineno-2-28"></a><span class="w">    </span><span class="nc">IO</span><span class="p">.</span><span class="n">println</span><span class="p">(</span><span class="s">s&quot;Brewing with </span><span class="si">${</span><span class="n">options</span><span class="p">.</span><span class="n">method</span><span class="si">}</span><span class="s"> at </span><span class="si">${</span><span class="n">options</span><span class="p">.</span><span class="n">temp</span><span class="si">}</span><span class="s">°C&quot;</span><span class="p">).</span><span class="n">as</span><span class="p">(</span><span class="nc">ExitCode</span><span class="p">.</span><span class="nc">Success</span><span class="p">)</span>
+</span><span id="__span-2-29"><a id="__codelineno-2-29" name="__codelineno-2-29" href="#__codelineno-2-29"></a><span class="p">}</span>
+</span><span id="__span-2-30"><a id="__codelineno-2-30" name="__codelineno-2-30" href="#__codelineno-2-30"></a>
+</span><span id="__span-2-31"><a id="__codelineno-2-31" name="__codelineno-2-31" href="#__codelineno-2-31"></a><span class="k">object</span><span class="w"> </span><span class="nc">CoffeeApp</span><span class="w"> </span><span class="k">extends</span><span class="w"> </span><span class="nc">IOCommandsEntryPoint</span><span class="w"> </span><span class="p">{</span>
+</span><span id="__span-2-32"><a id="__codelineno-2-32" name="__codelineno-2-32" href="#__codelineno-2-32"></a><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">progName</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="s">&quot;coffee&quot;</span>
+</span><span id="__span-2-33"><a id="__codelineno-2-33" name="__codelineno-2-33" href="#__codelineno-2-33"></a><span class="w">  </span><span class="k">def</span><span class="w"> </span><span class="nf">commands</span><span class="w"> </span><span class="o">=</span><span class="w"> </span><span class="nc">Seq</span><span class="p">(</span><span class="nc">Grind</span><span class="p">,</span><span class="w"> </span><span class="nc">Brew</span><span class="p">)</span>
+</span><span id="__span-2-34"><a id="__codelineno-2-34" name="__codelineno-2-34" href="#__codelineno-2-34"></a><span class="p">}</span>
+</span></code></pre></div>
+<p><code>IOCommand</code> extends <code>IOCaseApp</code>, the same way <code>Command</code> extends <code>CaseApp</code>, and
+supports custom <code>names</code>, <code>group</code>, <code>hidden</code>, <code>hasHelp</code> and <code>hasFullHelp</code>.
+Shell completions (<code>enableCompleteCommand</code> / <code>enableCompletionsCommand</code>) are
+not supported by <code>IOCommandsEntryPoint</code> yet.</p>
+<p><code>IOCommandsEntryPoint</code> supports <code>defaultCommand</code> for a fallback
+when no subcommand is specified, just like <code>CommandsEntryPoint</code>.</p>
 
 
 
@@ -819,7 +913,7 @@
     <span class="md-icon" title="Last update">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M21 13.1c-.1 0-.3.1-.4.2l-1 1 2.1 2.1 1-1c.2-.2.2-.6 0-.8l-1.3-1.3c-.1-.1-.2-.2-.4-.2m-1.9 1.8-6.1 6V23h2.1l6.1-6.1-2.1-2M12.5 7v5.2l4 2.4-1 1L11 13V7h1.5M11 21.9c-5.1-.5-9-4.8-9-9.9C2 6.5 6.5 2 12 2c5.3 0 9.6 4.1 10 9.3-.3-.1-.6-.2-1-.2s-.7.1-1 .2C19.6 7.2 16.2 4 12 4c-4.4 0-8 3.6-8 8 0 4.1 3.1 7.5 7.1 7.9l-.1.2v1.8Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 11, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 30, 2026</span>
   </span>
 
     
@@ -829,7 +923,7 @@
     <span class="md-icon" title="Created">
       <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24"><path d="M14.47 15.08 11 13V7h1.5v5.25l3.08 1.83c-.41.28-.79.62-1.11 1m-1.39 4.84c-.36.05-.71.08-1.08.08-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8c0 .37-.03.72-.08 1.08.69.1 1.33.32 1.92.64.1-.56.16-1.13.16-1.72 0-5.5-4.5-10-10-10S2 6.5 2 12s4.47 10 10 10c.59 0 1.16-.06 1.72-.16-.32-.59-.54-1.23-.64-1.92M18 15v3h-3v2h3v3h2v-3h3v-2h-3v-3h-2Z"/></svg>
     </span>
-    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">August 11, 2025</span>
+    <span class="git-revision-date-localized-plugin git-revision-date-localized-plugin-date">September 30, 2026</span>
   </span>
 
     
