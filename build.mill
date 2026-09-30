@@ -4,7 +4,7 @@
 
 package build
 
-import com.github.lolgab.mill.mima.Mima
+import com.github.lolgab.mill.mima.{DirectMissingMethodProblem, Mima, ProblemFilter}
 import mill._
 import mill.javalib.api.JvmWorkerUtil.matchingVersions
 import mill.scalajslib._
@@ -414,10 +414,18 @@ trait CaseAppPublishModule extends PublishModule with ScalaModule {
     "--release",
     "8"
   )
-  def scalacOptions = super.scalacOptions() ++ Seq(
-    "--release",
-    "8"
-  )
+  def scalacOptions = Task {
+    val isJvm = !this.isInstanceOf[ScalaJSModule] && !this.isInstanceOf[ScalaNativeModule]
+    // Lazy vals only rely on sun.misc.Unsafe on the JVM (and the Scala Native
+    // compiler plugin crashes on the new encoding anyway)
+    val futureLazyVals = isJvm && scalaVersion().startsWith("3.")
+    // -Yfuture-lazy-vals requires a JVM target of at least 9
+    val release = if (futureLazyVals) "9" else "8"
+    val maybeFutureLazyVals =
+      if (futureLazyVals) Seq("-Yfuture-lazy-vals")
+      else Nil
+    super.scalacOptions() ++ Seq("--release", release) ++ maybeFutureLazyVals
+  }
 }
 
 object CaseAppPublishModule {
@@ -513,6 +521,12 @@ trait MimaChecks extends Mima with PublishModule {
       }
     )
   }
+
+  def mimaBinaryIssueFilters = super.mimaBinaryIssueFilters() ++ Seq(
+    // -Yfuture-lazy-vals changes how some objects are initialized, and static
+    // initializers can't be called from user code anyway
+    ProblemFilter.exclude[DirectMissingMethodProblem]("*.<clinit>")
+  )
 }
 
 object docs extends ScalaModule {
