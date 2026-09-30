@@ -8,13 +8,32 @@ on:
   pull_request:
 
 jobs:
+  scala-versions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    outputs:
+      scala-versions: ${{ steps.versions.outputs.scala-versions }}
+    steps:
+    - uses: actions/checkout@v6
+      with:
+        fetch-depth: 0
+        submodules: true
+    - uses: coursier/cache-action@v8.1
+    - uses: coursier/setup-action@v3.0
+      with:
+        jvm: 21
+    - name: Get Scala versions from the build
+      id: versions
+      run: echo "scala-versions=$(./mill -i --ticker false show ci.scalaVersions | jq -c .)" >> "$GITHUB_OUTPUT"
+
   test:
+    needs: scala-versions
     runs-on: ubuntu-latest
     timeout-minutes: 10
     strategy:
       fail-fast: false
       matrix:
-        SCALA_VERSION: ["2.12.20", "2.13.16", "3.3.6"]
+        SCALA_VERSION: ${{ fromJSON(needs.scala-versions.outputs.scala-versions) }}
     steps:
     - uses: actions/checkout@v7
       with:
