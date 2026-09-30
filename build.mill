@@ -611,3 +611,15 @@ object docs extends ScalaModule {
     ()
   }
 }
+
+object ci extends Module {
+
+  /** The Scala versions the modules of this build are cross-compiled against
+    *
+    * Printed by `./mill show ci.scalaVersions`, and read by the CI to fill its job matrix, so that
+    * Scala versions don't have to be hard-coded in the GitHub Actions workflow.
+    */
+  def scalaVersions() = Task.Command[Seq[String]] {
+    Versions.scala
+  }
+}
