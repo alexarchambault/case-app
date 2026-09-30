@@ -1,6 +1,6 @@
 package caseapp.core.commandparser
 
-import caseapp.core.app.{CaseApp, Command}
+import caseapp.core.app.{CaseApp, Command, CommandLike}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -25,9 +25,9 @@ object RuntimeCommandParser {
     tree.command(args).getOrElse((Nil, defaultApp, args))
   }
 
-  private def commandMap(commands: Seq[Command[_]]): Map[List[String], Command[_]] =
+  def commandMap[C <: CommandLike](commands: Seq[C]): Map[List[String], C] =
     commands.flatMap(cmd =>
-      cmd.names.map(names => names -> cmd): Seq[(List[String], Command[_])]
+      cmd.names.map(names => names -> cmd): Seq[(List[String], C)]
     ).toMap
 
   def parse(

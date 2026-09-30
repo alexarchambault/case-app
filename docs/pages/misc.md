@@ -82,8 +82,10 @@ object CoffeeApp extends IOCommandsEntryPoint {
 }
 ```
 
-`IOCommand` supports the same features as `Command`: custom `names`,
-`group`, `hidden`, and tab completion via `completer`.
+`IOCommand` extends `IOCaseApp`, the same way `Command` extends `CaseApp`, and
+supports custom `names`, `group`, `hidden`, `hasHelp` and `hasFullHelp`.
+Shell completions (`enableCompleteCommand` / `enableCompletionsCommand`) are
+not supported by `IOCommandsEntryPoint` yet.
 
 `IOCommandsEntryPoint` supports `defaultCommand` for a fallback
 when no subcommand is specified, just like `CommandsEntryPoint`.

@@ -10,31 +10,8 @@ import caseapp.core.complete.{
   Fish,
   Zsh
 }
-import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
 
-abstract class CommandsEntryPoint {
-
-  def defaultCommand: Option[Command[_]] = None
-  def commands: Seq[Command[_]]
-
-  def progName: String
-  def description: String = ""
-  def summaryDesc: String = ""
-
-  def help: RuntimeCommandsHelp =
-    RuntimeCommandsHelp(
-      progName,
-      Some(description).filter(_.nonEmpty),
-      defaultCommand.map(_.finalHelp: Help[_]).getOrElse(Help[Unit]()),
-      commands.map(cmd => RuntimeCommandHelp(cmd.names, cmd.finalHelp, cmd.group, cmd.hidden)),
-      Some(summaryDesc).filter(_.nonEmpty)
-    )
-
-  def helpFormat: HelpFormat =
-    HelpFormat.default()
-
-  private def commandProgName(commandName: List[String]): String =
-    (progName +: commandName).mkString(" ")
+abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
 
   def enableCompleteCommand: Boolean    = false
   def completeCommandName: List[String] = List("complete")
@@ -356,18 +333,11 @@ abstract class CommandsEntryPoint {
         case Some(completionAlias) =>
           completionsMain(actualArgs.drop(completionAlias.length))
         case None =>
-          defaultCommand match {
+          commandFor(actualArgs.toList) match {
             case None =>
-              RuntimeCommandParser.parse(commands, actualArgs.toList) match {
-                case None =>
-                  printUsage()
-                case Some((commandName, command, commandArgs)) =>
-                  command.main(commandProgName(commandName), commandArgs.toArray)
-              }
-            case Some(defaultCommand0) =>
-              val (commandName, command, commandArgs) =
-                RuntimeCommandParser.parse(defaultCommand0, commands, actualArgs.toList)
-              command.main(commandProgName(commandName), commandArgs.toArray)
+              printUsage()
+            case Some((commandProgName, command, commandArgs)) =>
+              command.main(commandProgName, commandArgs.toArray)
           }
       }
     }

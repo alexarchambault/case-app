@@ -4,7 +4,7 @@ import caseapp.core.parser.Parser
 import caseapp.core.help.Help
 
 abstract class Command[T](implicit parser: Parser[T], help: Help[T])
-    extends CaseApp()(parser, help) {
+    extends CaseApp()(parser, help) with CommandLike {
   def names: List[List[String]] =
     List(List(name))
   def group: String   = ""

@@ -4,8 +4,9 @@ import cats.effect._
 import cats.effect.unsafe.implicits.global
 import cats.data.NonEmptyList
 import caseapp._
-import caseapp.core.help.Help
+import caseapp.core.help.{Help, HelpFormat}
 import caseapp.core.Error
+import caseapp.core.Scala3Helpers._
 import utest._
 
 sealed trait RecordedApp {
@@ -84,12 +85,24 @@ object CatsTests extends TestSuite {
       test("run") {
         testCaseStdout(List("--value", "foo", "--num-foo", "42"), "run: FewArgs(foo,42)")
       }
+      test("custom name in usage") {
+        val app = new RecordedIOCaseApp[FewArgs]() {
+          override def name = "custom-name"
+        }
+        app.run(List("--usage"))
+          .flatMap(_ => app.stdoutBuff.get)
+          .map { stdout =>
+            assert(stdout == List(Help[FewArgs].withHelp.withProgName("custom-name").usage))
+          }
+          .unsafeToFuture()
+      }
     }
 
     test("IOCommandsEntryPoint") {
       def mkEntryPoint() = {
         val firstCmd = new IOCommand[Definitions.First] with RecordedCommand {
           override def names: List[List[String]]    = List(List("first"))
+          override def hasFullHelp: Boolean         = true
           override def println(x: String): IO[Unit] = stdoutBuff.update(x :: _)
           override def run(options: Definitions.First, remainingArgs: RemainingArgs): IO[ExitCode] =
             stdoutBuff.update(s"first: $options" :: _).as(ExitCode.Success)
@@ -144,6 +157,62 @@ object CatsTests extends TestSuite {
         app.run(List())
           .map { code =>
             assert(code == ExitCode.Success)
+          }
+          .unsafeToFuture()
+      }
+
+      test("full help on command with hasFullHelp") {
+        val app      = mkEntryPoint()
+        val firstCmd = app.commands.head.asInstanceOf[RecordedCommand]
+        app.run(List("first", "--help-full"))
+          .flatMap { code =>
+            firstCmd.stdoutBuff.get.map { stdout =>
+              assert(code == ExitCode.Success)
+              assert(stdout == List(
+                Help[Definitions.First].withFullHelp.withProgName("test-app first").help(
+                  HelpFormat.default(),
+                  showHidden = true
+                )
+              ))
+            }
+          }
+          .unsafeToFuture()
+      }
+
+      test("help mentions subcommand name") {
+        val app       = mkEntryPoint()
+        val secondCmd = app.commands(1).asInstanceOf[RecordedCommand]
+        app.run(List("second", "--usage"))
+          .flatMap { code =>
+            secondCmd.stdoutBuff.get.map { stdout =>
+              assert(code == ExitCode.Success)
+              assert(stdout == List(
+                Help[Definitions.Second].withHelp.withProgName("test-app second").usage
+              ))
+            }
+          }
+          .unsafeToFuture()
+      }
+
+      test("no help option when hasHelp is false") {
+        val cmd = new IOCommand[Definitions.First] with RecordedCommand {
+          override def names: List[List[String]] = List(List("first"))
+          override def hasHelp: Boolean          = false
+          override def run(options: Definitions.First, remainingArgs: RemainingArgs) =
+            IO.pure(ExitCode.Success)
+          override def error(message: Error): IO[ExitCode] =
+            stderrBuff.update(message.message :: _).as(ExitCode.Error)
+        }
+        val app = new IOCommandsEntryPoint {
+          def progName = "test-app"
+          def commands = Seq(cmd)
+        }
+        app.run(List("first", "--help"))
+          .flatMap { code =>
+            cmd.stderrBuff.get.map { stderr =>
+              assert(code == ExitCode.Error)
+              assert(stderr == List("Unrecognized argument: --help"))
+            }
           }
           .unsafeToFuture()
       }
