@@ -22,12 +22,12 @@ object Versions {
   def scala3   = "3.3.6"
   def scala    = Seq(scala212, scala213, scala3)
 
-  def scalaJs     = "1.20.2"
+  def scalaJs     = "1.22.0"
   def scalaNative = "0.5.12"
 }
 
 object Deps {
-  def catsEffect                = mvn"org.typelevel::cats-effect::3.6.3"
+  def catsEffect                = mvn"org.typelevel::cats-effect::3.6.4"
   def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.7"
   def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
