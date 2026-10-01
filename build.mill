@@ -19,10 +19,11 @@ import scala.concurrent.duration.DurationInt
 import mill.api.{BuildCtx, Result, TaskCtx}
 
 object Versions {
-  def scala212 = "2.12.20"
   def scala213 = "2.13.18"
   def scala3   = "3.3.8"
-  def scala    = Seq(scala212, scala213, scala3)
+  def scala    = Seq(scala213, scala3)
+  // Scala.js, Scala Native, and cats modules are only built for Scala 3
+  def scala3Only = Seq(scala3)
 
   def scalaJs     = "1.22.0"
   def scalaNative = "0.5.12"
@@ -30,9 +31,7 @@ object Versions {
 
 object Deps {
   def catsEffect                = mvn"org.typelevel::cats-effect::3.7.0"
-  def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.11"
-  def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = mvn"org.scalameta::mdoc:2.9.2"
   def osLib                     = mvn"com.lihaoyi::os-lib::0.11.8"
   def pprint                    = mvn"com.lihaoyi::pprint::0.9.6"
@@ -59,8 +58,8 @@ object annotations extends Module {
   }
 
   object jvm    extends Cross[AnnotationsJvm](Versions.scala)
-  object js     extends Cross[AnnotationsJs](Versions.scala)
-  object native extends Cross[AnnotationsNative](Versions.scala)
+  object js     extends Cross[AnnotationsJs](Versions.scala3Only)
+  object native extends Cross[AnnotationsNative](Versions.scala3Only)
 
   trait AnnotationsJvm extends Annotations with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
@@ -93,8 +92,8 @@ object util extends Module {
   }
 
   object jvm    extends Cross[UtilJvm](Versions.scala)
-  object js     extends Cross[UtilJs](Versions.scala)
-  object native extends Cross[UtilNative](Versions.scala)
+  object js     extends Cross[UtilJs](Versions.scala3Only)
+  object native extends Cross[UtilNative](Versions.scala3Only)
 
   trait UtilJvm extends Util with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
@@ -144,8 +143,8 @@ object core extends Module {
   object `jvm-native` extends Cross[Shared](Versions.scala)
 
   object jvm    extends Cross[CoreJvm](Versions.scala)
-  object js     extends Cross[CoreJs](Versions.scala)
-  object native extends Cross[CoreNative](Versions.scala)
+  object js     extends Cross[CoreJs](Versions.scala3Only)
+  object native extends Cross[CoreNative](Versions.scala3Only)
 
   trait CoreJvm extends Core with MimaChecks {
     def moduleDeps = Seq(
@@ -187,17 +186,11 @@ object core extends Module {
           Nil
       super.scalacOptions() ++ maybeMacroAnn
     }
-    def scalacPluginMvnDeps = Task {
-      if (scalaVersion().startsWith("2.12."))
-        Seq(Deps.macroParadise)
-      else
-        Nil
-    }
   }
 }
 
 object cats extends Module {
-  object shared extends Cross[Shared](Versions.scala)
+  object shared extends Cross[Shared](Versions.scala3Only)
 
   trait Shared extends Cross.Module[String] {
     private def sourceDirs(`type`: String = "main") =
@@ -212,8 +205,8 @@ object cats extends Module {
     def testSources = Task.Sources(sourceDirs("test")*)
   }
 
-  object jvm extends Cross[CatsJvm](Versions.scala)
-  object js  extends Cross[CatsJs](Versions.scala)
+  object jvm extends Cross[CatsJvm](Versions.scala3Only)
+  object js  extends Cross[CatsJs](Versions.scala3Only)
 
   trait CatsJvm extends Cats with MimaChecks {
     def moduleDeps = Seq(core.jvm())
@@ -242,52 +235,6 @@ object cats extends Module {
   }
 }
 
-object cats2 extends Module {
-  object shared extends Cross[Shared](Versions.scala)
-
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs(`type`: String = "main") =
-      Seq(
-        os.sub / "src" / `type` / "java",
-        os.sub / "src" / `type` / "scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src" / `type` / s"scala-$sv"
-        }
-    def sources     = Task.Sources(sourceDirs()*)
-    def testSources = Task.Sources(sourceDirs("test")*)
-  }
-
-  object jvm extends Cross[Cats2Jvm](Versions.scala)
-  object js  extends Cross[Cats2Js](Versions.scala)
-
-  trait Cats2Jvm extends Cats2 with MimaChecks {
-    def moduleDeps = Seq(core.jvm())
-    def sources    = Task(cats.jvm().sources())
-
-    object test extends CrossSbtTests with TestCrossSources {
-      def mvnDeps       = Seq(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
-    }
-  }
-  trait Cats2Js extends Cats2 with CaseAppScalaJsModule with MimaChecks {
-    def moduleDeps = Seq(core.js())
-    def sources    = Task(cats.js().sources())
-
-    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
-      def mvnDeps       = Seq(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
-    }
-  }
-
-  trait Cats2 extends CrossSbtModule with CrossSources with CaseAppPublishModule {
-    def artifactName = "case-app-cats-effect-2"
-    def mvnDeps      = Seq(Deps.catsEffect2)
-  }
-}
-
 object tests extends Module {
   object shared extends Cross[Shared](Versions.scala)
 
@@ -307,8 +254,8 @@ object tests extends Module {
   object `jvm-native` extends Cross[Shared](Versions.scala)
 
   object jvm    extends Cross[TestsJvm](Versions.scala)
-  object js     extends Cross[TestsJs](Versions.scala)
-  object native extends Cross[TestsNative](Versions.scala)
+  object js     extends Cross[TestsJs](Versions.scala3Only)
+  object native extends Cross[TestsNative](Versions.scala3Only)
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
@@ -530,7 +477,7 @@ trait MimaChecks extends Mima with PublishModule {
 }
 
 object docs extends ScalaModule {
-  private def sv   = Versions.scala213
+  private def sv   = Versions.scala3
   def scalaVersion = sv
   def moduleDeps = Seq(
     cats.jvm(sv)

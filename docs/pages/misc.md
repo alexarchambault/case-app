@@ -6,7 +6,8 @@
 import caseapp._
 ```
 
-case-app has a module helping using it in cats-effect applications.
+case-app has a module helping using it in cats-effect applications. It is only
+published for Scala 3.
 
 Add a dependency to it like
 
