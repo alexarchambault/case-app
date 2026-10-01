@@ -22,6 +22,8 @@ object Versions {
   def scala213 = "2.13.18"
   def scala3   = "3.3.8"
   def scala    = Seq(scala213, scala3)
+  // Scala.js, Scala Native, and cats modules are only built for Scala 3
+  def scala3Only = Seq(scala3)
 
   def scalaJs     = "1.22.0"
   def scalaNative = "0.5.12"
@@ -56,8 +58,8 @@ object annotations extends Module {
   }
 
   object jvm    extends Cross[AnnotationsJvm](Versions.scala)
-  object js     extends Cross[AnnotationsJs](Versions.scala)
-  object native extends Cross[AnnotationsNative](Versions.scala)
+  object js     extends Cross[AnnotationsJs](Versions.scala3Only)
+  object native extends Cross[AnnotationsNative](Versions.scala3Only)
 
   trait AnnotationsJvm extends Annotations with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
@@ -90,8 +92,8 @@ object util extends Module {
   }
 
   object jvm    extends Cross[UtilJvm](Versions.scala)
-  object js     extends Cross[UtilJs](Versions.scala)
-  object native extends Cross[UtilNative](Versions.scala)
+  object js     extends Cross[UtilJs](Versions.scala3Only)
+  object native extends Cross[UtilNative](Versions.scala3Only)
 
   trait UtilJvm extends Util with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
@@ -141,8 +143,8 @@ object core extends Module {
   object `jvm-native` extends Cross[Shared](Versions.scala)
 
   object jvm    extends Cross[CoreJvm](Versions.scala)
-  object js     extends Cross[CoreJs](Versions.scala)
-  object native extends Cross[CoreNative](Versions.scala)
+  object js     extends Cross[CoreJs](Versions.scala3Only)
+  object native extends Cross[CoreNative](Versions.scala3Only)
 
   trait CoreJvm extends Core with MimaChecks {
     def moduleDeps = Seq(
@@ -188,7 +190,7 @@ object core extends Module {
 }
 
 object cats extends Module {
-  object shared extends Cross[Shared](Versions.scala)
+  object shared extends Cross[Shared](Versions.scala3Only)
 
   trait Shared extends Cross.Module[String] {
     private def sourceDirs(`type`: String = "main") =
@@ -203,8 +205,8 @@ object cats extends Module {
     def testSources = Task.Sources(sourceDirs("test")*)
   }
 
-  object jvm extends Cross[CatsJvm](Versions.scala)
-  object js  extends Cross[CatsJs](Versions.scala)
+  object jvm extends Cross[CatsJvm](Versions.scala3Only)
+  object js  extends Cross[CatsJs](Versions.scala3Only)
 
   trait CatsJvm extends Cats with MimaChecks {
     def moduleDeps = Seq(core.jvm())
@@ -252,8 +254,8 @@ object tests extends Module {
   object `jvm-native` extends Cross[Shared](Versions.scala)
 
   object jvm    extends Cross[TestsJvm](Versions.scala)
-  object js     extends Cross[TestsJs](Versions.scala)
-  object native extends Cross[TestsNative](Versions.scala)
+  object js     extends Cross[TestsJs](Versions.scala3Only)
+  object native extends Cross[TestsNative](Versions.scala3Only)
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
@@ -475,7 +477,7 @@ trait MimaChecks extends Mima with PublishModule {
 }
 
 object docs extends ScalaModule {
-  private def sv   = Versions.scala213
+  private def sv   = Versions.scala3
   def scalaVersion = sv
   def moduleDeps = Seq(
     cats.jvm(sv)
