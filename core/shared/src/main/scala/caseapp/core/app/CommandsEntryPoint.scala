@@ -16,8 +16,8 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
   def enableCompleteCommand: Boolean    = false
   def completeCommandName: List[String] = List("complete")
 
-  def enableCompletionsCommand: Boolean    = false
-  def completionsCommandName: List[String] = List("completions")
+  def enableCompletionsCommand: Boolean             = false
+  def completionsCommandName: List[String]          = List("completions")
   def completionsCommandAliases: List[List[String]] = List(
     completionsCommandName,
     List("completion")
@@ -77,7 +77,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
     rcFile: String,
     updated: Boolean
   ): Iterator[String] = {
-    val q = "\""
+    val q           = "\""
     val evalCommand =
       s"eval $q$$($progName ${completionsCommandName.mkString(" ")} install --env)$q"
     if (updated)
@@ -103,10 +103,10 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
       )
   }
 
-  def shell: Option[String]           = FileOps.readEnv("SHELL")
-  def completionHome: Path            = FileOps.homeDir
-  def completionXdgHome: Option[Path] = FileOps.readEnv("XDG_CONFIG_HOME").map(Paths.get(_))
-  def completionZDotDir: Option[Path] = FileOps.readEnv("ZDOTDIR").map(Paths.get(_))
+  def shell: Option[String]             = FileOps.readEnv("SHELL")
+  def completionHome: Path              = FileOps.homeDir
+  def completionXdgHome: Option[Path]   = FileOps.readEnv("XDG_CONFIG_HOME").map(Paths.get(_))
+  def completionZDotDir: Option[Path]   = FileOps.readEnv("ZDOTDIR").map(Paths.get(_))
   def completionDebugFile: Option[Path] =
     FileOps.readEnv("CASEAPP_COMPLETION_DEBUG").map(Paths.get(_))
 
@@ -141,7 +141,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
     completionsWorkingDirectory: Option[String],
     options: CompletionsInstallOptions
   ): Unit = {
-    val name = options.name.getOrElse(Paths.get(progName).getFileName.toString)
+    val name   = options.name.getOrElse(Paths.get(progName).getFileName.toString)
     val format = CommandsEntryPoint.getFormat(options.format, shell, File.separator).getOrElse {
       printLine(
         "Cannot determine current shell, pass the shell you use with --shell, like",
@@ -166,7 +166,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
         val completionScript     = Zsh.script(name)
         val dir                  = zshCompletionWorkingDir(options.output)
         val completionScriptDest = dir.resolve(s"_$name")
-        val needsWrite = !FileOps.exists(completionScriptDest) ||
+        val needsWrite           = !FileOps.exists(completionScriptDest) ||
           FileOps.readFile(completionScriptDest) != completionScript
         if (needsWrite) {
           printLine(s"Writing $completionScriptDest")
@@ -243,7 +243,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
         case Bash.shellName | Bash.id => Bash.script(progName)
         case Fish.shellName | Fish.id => Fish.script(progName)
         case Zsh.shellName | Zsh.id   => Zsh.script(progName)
-        case _ =>
+        case _                        =>
           completeUnrecognizedFormat(format)
       }
 
@@ -281,7 +281,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
       case Array(format, indexStr, userArgs @ _*) =>
         val index          = indexStr.toInt - 2 // -1 for argv[0], and -1 as indices start at 1
         val prefix: String = userArgs.applyOrElse(index + 1, (_: Int) => "")
-        val items = complete(userArgs.toList.drop(1), index)
+        val items          = complete(userArgs.toList.drop(1), index)
           .flatMap { item =>
             val values = item.values.filter(_.startsWith(prefix))
             if (values.isEmpty) Nil

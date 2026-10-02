@@ -23,7 +23,7 @@ object DslExpandTests extends TestSuite {
 
     test("handle expanded extra user arguments 1") {
       val parser: Parser[NoArgs] = Parser.derive
-      val res = parser.detailedParse(
+      val res                    = parser.detailedParse(
         PlatformArgsExpander.expand(List(s"@$testResourceDir/args1"))
       )
       val expectedRes = Right((
@@ -42,7 +42,7 @@ object DslExpandTests extends TestSuite {
 
     test("handle expanded extra user arguments 2") {
       val parser: Parser[NoArgs] = Parser.derive
-      val res = parser.detailedParse(PlatformArgsExpander.expand(List(
+      val res                    = parser.detailedParse(PlatformArgsExpander.expand(List(
         "--",
         s"@$testResourceDir/args2"
       )))

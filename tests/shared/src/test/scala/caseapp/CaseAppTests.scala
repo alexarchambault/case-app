@@ -30,7 +30,7 @@ object CaseAppTests extends TestSuite {
     test("handle extra user arguments") {
       val parser: Parser[NoArgs] = Parser.derive
       val res                    = parser.detailedParse(Seq("--", "b", "-a", "--other"))
-      val expectedRes = Right((
+      val expectedRes            = Right((
         NoArgs(),
         RemainingArgs(
           Seq(),
@@ -58,7 +58,7 @@ object CaseAppTests extends TestSuite {
         assert(res == expectedRes)
       }
       test {
-        val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
+        val res         = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
         val expectedRes = Left(Error.ParsingArgument(
           Name("numFoo"),
           Error.ArgumentAlreadySpecified("???", Nil),
@@ -75,7 +75,7 @@ object CaseAppTests extends TestSuite {
     }
 
     test("fail if arg fails to parse") {
-      val res = Parser[FewArgs].parse(Seq("--num-foo", "true"))
+      val res         = Parser[FewArgs].parse(Seq("--num-foo", "true"))
       val expectedRes = Left(Error.ParsingArgument(
         Name("numFoo"),
         Error.MalformedValue("integer", "true"),
@@ -253,7 +253,7 @@ object CaseAppTests extends TestSuite {
     }
 
     test("parse third README options (non mandatory args)") {
-      val res = Parser[ReadmeOptions3].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
+      val res         = Parser[ReadmeOptions3].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
       val expectedRes = Right((
         ReadmeOptions3(None, PathOptions("", "bar")),
         Seq("extra")
@@ -262,7 +262,7 @@ object CaseAppTests extends TestSuite {
     }
 
     test("parse fourth README options (non mandatory args)") {
-      val res = Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
+      val res         = Parser[ReadmeOptions4].parse(Seq("--user", "aaa", "extra", "-b", "bar"))
       val expectedRes = Right((
         ReadmeOptions4(
           Left(Error.RequiredOptionNotSpecified("--password")),
@@ -280,7 +280,7 @@ object CaseAppTests extends TestSuite {
     }
 
     test("report all missing mandatory arguments") {
-      val res = Parser[Example].parse(Seq())
+      val res         = Parser[Example].parse(Seq())
       val expectedRes = Left(SeveralErrors(
         Error.RequiredOptionNotSpecified("--foo"),
         Seq(Error.RequiredOptionNotSpecified("--bar"))
@@ -289,7 +289,7 @@ object CaseAppTests extends TestSuite {
     }
 
     test("report missing args and unknown args together") {
-      val res = Parser[Example].parse(Seq("--foo", "foo", "--baz", "10"))
+      val res         = Parser[Example].parse(Seq("--foo", "foo", "--baz", "10"))
       val expectedRes = Left(SeveralErrors(
         Error.UnrecognizedArgument("--baz"),
         Seq(Error.RequiredOptionNotSpecified("--bar"))
@@ -304,7 +304,7 @@ object CaseAppTests extends TestSuite {
       val args = Seq("--user", "aaa", "extra", "-b", "bar")
 
       test {
-        val res = parser.parse(args)
+        val res         = parser.parse(args)
         val expectedRes = Right((
           WithHelp(
             usage = false,
@@ -317,7 +317,7 @@ object CaseAppTests extends TestSuite {
       }
 
       test {
-        val res = parser.parse(args :+ "--help")
+        val res         = parser.parse(args :+ "--help")
         val expectedRes = Right((
           WithHelp(
             usage = false,
@@ -618,8 +618,8 @@ object CaseAppTests extends TestSuite {
     }
 
     test("keep tags") {
-      val args     = DemoOptions.help.args
-      val valueArg = args.find(_.name.name == "value").getOrElse(sys.error("value arg not found"))
+      val args      = DemoOptions.help.args
+      val valueArg  = args.find(_.name.name == "value").getOrElse(sys.error("value arg not found"))
       val stagesArg =
         args.find(_.name.name == "stages").getOrElse(sys.error("stages arg not found"))
 

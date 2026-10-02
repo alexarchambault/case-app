@@ -13,8 +13,8 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
   // FIXME Most of the content of this method is cut-n-pasted from generic.scala
   def construct(tpe: Type): List[Tree] => Tree = {
     // FIXME Cut-n-pasted from generic.scala
-    val sym         = tpe.typeSymbol
-    val isCaseClass = sym.asClass.isCaseClass
+    val sym                                                 = tpe.typeSymbol
+    val isCaseClass                                         = sym.asClass.isCaseClass
     def hasNonGenericCompanionMember(name: String): Boolean = {
       val mSym = sym.companion.typeSignature.member(TermName(name))
       mSym != NoSymbol && !isNonGeneric(mSym)
@@ -72,7 +72,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
 
     val wrapTpeTrees = annTreeLists.map {
       case Nil => nilTpe -> q"_root_.scala.Nil"
-      case l =>
+      case l   =>
         def listTree(trees: List[Tree]): Tree = {
           import scala.::
           trees match {
@@ -84,7 +84,7 @@ class AnnotationListMacros(val c: whitebox.Context) extends CaseClassMacros {
         appliedType(consTpe, annTpe) -> listTree(l)
     }
 
-    val outTpe = mkHListTpe(wrapTpeTrees.map { case (aTpe, _) => aTpe })
+    val outTpe  = mkHListTpe(wrapTpeTrees.map { case (aTpe, _) => aTpe })
     val outTree = wrapTpeTrees.foldRight(q"_root_.shapeless.HNil": Tree) {
       case ((_, bound), acc) => pq"_root_.shapeless.::($bound, $acc)"
     }

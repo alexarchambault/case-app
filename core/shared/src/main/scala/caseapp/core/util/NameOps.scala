@@ -23,7 +23,7 @@ class NameOps(val name: Name) extends AnyVal {
     formatter: Formatter[Name]
   ): Option[List[String]] =
     args match {
-      case Nil => None
+      case Nil    => None
       case h :: t =>
         if (h == option(formatter))
           Some(t)
