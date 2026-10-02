@@ -21,7 +21,7 @@ import scala.collection.mutable
   */
 case class Str private (private val chars: Array[Char], private val colors: Array[Str.State]) {
   require(chars.length == colors.length)
-  override def hashCode() = util.Arrays.hashCode(chars) + util.Arrays.hashCode(colors)
+  override def hashCode()         = util.Arrays.hashCode(chars) + util.Arrays.hashCode(colors)
   override def equals(other: Any) = other match {
     case o: fansi.Str =>
       util.Arrays.equals(chars, o.chars) && util.Arrays.equals(colors, o.colors)
@@ -231,7 +231,7 @@ object Str {
       if (char == '\u001b' || char == '\u009b') {
         val escapeStartSourceIndex = sourceIndex
         ParseMap.query(raw, escapeStartSourceIndex) match {
-          case None => sourceIndex = errorMode.handle(sourceIndex, raw)
+          case None        => sourceIndex = errorMode.handle(sourceIndex, raw)
           case Some(tuple) =>
             tuple match {
               case (newIndex, Left(color)) =>
@@ -358,7 +358,7 @@ object ErrorMode {
   case object Throw extends ErrorMode {
     def handle(sourceIndex: Int, raw: CharSequence) = {
       val matcher = Str.ansiRegex.matcher(raw)
-      val detail =
+      val detail  =
         if (!matcher.find(sourceIndex)) ""
         else {
           val end = matcher.end()
@@ -501,7 +501,7 @@ object Attrs {
   class Multiple private[Attrs] (val resetMask: Long, val applyMask: Long, val attrs: Attr*)
       extends Attrs {
     assert(attrs.length != 1)
-    override def hashCode() = attrs.hashCode()
+    override def hashCode()         = attrs.hashCode()
     override def equals(other: Any) = (this, other) match {
       case (lhs: Attr, rhs: Attr)                                    => lhs eq rhs
       case (lhs: Attr, rhs: Attrs.Multiple) if rhs.attrs.length == 1 => lhs eq rhs.attrs(0)

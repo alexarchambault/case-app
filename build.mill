@@ -108,7 +108,7 @@ object util extends Module {
 
   trait Util extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app-util"
-    def mvnDeps = Task {
+    def mvnDeps      = Task {
       if (scalaVersion().startsWith("2."))
         Seq(Deps.shapeless)
       else
@@ -173,7 +173,7 @@ object core extends Module {
 
   trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
     def artifactName = "case-app"
-    def mvnDeps = Task {
+    def mvnDeps      = Task {
       val maybeDataClass =
         if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
         else Nil
@@ -312,7 +312,7 @@ object tests extends Module {
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests with TestCrossSources {
@@ -322,7 +322,7 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = Task {
+      def sources       = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -344,7 +344,7 @@ object tests extends Module {
   }
   trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
     def moduleDeps = Seq(core.native())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests with ScalaNativeTests with TestCrossSources {
@@ -355,11 +355,11 @@ object tests extends Module {
       )
       def testFramework = "utest.runner.Framework"
       def resourceDir   = Task.Source(os.sub / "src/test/resources")
-      def forkEnv = super.forkEnv() ++ Seq(
+      def forkEnv       = super.forkEnv() ++ Seq(
         "CASEAPP_NATIVE_TESTS_RESOURCES" -> resourceDir().path.toString
       )
       def testSandboxWorkingDir = false // not respected
-      def sources = Task {
+      def sources               = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -420,7 +420,7 @@ trait CaseAppPublishModule extends PublishModule with ScalaModule {
     // compiler plugin crashes on the new encoding anyway)
     val futureLazyVals = isJvm && scalaVersion().startsWith("3.")
     // -Yfuture-lazy-vals requires a JVM target of at least 9
-    val release = if (futureLazyVals) "9" else "8"
+    val release             = if (futureLazyVals) "9" else "8"
     val maybeFutureLazyVals =
       if (futureLazyVals) Seq("-Yfuture-lazy-vals")
       else Nil
@@ -446,7 +446,7 @@ object CaseAppPublishModule {
   // Keeps the first 3 '.'-separated parts of the tag, bumps the last one, and adds '-SNAPSHOT'
   private def snapshotVersion(tag: String) = {
     val parts = tag.stripPrefix("v").split('.').take(3)
-    val last = parts.last.toIntOption.getOrElse {
+    val last  = parts.last.toIntOption.getOrElse {
       sys.error(s"Malformed tag $tag (${parts.last} is not a number)")
     }
     (parts.init :+ (last + 1).toString).mkString(".") + "-SNAPSHOT"
@@ -532,7 +532,7 @@ trait MimaChecks extends Mima with PublishModule {
 object docs extends ScalaModule {
   private def sv   = Versions.scala213
   def scalaVersion = sv
-  def moduleDeps = Seq(
+  def moduleDeps   = Seq(
     cats.jvm(sv)
   )
   def mvnDeps = Seq(
@@ -587,7 +587,7 @@ object docs extends ScalaModule {
   }
   def mkdocsServe() = Task.Command[Unit] {
     mdoc()()
-    val docsDir = BuildCtx.workspaceRoot / "docs"
+    val docsDir   = BuildCtx.workspaceRoot / "docs"
     val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
       .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
     val mdocProc = os.proc(

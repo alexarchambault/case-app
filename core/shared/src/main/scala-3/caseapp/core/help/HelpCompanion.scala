@@ -14,7 +14,7 @@ object HelpCompanion {
     ${ deriveHelpImpl }
   def deriveHelpImpl[T](using q: Quotes, t: Type[T]): Expr[Help[T]] = {
     import quotes.reflect.*
-    val sym = TypeTree.of[T].symbol
+    val sym        = TypeTree.of[T].symbol
     val parserExpr = Implicits.search(TypeRepr.of[Parser[T]]) match {
       case iss: ImplicitSearchSuccess =>
         iss.tree.asExpr.asExprOf[Parser[T]]
@@ -62,8 +62,8 @@ object HelpCompanion {
           }
       }
     '{
-      val parser   = $parserExpr
-      val appName0 = $appName
+      val parser    = $parserExpr
+      val appName0  = $appName
       val progName0 = ${ Expr.ofOption(progName) }.getOrElse {
         CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-")
       }

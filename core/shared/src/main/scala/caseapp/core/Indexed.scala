@@ -27,7 +27,7 @@ object Indexed {
 
   implicit def argParser[T: ArgParser]: ArgParser[Indexed[T]] =
     new ArgParser[Indexed[T]] {
-      private val underlying = ArgParser[T]
+      private val underlying                                                       = ArgParser[T]
       def apply(current: Option[Indexed[T]], index: Int, span: Int, value: String) =
         underlying(current.map(_.value), index, span, value)
           .map(t => Indexed(index, span, t))

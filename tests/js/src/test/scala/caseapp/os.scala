@@ -31,7 +31,7 @@ object os {
 
     override def toString(): String =
       (Iterator.fill(ups)("..") ++ segments.iterator).mkString("/")
-    override def hashCode = segments.hashCode() + ups.hashCode()
+    override def hashCode                = segments.hashCode() + ups.hashCode()
     override def equals(o: Any): Boolean = o match {
       case p: RelPath => segments == p.segments && p.ups == ups
       case p: SubPath => segments == p.segments && ups == 0
@@ -47,7 +47,7 @@ object os {
 
     override def toString(): String =
       segments.mkString("/")
-    override def hashCode = segments.hashCode()
+    override def hashCode                = segments.hashCode()
     override def equals(o: Any): Boolean = o match {
       case p: SubPath => segments == p.segments
       case p: RelPath => segments == p.segments && p.ups == 0
@@ -61,7 +61,7 @@ object os {
 
   class Path private[os] (val underlying: String) {
     def /(chunk: PathChunk): Path = {
-      val elems = List.fill(chunk.ups)("..") ++ chunk.segments
+      val elems   = List.fill(chunk.ups)("..") ++ chunk.segments
       val newPath = nodePath
         .applyDynamic("join")((underlying +: elems).map(x => x: js.Any): _*)
         .asInstanceOf[String]
