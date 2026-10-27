@@ -10,6 +10,7 @@ extending `CaseApp` (or its `Command` sub-class).
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 Individual commands are defined as instances of `Command`, which is
@@ -68,6 +69,7 @@ See [completion support](completion.md)
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 Overriding the `def hidden: Boolean` method of `Command` allows to hide a
@@ -123,6 +125,7 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 Override the `def group: String` method of `Command` to gather
@@ -211,6 +214,7 @@ println("```")
 
 ```scala mdoc:reset:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 Use one of the overrides of `RuntimeCommandParser.parse` to parse a list of arguments
