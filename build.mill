@@ -45,19 +45,7 @@ object Deps {
 }
 
 object annotations extends Module {
-  object shared extends Cross[Shared](Versions.scala)
-
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs =
-      Seq(
-        os.sub / "src/main/java",
-        os.sub / "src/main/scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src/main" / s"scala-$sv"
-        }
-    def sources = Task.Sources(sourceDirs*)
-  }
+  object shared extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[AnnotationsJvm](Versions.scala)
   object js     extends Cross[AnnotationsJs](Versions.scala)
@@ -79,19 +67,7 @@ object annotations extends Module {
 }
 
 object util extends Module {
-  object shared extends Cross[Shared](Versions.scala)
-
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs =
-      Seq(
-        os.sub / "src/main/java",
-        os.sub / "src/main/scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src/main" / s"scala-$sv"
-        }
-    def sources = Task.Sources(sourceDirs*)
-  }
+  object shared extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[UtilJvm](Versions.scala)
   object js     extends Cross[UtilJs](Versions.scala)
@@ -128,21 +104,9 @@ object util extends Module {
 }
 
 object core extends Module {
-  object shared extends Cross[Shared](Versions.scala)
+  object shared extends Cross[SharedSources](Versions.scala)
 
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs =
-      Seq(
-        os.sub / "src/main/java",
-        os.sub / "src/main/scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src/main" / s"scala-$sv"
-        }
-    def sources = Task.Sources(sourceDirs*)
-  }
-
-  object `jvm-native` extends Cross[Shared](Versions.scala)
+  object `jvm-native` extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[CoreJvm](Versions.scala)
   object js     extends Cross[CoreJs](Versions.scala)
@@ -198,20 +162,7 @@ object core extends Module {
 }
 
 object cats extends Module {
-  object shared extends Cross[Shared](Versions.scala)
-
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs(`type`: String = "main") =
-      Seq(
-        os.sub / "src" / `type` / "java",
-        os.sub / "src" / `type` / "scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src" / `type` / s"scala-$sv"
-        }
-    def sources     = Task.Sources(sourceDirs()*)
-    def testSources = Task.Sources(sourceDirs("test")*)
-  }
+  object shared extends Cross[SharedSources](Versions.scala)
 
   object jvm extends Cross[CatsJvm](Versions.scala)
   object js  extends Cross[CatsJs](Versions.scala)
@@ -244,20 +195,7 @@ object cats extends Module {
 }
 
 object cats2 extends Module {
-  object shared extends Cross[Shared](Versions.scala)
-
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs(`type`: String = "main") =
-      Seq(
-        os.sub / "src" / `type` / "java",
-        os.sub / "src" / `type` / "scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src" / `type` / s"scala-$sv"
-        }
-    def sources     = Task.Sources(sourceDirs()*)
-    def testSources = Task.Sources(sourceDirs("test")*)
-  }
+  object shared extends Cross[SharedSources](Versions.scala)
 
   object jvm extends Cross[Cats2Jvm](Versions.scala)
   object js  extends Cross[Cats2Js](Versions.scala)
@@ -290,22 +228,9 @@ object cats2 extends Module {
 }
 
 object tests extends Module {
-  object shared extends Cross[Shared](Versions.scala)
+  object shared extends Cross[SharedSources](Versions.scala)
 
-  trait Shared extends Cross.Module[String] {
-    private def sourceDirs(`type`: String = "main") =
-      Seq(
-        os.sub / "src" / `type` / "java",
-        os.sub / "src" / `type` / "scala"
-      ) ++
-        matchingVersions(crossValue).map { sv =>
-          os.sub / "src" / `type` / s"scala-$sv"
-        }
-    def sources     = Task.Sources(sourceDirs()*)
-    def testSources = Task.Sources(sourceDirs("test")*)
-  }
-
-  object `jvm-native` extends Cross[Shared](Versions.scala)
+  object `jvm-native` extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[TestsJvm](Versions.scala)
   object js     extends Cross[TestsJs](Versions.scala)
@@ -376,6 +301,24 @@ object tests extends Module {
       Seq(Deps.sourcecode) ++ maybeDataClass
     }
   }
+}
+
+/** Sources shared between the platform-specific modules of a project
+  *
+  * Contains the `src/main` and `src/test` directories (`java`, `scala`, and the Scala
+  * version-specific `scala-*` ones) of its module directory.
+  */
+trait SharedSources extends Cross.Module[String] {
+  private def sourceDirs(`type`: String) =
+    Seq(
+      os.sub / "src" / `type` / "java",
+      os.sub / "src" / `type` / "scala"
+    ) ++
+      matchingVersions(crossValue).map { sv =>
+        os.sub / "src" / `type` / s"scala-$sv"
+      }
+  def sources     = Task.Sources(sourceDirs("main")*)
+  def testSources = Task.Sources(sourceDirs("test")*)
 }
 
 trait CaseAppScalaJsModule extends ScalaJSModule {
