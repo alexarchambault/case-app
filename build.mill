@@ -137,8 +137,9 @@ object core extends Module {
 object cats extends Module {
   object shared extends Cross[SharedSources](Versions.scala3Only)
 
-  object jvm extends Cross[CatsJvm](Versions.scala3Only)
-  object js  extends Cross[CatsJs](Versions.scala3Only)
+  object jvm    extends Cross[CatsJvm](Versions.scala3Only)
+  object js     extends Cross[CatsJs](Versions.scala3Only)
+  object native extends Cross[CatsNative](Versions.scala3Only)
 
   trait CatsJvm extends Cats with MimaChecks {
     def moduleDeps = Seq(core.jvm())
@@ -155,6 +156,16 @@ object cats extends Module {
     def sources    = Task(super.sources() ++ shared(crossValue).sources())
 
     object test extends CrossSbtTests with ScalaJSTests {
+      def mvnDeps       = Seq(Deps.utest)
+      def testFramework = "utest.runner.Framework"
+      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
+    }
+  }
+  trait CatsNative extends Cats with CaseAppScalaNativeModule {
+    def moduleDeps = Seq(core.native())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
+
+    object test extends CrossSbtTests with ScalaNativeTests {
       def mvnDeps       = Seq(Deps.utest)
       def testFramework = "utest.runner.Framework"
       def sources       = Task(super.sources() ++ shared(crossValue).testSources())
