@@ -13,7 +13,7 @@ import dataclass.data
       case None =>
         parse(value, index, span)
       case Some(_) =>
-        Left(Error.ArgumentAlreadySpecified("???"))
+        Left(Error.AlreadySpecified)
     }
 
 }

@@ -61,10 +61,13 @@ object CaseAppTests extends TestSuite {
         val res = Parser[FewArgs].parse(Seq("--num-foo", "2", "--num-foo", "3"))
         val expectedRes = Left(Error.ParsingArgument(
           Name("numFoo"),
-          Error.ArgumentAlreadySpecified("???", Nil),
+          Error.AlreadySpecified,
           Formatter.DefaultNameFormatter
         ))
         assert(res == expectedRes)
+        assert(res.swap.toOption.map(_.message).contains(
+          "Argument --num-foo: specified more than once"
+        ))
       }
 
       test {
