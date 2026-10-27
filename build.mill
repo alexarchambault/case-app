@@ -64,41 +64,22 @@ object annotations extends Module {
   }
 }
 
-object util extends Module {
-  object shared extends Cross[SharedSources](Versions.scala)
+/** Scala 2 macros used by core
+  *
+  * Not published: Scala 2 can't expand macros in the compilation run that defines them, and core
+  * expands these on its own options classes. So they're compiled here, and their classes are
+  * bundled in the case-app JAR.
+  */
+object util extends Cross[Util](Seq(Versions.scala213))
 
-  object jvm    extends Cross[UtilJvm](Versions.scala)
-  object js     extends Cross[UtilJs](Versions.scala3Only)
-  object native extends Cross[UtilNative](Versions.scala3Only)
-
-  trait UtilJvm extends Util with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-  trait UtilJs extends Util with CaseAppScalaJsModule with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-  trait UtilNative extends Util with CaseAppScalaNativeModule with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-
-  trait Util extends CrossSbtModule with CaseAppPublishModule {
-    def artifactName = "case-app-util"
-    def mvnDeps = Task {
-      if (scalaVersion().startsWith("2."))
-        Seq(Deps.shapeless)
-      else
-        Nil
-    }
-    def compileMvnDeps = Task {
-      if (scalaVersion().startsWith("2."))
-        Seq(
-          Deps.scalaCompiler(scalaVersion()),
-          Deps.scalaReflect(scalaVersion())
-        )
-      else
-        Nil
-    }
-  }
+trait Util extends CrossScalaModule {
+  def sources = Task.Sources(os.sub / "src/main/scala-2")
+  def mvnDeps = Seq(Deps.shapeless)
+  def compileMvnDeps = Seq(
+    Deps.scalaCompiler(scalaVersion()),
+    Deps.scalaReflect(scalaVersion())
+  )
+  def scalacOptions = super.scalacOptions() ++ Seq("--release", "8")
 }
 
 object core extends Module {
@@ -111,25 +92,25 @@ object core extends Module {
   object native extends Cross[CoreNative](Versions.scala3Only)
 
   trait CoreJvm extends Core with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.jvm(),
-      util.jvm()
-    )
+    def moduleDeps       = Seq(annotations.jvm())
+    private def isScala2 = crossValue.startsWith("2.")
+    // Mill task dependencies are static, so util must not be referenced at all for Scala 3
+    private def utilClasspath: Task[Seq[PathRef]] =
+      if (isScala2) Task.Anon(Seq(util(crossValue).compile().classes))
+      else Task.Anon(Seq.empty[PathRef])
+    // Passes the classes of util to the modules depending on core
+    def unmanagedClasspath = Task(super.unmanagedClasspath() ++ utilClasspath())
+    // Ships the classes of util in the case-app JAR
+    def localClasspath = Task(super.localClasspath() ++ utilClasspath())
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.js(),
-      util.js()
-    )
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
+    def moduleDeps = Seq(annotations.js())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
   }
   trait CoreNative extends Core with CaseAppScalaNativeModule with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.native(),
-      util.native()
-    )
+    def moduleDeps = Seq(annotations.native())
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
@@ -137,10 +118,10 @@ object core extends Module {
   trait Core extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app"
     def mvnDeps = Task {
-      val maybeDataClass =
-        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
+      val maybeScala2Deps =
+        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass, Deps.shapeless)
         else Nil
-      Seq(Deps.sourcecode) ++ maybeDataClass
+      Seq(Deps.sourcecode) ++ maybeScala2Deps
     }
     def scalacOptions = Task {
       val maybeMacroAnn =
