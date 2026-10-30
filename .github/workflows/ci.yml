@@ -63,6 +63,7 @@ jobs:
 
   format:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
     - uses: actions/checkout@v7
       with:
@@ -77,6 +78,7 @@ jobs:
 
   doc:
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
       with:
@@ -93,6 +95,7 @@ jobs:
   publish:
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     # Never publish to Sonatype Central from two jobs at a time (snapshots of successive pushes,
     # or a snapshot and a release). A job waits for the running one rather than cancelling it.
     # GitHub keeps only one waiting job per group though, and cancels an older waiting one.
@@ -146,6 +149,7 @@ jobs:
   update-website:
     if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
     - uses: actions/checkout@v7
       with:
