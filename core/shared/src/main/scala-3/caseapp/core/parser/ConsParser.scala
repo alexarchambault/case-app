@@ -28,7 +28,7 @@ case class ConsParser[H, T <: Tuple](
     nameFormatter: Formatter[Name]
   ): Either[(Error, Arg, List[String]), Option[(D, Arg, List[String])]] =
     argument.step(args, index, runtime.Tuples(d, 0).asInstanceOf[Option[H]], nameFormatter) match {
-      case Left((err, rem)) => Left((err, argument.arg, rem))
+      case Left((err, rem))          => Left((err, argument.arg, rem))
       case Right(Some((dHead, rem))) =>
         Right(Some((dHead *: runtime.Tuples.tail(d).asInstanceOf[tail.D], argument.arg, rem)))
       case Right(None) =>

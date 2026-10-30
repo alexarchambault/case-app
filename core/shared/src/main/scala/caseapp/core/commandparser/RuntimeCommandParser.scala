@@ -55,13 +55,13 @@ object RuntimeCommandParser {
     args: List[String],
     index: Int
   ): List[CompletionItem] = {
-    val map  = commandMap(commands)
-    val tree = CommandTree.fromCommandMap(map)
+    val map                                 = commandMap(commands)
+    val tree                                = CommandTree.fromCommandMap(map)
     val (commandName, command, commandArgs) =
       tree.command(args).getOrElse((Nil, defaultCommand, args))
     val prefix                 = args.applyOrElse(index, (_: Int) => "")
     val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
-    val commandCompletions =
+    val commandCompletions     =
       if (index < commandName.length) Nil
       else
         command.complete(
@@ -110,7 +110,7 @@ object RuntimeCommandParser {
           }
         case h :: t =>
           map.get(h) match {
-            case None => Nil
+            case None          => Nil
             case Some(subTree) =>
               subTree.complete(t)
           }
@@ -124,7 +124,7 @@ object RuntimeCommandParser {
       reverseName: List[String]
     ): Option[(List[String], T, List[String])] =
       args match {
-        case Nil => defaultApp.map((Nil, _, args))
+        case Nil    => defaultApp.map((Nil, _, args))
         case h :: t =>
           map.get(h) match {
             case None =>
