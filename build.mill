@@ -57,7 +57,7 @@ object annotations extends Module {
   trait AnnotationsJs extends Annotations with CaseAppScalaJsModule with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
-  trait AnnotationsNative extends Annotations with CaseAppScalaNativeModule {
+  trait AnnotationsNative extends Annotations with CaseAppScalaNativeModule with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
 
@@ -79,7 +79,7 @@ object util extends Module {
   trait UtilJs extends Util with CaseAppScalaJsModule with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
-  trait UtilNative extends Util with CaseAppScalaNativeModule {
+  trait UtilNative extends Util with CaseAppScalaNativeModule with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
 
@@ -127,7 +127,7 @@ object core extends Module {
     )
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
-  trait CoreNative extends Core with CaseAppScalaNativeModule {
+  trait CoreNative extends Core with CaseAppScalaNativeModule with MimaChecks {
     def moduleDeps = Seq(
       annotations.native(),
       util.native()
