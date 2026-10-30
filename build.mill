@@ -16,8 +16,7 @@ import java.io.File
 import java.nio.file.Files
 import java.util.jar.{Attributes, JarOutputStream, Manifest}
 
-import scala.concurrent.duration.DurationInt
-import mill.api.{BuildCtx, Result, TaskCtx}
+import mill.api.{BuildCtx, Result}
 
 object Versions {
   def scala212 = "2.12.20"
@@ -61,7 +60,7 @@ object annotations extends Module {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
 
-  trait Annotations extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+  trait Annotations extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app-annotations"
   }
 }
@@ -83,7 +82,7 @@ object util extends Module {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
   }
 
-  trait Util extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+  trait Util extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app-util"
     def mvnDeps = Task {
       if (scalaVersion().startsWith("2."))
@@ -136,7 +135,7 @@ object core extends Module {
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
 
-  trait Core extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+  trait Core extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app"
     def mvnDeps = Task {
       val maybeDataClass =
@@ -171,7 +170,7 @@ object cats extends Module {
     def moduleDeps = Seq(core.jvm())
     def sources    = Task(super.sources() ++ shared(crossValue).sources())
 
-    object test extends CrossSbtTests with TestCrossSources {
+    object test extends CrossSbtTests {
       def mvnDeps       = Seq(Deps.utest)
       def testFramework = "utest.runner.Framework"
       def sources       = Task(super.sources() ++ shared(crossValue).testSources())
@@ -181,14 +180,14 @@ object cats extends Module {
     def moduleDeps = Seq(core.js())
     def sources    = Task(super.sources() ++ shared(crossValue).sources())
 
-    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+    object test extends CrossSbtTests with ScalaJSTests {
       def mvnDeps       = Seq(Deps.utest)
       def testFramework = "utest.runner.Framework"
       def sources       = Task(super.sources() ++ shared(crossValue).testSources())
     }
   }
 
-  trait Cats extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+  trait Cats extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app-cats"
     def mvnDeps      = Seq(Deps.catsEffect)
   }
@@ -204,7 +203,7 @@ object cats2 extends Module {
     def moduleDeps = Seq(core.jvm())
     def sources    = Task(cats.jvm().sources())
 
-    object test extends CrossSbtTests with TestCrossSources {
+    object test extends CrossSbtTests {
       def mvnDeps       = Seq(Deps.utest)
       def testFramework = "utest.runner.Framework"
       def sources       = Task(super.sources() ++ shared(crossValue).testSources())
@@ -214,14 +213,14 @@ object cats2 extends Module {
     def moduleDeps = Seq(core.js())
     def sources    = Task(cats.js().sources())
 
-    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+    object test extends CrossSbtTests with ScalaJSTests {
       def mvnDeps       = Seq(Deps.utest)
       def testFramework = "utest.runner.Framework"
       def sources       = Task(super.sources() ++ shared(crossValue).testSources())
     }
   }
 
-  trait Cats2 extends CrossSbtModule with CrossSources with CaseAppPublishModule {
+  trait Cats2 extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app-cats-effect-2"
     def mvnDeps      = Seq(Deps.catsEffect2)
   }
@@ -241,7 +240,7 @@ object tests extends Module {
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
-    object test extends CrossSbtTests with TestCrossSources {
+    object test extends CrossSbtTests {
       def mvnDeps = Seq(
         Deps.osLib,
         Deps.pprint,
@@ -259,7 +258,7 @@ object tests extends Module {
     def moduleDeps = Seq(core.js())
     def sources    = Task(super.sources() ++ shared(crossValue).sources())
 
-    object test extends CrossSbtTests with ScalaJSTests with TestCrossSources {
+    object test extends CrossSbtTests with ScalaJSTests {
       def mvnDeps = Seq(
         Deps.pprint,
         Deps.utest
@@ -273,7 +272,7 @@ object tests extends Module {
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
-    object test extends CrossSbtTests with ScalaNativeTests with TestCrossSources {
+    object test extends CrossSbtTests with ScalaNativeTests {
       def mvnDeps = Seq(
         Deps.osLib,
         Deps.pprint,
@@ -293,7 +292,7 @@ object tests extends Module {
     }
   }
 
-  trait Tests0 extends CrossSbtModule with CrossSources {
+  trait Tests0 extends CrossSbtModule {
     def mvnDeps = Task {
       val maybeDataClass =
         if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
@@ -402,42 +401,6 @@ object CaseAppPublishModule {
       .map(_.stripPrefix("v"))
       .orElse(latestTag.map(snapshotVersion))
       .getOrElse(sys.error("No v* tag found in the repository"))
-}
-
-object CrossSources {
-  def extraSourcesDirs(
-    sv: String,
-    millSourcePath: os.Path,
-    kind: String,
-    scope: String
-  ): Seq[PathRef] = {
-    val (maj, majMin) = sv.split('.') match {
-      case Array(maj0, min, _*) => (maj0, s"$maj0.$min")
-      case _                    => sys.error(s"Malformed Scala version: $sv")
-    }
-    val baseDir = millSourcePath / os.up / kind / "src" / scope
-    Seq(
-      PathRef(baseDir / "scala"),
-      PathRef(baseDir / s"scala-$maj"),
-      PathRef(baseDir / s"scala-$majMin")
-    )
-  }
-}
-
-trait CrossSources extends SbtModule {
-  import CrossSources._
-  // def sources = Task.sources {
-  //   val sv = scalaVersion()
-  //   super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "main")
-  // }
-}
-
-trait TestCrossSources extends SbtModule {
-  import CrossSources._
-  // def sources = Task.sources {
-  //   val sv = scalaVersion()
-  //   super.sources() ++ extraSourcesDirs(sv, millSourcePath, "shared", "test")
-  // }
 }
 
 trait MimaChecks extends Mima with PublishModule {
