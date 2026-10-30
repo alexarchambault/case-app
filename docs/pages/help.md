@@ -4,6 +4,7 @@
 
 ```scala mdoc:reset:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 A number of annotations can be used, either on fields or on classes defining options,
@@ -50,6 +51,7 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 Annotate an option with `@Hidden` to hide it from the default help message:
@@ -114,6 +116,7 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
+import caseapp.core.Scala3Helpers._
 ```
 
 ```scala mdoc:silent

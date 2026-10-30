@@ -54,6 +54,8 @@ println("```")
 
 ## Scala.js and Scala Native
 
+case-app is only published for Scala 3 on Scala.js and Scala Native.
+
 Scala.js and Scala Native dependencies need to be marked as platform-specific, usually
 [with an extra `:` or `%`](https://youforgotapercentagesignoracolon.com).
 

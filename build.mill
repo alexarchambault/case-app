@@ -19,10 +19,11 @@ import java.util.jar.{Attributes, JarOutputStream, Manifest}
 import mill.api.{BuildCtx, Result}
 
 object Versions {
-  def scala212 = "2.12.20"
   def scala213 = "2.13.18"
   def scala3   = "3.3.9"
-  def scala    = Seq(scala212, scala213, scala3)
+  def scala    = Seq(scala213, scala3)
+  // Scala.js, Scala Native, and cats modules are only built for Scala 3
+  def scala3Only = Seq(scala3)
 
   def scalaJs     = "1.22.0"
   def scalaNative = "0.5.12"
@@ -30,9 +31,7 @@ object Versions {
 
 object Deps {
   def catsEffect                = mvn"org.typelevel::cats-effect::3.7.1"
-  def catsEffect2               = mvn"org.typelevel::cats-effect::2.5.5"
   def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.11"
-  def macroParadise             = mvn"org.scalamacros:::paradise:2.1.1"
   def mdoc                      = mvn"org.scalameta::mdoc:2.9.2"
   def osLib                     = mvn"com.lihaoyi::os-lib::0.11.10"
   def pprint                    = mvn"com.lihaoyi::pprint::0.9.6"
@@ -47,8 +46,8 @@ object annotations extends Module {
   object shared extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[AnnotationsJvm](Versions.scala)
-  object js     extends Cross[AnnotationsJs](Versions.scala)
-  object native extends Cross[AnnotationsNative](Versions.scala)
+  object js     extends Cross[AnnotationsJs](Versions.scala3Only)
+  object native extends Cross[AnnotationsNative](Versions.scala3Only)
 
   trait AnnotationsJvm extends Annotations with MimaChecks {
     def sources = Task(super.sources() ++ shared(crossValue).sources())
@@ -65,41 +64,22 @@ object annotations extends Module {
   }
 }
 
-object util extends Module {
-  object shared extends Cross[SharedSources](Versions.scala)
+/** Scala 2 macros used by core
+  *
+  * Not published: Scala 2 can't expand macros in the compilation run that defines them, and core
+  * expands these on its own options classes. So they're compiled here, and their classes are
+  * bundled in the case-app JAR.
+  */
+object util extends Cross[Util](Seq(Versions.scala213))
 
-  object jvm    extends Cross[UtilJvm](Versions.scala)
-  object js     extends Cross[UtilJs](Versions.scala)
-  object native extends Cross[UtilNative](Versions.scala)
-
-  trait UtilJvm extends Util with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-  trait UtilJs extends Util with CaseAppScalaJsModule with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-  trait UtilNative extends Util with CaseAppScalaNativeModule with MimaChecks {
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
-  }
-
-  trait Util extends CrossSbtModule with CaseAppPublishModule {
-    def artifactName = "case-app-util"
-    def mvnDeps = Task {
-      if (scalaVersion().startsWith("2."))
-        Seq(Deps.shapeless)
-      else
-        Nil
-    }
-    def compileMvnDeps = Task {
-      if (scalaVersion().startsWith("2."))
-        Seq(
-          Deps.scalaCompiler(scalaVersion()),
-          Deps.scalaReflect(scalaVersion())
-        )
-      else
-        Nil
-    }
-  }
+trait Util extends CrossScalaModule {
+  def sources = Task.Sources(os.sub / "src/main/scala-2")
+  def mvnDeps = Seq(Deps.shapeless)
+  def compileMvnDeps = Seq(
+    Deps.scalaCompiler(scalaVersion()),
+    Deps.scalaReflect(scalaVersion())
+  )
+  def scalacOptions = super.scalacOptions() ++ Seq("--release", "8")
 }
 
 object core extends Module {
@@ -108,29 +88,29 @@ object core extends Module {
   object `jvm-native` extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[CoreJvm](Versions.scala)
-  object js     extends Cross[CoreJs](Versions.scala)
-  object native extends Cross[CoreNative](Versions.scala)
+  object js     extends Cross[CoreJs](Versions.scala3Only)
+  object native extends Cross[CoreNative](Versions.scala3Only)
 
   trait CoreJvm extends Core with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.jvm(),
-      util.jvm()
-    )
+    def moduleDeps       = Seq(annotations.jvm())
+    private def isScala2 = crossValue.startsWith("2.")
+    // Mill task dependencies are static, so util must not be referenced at all for Scala 3
+    private def utilClasspath: Task[Seq[PathRef]] =
+      if (isScala2) Task.Anon(Seq(util(crossValue).compile().classes))
+      else Task.Anon(Seq.empty[PathRef])
+    // Passes the classes of util to the modules depending on core
+    def unmanagedClasspath = Task(super.unmanagedClasspath() ++ utilClasspath())
+    // Ships the classes of util in the case-app JAR
+    def localClasspath = Task(super.localClasspath() ++ utilClasspath())
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.js(),
-      util.js()
-    )
-    def sources = Task(super.sources() ++ shared(crossValue).sources())
+    def moduleDeps = Seq(annotations.js())
+    def sources    = Task(super.sources() ++ shared(crossValue).sources())
   }
   trait CoreNative extends Core with CaseAppScalaNativeModule with MimaChecks {
-    def moduleDeps = Seq(
-      annotations.native(),
-      util.native()
-    )
+    def moduleDeps = Seq(annotations.native())
     def sources =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
@@ -138,10 +118,10 @@ object core extends Module {
   trait Core extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app"
     def mvnDeps = Task {
-      val maybeDataClass =
-        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass)
+      val maybeScala2Deps =
+        if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass, Deps.shapeless)
         else Nil
-      Seq(Deps.sourcecode) ++ maybeDataClass
+      Seq(Deps.sourcecode) ++ maybeScala2Deps
     }
     def scalacOptions = Task {
       val maybeMacroAnn =
@@ -151,20 +131,14 @@ object core extends Module {
           Nil
       super.scalacOptions() ++ maybeMacroAnn
     }
-    def scalacPluginMvnDeps = Task {
-      if (scalaVersion().startsWith("2.12."))
-        Seq(Deps.macroParadise)
-      else
-        Nil
-    }
   }
 }
 
 object cats extends Module {
-  object shared extends Cross[SharedSources](Versions.scala)
+  object shared extends Cross[SharedSources](Versions.scala3Only)
 
-  object jvm extends Cross[CatsJvm](Versions.scala)
-  object js  extends Cross[CatsJs](Versions.scala)
+  object jvm extends Cross[CatsJvm](Versions.scala3Only)
+  object js  extends Cross[CatsJs](Versions.scala3Only)
 
   trait CatsJvm extends Cats with MimaChecks {
     def moduleDeps = Seq(core.jvm())
@@ -193,47 +167,14 @@ object cats extends Module {
   }
 }
 
-object cats2 extends Module {
-  object shared extends Cross[SharedSources](Versions.scala)
-
-  object jvm extends Cross[Cats2Jvm](Versions.scala)
-  object js  extends Cross[Cats2Js](Versions.scala)
-
-  trait Cats2Jvm extends Cats2 with MimaChecks {
-    def moduleDeps = Seq(core.jvm())
-    def sources    = Task(cats.jvm().sources())
-
-    object test extends CrossSbtTests {
-      def mvnDeps       = Seq(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
-    }
-  }
-  trait Cats2Js extends Cats2 with CaseAppScalaJsModule with MimaChecks {
-    def moduleDeps = Seq(core.js())
-    def sources    = Task(cats.js().sources())
-
-    object test extends CrossSbtTests with ScalaJSTests {
-      def mvnDeps       = Seq(Deps.utest)
-      def testFramework = "utest.runner.Framework"
-      def sources       = Task(super.sources() ++ shared(crossValue).testSources())
-    }
-  }
-
-  trait Cats2 extends CrossSbtModule with CaseAppPublishModule {
-    def artifactName = "case-app-cats-effect-2"
-    def mvnDeps      = Seq(Deps.catsEffect2)
-  }
-}
-
 object tests extends Module {
   object shared extends Cross[SharedSources](Versions.scala)
 
   object `jvm-native` extends Cross[SharedSources](Versions.scala)
 
   object jvm    extends Cross[TestsJvm](Versions.scala)
-  object js     extends Cross[TestsJs](Versions.scala)
-  object native extends Cross[TestsNative](Versions.scala)
+  object js     extends Cross[TestsJs](Versions.scala3Only)
+  object native extends Cross[TestsNative](Versions.scala3Only)
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
@@ -437,7 +378,7 @@ trait MimaChecks extends Mima with PublishModule {
 }
 
 object docs extends ScalaModule {
-  private def sv   = Versions.scala213
+  private def sv   = Versions.scala3
   def scalaVersion = sv
   def moduleDeps = Seq(
     cats.jvm(sv)
