@@ -73,7 +73,7 @@ jobs:
     - uses: coursier/setup-action@v3.0
       with:
         jvm: 21
-        apps: scalafmt:3.7.14
+        apps: scalafmt # launcher only, the scalafmt version used comes from .scalafmt.conf
     - run: scalafmt --check
 
   doc:
