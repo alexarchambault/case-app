@@ -38,6 +38,9 @@ object Error {
   @data case class ArgumentAlreadySpecified(name: String, extraNames: Seq[String] = Nil)
       extends SimpleError(s"argument ${(name +: extraNames).mkString(" / ")} already specified")
 
+  // meant to be wrapped in ParsingArgument, which states the argument name
+  case object AlreadySpecified extends SimpleError("specified more than once")
+
   case object CannotBeDisabled extends SimpleError("Option cannot be explicitly disabled")
 
   @data case class UnrecognizedFlagValue(value: String)
