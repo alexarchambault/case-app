@@ -1,10 +1,7 @@
 package caseapp
 
-import java.nio.file.Paths
-
 import caseapp.core.Indexed
 import caseapp.core.parser.PlatformArgsExpander
-import caseapp.demo._
 import utest._
 
 object DslExpandTests extends TestSuite {
@@ -14,7 +11,7 @@ object DslExpandTests extends TestSuite {
   val tests = TestSuite {
 
     test("handle expanded extra user arguments 1") {
-      val argfile                = Paths.get(DslExpandTests.getClass.getResource("/args1").toURI)
+      val argfile                = TestResources.path("args1")
       val parser: Parser[NoArgs] = Parser.derive
       val res = parser.detailedParse(PlatformArgsExpander.expand(List(s"@$argfile")))
       val expectedRes = Right((
@@ -25,7 +22,7 @@ object DslExpandTests extends TestSuite {
     }
 
     test("handle expanded extra user arguments 2") {
-      val argfile                = Paths.get(DslExpandTests.getClass.getResource("/args2").toURI)
+      val argfile                = TestResources.path("args2")
       val parser: Parser[NoArgs] = Parser.derive
       val res = parser.detailedParse(PlatformArgsExpander.expand(List("--", s"@$argfile")))
       val expectedRes = Right((

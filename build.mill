@@ -252,6 +252,7 @@ object tests extends Module {
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
       }
+      def resources = Task(super.resources() ++ `jvm-native`(crossValue).testResources())
     }
   }
   trait TestsJs extends Tests0 with CaseAppScalaJsModule {
@@ -279,9 +280,9 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def resourceDir   = Task.Source(os.sub / "src/test/resources")
       def forkEnv = super.forkEnv() ++ Seq(
-        "CASEAPP_NATIVE_TESTS_RESOURCES" -> resourceDir().path.toString
+        "CASEAPP_NATIVE_TESTS_RESOURCES" ->
+          `jvm-native`(crossValue).testResources().head.path.toString
       )
       def testSandboxWorkingDir = false // not respected
       def sources = Task {
@@ -305,7 +306,8 @@ object tests extends Module {
 /** Sources shared between the platform-specific modules of a project
   *
   * Contains the `src/main` and `src/test` directories (`java`, `scala`, and the Scala
-  * version-specific `scala-*` ones) of its module directory.
+  * version-specific `scala-*` ones) of its module directory, and its `src/test/resources`
+  * directory.
   */
 trait SharedSources extends Cross.Module[String] {
   private def sourceDirs(`type`: String) =
@@ -316,8 +318,9 @@ trait SharedSources extends Cross.Module[String] {
       matchingVersions(crossValue).map { sv =>
         os.sub / "src" / `type` / s"scala-$sv"
       }
-  def sources     = Task.Sources(sourceDirs("main")*)
-  def testSources = Task.Sources(sourceDirs("test")*)
+  def sources       = Task.Sources(sourceDirs("main")*)
+  def testSources   = Task.Sources(sourceDirs("test")*)
+  def testResources = Task.Sources(os.sub / "src/test/resources")
 }
 
 trait CaseAppScalaJsModule extends ScalaJSModule {
