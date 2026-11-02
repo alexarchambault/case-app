@@ -42,7 +42,7 @@ case class ConsParser[H, T <: Tuple](
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H *: T] = {
 
     val maybeHead = argument.get(runtime.Tuples(d, 0).asInstanceOf[Option[H]], nameFormatter)
-    val maybeTail = tail.get(runtime.Tuples.tail(d).asInstanceOf[tail.D])
+    val maybeTail = tail.get(runtime.Tuples.tail(d).asInstanceOf[tail.D], nameFormatter)
 
     (maybeHead, maybeTail) match {
       case (Left(headErr), Left(tailErrs)) => Left(headErr.append(tailErrs))

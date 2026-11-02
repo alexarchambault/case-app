@@ -39,7 +39,7 @@ import caseapp.Name
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H :*: T] = {
 
     val maybeHead = argument.get(d.head, nameFormatter)
-    val maybeTail = tail.get(d.tail)
+    val maybeTail = tail.get(d.tail, nameFormatter)
 
     (maybeHead, maybeTail) match {
       case (Left(headErr), Left(tailErrs)) => Left(headErr.append(tailErrs))

@@ -115,6 +115,11 @@ object Definitions {
     bar: Int
   )
 
+  final case class CamelCaseRequired(
+    fooBar: String,
+    bazQux: Int
+  )
+
   @HelpMessage("Example help message", "", "Example detailed help message")
   final case class ExampleWithHelpMessage(
     foo: String,

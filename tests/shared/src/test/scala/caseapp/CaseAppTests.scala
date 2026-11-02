@@ -562,6 +562,18 @@ object CaseAppTests extends TestSuite {
       assert(res == expectedRes)
     }
 
+    test("report all missing mandatory arguments with custom option formatter") {
+      val res =
+        Parser[CamelCaseRequired]
+          .nameFormatter((n: Name) => n.name)
+          .parse(Seq())
+      val expectedRes = Left(SeveralErrors(
+        Error.RequiredOptionNotSpecified("--fooBar"),
+        Seq(Error.RequiredOptionNotSpecified("--bazQux"))
+      ))
+      assert(res == expectedRes)
+    }
+
     test("parser withHelp works with custom option formatter") {
       val res =
         Parser[FewArgs]
