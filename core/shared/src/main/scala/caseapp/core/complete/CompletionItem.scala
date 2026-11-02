@@ -2,7 +2,11 @@ package caseapp.core.complete
 
 import dataclass.data
 
-@data case class CompletionItem(
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class CompletionItem(
   value: String,
   description: Option[String] = None,
   extraValues: Seq[String] = Nil

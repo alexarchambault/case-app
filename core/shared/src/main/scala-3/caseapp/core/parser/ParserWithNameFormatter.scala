@@ -1,7 +1,6 @@
 package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
-import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
@@ -34,7 +33,7 @@ case class ParserWithNameFormatter[T](underlying: Parser[T], f: Formatter[Name])
   override def defaultNameFormatter: Formatter[Name] = f
 
   def withDefaultOrigin(origin: String): Parser[T] =
-    this.withUnderlying(underlying.withDefaultOrigin(origin))
+    this.copy(underlying = underlying.withDefaultOrigin(origin))
 }
 
 object ParserWithNameFormatter {
@@ -42,6 +41,7 @@ object ParserWithNameFormatter {
   implicit class ParserWithNameFormatterWithOps[T](private val parser: ParserWithNameFormatter[
     T
   ]) extends AnyVal {
+    @deprecated("Use copy instead", "2.1.2")
     def withUnderlying(underlying: Parser[T]): ParserWithNameFormatter[T] =
       parser.copy(underlying = underlying)
   }

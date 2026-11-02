@@ -1,7 +1,6 @@
 package caseapp.core.app
 
 import caseapp.Name
-import caseapp.core.Scala3Helpers._
 import caseapp.core.{Error, RemainingArgs}
 import caseapp.core.complete.{Completer, CompletionItem, HelpCompleter}
 import caseapp.core.help.{Help, HelpFormat, WithFullHelp, WithHelp}
@@ -80,23 +79,23 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
       else if (hasHelp) messages.withHelp
       else messages
     if (name == h.progName) h
-    else h.withProgName(name)
+    else h.copy(progName = name)
   }
 
   def fullHelpAsked(progName: String): Nothing = {
-    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    val help = if (progName.isEmpty) finalHelp else finalHelp.copy(progName = progName)
     printLine(help.help(helpFormat, showHidden = true))
     exit(0)
   }
 
   def helpAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
-    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    val help = if (progName.isEmpty) finalHelp else finalHelp.copy(progName = progName)
     printLine(help.help(helpFormat, showHidden = false))
     exit(0)
   }
 
   def usageAsked(progName: String, maybeOptions: Either[Error, T]): Nothing = {
-    val help = if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    val help = if (progName.isEmpty) finalHelp else finalHelp.copy(progName = progName)
     printLine(help.usage(helpFormat))
     exit(0)
   }

@@ -6,7 +6,11 @@ import caseapp.core.util.fansi
 import caseapp.core.util.NameOps.toNameOps
 import dataclass._
 
-@data case class RuntimeCommandsHelp(
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class RuntimeCommandsHelp(
   progName: String,
   description: Option[String],
   defaultHelp: Help[_],

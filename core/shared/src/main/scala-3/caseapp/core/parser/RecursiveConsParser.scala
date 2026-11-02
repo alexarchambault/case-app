@@ -3,8 +3,6 @@ package caseapp.core.parser
 import caseapp.{Name, Recurse}
 import caseapp.core.{Arg, Error}
 import caseapp.core.util.Formatter
-import caseapp.core.Scala3Helpers._
-import dataclass.data
 
 case class RecursiveConsParser[H, T <: Tuple](
   headParser: Parser[H],
@@ -27,24 +25,23 @@ case class RecursiveConsParser[H, T <: Tuple](
       .step(
         args,
         index,
-        runtime.Tuples(d, 0).asInstanceOf[headParser.D],
+        d.head,
         Formatter.addRecursePrefix(recurse, nameFormatter)
       )
       .flatMap {
         case None =>
           tailParser
-            .step(args, index, runtime.Tuples.tail(d).asInstanceOf[tailParser.D], nameFormatter)
+            .step(args, index, d.tail, nameFormatter)
             .map(_.map {
-              case (t, arg, args) =>
-                (runtime.Tuples(d, 0).asInstanceOf[headParser.D] *: t, arg, args)
+              case (t, arg, args) => (d.head *: t, arg, args)
             })
         case Some((h, arg, args)) =>
-          Right(Some(h *: runtime.Tuples.tail(d).asInstanceOf[tailParser.D], arg, args))
+          Right(Some(h *: d.tail, arg, args))
       }
 
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, H *: T] = {
-    val maybeHead = headParser.get(runtime.Tuples(d, 0).asInstanceOf[headParser.D], nameFormatter)
-    val maybeTail = tailParser.get(runtime.Tuples.tail(d).asInstanceOf[tailParser.D], nameFormatter)
+    val maybeHead = headParser.get(d.head, nameFormatter)
+    val maybeTail = tailParser.get(d.tail, nameFormatter)
 
     (maybeHead, maybeTail) match {
       case (Left(headErrs), Left(tailErrs)) => Left(headErrs.append(tailErrs))
@@ -58,13 +55,15 @@ case class RecursiveConsParser[H, T <: Tuple](
 
   def mapHead[I](f: H => I): Parser[I *: T] =
     map { l =>
-      f(l.head) *: runtime.Tuples.tail(l).asInstanceOf[T]
+      f(l.head) *: l.tail
     }
 
   def ::[A](argument: Argument[A]): ConsParser[A, H *: T] =
     ConsParser[A, H *: T](argument, this)
 
   def withDefaultOrigin(origin: String): Parser[H *: T] =
-    this.withHeadParser(headParser.withDefaultOrigin(origin))
-      .withTailParser(tailParser.withDefaultOrigin(origin))
+    this.copy(
+      headParser = headParser.withDefaultOrigin(origin),
+      tailParser = tailParser.withDefaultOrigin(origin)
+    )
 }

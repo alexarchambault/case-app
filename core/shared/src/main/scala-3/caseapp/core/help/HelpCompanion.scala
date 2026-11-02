@@ -2,65 +2,32 @@ package caseapp.core.help
 
 import caseapp.core.parser.Parser
 import caseapp.core.parser.LowPriorityParserImplicits
-import caseapp.core.parser.LowPriorityParserImplicits.ofOption
+import caseapp.core.parser.LowPriorityParserImplicits.{annotations, ofOption, summonOrAbort}
 import caseapp.core.util.CaseUtil
 
-import scala.compiletime.*
-import scala.deriving.*
-import scala.quoted.{given, *}
+import scala.quoted.*
 
 object HelpCompanion {
   inline def deriveHelp[T]: Help[T] =
     ${ deriveHelpImpl }
   def deriveHelpImpl[T](using q: Quotes, t: Type[T]): Expr[Help[T]] = {
     import quotes.reflect.*
-    val sym = TypeTree.of[T].symbol
-    val parserExpr = Implicits.search(TypeRepr.of[Parser[T]]) match {
-      case iss: ImplicitSearchSuccess =>
-        iss.tree.asExpr.asExprOf[Parser[T]]
-      case isf: ImplicitSearchFailure =>
-        throw new Exception(s"No given ${Type.show[Parser[T]]} instance found")
-    }
-    val appName = sym.annotations
-      .find(_.tpe =:= TypeRepr.of[caseapp.AppName])
-      .collect {
-        case Apply(_, List(arg)) =>
-          arg.asExprOf[String]
-      }
+    val sym        = TypeRepr.of[T].dealias.typeSymbol
+    val parserExpr = summonOrAbort[Parser[T]](s"Cannot derive a help message for ${Type.show[T]}")
+    val appName = annotations[caseapp.AppName](sym).headOption
+      .map(appName => '{ $appName.appName })
       .getOrElse {
-        Expr(LowPriorityParserImplicits.shortName[T].stripSuffix("Options"))
+        val shortName = LowPriorityParserImplicits.shortName[T]
+        Expr(if (shortName == "Options") shortName else shortName.stripSuffix("Options"))
       }
-    val appVersion = sym.annotations
-      .find(_.tpe =:= TypeRepr.of[caseapp.AppVersion])
-      .collect {
-        case Apply(_, List(arg)) =>
-          arg.asExprOf[String]
-      }
+    val appVersion = annotations[caseapp.AppVersion](sym).headOption
+      .map(appVersion => '{ $appVersion.appVersion })
       .getOrElse(Expr(""))
-    val progName = sym.annotations
-      .find(_.tpe =:= TypeRepr.of[caseapp.ProgName])
-      .collect {
-        case Apply(_, List(arg)) =>
-          arg.asExprOf[String]
-      }
-    val argsName = sym.annotations
-      .find(_.tpe =:= TypeRepr.of[caseapp.ArgsName])
-      .collect {
-        case Apply(_, List(arg)) =>
-          arg.asExprOf[String]
-      }
-    val helpMessage = sym.annotations
-      .find(_.tpe =:= TypeRepr.of[caseapp.HelpMessage])
-      .collect {
-        case Apply(_, List(arg, argMd, argDetailed)) =>
-          '{
-            caseapp.HelpMessage(
-              ${ arg.asExprOf[String] },
-              ${ argMd.asExprOf[String] },
-              ${ argDetailed.asExprOf[String] }
-            )
-          }
-      }
+    val progName = annotations[caseapp.ProgName](sym).headOption
+      .map(progName => '{ $progName.progName })
+    val argsName = annotations[caseapp.ArgsName](sym).headOption
+      .map(argsName => '{ $argsName.argsName })
+    val helpMessage = annotations[caseapp.HelpMessage](sym).headOption
     '{
       val parser   = $parserExpr
       val appName0 = $appName
@@ -83,5 +50,9 @@ object HelpCompanion {
 
 abstract class HelpCompanion {
   inline given derive[T]: Help[T] =
+    HelpCompanion.deriveHelp[T]
+
+  /** Allows to write `case class Options(...) derives Help` */
+  inline def derived[T]: Help[T] =
     HelpCompanion.deriveHelp[T]
 }

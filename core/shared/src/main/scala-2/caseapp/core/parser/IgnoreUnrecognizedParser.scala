@@ -5,7 +5,11 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class IgnoreUnrecognizedParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[T] {
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) class IgnoreUnrecognizedParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[T] {
   type D = D0
   def init: D = underlying.init
   def step(
@@ -27,5 +31,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[T, D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    copy(underlying = underlying.withDefaultOrigin(origin))
 }

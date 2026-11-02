@@ -5,7 +5,11 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) class OptionParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Option[T]] {
 
   type D = D0
 
@@ -36,5 +40,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[Option[T], D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    copy(underlying = underlying.withDefaultOrigin(origin))
 }

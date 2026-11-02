@@ -1,7 +1,6 @@
 package caseapp.core.help
 
 import caseapp.core.Arg
-import caseapp.core.Scala3Helpers._
 import caseapp.{Name, ValueDescription}
 import caseapp.core.parser.Parser
 import caseapp.core.util.fansi
@@ -12,7 +11,11 @@ import caseapp.HelpMessage
 
 /** Provides usage and help messages related to `T`
   */
-@data case class Help[T](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class Help[T](
   args: Seq[Arg] = Nil,
   appName: String = "",
   appVersion: String = "",
@@ -52,7 +55,7 @@ import caseapp.HelpMessage
     implicit val parser: Parser[WithHelp[Dummy]] = WithHelp.parser
     val helpArgs                                 = parser.args
 
-    this.withArgs(helpArgs ++ args)
+    this.copy(args = helpArgs ++ args)
       // circumventing a possible data-class issue here (getting a Help[Nothing] else)
       .asInstanceOf[Help[WithHelp[T]]]
   }
@@ -62,7 +65,7 @@ import caseapp.HelpMessage
     val parser: Parser[WithFullHelp[Dummy]] = WithFullHelp.parser
     val helpArgs                            = parser.args
 
-    this.withArgs(helpArgs ++ args)
+    this.copy(args = helpArgs ++ args)
       // circumventing a possible data-class issue here (getting a Help[Nothing] else)
       .asInstanceOf[Help[WithFullHelp[T]]]
   }

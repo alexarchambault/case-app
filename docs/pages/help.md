@@ -4,7 +4,6 @@
 
 ```scala mdoc:reset:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 A number of annotations can be used, either on fields or on classes defining options,
@@ -51,7 +50,6 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 Annotate an option with `@Hidden` to hide it from the default help message:
@@ -75,7 +73,7 @@ object MyHelperApp extends CaseApp[Options] {
   }
 }
 println("```text")
-println(MyHelperApp.finalHelp.withProgName("my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
+println(MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
 println("```")
 ```
 
@@ -99,13 +97,15 @@ $ my-app --full-help
 println("```text")
 println {
   // FIXME Find a way to keep colors in the output
-  MyApp.finalHelp.withProgName("my-app").help(
+  MyApp.finalHelp.copy(progName = "my-app").help(
     // reset colors
     MyApp.helpFormat
-      .withProgName(caseapp.core.util.fansi.Attrs.Empty)
-      .withCommandName(caseapp.core.util.fansi.Attrs.Empty)
-      .withOption(caseapp.core.util.fansi.Attrs.Empty)
-      .withHidden(caseapp.core.util.fansi.Attrs.Empty),
+      .copy(
+        progName = caseapp.core.util.fansi.Attrs.Empty,
+        commandName = caseapp.core.util.fansi.Attrs.Empty,
+        option = caseapp.core.util.fansi.Attrs.Empty,
+        hidden = caseapp.core.util.fansi.Attrs.Empty
+      ),
     showHidden = true
   )
 }
@@ -116,7 +116,6 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 ```scala mdoc:silent
@@ -140,15 +139,15 @@ object MyHelperApp extends CaseApp[Options] {
   }
 }
 println("```text")
-println(MyHelperApp.finalHelp.withProgName("my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
+println(MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
 println("```")
 ```
 
 When using the `CaseApp` or `Command` classes, you can sort groups with
 ```scala mdoc:silent
 object MyApp extends CaseApp[Options] {
-  override def helpFormat = super.helpFormat.withSortedGroups(
-    Some(Seq("Help", "First", "Second"))
+  override def helpFormat = super.helpFormat.copy(
+    sortedGroups = Some(Seq("Help", "First", "Second"))
   )
   def run(options: Options, args: RemainingArgs): Unit = {
     ???
@@ -160,13 +159,15 @@ One then gets
 ```scala mdoc:passthrough
 // FIXME Find a way to keep colors in the output
 println("```text")
-println(MyApp.finalHelp.withProgName("my-app").help(
+println(MyApp.finalHelp.copy(progName = "my-app").help(
   // reset colors
   MyApp.helpFormat
-    .withProgName(caseapp.core.util.fansi.Attrs.Empty)
-    .withCommandName(caseapp.core.util.fansi.Attrs.Empty)
-    .withOption(caseapp.core.util.fansi.Attrs.Empty)
-    .withHidden(caseapp.core.util.fansi.Attrs.Empty)
+    .copy(
+      progName = caseapp.core.util.fansi.Attrs.Empty,
+      commandName = caseapp.core.util.fansi.Attrs.Empty,
+      option = caseapp.core.util.fansi.Attrs.Empty,
+      hidden = caseapp.core.util.fansi.Attrs.Empty
+    )
   )
 )
 println("```")

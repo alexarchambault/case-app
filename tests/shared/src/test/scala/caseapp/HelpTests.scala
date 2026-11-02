@@ -3,7 +3,6 @@ package caseapp
 import caseapp.core.Arg
 import caseapp.core.app.CommandsEntryPoint
 import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsHelp}
-import caseapp.core.Scala3Helpers._
 import utest._
 
 object HelpTests extends TestSuite {
@@ -98,7 +97,7 @@ object HelpTests extends TestSuite {
     test("group options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
-      val groupFormat = format.withSortGroups(Some { groups =>
+      val groupFormat = format.copy(sortGroups = Some { groups =>
         groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
       })
       val message = Help[GroupedOptions].help(groupFormat)
@@ -121,7 +120,7 @@ object HelpTests extends TestSuite {
     test("hidden group of options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
-      val groupFormat = format.withSortGroups(Some { groups =>
+      val groupFormat = format.copy(sortGroups = Some { groups =>
         groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
       })
       val message = Help[HiddenGroupOptions].help(groupFormat)
@@ -140,7 +139,7 @@ object HelpTests extends TestSuite {
     test("group ordering") {
 
       val orderedGroups = Seq("Something", "Bb")
-      val groupFormat   = format.withSortedGroups(Some(orderedGroups))
+      val groupFormat   = format.copy(sortedGroups = Some(orderedGroups))
       val message       = Help[GroupedOptions].help(groupFormat)
 
       val expectedMessage =
@@ -409,10 +408,12 @@ object HelpTests extends TestSuite {
         override def defaultCommand = Some(CommandGroups.First)
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
-      val formatWithHiddenGroup = format.withHiddenGroups(Some(Seq(
-        CommandGroups.First.group,
-        CommandGroups.Third.group
-      )))
+      val formatWithHiddenGroup = format.copy(hiddenGroups =
+        Some(Seq(
+          CommandGroups.First.group,
+          CommandGroups.Third.group
+        ))
+      )
       val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val hiddenGroupEntries = """
@@ -445,10 +446,12 @@ object HelpTests extends TestSuite {
 
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
-      val formatWithHiddenGroup = format.withHiddenGroupsWhenShowHidden(Some(Seq(
-        CommandGroups.First.group,
-        CommandGroups.Third.group
-      )))
+      val formatWithHiddenGroup = format.copy(hiddenGroupsWhenShowHidden =
+        Some(Seq(
+          CommandGroups.First.group,
+          CommandGroups.Third.group
+        ))
+      )
       val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val hiddenGroupEntries =
@@ -484,7 +487,7 @@ object HelpTests extends TestSuite {
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
       val filterArgsFunction    = (a: Arg) => !a.tags.exists(_.name == "foo")
-      val formatWithHiddenGroup = format.withFilterArgs(Some(filterArgsFunction))
+      val formatWithHiddenGroup = format.copy(filterArgs = Some(filterArgsFunction))
       val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val fooEntry =
@@ -520,7 +523,7 @@ object HelpTests extends TestSuite {
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
       val filterArgsFunction    = (a: Arg) => !a.tags.exists(_.name == "foo")
-      val formatWithHiddenGroup = format.withFilterArgsWhenShowHidden(Some(filterArgsFunction))
+      val formatWithHiddenGroup = format.copy(filterArgsWhenShowHidden = Some(filterArgsFunction))
       val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val fooEntry =
@@ -605,7 +608,7 @@ object HelpTests extends TestSuite {
       }
 
       for (namesLimit <- Seq(-1, 1, 2, 3, 4, 5, 6)) {
-        val formatWithNamesLimit = format.withNamesLimit(Some(namesLimit))
+        val formatWithNamesLimit = format.copy(namesLimit = Some(namesLimit))
         val shortHelp            = entryPoint.help.help(formatWithNamesLimit)
         val fullHelp             = entryPoint.help.help(formatWithNamesLimit, showHidden = true)
 
@@ -658,6 +661,7 @@ object HelpTests extends TestSuite {
         assert(fullHelp == expectedFullHelp) // the limit shouldn't be applied for full help
       }
     }
+
   }
 
 }

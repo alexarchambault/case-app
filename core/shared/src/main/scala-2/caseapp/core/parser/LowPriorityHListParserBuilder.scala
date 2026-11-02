@@ -59,7 +59,7 @@ abstract class LowPriorityHListParserBuilder {
         noHelp.head.nonEmpty,
         argParser.value.isFlag,
         groups.head
-      ).withTags(tags.head)
+      ).copy(tags = tags.head)
 
       val argument = Argument(arg, argParser.value, () => default0().head)
 

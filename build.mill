@@ -30,16 +30,17 @@ object Versions {
 }
 
 object Deps {
-  def catsEffect                = mvn"org.typelevel::cats-effect::3.7.1"
-  def dataClass                 = mvn"io.github.alexarchambault::data-class:0.2.11"
-  def mdoc                      = mvn"org.scalameta::mdoc:2.9.2"
-  def osLib                     = mvn"com.lihaoyi::os-lib::0.11.10"
-  def pprint                    = mvn"com.lihaoyi::pprint::0.9.6"
-  def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
-  def scalaReflect(sv: String)  = mvn"org.scala-lang:scala-reflect:$sv"
-  def shapeless                 = mvn"com.chuusai::shapeless::2.3.13"
-  def sourcecode                = mvn"com.lihaoyi::sourcecode::0.4.4"
-  def utest                     = mvn"com.lihaoyi::utest::0.9.5"
+  def catsEffect                 = mvn"org.typelevel::cats-effect::3.7.1"
+  def dataClass                  = mvn"io.github.alexarchambault::data-class:0.2.11"
+  def mdoc                       = mvn"org.scalameta::mdoc:2.9.2"
+  def osLib                      = mvn"com.lihaoyi::os-lib::0.11.10"
+  def pprint                     = mvn"com.lihaoyi::pprint::0.9.6"
+  def scalaCompiler(sv: String)  = mvn"org.scala-lang:scala-compiler:$sv"
+  def scala3Compiler(sv: String) = mvn"org.scala-lang::scala3-compiler:$sv"
+  def scalaReflect(sv: String)   = mvn"org.scala-lang:scala-reflect:$sv"
+  def shapeless                  = mvn"com.chuusai::shapeless::2.3.13"
+  def sourcecode                 = mvn"com.lihaoyi::sourcecode::0.4.4"
+  def utest                      = mvn"com.lihaoyi::utest::0.9.5"
 }
 
 object annotations extends Module {
@@ -80,6 +81,21 @@ trait Util extends CrossScalaModule {
     Deps.scalaReflect(scalaVersion())
   )
   def scalacOptions = super.scalacOptions() ++ Seq("--release", "8")
+}
+
+/** Vendored unroll compiler plugin, see unroll/README.md
+  *
+  * Not published: only used to compile core on Scala 3, where it generates the binary-compatible
+  * overloads that data-class generates on Scala 2.
+  */
+object unroll extends Cross[UnrollPlugin](Versions.scala3Only)
+
+trait UnrollPlugin extends CrossScalaModule {
+  // Compiler plugins are built against exact Scala versions
+  def crossFullScalaVersion = true
+  def sources               = Task.Sources(os.sub / "src")
+  def resources             = Task.Sources(os.sub / "resources")
+  def compileMvnDeps        = Seq(Deps.scala3Compiler(scalaVersion()))
 }
 
 object core extends Module {
@@ -123,13 +139,23 @@ object core extends Module {
         else Nil
       Seq(Deps.sourcecode) ++ maybeScala2Deps
     }
+    // Mill task dependencies are static, so unroll must not be referenced at all for Scala 2
+    private def unrollPluginJars: Task[Seq[PathRef]] =
+      if (crossValue.startsWith("3.")) Task.Anon(Seq(unroll(crossValue).jar()))
+      else Task.Anon(Seq.empty[PathRef])
+    def scalacPluginClasspath = Task(super.scalacPluginClasspath() ++ unrollPluginJars())
     def scalacOptions = Task {
       val maybeMacroAnn =
         if (scalaVersion().startsWith("2.13."))
           Seq("-Ymacro-annotations")
         else
           Nil
-      super.scalacOptions() ++ maybeMacroAnn
+      // Mill only derives -Xplugin options from scalacPluginMvnDeps, so the JAR is passed here
+      val unrollPluginOptions = unrollPluginJars() match {
+        case Seq() => Nil
+        case jars  => jars.map(jar => s"-Xplugin:${jar.path}") :+ "-Xplugin-require:unroll"
+      }
+      super.scalacOptions() ++ maybeMacroAnn ++ unrollPluginOptions
     }
   }
 }

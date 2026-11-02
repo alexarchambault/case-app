@@ -1,7 +1,6 @@
 package caseapp.core.parser
 
 import caseapp.core.{Arg, Error}
-import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
@@ -29,7 +28,7 @@ case class StopAtFirstUnrecognizedParser[T](underlying: Parser[T])
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser[T] =
-    this.withUnderlying(underlying.withDefaultOrigin(origin))
+    this.copy(underlying = underlying.withDefaultOrigin(origin))
 }
 
 object StopAtFirstUnrecognizedParser {
@@ -37,6 +36,7 @@ object StopAtFirstUnrecognizedParser {
   implicit class StopAtFirstUnrecognizedParserWithOps[T](
     private val parser: StopAtFirstUnrecognizedParser[T]
   ) extends AnyVal {
+    @deprecated("Use copy instead", "2.1.2")
     def withUnderlying(underlying: Parser[T]): StopAtFirstUnrecognizedParser[T] =
       parser.copy(underlying = underlying)
   }

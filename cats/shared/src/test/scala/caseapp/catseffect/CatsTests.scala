@@ -6,7 +6,6 @@ import cats.data.NonEmptyList
 import caseapp._
 import caseapp.core.help.{Help, HelpFormat}
 import caseapp.core.Error
-import caseapp.core.Scala3Helpers._
 import utest._
 
 sealed trait RecordedApp {
@@ -92,7 +91,7 @@ object CatsTests extends TestSuite {
         app.run(List("--usage"))
           .flatMap(_ => app.stdoutBuff.get)
           .map { stdout =>
-            assert(stdout == List(Help[FewArgs].withHelp.withProgName("custom-name").usage))
+            assert(stdout == List(Help[FewArgs].withHelp.copy(progName = "custom-name").usage))
           }
           .unsafeToFuture()
       }
@@ -169,7 +168,7 @@ object CatsTests extends TestSuite {
             firstCmd.stdoutBuff.get.map { stdout =>
               assert(code == ExitCode.Success)
               assert(stdout == List(
-                Help[Definitions.First].withFullHelp.withProgName("test-app first").help(
+                Help[Definitions.First].withFullHelp.copy(progName = "test-app first").help(
                   HelpFormat.default(),
                   showHidden = true
                 )
@@ -187,7 +186,7 @@ object CatsTests extends TestSuite {
             secondCmd.stdoutBuff.get.map { stdout =>
               assert(code == ExitCode.Success)
               assert(stdout == List(
-                Help[Definitions.Second].withHelp.withProgName("test-app second").usage
+                Help[Definitions.Second].withHelp.copy(progName = "test-app second").usage
               ))
             }
           }

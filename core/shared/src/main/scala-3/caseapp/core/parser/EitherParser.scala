@@ -1,8 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
-import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
@@ -39,13 +37,14 @@ case class EitherParser[T](underlying: Parser[T])
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser[Either[Error, T]] =
-    this.withUnderlying(underlying.withDefaultOrigin(origin))
+    this.copy(underlying = underlying.withDefaultOrigin(origin))
 }
 
 object EitherParser {
 
   implicit class EitherParserWithOps[T](private val parser: EitherParser[T])
       extends AnyVal {
+    @deprecated("Use copy instead", "2.1.2")
     def withUnderlying(underlying: Parser[T]): EitherParser[T] =
       parser.copy(underlying = underlying)
   }
