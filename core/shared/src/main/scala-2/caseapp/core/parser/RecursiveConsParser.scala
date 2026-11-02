@@ -6,7 +6,11 @@ import caseapp.core.util.Formatter
 import shapeless.{::, HList}
 import dataclass.data
 
-@data class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) class RecursiveConsParser[H, HD, T <: HList, TD <: HList](
   headParser: Parser.Aux[H, HD],
   tailParser: Parser.Aux[T, TD],
   recurse: Recurse
@@ -59,6 +63,8 @@ import dataclass.data
     ConsParser[A, H :: T, D](argument, this)
 
   def withDefaultOrigin(origin: String): Parser.Aux[H :: T, D] =
-    withHeadParser(headParser.withDefaultOrigin(origin))
-      .withTailParser(tailParser.withDefaultOrigin(origin))
+    copy(
+      headParser = headParser.withDefaultOrigin(origin),
+      tailParser = tailParser.withDefaultOrigin(origin)
+    )
 }

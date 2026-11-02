@@ -10,7 +10,6 @@ extending `CaseApp` (or its `Command` sub-class).
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 Individual commands are defined as instances of `Command`, which is
@@ -69,7 +68,6 @@ See [completion support](completion.md)
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 Overriding the `def hidden: Boolean` method of `Command` allows to hide a
@@ -112,10 +110,12 @@ println {
   MyApp.help.help(
     // reset colors
     MyApp.helpFormat
-      .withProgName(caseapp.core.util.fansi.Attrs.Empty)
-      .withCommandName(caseapp.core.util.fansi.Attrs.Empty)
-      .withOption(caseapp.core.util.fansi.Attrs.Empty)
-      .withHidden(caseapp.core.util.fansi.Attrs.Empty)
+      .copy(
+        progName = caseapp.core.util.fansi.Attrs.Empty,
+        commandName = caseapp.core.util.fansi.Attrs.Empty,
+        option = caseapp.core.util.fansi.Attrs.Empty,
+        hidden = caseapp.core.util.fansi.Attrs.Empty
+      )
   )
 }
 println("```")
@@ -125,7 +125,6 @@ println("```")
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 Override the `def group: String` method of `Command` to gather
@@ -168,10 +167,12 @@ println {
   MyApp.help.help(
     // reset colors
     MyApp.helpFormat
-      .withProgName(caseapp.core.util.fansi.Attrs.Empty)
-      .withCommandName(caseapp.core.util.fansi.Attrs.Empty)
-      .withOption(caseapp.core.util.fansi.Attrs.Empty)
-      .withHidden(caseapp.core.util.fansi.Attrs.Empty)
+      .copy(
+        progName = caseapp.core.util.fansi.Attrs.Empty,
+        commandName = caseapp.core.util.fansi.Attrs.Empty,
+        option = caseapp.core.util.fansi.Attrs.Empty,
+        hidden = caseapp.core.util.fansi.Attrs.Empty
+      )
   )
 }
 println("```")
@@ -183,8 +184,8 @@ fields of `Command#helpFormat`, like
 object MyOtherApp extends CommandsEntryPoint {
   override def defaultCommand = None
   def progName = "my-other-app"
-  override def helpFormat = super.helpFormat.withSortedCommandGroups(
-    Some(Seq("Other", "Main"))
+  override def helpFormat = super.helpFormat.copy(
+    sortedCommandGroups = Some(Seq("Other", "Main"))
   )
   def commands = Seq(
     First,
@@ -201,10 +202,12 @@ println {
   MyOtherApp.help.help(
     // reset colors
     MyOtherApp.helpFormat
-      .withProgName(caseapp.core.util.fansi.Attrs.Empty)
-      .withCommandName(caseapp.core.util.fansi.Attrs.Empty)
-      .withOption(caseapp.core.util.fansi.Attrs.Empty)
-      .withHidden(caseapp.core.util.fansi.Attrs.Empty)
+      .copy(
+        progName = caseapp.core.util.fansi.Attrs.Empty,
+        commandName = caseapp.core.util.fansi.Attrs.Empty,
+        option = caseapp.core.util.fansi.Attrs.Empty,
+        hidden = caseapp.core.util.fansi.Attrs.Empty
+      )
   )
 }
 println("```")
@@ -214,7 +217,6 @@ println("```")
 
 ```scala mdoc:reset:invisible
 import caseapp._
-import caseapp.core.Scala3Helpers._
 ```
 
 Use one of the overrides of `RuntimeCommandParser.parse` to parse a list of arguments

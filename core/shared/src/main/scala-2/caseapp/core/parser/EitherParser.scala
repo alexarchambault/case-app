@@ -5,7 +5,11 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class EitherParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Either[Error, T]] {
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) class EitherParser[T, D0](underlying: Parser.Aux[T, D0]) extends Parser[Either[Error, T]] {
 
   type D = D0
 
@@ -35,5 +39,5 @@ import caseapp.Name
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser.Aux[Either[Error, T], D] =
-    withUnderlying(underlying.withDefaultOrigin(origin))
+    copy(underlying = underlying.withDefaultOrigin(origin))
 }

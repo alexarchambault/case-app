@@ -3,7 +3,11 @@ package caseapp.core.argparser
 import caseapp.core.Error
 import dataclass.data
 
-@data case class AccumulatorArgParser[T](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class AccumulatorArgParser[T](
   description: String,
   parse: (Option[T], Int, Int, String) => Either[Error, T]
 ) extends ArgParser[T] {

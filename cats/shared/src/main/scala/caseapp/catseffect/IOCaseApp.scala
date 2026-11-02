@@ -1,7 +1,6 @@
 package caseapp.catseffect
 
 import caseapp.core.Error
-import caseapp.core.Scala3Helpers._
 import caseapp.core.help.{Help, HelpFormat, WithFullHelp, WithHelp}
 import caseapp.core.parser.Parser
 import caseapp.core.RemainingArgs
@@ -25,14 +24,14 @@ abstract class IOCaseApp[T](implicit val parser0: Parser[T], val messages: Help[
       else if (hasHelp) messages.withHelp
       else messages
     if (name == h.progName) h
-    else h.withProgName(name)
+    else h.copy(progName = name)
   }
 
   def helpFormat: HelpFormat =
     HelpFormat.default()
 
   private def helpFor(progName: String): Help[_] =
-    if (progName.isEmpty) finalHelp else finalHelp.withProgName(progName)
+    if (progName.isEmpty) finalHelp else finalHelp.copy(progName = progName)
 
   def parser: Parser[T] = {
     val p = parser0.nameFormatter(nameFormatter)

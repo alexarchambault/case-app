@@ -4,7 +4,11 @@ import caseapp.core.Arg
 import dataclass.data
 import caseapp.HelpMessage
 
-@data case class CommandHelp(
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class CommandHelp(
   args: Seq[Arg],
   argsNameOption: Option[String],
   helpMessage: Option[HelpMessage]

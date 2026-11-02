@@ -17,35 +17,24 @@ case class Options(
 import caseapp._
 ```
 
+When defining a case class for options, it is recommended to derive case-app
+type classes for it. In Scala 3, this is done with a `derives` clause, like
 ```scala mdoc:silent
-// should be the same as below, but for the Scala 3 section
 case class Options(
   foo: Int
-)
-
-// Scala 2
-object Options {
-  implicit lazy val parser: Parser[Options] = Parser.derive
-  implicit lazy val help: Help[Options] = Help.derive
-}
+) derives Parser, Help
 ```
 
-When defining a case class for options, it is recommended to derive case-app
-type classes for it in its companion object, like
+In Scala 2, this is done in its companion object, like
 ```scala
 case class Options(
   foo: Int
 )
 
-// Scala 2
 object Options {
   implicit lazy val parser: Parser[Options] = Parser.derive
   implicit lazy val help: Help[Options] = Help.derive
 }
-
-// Scala 3
-@derives[Parser, Help]
-object Options
 ```
 
 These derivations are omitted in all other examples through out the case-app
@@ -68,6 +57,10 @@ case class Options(
   verbosity: Int = 0 // --verbosity is optional
 )
 ```
+
+Options of types with an implicit `caseapp.core.default.Default` value, such as
+`Option[T]`, `List[T]`, `Vector[T]`, or counters, are optional too, even with no
+default value.
 
 ## Shared options
 

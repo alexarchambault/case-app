@@ -9,7 +9,11 @@ import dataclass.data
   * @param unparsed:
   *   arguments after a first `--`, if any
   */
-@data case class RemainingArgs(
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class RemainingArgs(
   indexedRemaining: Seq[Indexed[String]],
   indexedUnparsed: Seq[Indexed[String]]
 ) {

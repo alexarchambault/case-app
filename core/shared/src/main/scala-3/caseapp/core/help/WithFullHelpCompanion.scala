@@ -1,7 +1,6 @@
 package caseapp.core.help
 
 import caseapp.{ExtraName, Group, HelpMessage, Parser, Recurse}
-import caseapp.core.Scala3Helpers.*
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.{Arg, Error}
 import caseapp.core.parser.RecursiveConsParser
@@ -15,18 +14,20 @@ abstract class WithFullHelpCompanion {
 
     val baseHelpArgument = StandardArgument[Boolean](
       Arg("helpFull")
-        .withExtraNames(Seq(
-          ExtraName("fullHelp"),
-          ExtraName("-help-full"),
-          ExtraName("-full-help")
-        ))
-        .withGroup(Some(Group("Help")))
-        .withOrigin(Some("WithFullHelp"))
-        .withHelpMessage(Some(
-          HelpMessage("Print help message, including hidden options, and exit")
-        ))
-        .withIsFlag(true)
-    ).withDefault(() => Some(false))
+        .copy(
+          extraNames = Seq(
+            ExtraName("fullHelp"),
+            ExtraName("-help-full"),
+            ExtraName("-full-help")
+          ),
+          group = Some(Group("Help")),
+          origin = Some("WithFullHelp"),
+          helpMessage = Some(
+            HelpMessage("Print help message, including hidden options, and exit")
+          ),
+          isFlag = true
+        )
+    ).copy(default = () => Some(false))
 
     // accept "-help" too (single dash)
     val helpArgument: Argument[Boolean] =

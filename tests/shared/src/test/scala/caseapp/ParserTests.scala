@@ -5,7 +5,6 @@ import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.parser.{Argument, NilParser, StandardArgument}
 import caseapp.core.parser.ParserOps
 import caseapp.core.util.Formatter
-import caseapp.core.Scala3Helpers._
 
 import utest._
 
@@ -36,7 +35,7 @@ object ParserTests extends TestSuite {
       case class Helper(n: Int, value: String)
       val parser =
         Argument[Int](Arg("n")) ::
-          StandardArgument[String](Arg("value")).withDefault(() => Some("-")) ::
+          StandardArgument[String](Arg("value")).copy(default = () => Some("-")) ::
           NilParser
       test {
         val res      = parser.to[Helper].parse(Seq("-n", "2", "something", "--value", "foo"))
@@ -57,7 +56,7 @@ object ParserTests extends TestSuite {
       case class Helper(n: Int, value: String)
       val parser =
         Argument[Int](Arg("n")) ::
-          StandardArgument[String](Arg("value")).withDefault(() => Some("default")) ::
+          StandardArgument[String](Arg("value")).copy(default = () => Some("default")) ::
           NilParser
       test("single") {
         val res      = parser.to[Helper].parse(Seq("-n", "2", "-"))
@@ -109,7 +108,7 @@ object ParserTests extends TestSuite {
       case class Helper(n: Int, values: List[String])
 
       val valuesArgument = new Argument[List[String]] {
-        def arg = Arg(Name("X")).withIsFlag(true)
+        def arg = Arg(Name("X")).copy(isFlag = true)
         def withDefaultOrigin(origin: String): Argument[List[String]] = ???
         def init: Option[List[String]]                                = Some(Nil)
         def step(

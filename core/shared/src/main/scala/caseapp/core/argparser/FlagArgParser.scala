@@ -3,7 +3,11 @@ package caseapp.core.argparser
 import caseapp.core.Error
 import dataclass.data
 
-@data case class FlagArgParser[T](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class FlagArgParser[T](
   description: String,
   parse: (Option[String], Int, Int) => Either[Error, T]
 ) extends ArgParser[T] {

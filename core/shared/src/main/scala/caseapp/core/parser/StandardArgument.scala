@@ -7,7 +7,11 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data case class StandardArgument[H](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class StandardArgument[H](
   arg: Arg,
   argParser: ArgParser[H],
   default: () => Option[H] // FIXME Couldn't this be Option[() => H]?
@@ -16,7 +20,7 @@ import caseapp.Name
   import StandardArgument._
 
   def withDefaultOrigin(origin: String): Argument[H] =
-    this.withArg(arg.withDefaultOrigin(origin))
+    this.copy(arg = arg.withDefaultOrigin(origin))
 
   def init: Option[H] =
     None
@@ -90,6 +94,7 @@ object StandardArgument {
 
   implicit class StandardArgumentWithOps[H](private val standardArg: StandardArgument[H])
       extends AnyVal {
+    @deprecated("Use copy instead", "2.1.2")
     def withArg(arg: Arg): StandardArgument[H] =
       standardArg.copy(arg = arg)
   }

@@ -4,7 +4,11 @@ import caseapp.core.{Counter, Error}
 import caseapp.{@@, Tag}
 import dataclass.data
 
-@data case class FlagAccumulatorArgParser[T](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class FlagAccumulatorArgParser[T](
   description: String,
   parse: (Option[T], Int, Int, Option[String]) => Either[Error, T]
 ) extends ArgParser[T] {

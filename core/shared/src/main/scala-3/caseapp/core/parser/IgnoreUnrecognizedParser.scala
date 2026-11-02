@@ -1,8 +1,6 @@
 package caseapp.core.parser
 
-import caseapp.core.Scala3Helpers._
 import caseapp.core.{Arg, Error}
-import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
@@ -29,7 +27,7 @@ case class IgnoreUnrecognizedParser[T](underlying: Parser[T]) extends Parser[T] 
     underlying.defaultNameFormatter
 
   def withDefaultOrigin(origin: String): Parser[T] =
-    this.withUnderlying(underlying.withDefaultOrigin(origin))
+    this.copy(underlying = underlying.withDefaultOrigin(origin))
 }
 
 object IgnoreUnrecognizedParser {
@@ -37,6 +35,7 @@ object IgnoreUnrecognizedParser {
   implicit class IgnoreUnrecognizedParserWithOps[T](
     private val parser: IgnoreUnrecognizedParser[T]
   ) extends AnyVal {
+    @deprecated("Use copy instead", "2.1.2")
     def withUnderlying(underlying: Parser[T]): IgnoreUnrecognizedParser[T] =
       parser.copy(underlying = underlying)
   }

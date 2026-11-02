@@ -8,7 +8,11 @@ import dataclass.data
 import caseapp.core.util.Formatter
 import caseapp.Name
 
-@data class ConsParser[H, T <: HList, DT <: HList](
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) class ConsParser[H, T <: HList, DT <: HList](
   argument: Argument[H],
   tail: Parser.Aux[T, DT]
 ) extends Parser[H :*: T] {
@@ -61,6 +65,5 @@ import caseapp.Name
     ConsParser[A, H :*: T, D](argument, this)
 
   def withDefaultOrigin(origin: String): Parser.Aux[H :*: T, D] =
-    withArgument(argument.withDefaultOrigin(origin))
-      .withTail(tail.withDefaultOrigin(origin))
+    copy(argument = argument.withDefaultOrigin(origin), tail = tail.withDefaultOrigin(origin))
 }

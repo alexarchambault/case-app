@@ -1,11 +1,14 @@
 package caseapp.core.help
 
 import caseapp.core.Arg
-import caseapp.core.Scala3Helpers._
 import caseapp.core.util.fansi
 import dataclass._
 
-@data case class HelpFormat(
+@data(
+  deprecatedSetters = true,
+  deprecatedSettersMessage = "Use copy instead",
+  deprecatedSettersSince = "2.1.2"
+) case class HelpFormat(
   progName: fansi.Attrs = fansi.Attrs.Empty,
   commandName: fansi.Attrs = fansi.Attrs.Empty,
   option: fansi.Attrs = fansi.Attrs.Empty,
@@ -59,10 +62,12 @@ object HelpFormat {
   def default(ansiColors: Boolean): HelpFormat =
     if (ansiColors)
       HelpFormat()
-        .withProgName(fansi.Bold.On)
-        .withCommandName(fansi.Bold.On)
-        .withOption(fansi.Color.Yellow)
-        .withHidden(fansi.Color.DarkGray)
+        .copy(
+          progName = fansi.Bold.On,
+          commandName = fansi.Bold.On,
+          option = fansi.Color.Yellow,
+          hidden = fansi.Color.DarkGray
+        )
     else
       HelpFormat()
 }

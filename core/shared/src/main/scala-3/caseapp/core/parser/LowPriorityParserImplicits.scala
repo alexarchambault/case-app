@@ -2,10 +2,10 @@ package caseapp.core.parser
 
 import caseapp.core.Arg
 import caseapp.core.argparser.ArgParser
+import caseapp.core.default.Default
 
-import scala.compiletime.*
 import scala.deriving.*
-import scala.quoted.{given, *}
+import scala.quoted.*
 
 object LowPriorityParserImplicits {
 
@@ -18,9 +18,27 @@ object LowPriorityParserImplicits {
   }
 
   def shortName[T](using Quotes, Type[T]): String = {
-    val fullName = Type.show[T]
-    // attempt at getting a simple name out of fullName (this is likely broken)
-    fullName.takeWhile(_ != '[').split('.').last
+    import quotes.reflect.*
+    TypeRepr.of[T].dealias.typeSymbol.name.stripSuffix("$")
+  }
+
+  /** The annotations of type `A` of a symbol, in source order */
+  private[core] def annotations[A: Type](using q: Quotes)(sym: q.reflect.Symbol): List[Expr[A]] = {
+    import q.reflect.*
+    // Symbol#annotations starts from the last annotation of the sources
+    sym.annotations.reverse.filter(_.tpe =:= TypeRepr.of[A]).map(_.asExprOf[A])
+  }
+
+  /** Looks for an implicit `A`, failing the compilation with `message` and the reason why if there
+    * isn't any
+    */
+  private[core] def summonOrAbort[A: Type](message: String)(using Quotes): Expr[A] = {
+    import quotes.reflect.*
+    Implicits.search(TypeRepr.of[A]) match {
+      case success: ImplicitSearchSuccess => success.tree.asExprOf[A]
+      case failure: ImplicitSearchFailure =>
+        report.errorAndAbort(s"$message: ${failure.explanation}")
+    }
   }
 
   private def fields[U](using
@@ -28,227 +46,114 @@ object LowPriorityParserImplicits {
     t: Type[U]
   ): List[(q.reflect.Symbol, q.reflect.TypeRepr)] = {
     import quotes.reflect.*
-    val (sym, typeParams) = TypeRepr.of[U] match {
-      case AppliedType(base, params) =>
-        (base.typeSymbol, params)
-      case _ =>
-        (TypeTree.of[U].symbol, List())
-    }
-    val typeParamSyms = sym.primaryConstructor.paramSymss.flatten.filter(_.isTypeParam)
-
-    sym.primaryConstructor
-      .paramSymss
-      .flatten
-      .map(f => (f, f.tree))
-      .collect {
-        case (sym, v: ValDef) =>
-          (sym, v.tpt.tpe.substituteTypes(typeParamSyms, typeParams))
-      }
+    val tpe = TypeRepr.of[U].dealias
+    val sym = tpe.typeSymbol
+    sym.primaryConstructor.paramSymss.flatten
+      .filter(_.isTerm)
+      .map(param => (param, tpe.memberType(sym.fieldMember(param.name))))
   }
 
-  inline private def checkFieldCount[T, N <: Int]: Unit =
-    ${ checkFieldCountImpl[T, N] }
-  private def checkFieldCountImpl[T, N <: Int](using Quotes, Type[T], Type[N]): Expr[Unit] = {
+  /** The default values of the fields of `U`, by field name */
+  private def defaultValues[U](using q: Quotes, t: Type[U]): Map[String, q.reflect.Term] = {
     import quotes.reflect.*
-
-    val viaMirror = TypeRepr.of[N] match {
-      case ConstantType(c) =>
-        c.value match {
-          case n: Int => n
-          case other => sys.error(
-              s"Expected literal integer type, got ${Type.show[N]} ($other, ${other.getClass})"
-            )
-        }
-      case other =>
-        sys.error(s"Expected literal integer type, got ${Type.show[N]} ($other, ${other.getClass})")
+    val (tycon, typeArgs) = TypeRepr.of[U].dealias match {
+      case AppliedType(base, args) => (base, args)
+      case other                   => (other, Nil)
     }
-
-    val viaReflect = fields[T].length
-
-    assert(
-      viaMirror == viaReflect,
-      s"Got Unexpected number of field via reflection for type ${Type.show[T]} (got $viaReflect, expected $viaMirror)"
-    )
-
-    '{ () }
+    val companionSym = tycon.typeSymbol.companionModule
+    def isInCompanion(owner: Symbol): Boolean =
+      !owner.isNoSymbol && (owner == companionSym.moduleClass || isInCompanion(owner.maybeOwner))
+    val companion = tycon match {
+      // Happens with derives clauses. Ref.term can't refer to an enclosing object.
+      case _ if isInCompanion(Symbol.spliceOwner) => This(companionSym.moduleClass)
+      case TypeRef(NoPrefix(), _)                 => Ref(companionSym)
+      // Going through the prefix, as the companion of a class nested in a class is not static
+      case TypeRef(prefix, _) => Ref.term(TermRef(prefix, companionSym.name))
+      case _                  => Ref(companionSym)
+    }
+    fields[U].map(_._1).zipWithIndex.collect {
+      case (field, idx) if field.flags.is(Flags.HasDefault) =>
+        val getter = companionSym.methodMember(s"$$lessinit$$greater$$default$$${idx + 1}").head
+        val value  = companion.select(getter)
+        field.name -> (if (typeArgs.isEmpty) value else value.appliedToTypes(typeArgs))
+    }.toMap
   }
 
-  inline private def tupleParser[T]: Parser[_] =
+  inline private def tupleParser[T]: Parser[Tuple] =
     ${ tupleParserImpl[T] }
-  private def tupleParserImpl[T](using q: Quotes, t: Type[T]): Expr[Parser[_]] = {
+  private def tupleParserImpl[T](using Quotes, Type[T]): Expr[Parser[Tuple]] = {
     import quotes.reflect.*
-    val (tSym, params) = TypeRepr.of[T] match {
-      case AppliedType(base, params) => (base.typeSymbol, Some(params))
-      case _                         => (TypeTree.of[T].symbol, None)
-    }
-    val origin  = shortName[T]
-    val fields0 = fields[T]
 
-    val defaultMap: Map[String, Expr[Any]] = {
-      val comp =
-        if (tSym.isClassDef && !tSym.companionClass.isNoSymbol) tSym.companionClass
-        else tSym
-      val bodyOpt = Some(comp)
-        .filter(!_.isNoSymbol)
-        .map(_.tree)
-        .collect {
-          case cd: ClassDef => cd.body
-        }
-      bodyOpt match {
-        case Some(body) =>
-          val names = fields0
-            .map(_._1)
-            .filter(_.flags.is(Flags.HasDefault))
-            .map(_.name)
-          val values = body.collect {
-            case d @ DefDef(name, _, _, _) if name.startsWith("$lessinit$greater$default") =>
-              val ref = Ref(d.symbol)
-              params.fold(ref)(ref.appliedToTypes).asExpr
-          }
-          names.zip(values).toMap
-        case None =>
-          Map.empty
-      }
-    }
+    val defaults = defaultValues[T]
 
-    val parserExpr = fields0
-      .foldRight[(TypeRepr, Expr[Parser[_]])]((TypeRepr.of[EmptyTuple], '{ NilParser })) {
-        case ((sym, symTpe), (tailType, tailParserExpr)) =>
-          val recurse = sym.annotations
-            .find(_.tpe =:= TypeRepr.of[caseapp.Recurse])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.Recurse(${ arg.asExprOf[String] }) }
-              case Apply(_, Nil) =>
-                '{ caseapp.Recurse() }
-            }
-          val extraNames = sym.annotations
-            .filter(_.tpe =:= TypeRepr.of[caseapp.ExtraName])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.ExtraName(${ arg.asExprOf[String] }) }
-            }.reverse
-          val valueDescription = sym.annotations
-            .find(_.tpe =:= TypeRepr.of[caseapp.ValueDescription])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.ValueDescription(${ arg.asExprOf[String] }) }
-            }
-          val helpMessage = sym.annotations
-            .find(_.tpe =:= TypeRepr.of[caseapp.HelpMessage])
-            .collect {
-              case Apply(_, List(arg, argMd, argDetailed)) =>
-                '{
-                  caseapp.HelpMessage(
-                    ${ arg.asExprOf[String] },
-                    ${ argMd.asExprOf[String] },
-                    ${ argDetailed.asExprOf[String] }
-                  )
+    // Each field adds itself to the parser of the fields that follow it. Building the whole parser
+    // as a single nested expression would make the compiler overflow its stack on large classes.
+    val addFields = fields[T].map {
+      case (sym, symTpe) =>
+        symTpe.asType match {
+          case '[t] =>
+            annotations[caseapp.Recurse](sym).headOption match {
+              case Some(recurse) =>
+                val headParser = summonOrAbort[Parser[t]](
+                  s"Cannot derive a parser for field ${sym.name} of ${Type.show[T]}"
+                )
+                '{ (tail: Parser[Tuple]) =>
+                  RecursiveConsParser[t, Tuple]($headParser, tail, $recurse): Parser[Tuple]
                 }
-            }
-          val hidden = sym.annotations.exists(_.tpe =:= TypeRepr.of[caseapp.Hidden])
-          val group = sym.annotations
-            .find(_.tpe =:= TypeRepr.of[caseapp.Group])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.Group(${ arg.asExprOf[String] }) }
-            }
-          val tags = sym.annotations
-            .filter(_.tpe =:= TypeRepr.of[caseapp.annotation.Tag])
-            .collect {
-              case Apply(_, List(arg)) =>
-                '{ caseapp.annotation.Tag(${ arg.asExprOf[String] }) }
-            }
-          val newTailType = TypeRepr.of[*:].appliedTo(List(symTpe, tailType))
-          val expr = symTpe.asType match {
-            case '[t] =>
-              given Quotes = q
-              lazy val headParserExpr = Implicits.search(TypeRepr.of[Parser[t]]) match {
-                case iss: ImplicitSearchSuccess =>
-                  iss.tree.asExpr
-                case isf: ImplicitSearchFailure =>
-                  throw new Exception(s"No given ${Type.show[Parser[t]]} instance found")
-              }
-              lazy val argumentExpr = {
-                val default = defaultMap.get(sym.name).map(_.asExprOf[t])
-                val argParserExpr = Implicits.search(TypeRepr.of[ArgParser[t]]) match {
-                  case iss: ImplicitSearchSuccess =>
-                    iss.tree.asExpr.asExprOf[ArgParser[t]]
-                  case isf: ImplicitSearchFailure =>
-                    throw new Exception(s"No given ${Type.show[ArgParser[t]]} instance found")
+              case None =>
+                val argParser = summonOrAbort[ArgParser[t]](
+                  s"Cannot parse field ${sym.name} of ${Type.show[T]}"
+                )
+                val default = defaults.get(sym.name).map(_.asExprOf[t]).orElse {
+                  Implicits.search(TypeRepr.of[Default[t]]) match {
+                    case success: ImplicitSearchSuccess =>
+                      Some('{ ${ success.tree.asExprOf[Default[t]] }.value })
+                    case _: ImplicitSearchFailure => None
+                  }
                 }
-                '{
-                  val argParser = $argParserExpr
+                val valueDescription = annotations[caseapp.ValueDescription](sym).headOption
+                val extraNames       = annotations[caseapp.ExtraName](sym)
+                val helpMessage      = annotations[caseapp.HelpMessage](sym).headOption
+                val hidden           = annotations[caseapp.Hidden](sym).nonEmpty
+                val group            = annotations[caseapp.Group](sym).headOption
+                val tags             = annotations[caseapp.annotation.Tag](sym)
+                val argumentExpr = '{
+                  val argParser0 = $argParser
                   val valueDesc = ${ Expr.ofOption(valueDescription) }
-                    .getOrElse(caseapp.ValueDescription(argParser.description))
+                    .getOrElse(caseapp.ValueDescription(argParser0.description))
                   val arg = Arg(
                     name = caseapp.Name(${ Expr(sym.name) }),
                     extraNames = ${ Expr.ofList(extraNames) },
                     valueDescription = Some(valueDesc),
                     helpMessage = ${ Expr.ofOption(helpMessage) },
                     noHelp = ${ Expr(hidden) },
-                    isFlag = argParser.isFlag,
+                    isFlag = argParser0.isFlag,
                     group = ${ Expr.ofOption(group) },
                     origin = None,
-                    // sorting, as the ordering provided by Scala 3 doesn't seem to always respect the one in the original sources
-                    tags = ${ Expr.ofList(tags) }.sortBy(_.name)
+                    tags = ${ Expr.ofList(tags) }
                   )
-                  Argument[t](arg, argParser, () => ${ Expr.ofOption(default) })
+                  Argument[t](arg, argParser0, () => ${ Expr.ofOption(default) })
                 }
-              }
-              tailType.asType match {
-                case '[EmptyTuple] =>
-                  recurse match {
-                    case Some(recurseExpr) =>
-                      '{
-                        RecursiveConsParser[t, EmptyTuple](
-                          ${ headParserExpr.asExprOf[Parser[t]] },
-                          ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] },
-                          ${ recurseExpr }
-                        )
-                      }
-                    case None =>
-                      '{
-                        ConsParser[t, EmptyTuple](
-                          $argumentExpr,
-                          ${ tailParserExpr.asExprOf[Parser[EmptyTuple]] }
-                        )
-                      }
-                  }
+                '{ (tail: Parser[Tuple]) =>
+                  ConsParser[t, Tuple]($argumentExpr, tail): Parser[Tuple]
+                }
+            }
+        }
+    }
 
-                case '[head *: tail] =>
-                  recurse match {
-                    case Some(recurseExpr) =>
-                      '{
-                        RecursiveConsParser[t, head *: tail](
-                          ${ headParserExpr.asExprOf[Parser[t]] },
-                          ${ tailParserExpr.asExprOf[Parser[head *: tail]] },
-                          ${ recurseExpr }
-                        )
-                      }
-                    case None =>
-                      '{
-                        ConsParser[t, head *: tail](
-                          $argumentExpr,
-                          ${ tailParserExpr.asExprOf[Parser[head *: tail]] }
-                        )
-                      }
-                  }
-              }
-          }
-          (newTailType, expr)
-      }
-      ._2
-      .asExprOf[Parser[_]]
-
-    '{ $parserExpr.withDefaultOrigin(${ Expr(origin) }) }
+    '{
+      ${ Expr.ofList(addFields) }
+        .foldRight[Parser[Tuple]](NilParser)((addField, tail) => addField(tail))
+        .withDefaultOrigin(${ Expr(shortName[T]) })
+    }
   }
 }
 
 trait LowPriorityParserImplicits {
-  inline given derive[T](using m: Mirror.ProductOf[T]): Parser[T] = {
-    LowPriorityParserImplicits.checkFieldCount[T, Tuple.Size[m.MirroredElemTypes]]
-    val parser = LowPriorityParserImplicits.tupleParser[T]
-    parser.asInstanceOf[Parser[m.MirroredElemTypes]].map(m.fromTuple)
-  }
+  inline given derive[T](using m: Mirror.ProductOf[T]): Parser[T] =
+    LowPriorityParserImplicits.tupleParser[T].map(m.fromProduct)
+
+  /** Allows to write `case class Options(...) derives Parser` */
+  inline def derived[T](using m: Mirror.ProductOf[T]): Parser[T] =
+    derive[T]
 }
