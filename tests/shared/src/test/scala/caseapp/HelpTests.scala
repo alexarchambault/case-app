@@ -24,7 +24,7 @@ object HelpTests extends TestSuite {
 
   val tests = Tests {
 
-    def lines(s: String) = s.linesIterator.toVector
+    def lines(s: String)                                     = s.linesIterator.toVector
     def checkLines(message: String, expectedMessage: String) = {
       val messageLines  = lines(message)
       val expectedLines = lines(expectedMessage)
@@ -97,7 +97,7 @@ object HelpTests extends TestSuite {
     test("group options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
-      val groupFormat = format.copy(sortGroups = Some { groups =>
+      val groupFormat   = format.copy(sortGroups = Some { groups =>
         groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
       })
       val message = Help[GroupedOptions].help(groupFormat)
@@ -120,7 +120,7 @@ object HelpTests extends TestSuite {
     test("hidden group of options") {
 
       val orderedGroups = Seq("Something", "Bb").zipWithIndex.toMap
-      val groupFormat = format.copy(sortGroups = Some { groups =>
+      val groupFormat   = format.copy(sortGroups = Some { groups =>
         groups.sortBy(g => orderedGroups.getOrElse(g, Int.MaxValue))
       })
       val message = Help[HiddenGroupOptions].help(groupFormat)
@@ -294,7 +294,7 @@ object HelpTests extends TestSuite {
         override def defaultCommand = Some(First)
         def commands                = Seq(First, Second, Third)
       }
-      val help = entryPoint.help.help(format)
+      val help     = entryPoint.help.help(format)
       val expected =
         """Usage: foo <COMMAND> [options]
           |
@@ -320,7 +320,7 @@ object HelpTests extends TestSuite {
         override def defaultCommand = Some(CommandGroups.First)
         def commands = Seq(CommandGroups.First, CommandGroups.Second, CommandGroups.Third)
       }
-      val help = entryPoint.help.help(format)
+      val help     = entryPoint.help.help(format)
       val expected =
         """Usage: foo <COMMAND> [options]
           |
@@ -357,7 +357,7 @@ object HelpTests extends TestSuite {
           None
         )
       }
-      val help = entryPoint.help.help(format)
+      val help     = entryPoint.help.help(format)
       val expected =
         """Usage: foo <COMMAND>
           |
@@ -386,7 +386,7 @@ object HelpTests extends TestSuite {
           Some("Summary Description")
         )
       }
-      val help = entryPoint.help.help(format)
+      val help     = entryPoint.help.help(format)
       val expected =
         """Usage: foo <COMMAND>
           |Description
@@ -414,8 +414,8 @@ object HelpTests extends TestSuite {
           CommandGroups.Third.group
         ))
       )
-      val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
-      val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val shortHelp          = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp           = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val hiddenGroupEntries = """
                                  |
                                  |Aa commands:
@@ -452,8 +452,8 @@ object HelpTests extends TestSuite {
           CommandGroups.Third.group
         ))
       )
-      val shortHelp = entryPoint.help.help(formatWithHiddenGroup)
-      val fullHelp  = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
+      val shortHelp          = entryPoint.help.help(formatWithHiddenGroup)
+      val fullHelp           = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
       val hiddenGroupEntries =
         """
           |
@@ -490,7 +490,7 @@ object HelpTests extends TestSuite {
       val formatWithHiddenGroup = format.copy(filterArgs = Some(filterArgsFunction))
       val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
-      val fooEntry =
+      val fooEntry              =
         """
           |  -f, --foo string""".stripMargin
       def expected(showHidden: Boolean) =
@@ -526,7 +526,7 @@ object HelpTests extends TestSuite {
       val formatWithHiddenGroup = format.copy(filterArgsWhenShowHidden = Some(filterArgsFunction))
       val shortHelp             = entryPoint.help.help(formatWithHiddenGroup)
       val fullHelp              = entryPoint.help.help(formatWithHiddenGroup, showHidden = true)
-      val fooEntry =
+      val fooEntry              =
         """
           |  -f, --foo string""".stripMargin
       def expected(showHidden: Boolean) =
@@ -557,7 +557,7 @@ object HelpTests extends TestSuite {
         def commands = Seq(HiddenCommands.First, HiddenCommands.Second, HiddenCommands.Third)
       }
       test("hidden by default") {
-        val help = entryPoint.help.help(format)
+        val help     = entryPoint.help.help(format)
         val expected =
           """Usage: foo <COMMAND> [options]
             |
@@ -578,7 +578,7 @@ object HelpTests extends TestSuite {
         assert(help == expected)
       }
       test("shown when asked") {
-        val help = entryPoint.help.help(format, showHidden = true)
+        val help     = entryPoint.help.help(format, showHidden = true)
         val expected =
           """Usage: foo <COMMAND> [options]
             |

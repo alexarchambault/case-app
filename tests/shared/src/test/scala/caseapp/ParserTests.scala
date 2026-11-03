@@ -145,7 +145,7 @@ object ParserTests extends TestSuite {
       import Definitions.{FewArgsWithIndexed, WithIndexed}
       val parser = Parser[WithIndexed]
       test {
-        val res = parser.parse(Seq("--aa", "foo"))
+        val res      = parser.parse(Seq("--aa", "foo"))
         val expected = Right((
           WithIndexed(aa = Some(Indexed(0, 1, true))),
           Seq("foo")
@@ -153,7 +153,7 @@ object ParserTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = parser.parse(Seq("foo", "--aa"))
+        val res      = parser.parse(Seq("foo", "--aa"))
         val expected = Right((
           WithIndexed(aa = Some(Indexed(1, 1, true))),
           Seq("foo")
@@ -161,7 +161,7 @@ object ParserTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = parser.parse(Seq("foo", "--aa", "--value", "foo"))
+        val res      = parser.parse(Seq("foo", "--aa", "--value", "foo"))
         val expected = Right((
           WithIndexed(
             aa = Some(Indexed(1, 1, true)),
@@ -174,7 +174,7 @@ object ParserTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = parser.parse(Seq("foo", "--num-foo=2", "--value", "foo"))
+        val res      = parser.parse(Seq("foo", "--num-foo=2", "--value", "foo"))
         val expected = Right((
           WithIndexed(
             few = FewArgsWithIndexed(
@@ -187,7 +187,7 @@ object ParserTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res = parser.parse(Seq("--elem=a", "--elem", "b"))
+        val res      = parser.parse(Seq("--elem=a", "--elem", "b"))
         val expected = Right((
           WithIndexed(
             elem = List(

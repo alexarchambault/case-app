@@ -60,7 +60,7 @@ object LowPriorityParserImplicits {
       case AppliedType(base, args) => (base, args)
       case other                   => (other, Nil)
     }
-    val companionSym = tycon.typeSymbol.companionModule
+    val companionSym                          = tycon.typeSymbol.companionModule
     def isInCompanion(owner: Symbol): Boolean =
       !owner.isNoSymbol && (owner == companionSym.moduleClass || isInCompanion(owner.maybeOwner))
     val companion = tycon match {
@@ -117,9 +117,9 @@ object LowPriorityParserImplicits {
                 val hidden           = annotations[caseapp.Hidden](sym).nonEmpty
                 val group            = annotations[caseapp.Group](sym).headOption
                 val tags             = annotations[caseapp.annotation.Tag](sym)
-                val argumentExpr = '{
+                val argumentExpr     = '{
                   val argParser0 = $argParser
-                  val valueDesc = ${ Expr.ofOption(valueDescription) }
+                  val valueDesc  = ${ Expr.ofOption(valueDescription) }
                     .getOrElse(caseapp.ValueDescription(argParser0.description))
                   val arg = Arg(
                     name = caseapp.Name(${ Expr(sym.name) }),

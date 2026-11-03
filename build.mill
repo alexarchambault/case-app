@@ -74,8 +74,8 @@ object annotations extends Module {
 object util extends Cross[Util](Seq(Versions.scala213))
 
 trait Util extends CrossScalaModule {
-  def sources = Task.Sources(os.sub / "src/main/scala-2")
-  def mvnDeps = Seq(Deps.shapeless)
+  def sources        = Task.Sources(os.sub / "src/main/scala-2")
+  def mvnDeps        = Seq(Deps.shapeless)
   def compileMvnDeps = Seq(
     Deps.scalaCompiler(scalaVersion()),
     Deps.scalaReflect(scalaVersion())
@@ -118,7 +118,7 @@ object core extends Module {
     def unmanagedClasspath = Task(super.unmanagedClasspath() ++ utilClasspath())
     // Ships the classes of util in the case-app JAR
     def localClasspath = Task(super.localClasspath() ++ utilClasspath())
-    def sources =
+    def sources        =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
   trait CoreJs extends Core with CaseAppScalaJsModule with MimaChecks {
@@ -127,13 +127,13 @@ object core extends Module {
   }
   trait CoreNative extends Core with CaseAppScalaNativeModule with MimaChecks {
     def moduleDeps = Seq(annotations.native())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
   }
 
   trait Core extends CrossSbtModule with CaseAppPublishModule {
     def artifactName = "case-app"
-    def mvnDeps = Task {
+    def mvnDeps      = Task {
       val maybeScala2Deps =
         if (scalaVersion().startsWith("2.")) Seq(Deps.dataClass, Deps.shapeless)
         else Nil
@@ -144,7 +144,7 @@ object core extends Module {
       if (crossValue.startsWith("3.")) Task.Anon(Seq(unroll(crossValue).jar()))
       else Task.Anon(Seq.empty[PathRef])
     def scalacPluginClasspath = Task(super.scalacPluginClasspath() ++ unrollPluginJars())
-    def scalacOptions = Task {
+    def scalacOptions         = Task {
       val maybeMacroAnn =
         if (scalaVersion().startsWith("2.13."))
           Seq("-Ymacro-annotations")
@@ -215,7 +215,7 @@ object tests extends Module {
 
   trait TestsJvm extends Tests0 {
     def moduleDeps = Seq(core.jvm())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests {
@@ -225,7 +225,7 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def sources = Task {
+      def sources       = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -248,7 +248,7 @@ object tests extends Module {
   }
   trait TestsNative extends Tests0 with CaseAppScalaNativeModule {
     def moduleDeps = Seq(core.native())
-    def sources =
+    def sources    =
       Task(super.sources() ++ shared(crossValue).sources() ++ `jvm-native`(crossValue).sources())
 
     object test extends CrossSbtTests with ScalaNativeTests {
@@ -258,12 +258,12 @@ object tests extends Module {
         Deps.utest
       )
       def testFramework = "utest.runner.Framework"
-      def forkEnv = super.forkEnv() ++ Seq(
+      def forkEnv       = super.forkEnv() ++ Seq(
         "CASEAPP_NATIVE_TESTS_RESOURCES" ->
           `jvm-native`(crossValue).testResources().head.path.toString
       )
       def testSandboxWorkingDir = false // not respected
-      def sources = Task {
+      def sources               = Task {
         super.sources() ++
           shared(crossValue).testSources() ++
           `jvm-native`(crossValue).testSources()
@@ -344,7 +344,7 @@ trait CaseAppPublishModule extends PublishModule with ScalaModule {
     // compiler plugin crashes on the new encoding anyway)
     val futureLazyVals = isJvm && scalaVersion().startsWith("3.")
     // -Yfuture-lazy-vals requires a JVM target of at least 9
-    val release = if (futureLazyVals) "9" else "8"
+    val release             = if (futureLazyVals) "9" else "8"
     val maybeFutureLazyVals =
       if (futureLazyVals) Seq("-Yfuture-lazy-vals")
       else Nil
@@ -370,7 +370,7 @@ object CaseAppPublishModule {
   // Keeps the first 3 '.'-separated parts of the tag, bumps the last one, and adds '-SNAPSHOT'
   private def snapshotVersion(tag: String) = {
     val parts = tag.stripPrefix("v").split('.').take(3)
-    val last = parts.last.toIntOption.getOrElse {
+    val last  = parts.last.toIntOption.getOrElse {
       sys.error(s"Malformed tag $tag (${parts.last} is not a number)")
     }
     (parts.init :+ (last + 1).toString).mkString(".") + "-SNAPSHOT"
@@ -420,7 +420,7 @@ trait MimaChecks extends Mima with PublishModule {
 object docs extends ScalaModule {
   private def sv   = Versions.scala3
   def scalaVersion = sv
-  def moduleDeps = Seq(
+  def moduleDeps   = Seq(
     cats.jvm(sv)
   )
   def mvnDeps = Seq(
@@ -475,7 +475,7 @@ object docs extends ScalaModule {
   }
   def mkdocsServe() = Task.Command[Unit] {
     mdoc()()
-    val docsDir = BuildCtx.workspaceRoot / "docs"
+    val docsDir   = BuildCtx.workspaceRoot / "docs"
     val serveProc = os.proc("mkdocs", "serve", mkdocsConfigArgs())
       .spawn(cwd = docsDir, stdin = os.Inherit, stdout = os.Inherit)
     val mdocProc = os.proc(

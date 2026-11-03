@@ -14,7 +14,7 @@ object HelpCompanion {
     import quotes.reflect.*
     val sym        = TypeRepr.of[T].dealias.typeSymbol
     val parserExpr = summonOrAbort[Parser[T]](s"Cannot derive a help message for ${Type.show[T]}")
-    val appName = annotations[caseapp.AppName](sym).headOption
+    val appName    = annotations[caseapp.AppName](sym).headOption
       .map(appName => '{ $appName.appName })
       .getOrElse {
         val shortName = LowPriorityParserImplicits.shortName[T]
@@ -29,8 +29,8 @@ object HelpCompanion {
       .map(argsName => '{ $argsName.argsName })
     val helpMessage = annotations[caseapp.HelpMessage](sym).headOption
     '{
-      val parser   = $parserExpr
-      val appName0 = $appName
+      val parser    = $parserExpr
+      val appName0  = $appName
       val progName0 = ${ Expr.ofOption(progName) }.getOrElse {
         CaseUtil.pascalCaseSplit(appName0.toList).map(_.toLowerCase).mkString("-")
       }

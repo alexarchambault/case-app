@@ -30,7 +30,7 @@ object PlatformTests extends TestSuite {
 
   val tests = TestSuite {
     test("parse a date") {
-      val res = Parser[WithCalendar].parse(Seq("--date", "2014-10-23"))
+      val res         = Parser[WithCalendar].parse(Seq("--date", "2014-10-23"))
       val expectedRes = Right((
         WithCalendar(date = new GregorianCalendar(2014, 9, 23)),
         Nil
@@ -39,7 +39,7 @@ object PlatformTests extends TestSuite {
     }
 
     test("parse a path") {
-      val res = Parser[WithPath].parse(Seq("--path", "/path/to/file.ext"))
+      val res         = Parser[WithPath].parse(Seq("--path", "/path/to/file.ext"))
       val expectedRes = Right((
         WithPath(path = Paths.get("/path/to/file.ext")),
         Nil

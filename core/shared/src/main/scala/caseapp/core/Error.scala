@@ -15,7 +15,7 @@ object Error {
 
   sealed abstract class SimpleError(val message: String) extends Error {
     def append(that: Error): Error = that match {
-      case simple: SimpleError => Error.SeveralErrors(this, Seq(simple))
+      case simple: SimpleError    => Error.SeveralErrors(this, Seq(simple))
       case s: Error.SeveralErrors =>
         Error.SeveralErrors(this, s.head +: s.tail)
     }
@@ -26,9 +26,9 @@ object Error {
     deprecatedSettersMessage = "Use copy instead",
     deprecatedSettersSince = "2.1.2"
   ) case class SeveralErrors(head: SimpleError, tail: Seq[SimpleError]) extends Error {
-    def message: String = (head +: tail).map(_.message).mkString("\n")
+    def message: String            = (head +: tail).map(_.message).mkString("\n")
     def append(that: Error): Error = that match {
-      case simple: SimpleError => this.copy(tail = tail :+ simple)
+      case simple: SimpleError    => this.copy(tail = tail :+ simple)
       case s: Error.SeveralErrors =>
         this.copy(tail = tail ++ (s.head +: s.tail))
     }

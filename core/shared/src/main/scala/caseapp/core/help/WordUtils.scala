@@ -32,7 +32,7 @@ object WordUtils {
 
     while (!shouldStop && offset < inputLineLength) {
       var spaceToWrapAt = -1
-      var matcher = patternToWrapOn.matcher(
+      var matcher       = patternToWrapOn.matcher(
         str.substring(
           offset,
           Math.min(

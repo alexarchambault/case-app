@@ -11,8 +11,8 @@ import utest._
 object BinaryCompatibilityTests extends TestSuite {
 
   private def check(clazz: Class[_], companion: Class[_], expectedArities: Set[Int]): Unit = {
-    val ctorArities = clazz.getConstructors.map(_.getParameterCount).toSet
-    val copyArities = clazz.getMethods.filter(_.getName == "copy").map(_.getParameterCount).toSet
+    val ctorArities  = clazz.getConstructors.map(_.getParameterCount).toSet
+    val copyArities  = clazz.getMethods.filter(_.getName == "copy").map(_.getParameterCount).toSet
     val applyArities =
       companion.getMethods.filter(_.getName == "apply").map(_.getParameterCount).toSet
     assert(expectedArities.subsetOf(ctorArities))
