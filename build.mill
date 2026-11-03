@@ -31,7 +31,7 @@ object Versions {
 
 object Deps {
   def catsEffect                 = mvn"org.typelevel::cats-effect::3.7.1"
-  def dataClass                  = mvn"io.github.alexarchambault::data-class:0.2.11"
+  def dataClass                  = mvn"io.github.alexarchambault::data-class:0.3.0"
   def mdoc                       = mvn"org.scalameta::mdoc:2.9.2"
   def osLib                      = mvn"com.lihaoyi::os-lib::0.11.10"
   def pprint                     = mvn"com.lihaoyi::pprint::0.9.6"
