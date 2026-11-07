@@ -102,7 +102,7 @@ object MyApp extends CaseApp[Options] {
 }
 ```
 
-In that example, case-app defines the `MainApp#main` method, so that
+In that example, `CaseApp` defines the `main` method, so that
 `MyApp` can be used as a "main class".
 
 ## Parsing
