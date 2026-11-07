@@ -9,6 +9,11 @@ import caseapp.core.complete.CompletionItem
 
 import scala.annotation.tailrec
 
+/** Methods of `Parser`, parsing arguments as a `T`
+  *
+  * The main ones are `parse` and `detailedParse`, that parse a whole sequence of arguments. They
+  * rely on `init`, `step`, and `get`, which implementations of `Parser` define.
+  */
 trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
 
   import Parser.Step
@@ -17,6 +22,10 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     */
   def init: D
 
+  /** Process the next argument, using `defaultNameFormatter` to format option names
+    *
+    * See the other `step` method for more details.
+    */
   def step(
     args: List[String],
     index: Int,
@@ -36,14 +45,17 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     *
     * @param args:
     *   arguments to process
+    * @param index:
+    *   index of the first element of `args`, in the whole sequence of arguments being parsed
     * @param d:
     *   current intermediate result
     * @param nameFormatter:
     *   formats name to the appropriate format
     * @return
     *   if no argument were parsed, `Right(None)`; if an error occurred, an error message wrapped in
-    *   [[caseapp.core.Error]] and [[scala.Left]]; else the next intermediate value and the
-    *   remaining arguments wrapped in [[scala.Some]] and [[scala.Right]].
+    *   `Error` and `Left`, along with the argument that failed and the remaining arguments; else
+    *   the next intermediate value, the matched argument, and the remaining arguments wrapped in
+    *   `Some` and `Right`.
     */
   def step(
     args: List[String],
@@ -60,8 +72,8 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     * @param d:
     *   final intermediate value
     * @return
-    *   in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in
-    *   [[caseapp.core.Error]] and [[scala.Left]]
+    *   in case of success, a `T` wrapped in `Right`; else, an error message, wrapped in `Error` and
+    *   `Left`
     */
   final def get(d: D): Either[Error, T] = get(d, defaultNameFormatter)
 
@@ -75,8 +87,8 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     * @param nameFormatter:
     *   formats names to the appropriate format
     * @return
-    *   in case of success, a `T` wrapped in [[scala.Right]]; else, an error message, wrapped in
-    *   [[caseapp.core.Error]] and [[scala.Left]]
+    *   in case of success, a `T` wrapped in `Right`; else, an error message, wrapped in `Error` and
+    *   `Left`
     */
   def get(d: D, nameFormatter: Formatter[Name]): Either[Error, T]
 
@@ -86,15 +98,34 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     */
   def args: Seq[Arg]
 
+  /** Whether `parse` and `detailedParse` stop at the first unrecognized argument by default
+    *
+    * `false` by default, `true` for parsers created with `Parser.stopAtFirstUnrecognized`.
+    */
   def defaultStopAtFirstUnrecognized: Boolean =
     false
 
+  /** Whether `parse` and `detailedParse` ignore unrecognized options by default
+    *
+    * `false` by default, `true` for parsers created with `Parser.ignoreUnrecognized`.
+    */
   def defaultIgnoreUnrecognized: Boolean =
     false
 
+  /** Formatter used to compute option names from field names, see `Parser.nameFormatter`
+    *
+    * Defaults to [[caseapp.core.util.Formatter.DefaultNameFormatter]].
+    */
   def defaultNameFormatter: Formatter[Name] =
     Formatter.DefaultNameFormatter
 
+  /** Parses `args`
+    *
+    * @return
+    *   in case of success, the parsed `T`, and the arguments that weren't parsed as options (both
+    *   before and after a first `--`, see [[caseapp.core.RemainingArgs.all]]); else, an error,
+    *   possibly aggregating several errors (see [[caseapp.core.Error.SeveralErrors]])
+    */
   final def parse(args: Seq[String]): Either[Error, (T, Seq[String])] =
     detailedParse(args)
       .map {
@@ -102,7 +133,10 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
           (t, rem.all)
       }
 
-  /** Keeps the remaining args before and after a possible -- separated */
+  /** Parses `args`, keeping the remaining args before and after a possible `--` separated
+    *
+    * Like `parse`, but returns the remaining arguments as a [[caseapp.core.RemainingArgs]].
+    */
   final def detailedParse(args: Seq[String]): Either[Error, (T, RemainingArgs)] =
     detailedParse(
       args,
@@ -110,6 +144,10 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       ignoreUnrecognized = defaultIgnoreUnrecognized
     )
 
+  /** Parses `args`, possibly stopping at the first unrecognized argument
+    *
+    * See the other `detailedParse` methods.
+    */
   final def detailedParse(
     args: Seq[String],
     stopAtFirstUnrecognized: Boolean
@@ -120,6 +158,17 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       ignoreUnrecognized = defaultIgnoreUnrecognized
     )
 
+  /** Parses `args`
+    *
+    * @param stopAtFirstUnrecognized
+    *   whether to stop parsing at the first unrecognized argument (the first argument not starting
+    *   with `-`, or the first unrecognized option), putting it and all the arguments that follow in
+    *   the remaining arguments
+    * @param ignoreUnrecognized
+    *   whether to put unrecognized options in the remaining arguments, rather than failing
+    * @return
+    *   in case of success, the parsed `T`, and the remaining arguments; else, an error
+    */
   final def detailedParse(
     args: Seq[String],
     stopAtFirstUnrecognized: Boolean,
@@ -131,6 +180,14 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
       .map((_, remArgs))
   }
 
+  /** Parses `args`, also returning the details of each parsing step
+    *
+    * Lower-level than `detailedParse`, and mostly meant to compute completions (see `complete`).
+    *
+    * @return
+    *   the parsing result (in case of error, along with the last intermediate value, or the `T` if
+    *   it could be built), the remaining arguments, and the parsing steps
+    */
   final def scan(
     args: Seq[String],
     stopAtFirstUnrecognized: Boolean,
@@ -277,6 +334,18 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
     helper(init, args.toList, Nil, Nil, 0)
   }
 
+  /** Computes completions for the argument at index `index` in `args`
+    *
+    * Finds out whether this argument is an option name, an option value, or a non-option argument,
+    * and calls the corresponding method of `completer`.
+    *
+    * @param args
+    *   arguments (without the program name)
+    * @param index
+    *   index of the argument to complete (can be `args.length` or more, to complete a new argument)
+    * @param completer
+    *   computes completions for option names, option values, and arguments
+    */
   def complete(
     args: Seq[String],
     index: Int,

@@ -10,6 +10,49 @@ import caseapp.core.util.Formatter
 import caseapp.HelpMessage
 
 /** Provides usage and help messages related to `T`
+  *
+  * Like [[caseapp.core.parser.Parser]], `Help` instances for case classes are derived
+  * automatically, from their parser and the annotations on them (`AppName`, `ProgName`, `ArgsName`,
+  * `HelpMessage`…). They can also be derived explicitly with `Help.derive` (or with a
+  * `derives Help` clause, on Scala 3).
+  *
+  * {{{
+  * @HelpMessage("Greets people")
+  * case class GreetOptions(
+  *   @HelpMessage("Name of the person to greet")
+  *   name: String = "World"
+  * )
+  *
+  * println(Help[GreetOptions].help)
+  * // Usage: greet [options]
+  * // Greets people
+  * //
+  * // Options:
+  * //   --name string  Name of the person to greet
+  * }}}
+  *
+  * The help options (`--help`, `--usage`…) aren't part of it, see [[withHelp]] and [[withFullHelp]]
+  * to add them.
+  *
+  * @param args
+  *   arguments accepted by `T`, as computed by [[caseapp.core.parser.Parser]]
+  * @param appName
+  *   application name (see the `AppName` annotation), not printed in help messages
+  * @param appVersion
+  *   application version (see the `AppVersion` annotation), not printed in help messages
+  * @param progName
+  *   program name (see the `ProgName` annotation), printed in the usage line
+  * @param argsNameOption
+  *   name of the non-option arguments (see the `ArgsName` annotation), printed between brackets at
+  *   the end of the usage line
+  * @param optionsDesc
+  *   description of the options, printed in the usage line after [[progName]] if there are options,
+  *   `[options]` by default
+  * @param nameFormatter
+  *   formats the names of the arguments into option names
+  * @param helpMessage
+  *   description of the application (see the `HelpMessage` annotation), printed after the usage
+  *   line
   */
 @data(
   deprecatedSetters = true,
@@ -27,28 +70,39 @@ import caseapp.HelpMessage
   helpMessage: Option[HelpMessage] = Help.DefaultHelpMessage
 ) {
 
+  /** Whether there are some arguments */
   def nonEmpty = args.nonEmpty
 
-  /** One-line usage message for `T` */
+  /** One-line usage message for `T`, like `Usage: my-app [options]`
+    *
+    * Formatted with [[HelpFormat.default()* HelpFormat.default()]], which uses ANSI colors.
+    */
   def usage: String =
     usage(HelpFormat.default())
+
+  /** One-line usage message for `T`, formatted with `format` */
   def usage(format: HelpFormat): String = {
     val b = new StringBuilder
     printUsage(b, format)
     b.result()
   }
 
-  /** Options description for `T` */
+  /** Options description for `T`, see `Help.optionsMessage`
+    */
   def options: String = Help.optionsMessage(args, nameFormatter, showHidden = false)
 
   /** Full multi-line help message for `T`.
     *
-    * Includes both `usageMessage` and `optionsMessage`
+    * Includes the usage line, the description of `T` (if it has a `HelpMessage` annotation), and
+    * the options, grouped by `Group`. Hidden options aren't included. Formatted with
+    * [[HelpFormat.default()* HelpFormat.default()]], which uses ANSI colors.
     */
   def help: String =
     help(HelpFormat.default(), showHidden = false)
 
   /** Add help and usage options.
+    *
+    * Adds the options of [[WithHelp]] (`--usage`, `--help`, `-h`) to [[args]].
     */
   def withHelp: Help[WithHelp[T]] = {
     final case class Dummy()
@@ -60,6 +114,10 @@ import caseapp.HelpMessage
       .asInstanceOf[Help[WithHelp[T]]]
   }
 
+  /** Add help, usage, and full help options.
+    *
+    * Adds the options of [[WithFullHelp]] (`--usage`, `--help`, `-h`, `--help-full`…) to [[args]].
+    */
   def withFullHelp: Help[WithFullHelp[T]] = {
     final case class Dummy()
     val parser: Parser[WithFullHelp[Dummy]] = WithFullHelp.parser
@@ -70,6 +128,7 @@ import caseapp.HelpMessage
       .asInstanceOf[Help[WithFullHelp[T]]]
   }
 
+  /** Arguments sharing an option name, by option name */
   def duplicates: Map[String, Seq[Arg]] = {
     val pairs = args.flatMap(a => a.names.map(n => n.option(nameFormatter) -> a))
     pairs
@@ -80,6 +139,11 @@ import caseapp.HelpMessage
       .toMap
   }
 
+  /** Throws an exception if several arguments share an option name
+    *
+    * @throws java.lang.Exception
+    *   if some option names are duplicated
+    */
   def ensureNoDuplicates(): Unit =
     if (duplicates.nonEmpty) {
       val message = duplicates
@@ -93,6 +157,7 @@ import caseapp.HelpMessage
       throw new Exception(message)
     }
 
+  /** Writes the usage line (see [[usage:String* usage]]) to `b` */
   def printUsage(b: StringBuilder, format: HelpFormat): Unit = {
     b.append("Usage: ")
     b.append(format.progName(progName).render)
@@ -109,6 +174,8 @@ import caseapp.HelpMessage
     }
   }
 
+  /** Writes the help message (see `help`) to `b`
+    */
   def printHelp(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit = {
     printUsage(b, format)
     b.append(format.newLine)
@@ -132,15 +199,27 @@ import caseapp.HelpMessage
     printOptions(b, format, showHidden)
   }
 
+  /** Multi-line help message for `T`, formatted with `format`, without hidden options */
   def help(format: HelpFormat): String =
     help(format, showHidden = false)
 
+  /** Multi-line help message for `T`, formatted with `format`
+    *
+    * @param showHidden
+    *   whether to include hidden options (see the `Hidden` annotation), and to use the
+    *   `detailedMessage` of the `HelpMessage` annotation of `T`, if it's not empty. That's what is
+    *   printed with `--help-full`.
+    */
   def help(format: HelpFormat, showHidden: Boolean): String = {
     val b = new StringBuilder
     printHelp(b, format, showHidden)
     b.result()
   }
 
+  /** Writes the options table, grouped by `Group`, to `b`
+    *
+    * Groups are sorted and filtered according to `format`, see [[HelpFormat]].
+    */
   def printOptions(b: StringBuilder, format: HelpFormat, showHidden: Boolean): Unit =
     if (args.nonEmpty) {
       val filteredArgs =
@@ -185,9 +264,15 @@ import caseapp.HelpMessage
 }
 
 object Help extends HelpCompanion {
-  val DefaultOptionsDesc   = "[options]"
+
+  /** Default value of [[Help.optionsDesc]], `[options]` */
+  val DefaultOptionsDesc = "[options]"
+
+  /** Default value of [[Help.nameFormatter]] */
   val DefaultNameFormatter = Formatter.DefaultNameFormatter
-  val DefaultHelpMessage   = Option.empty[HelpMessage]
+
+  /** Default value of [[Help.helpMessage]], none */
+  val DefaultHelpMessage = Option.empty[HelpMessage]
 
   /** Look for an implicit `Help[T]` */
   def apply[T](implicit help: Help[T]): Help[T] = help
@@ -263,12 +348,16 @@ object Help extends HelpCompanion {
       Seq[fansi.Str](optionsAndValue, desc)
     }
 
+  /** Wraps `input` so that its lines aren't longer than `terminalWidth` */
   def reflowed(input: String, newLine: String, terminalWidth: Int): String =
     if (input.length <= terminalWidth)
       input
     else
       WordUtils.wrap(input, terminalWidth, Some(newLine), wrapLongWords = true, wrapOn = " ")
 
+  /** Writes `desc`, wrapped to `terminalWidth` (see [[reflowed]]), and followed by a new line, to
+    * `b`
+    */
   def printDescription(
     b: StringBuilder,
     desc: String,
