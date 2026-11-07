@@ -185,6 +185,56 @@ case class Options(
 )
 ```
 
+### Custom name formatting
+
+```scala mdoc:invisible:reset
+import caseapp._
+```
+
+The conversion of field names (and of [extra names](#extra-names)) to option names
+can be customized, by passing a `caseapp.core.util.Formatter[Name]` to the
+`nameFormatter` method of a `Parser`. For example, to keep field names as is, rather
+than converting them to kebab case:
+```scala mdoc:silent
+import caseapp.core.util.Formatter
+
+case class Options(
+  fooBar: Int = 0,
+  @Name("t")
+  @Name("otherName")
+    thing: Boolean = false
+)
+
+object Options {
+  implicit lazy val parser: Parser[Options] = {
+    val parser0: Parser[Options] = Parser.derive
+    parser0.nameFormatter((name: Name) => name.name)
+  }
+  implicit lazy val help: Help[Options] = Help.derive
+}
+```
+
+```scala mdoc
+CaseApp.parse[Options](Seq("--fooBar", "2", "--otherName"))
+CaseApp.parse[Options](Seq("--foo-bar", "2"))
+```
+
+Single-letter names, like `-t` above, are not passed to the formatter.
+
+As `Help.derive` relies on the formatter of the `Parser` it's derived from,
+the help message also uses the custom names:
+```scala mdoc:passthrough
+import caseapp.core.help.HelpFormat
+println("```text")
+println(Help[Options].help(HelpFormat.default(ansiColors = false)))
+println("```")
+```
+
+When extending `CaseApp`, one can also override its `nameFormatter` method. Note
+that this only changes how arguments are parsed, not the help message of the
+application, so customizing the formatter of the parser like above is
+preferable.
+
 ## Passing values to options
 
 For option types expecting a value (most of them), that value can be passed in a separate
