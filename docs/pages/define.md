@@ -132,6 +132,21 @@ case class Options(
 )
 ```
 
+```scala mdoc:invisible:reset
+import caseapp._
+```
+
+`@ExtraName` is an alias of `@Name` (`caseapp.ExtraName` is defined as
+`caseapp.Name`), that can be used instead of it if you find it more explicit:
+```scala mdoc
+case class Options(
+  @ExtraName("f")
+    foo: Int = 0
+)
+
+CaseApp.parse[Options](Seq("-f", "2"))
+```
+
 ## Field name to option name conversion
 
 ```scala mdoc:invisible:reset
