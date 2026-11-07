@@ -2,8 +2,8 @@
   *
   * Simply importing things directly under this package should make it possible not to have to
   * import things from [[caseapp.core]]. This package contains the annotations used to customize
-  * arguments (like `HelpMessage`, `Name`, `Recurse`…), and aliases
-  * to the main types of [[caseapp.core]].
+  * arguments (like `HelpMessage`, `Name`, `Recurse`…), and aliases to the main types of
+  * [[caseapp.core]].
   *
   * Typical usage:
   * {{{
