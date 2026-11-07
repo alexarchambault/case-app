@@ -47,6 +47,26 @@ field value is then `Some(…)`) or not (field value is `None`),
 and to behave differently if the option wasn't specified, like defaulting to the value
 of another option.
 
+```scala mdoc:reset:invisible
+import caseapp._
+```
+
+```scala mdoc
+case class Options(
+  foo: Option[Int],
+  path: Option[String] = None
+)
+
+CaseApp.parse[Options](Seq("--foo", "2"))
+```
+
+Like for non-`Option` fields, specifying an `Option` option more than once
+is an error:
+```scala mdoc
+CaseApp.parse[Options](Seq("--foo", "2", "--foo", "3"))
+```
+Use [`Last`](#last) or [sequences](#sequences) to accept repeated options.
+
 ## Sequences
 
 ```scala mdoc:reset:invisible
@@ -80,6 +100,26 @@ last one.
 So `Last` makes option parsing not fail if its option is specified multiple times, and just
 retains the last occurrence of it.
 
+```scala mdoc:reset:invisible
+import caseapp._
+```
+
+```scala mdoc
+case class Options(
+  mode: Last[String] = Last("default"),
+  level: Option[Last[Int]] = None
+)
+
+val (options, _) = CaseApp.parse[Options](
+  Seq("--mode", "fast", "--level", "1", "--mode", "slow", "--level", "3")
+).toOption.get
+options.mode.value
+options.level.map(_.value)
+```
+
+As shown above, `Last` can be wrapped in `Option`, to know whether the option
+was specified at all.
+
 ## Counters
 
 ```scala mdoc:reset:invisible
@@ -111,6 +151,42 @@ be of little help. A field with type `Unit` is mapped to a flag option, like
 [`Boolean`](#booleans), but the `Unit` type itself doesn't allow retaining whether the flag
 was specified by users or not. In a `List` on the other hand, counting the number
 of `()` (`Unit` instance) in the list tells how many times the flag was specified.
+
+## JVM-only types
+
+```scala mdoc:reset:invisible
+import caseapp._
+```
+
+On the JVM, case-app also pre-defines parsers for:
+
+- `java.nio.file.Path`, whose values are converted with `java.nio.file.Paths.get`,
+- `java.util.Calendar`, whose values must follow the `yyyy-MM-dd` format (dates
+  are parsed in the default time zone of the JVM).
+
+```scala mdoc:silent
+import java.nio.file.Path
+import java.util.Calendar
+
+case class Options(
+  output: Path,
+  since: Calendar
+)
+
+val (options, _) = CaseApp.parse[Options](
+  Seq("--output", "out/result.txt", "--since", "2024-03-01")
+).toOption.get
+```
+
+```scala mdoc
+options.output
+options.since.get(Calendar.YEAR)
+options.since.get(Calendar.MONTH) + 1
+options.since.get(Calendar.DAY_OF_MONTH)
+```
+
+These parsers are not available on Scala.js and Scala Native, where you need
+to [define your own parsers](#custom-parsers) for such types if needed.
 
 ## Custom parsers
 
