@@ -161,21 +161,9 @@ object MyApp extends CommandsEntryPoint {
 
 One gets as a help message:
 ```scala mdoc:passthrough
-println("```text")
-println {
-  // FIXME Find a way to keep colors in the output
-  MyApp.help.help(
-    // reset colors
-    MyApp.helpFormat
-      .copy(
-        progName = caseapp.core.util.fansi.Attrs.Empty,
-        commandName = caseapp.core.util.fansi.Attrs.Empty,
-        option = caseapp.core.util.fansi.Attrs.Empty,
-        hidden = caseapp.core.util.fansi.Attrs.Empty
-      )
-  )
-}
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyApp.help.help(MyApp.helpFormat)
+)
 ```
 
 ### Command groups
@@ -218,21 +206,9 @@ object MyApp extends CommandsEntryPoint {
 
 One gets as a help message:
 ```scala mdoc:passthrough
-println("```text")
-println {
-  // FIXME Find a way to keep colors in the output
-  MyApp.help.help(
-    // reset colors
-    MyApp.helpFormat
-      .copy(
-        progName = caseapp.core.util.fansi.Attrs.Empty,
-        commandName = caseapp.core.util.fansi.Attrs.Empty,
-        option = caseapp.core.util.fansi.Attrs.Empty,
-        hidden = caseapp.core.util.fansi.Attrs.Empty
-      )
-  )
-}
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyApp.help.help(MyApp.helpFormat)
+)
 ```
 
 To sort groups, override `helpFormat` in your `CommandsEntryPoint`, and set the
@@ -254,21 +230,9 @@ object MyOtherApp extends CommandsEntryPoint {
 
 One then gets as a help message:
 ```scala mdoc:passthrough
-println("```text")
-println {
-  // FIXME Find a way to keep colors in the output
-  MyOtherApp.help.help(
-    // reset colors
-    MyOtherApp.helpFormat
-      .copy(
-        progName = caseapp.core.util.fansi.Attrs.Empty,
-        commandName = caseapp.core.util.fansi.Attrs.Empty,
-        option = caseapp.core.util.fansi.Attrs.Empty,
-        hidden = caseapp.core.util.fansi.Attrs.Empty
-      )
-  )
-}
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyOtherApp.help.help(MyOtherApp.helpFormat)
+)
 ```
 
 ### Standalone use of the command argument parser
