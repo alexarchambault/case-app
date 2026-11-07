@@ -1,6 +1,4 @@
-# Miscellaneous
-
-## cats-effect
+# cats-effect
 
 ```scala mdoc:reset-object:invisible
 import caseapp._
@@ -18,7 +16,7 @@ println("```")
 ```
 (for other build tools, see [setup](setup.md) and change `case-app` to `case-app-cats`)
 
-### Single command
+## Single command
 
 Use `IOCaseApp` for a single-command application:
 ```scala mdoc:silent
@@ -40,7 +38,7 @@ object IOCaseExample extends IOCaseApp[ExampleOptions] {
 }
 ```
 
-### Multiple subcommands
+## Multiple subcommands
 
 Use `IOCommand` and `IOCommandsEntryPoint` for applications with
 multiple subcommands — the cats-effect equivalents of `Command` and
