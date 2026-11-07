@@ -235,8 +235,9 @@ println {
 println("```")
 ```
 
-To sort groups, set the `sortCommandGroups` or `sortedCommandGroups` command
-fields of `Command#helpFormat`, like
+To sort groups, override `helpFormat` in your `CommandsEntryPoint`, and set the
+`sortedCommandGroups` field of `HelpFormat` (explicit group order) or its
+`sortCommandGroups` field (function sorting group names), like
 ```scala mdoc:silent
 object MyOtherApp extends CommandsEntryPoint {
   override def defaultCommand = None
