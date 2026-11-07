@@ -12,6 +12,7 @@ nav:
     - 'completion.md'
     - cats-effect: 'misc.md'
     - 'advanced.md'
+  - API reference: 'https://javadoc.io/doc/com.github.alexarchambault/case-app_3'
   - Contributing:
     - 'contrib-website.md'
 
