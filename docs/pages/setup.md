@@ -14,16 +14,16 @@ From [Mill](https://github.com/com-lihaoyi/Mill):
 def millMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
     println(
-      """def repositoriesTask = T {
-        |  super.repositoriesTask() ++ Seq(
-        |    coursier.Repositories.sonatype("snapshots")
+      """def repositories = Task {
+        |  super.repositories() ++ Seq(
+        |    "sonatype:snapshots"
         |  )
         |}""".stripMargin
     )
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def mvnDeps = Agg(
+  """def mvnDeps = Seq(
     |  mvn"com.github.alexarchambault::case-app:@VERSION@"
     |)""".stripMargin
 )
@@ -64,7 +64,7 @@ From [Mill](https://github.com/com-lihaoyi/Mill):
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def mvnDeps = Agg(
+  """def mvnDeps = Seq(
     |  mvn"com.github.alexarchambault::case-app::@VERSION@"
     |)""".stripMargin
 )
