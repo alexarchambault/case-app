@@ -56,6 +56,68 @@ object MyApp extends CommandsEntryPoint {
 }
 ```
 
+### Default command names and descriptions
+
+```scala mdoc:reset-object:invisible
+import caseapp._
+```
+
+If neither `name` nor `names` are overridden, a command is named after the
+program name of its options, that is the value of the `@ProgName` annotation of
+the options class if it has one, or the name of the options class, minus its
+`Options` suffix, converted to kebab case. Put a `@HelpMessage` annotation on
+the options class to give a description to the command, whose first line
+is shown in the list of commands of the help message (see
+[application description](help.md#application-description)):
+```scala mdoc:silent
+@HelpMessage("Add a remote")
+case class RemoteAddOptions(
+  url: String = ""
+)
+
+object RemoteAdd extends Command[RemoteAddOptions] {
+  def run(options: RemoteAddOptions, args: RemainingArgs): Unit = {
+    ???
+  }
+}
+
+@ProgName("rm")
+@HelpMessage("Remove a remote")
+case class RemoveOptions(
+  force: Boolean = false
+)
+
+object Remove extends Command[RemoveOptions] {
+  def run(options: RemoveOptions, args: RemainingArgs): Unit = {
+    ???
+  }
+}
+
+object MyApp extends CommandsEntryPoint {
+  def progName = "my-app"
+  def commands = Seq(
+    RemoteAdd,
+    Remove
+  )
+}
+```
+
+```scala mdoc
+RemoteAdd.names
+Remove.names
+```
+
+```scala mdoc:passthrough
+// FIXME Find a way to keep colors in the output
+import caseapp.core.help.HelpFormat
+println("```text")
+println(MyApp.help.help(HelpFormat.default(ansiColors = false)))
+println("```")
+```
+
+Note that the `@CommandName` annotation, that can be put on options classes,
+isn't used by case-app itself to name commands: override `name` or `names` instead.
+
 ## Customizing commands help
 
 ```scala mdoc:reset-object:invisible
