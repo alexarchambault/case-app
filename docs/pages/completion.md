@@ -7,10 +7,10 @@ Support for completion relies on [commands](commands.md).
 ### In commands
 
 In an application made of [commands](commands.md), enable completions by overriding
-the `def enableCompletionsCommand: Boolean` and `def enableCompleteCommand: Boolean`.
+the `def enableCompletionsCommand: Boolean` and `def enableCompleteCommand: Boolean` methods.
 
 This adds two (hidden) commands to your application:
-- `completions` (also aliased to `completion`): command that allows to help installing
+- `completions` (also aliased to `completion`): command that helps install
   completions
 - `complete`: command run when users ask for completions in their shell
 
@@ -54,10 +54,10 @@ object MyApp extends CommandsEntryPoint {
 
 ### Via `completions install`
 
-Assuming `progname` runs the main class added by `CommandEntryPoint` to the object extended
-by it, you can install completions with
+Assuming `my-app` runs the main class added by `CommandsEntryPoint` to the object extending
+it, you can install completions with
 ```text
-$ progname completions install
+$ my-app completions install
 ```
 
 ```scala mdoc:passthrough

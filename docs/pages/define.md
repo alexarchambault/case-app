@@ -87,7 +87,7 @@ types can also have fields marked with it, etc.
 import caseapp._
 ```
 
-Various annotations allow to customize options, like `@Name` to offer
+Various annotations allow customizing options, like `@Name` to offer
 several ways to specify an option:
 ```scala mdoc:silent
 case class Options(
@@ -110,8 +110,8 @@ Case class field names are assumed to follow the
 [kebab case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case) (`kebab-case`) to
 get the corresponding option name.
 
-Names consisting in a single letter are
-prefixed with a single hyphen (like `-t`) while other are prefixed with two hyphens
+Names consisting of a single letter are
+prefixed with a single hyphen (like `-t`) while others are prefixed with two hyphens
 (like `--foo-thing`).
 ```scala mdoc:silent
 case class Options(
@@ -139,7 +139,7 @@ case class Options(
 
 ## Passing values to options
 
-For option types expecting a value (most of them), that value can be passed in a separated
+For option types expecting a value (most of them), that value can be passed in a separate
 argument, like
 ```text
 --foo value

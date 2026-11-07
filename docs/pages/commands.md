@@ -127,7 +127,7 @@ See [completion support](completion.md)
 import caseapp._
 ```
 
-Overriding the `def hidden: Boolean` method of `Command` allows to hide a
+Overriding the `def hidden: Boolean` method of `Command` hides a
 command from the help message:
 ```scala mdoc:silent
 case class FirstOptions()

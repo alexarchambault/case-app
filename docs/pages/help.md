@@ -77,8 +77,8 @@ println(MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(
 println("```")
 ```
 
-When using hidden options alongside with the `CaseApp` class, you can offer users
-to get an help message that includes the hidden options with `--full-help`, like
+When using hidden options alongside the `CaseApp` class, you can let users
+get a help message that includes the hidden options with `--full-help`, like
 ```scala mdoc:silent
 object MyApp extends CaseApp[Options] {
   override def hasFullHelp = true

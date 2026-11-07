@@ -66,7 +66,7 @@ val args = Array("a")
 ```
 
 It aims at being used from Scala CLI `.sc` files ("Scala scripts"), where one
-would rather have case-app handle all errors cases, like
+would rather have case-app handle all error cases, like
 ```scala mdoc:silent
 //> using dep com.github.alexarchambault::case-app::@VERSION@
 import caseapp._
