@@ -75,10 +75,6 @@ plugins:
       enabled: !ENV [CI, false]
   - search
 
-extra:
-  version:
-    provider: mike
-
 validation:
   links:
     not_found:
