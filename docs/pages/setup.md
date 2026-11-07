@@ -1,7 +1,7 @@
 # Setup
 
 Depend on case-app via `com.github.alexarchambault::case-app:@VERSION@`.
-The latest version is [![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_3.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_3).
+The latest version is [![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_3.svg)](https://central.sonatype.com/artifact/com.github.alexarchambault/case-app_3).
 
 ## JVM
 
