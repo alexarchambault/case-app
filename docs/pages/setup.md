@@ -16,7 +16,7 @@ def millMaybeAddSonatypeSnapshots() =
     println(
       """def repositories = Task {
         |  super.repositories() ++ Seq(
-        |    "sonatype:snapshots"
+        |    "central:maven-snapshots"
         |  )
         |}""".stripMargin
     )
@@ -34,7 +34,7 @@ From [Scala CLI](https://github.com/VirtusLab/scala-cli):
 ```scala mdoc:passthrough
 def scalaCliMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
-    println("//> using repository sonatype:snapshots")
+    println("//> using repository central:maven-snapshots")
 println("```scala")
 scalaCliMaybeAddSonatypeSnapshots()
 println("//> using dep com.github.alexarchambault::case-app:@VERSION@")
@@ -45,7 +45,7 @@ From [sbt](https://github.com/sbt/sbt):
 ```scala mdoc:passthrough
 def sbtMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
-    println("""resolvers ++= Resolver.sonatypeOssRepos("snapshots")""")
+    println("""resolvers += "Sonatype Central snapshots" at "https://central.sonatype.com/repository/maven-snapshots/"""")
 println("```scala")
 sbtMaybeAddSonatypeSnapshots()
 println("""libraryDependencies += "com.github.alexarchambault" %% "case-app" % "@VERSION@"""")
