@@ -106,7 +106,7 @@ object Error {
     * @param `type`
     *   description of the expected type, like `integer`
     * @param error
-    *   the value that couldn't be parsed
+    *   the value that couldn't be parsed, or details about the error
     */
   @data(
     deprecatedSetters = true,
