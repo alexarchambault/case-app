@@ -58,6 +58,63 @@ object MyApp extends CommandsEntryPoint {
 
 ## Customizing commands help
 
+```scala mdoc:reset-object:invisible
+import caseapp._
+```
+
+The help message of a `CommandsEntryPoint`, printed when no command is passed
+(and there's no default command), lists the available commands. Each command is
+described by the first line of the `@HelpMessage` annotation of its options class.
+On the `CommandsEntryPoint` side, override `description` to print a text
+right after the usage line, and `summaryDesc` to print a text at the end of the
+help message:
+```scala mdoc:silent
+@HelpMessage("Build things")
+case class BuildOptions(
+  foo: String = ""
+)
+
+object Build extends Command[BuildOptions] {
+  def run(options: BuildOptions, args: RemainingArgs): Unit = {
+    ???
+  }
+}
+
+@HelpMessage("Clean things\nDetails that only appear in the help message of clean")
+case class CleanOptions(
+  bar: String = ""
+)
+
+object Clean extends Command[CleanOptions] {
+  def run(options: CleanOptions, args: RemainingArgs): Unit = {
+    ???
+  }
+}
+
+object MyApp extends CommandsEntryPoint {
+  def progName = "my-app"
+  override def description = "My app does things."
+  override def summaryDesc = "Run my-app <COMMAND> --help for more details."
+  def commands = Seq(
+    Build,
+    Clean
+  )
+}
+```
+
+One gets as a help message:
+```scala mdoc:passthrough
+import caseapp.core.help.HelpFormat
+println("```text")
+println(MyApp.help.help(HelpFormat.default(ansiColors = false)))
+println("```")
+```
+
+The format of that help message (colors, [command group](#command-groups) order, …)
+can be customized by overriding `def helpFormat: HelpFormat` in the `CommandsEntryPoint`.
+The help message of each command is that of its options, and can be customized like
+[that of a `CaseApp`](help.md).
+
 ## Enabling support for completion
 
 See [completion support](completion.md)
