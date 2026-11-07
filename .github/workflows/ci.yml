@@ -91,6 +91,9 @@ jobs:
     - run: |
         .github/scripts/setup-mkdocs.sh && \
         ./mill -i docs.mkdocsBuild
+      env:
+        # Used by the git-committers MkDocs plugin, to list the contributors of each page
+        MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.GITHUB_TOKEN }}
 
   publish:
     if: github.event_name == 'push'
@@ -162,3 +165,6 @@ jobs:
     - run: |
         .github/scripts/setup-mkdocs.sh && \
         ./mill -i docs.mkdocsGhDeploy
+      env:
+        # Used by the git-committers MkDocs plugin, to list the contributors of each page
+        MKDOCS_GIT_COMMITTERS_APIKEY: ${{ secrets.GITHUB_TOKEN }}
