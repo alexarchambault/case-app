@@ -18,15 +18,8 @@ import caseapp._
 ```
 
 When defining a case class for options, it is recommended to derive case-app
-type classes for it. In Scala 3, this is done with a `derives` clause, like
+type classes for it in its companion object. This works in both Scala 2 and Scala 3:
 ```scala mdoc:silent
-case class Options(
-  foo: Int
-) derives Parser, Help
-```
-
-In Scala 2, this is done in its companion object, like
-```scala
 case class Options(
   foo: Int
 )
@@ -37,10 +30,12 @@ object Options {
 }
 ```
 
-These derivations are omitted in all other examples through out the case-app
+In Scala 3, a `derives Parser, Help` clause on the case class is equivalent.
+
+These derivations are omitted in all other examples throughout the case-app
 documentation for brevity, but we highly recommend deriving them there, in order
 to make incremental compilation faster when the file defining the options isn't modified.
-This is especially the case in Scala 2, where those type class derivation can be somewhat
+This is especially the case in Scala 2, where those type class derivations can be somewhat
 slow.
 
 ## Mandatory options
