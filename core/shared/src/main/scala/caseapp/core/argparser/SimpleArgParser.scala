@@ -3,6 +3,17 @@ package caseapp.core.argparser
 import caseapp.core.Error
 import dataclass.data
 
+/** [[ArgParser]] for options that require a value, and can't be specified more than once
+  *
+  * Specifying such an option more than once fails with [[caseapp.core.Error.AlreadySpecified]]. Use
+  * `List[T]` or [[Last]] fields to accept options several times.
+  *
+  * @param description
+  *   value description, used in help messages (see [[ArgParser.description]])
+  * @param parse
+  *   parses a value, given the value, the position of the option in the arguments, and the number
+  *   of arguments the option and its value span (see [[ArgParser.apply]])
+  */
 @data(
   deprecatedSetters = true,
   deprecatedSettersMessage = "Use copy instead",
@@ -24,9 +35,18 @@ import dataclass.data
 
 object SimpleArgParser {
 
+  /** Creates a [[SimpleArgParser]] out of a function parsing a `String`
+    *
+    * @param description
+    *   value description, used in help messages, like `int` or `path`
+    * @param parse
+    *   parses a value, returning an error in case of failure (like
+    *   [[caseapp.core.Error.MalformedValue]] or [[caseapp.core.Error.Other]])
+    */
   def from[T](description: String)(parse: String => Either[Error, T]): SimpleArgParser[T] =
     SimpleArgParser(description, (value, _, _) => parse(value))
 
+  /** Parser for `Byte` */
   val byte: SimpleArgParser[Byte] =
     from("byte") { s =>
       try Right(s.toByte)
@@ -36,6 +56,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `Short` */
   val short: SimpleArgParser[Short] =
     from("short") { s =>
       try Right(s.toShort)
@@ -45,6 +66,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `Int` */
   val int: SimpleArgParser[Int] =
     from("int") { s =>
       try Right(s.toInt)
@@ -54,6 +76,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `Long` */
   val long: SimpleArgParser[Long] =
     from("long") { s =>
       try Right(s.toLong)
@@ -63,6 +86,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `Double` */
   val double: SimpleArgParser[Double] =
     from("double") { s =>
       try Right(s.toDouble)
@@ -72,6 +96,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `Float` */
   val float: SimpleArgParser[Float] =
     from("float") { s =>
       try Right(s.toFloat)
@@ -81,6 +106,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `BigDecimal` */
   val bigDecimal: SimpleArgParser[BigDecimal] =
     from("decimal") { s =>
       try Right(BigDecimal(s))
@@ -90,6 +116,7 @@ object SimpleArgParser {
       }
     }
 
+  /** Parser for `String` (any value is accepted) */
   val string: SimpleArgParser[String] =
     from("string")(Right(_))
 
