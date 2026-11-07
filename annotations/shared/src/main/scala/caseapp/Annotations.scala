@@ -46,12 +46,12 @@ object ValueDescription {
 
 /** Help message for the annotated argument, or for the annotated case class of arguments
   *
-  * On an argument (case class field), `message` is shown next to the argument in help messages,
-  * and is used as description of that option in shell completions.
+  * On an argument (case class field), `message` is shown next to the argument in help messages, and
+  * is used as description of that option in shell completions.
   *
   * On a case class of arguments, `message` is printed after the usage line in help messages, and
-  * its first line is used as description of the corresponding command in command listings and
-  * shell completions.
+  * its first line is used as description of the corresponding command in command listings and shell
+  * completions.
   *
   * {{{
   * @HelpMessage("Greets people")
@@ -116,8 +116,8 @@ final case class ArgsName(argsName: String) extends StaticAnnotation
 
 /** Don't parse the annotated field as a single argument. Recurse on its fields instead.
   *
-  * The type of the annotated field must itself be a case class of arguments (with a `Parser`).
-  * This allows sharing groups of options between several applications or commands.
+  * The type of the annotated field must itself be a case class of arguments (with a `Parser`). This
+  * allows sharing groups of options between several applications or commands.
   *
   * Optionally, add a prefix to all the names of the fields: with `@Recurse("foo")`, a `bar` field
   * of the nested case class is accepted as `--foo-bar`.
