@@ -155,6 +155,10 @@ object CompletionTests extends TestSuite {
 
         assert(compRely.contains(expectedCompRely))
       }
+      test("bash fallback to file completion") {
+        val compRely = Bash.print(Nil)
+        assert(compRely.contains("""compgen -f -- "${COMP_WORDS[$COMP_CWORD]}""""))
+      }
       test("fish") {
         val res              = Prog.complete(Seq("back-tick", "-"), 1)
         val compRely         = Fish.print(res)
