@@ -19,7 +19,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - name: Get Scala versions from the build
@@ -40,7 +40,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - name: Test
@@ -55,7 +55,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - name: Check
@@ -70,7 +70,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
         apps: scalafmt # launcher only, the scalafmt version used comes from .scalafmt.conf
@@ -85,7 +85,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - run: |
@@ -113,7 +113,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - name: Release
@@ -156,7 +156,7 @@ jobs:
         fetch-depth: 0
         submodules: true
     - uses: coursier/cache-action@v9.0
-    - uses: coursier/setup-action@v3.0
+    - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
     - run: |
