@@ -34,7 +34,7 @@ object Bash {
       b.append("\"")
       b.append(newLine)
     }
-    if (b.isEmpty) """COMPREPLY=($(compgen -f "${COMP_WORDS[$COMP_CWORD]}"))"""
+    if (b.isEmpty) """COMPREPLY=($(compgen -f -- "${COMP_WORDS[$COMP_CWORD]}"))"""
     else "COMPREPLY=(" + b.result() + ")"
   }
 }
