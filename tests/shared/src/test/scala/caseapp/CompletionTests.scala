@@ -41,7 +41,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
         )
         assert(res == expected)
@@ -73,7 +73,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
         )
         assert(res == expected)
@@ -127,7 +127,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
         )
         assert(res == expected)
@@ -203,7 +203,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
         )
         assert(res == expected)
@@ -212,7 +212,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
         )
         assert(res == expected)

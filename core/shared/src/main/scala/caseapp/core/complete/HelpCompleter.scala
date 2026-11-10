@@ -1,6 +1,7 @@
 package caseapp.core.complete
 
 import caseapp.core.help.Help
+import caseapp.core.util.NameOps.toNameOps
 import caseapp.core.{Arg, RemainingArgs}
 
 /** Default [[Completer]], completing option names from `help`
@@ -15,8 +16,7 @@ class HelpCompleter[T](help: Help[T]) extends Completer[T] {
       .iterator
       .flatMap { arg =>
         val names = arg.names
-          .map(help.nameFormatter.format)
-          .map(n => (if (n.length == 1) "-" else "--") + n)
+          .map(_.option(help.nameFormatter))
           .filter(_.startsWith(prefix))
         if (names.isEmpty) Iterator.empty
         else
