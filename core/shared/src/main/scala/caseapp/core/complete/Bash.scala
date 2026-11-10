@@ -35,6 +35,15 @@ object Bash {
   private def firstLine(s: String): String =
     s.linesIterator.take(1).toList.headOption.getOrElse("")
 
+  // When nothing can be suggested, complete file names, like bash does by default.
+  // compopt -o filenames gets directory names a trailing '/' rather than a space.
+  // As bash splits words on the characters of COMP_WORDBREAKS, like '=' or ':', the
+  // current word can be such a character: complete files right after it then.
+  private def fileCompletion: String =
+    """compopt -o filenames 2>/dev/null; COMPREPLY=($(cur="${COMP_WORDS[$COMP_CWORD]}"; """ +
+      """[[ ${#cur} == 1 && "$COMP_WORDBREAKS" == *"$cur"* ]] && cur=""; """ +
+      """compgen -f -- "$cur"))"""
+
   def print(items: Seq[CompletionItem]): String = {
     val newLine     = System.lineSeparator()
     val b           = new StringBuilder
@@ -46,7 +55,7 @@ object Bash {
       b.append(quote(firstLine(value) + desc))
       b.append(newLine)
     }
-    if (b.isEmpty) """COMPREPLY=($(compgen -f -- "${COMP_WORDS[$COMP_CWORD]}"))"""
+    if (b.isEmpty) fileCompletion
     else "COMPREPLY=(" + b.result() + ")"
   }
 }

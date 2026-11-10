@@ -79,5 +79,24 @@ object BashCompletionTests extends TestSuite {
       else
         "bash not available, skipped"
     }
+
+    test("file fallback right after a word break character") {
+      if (hasBash) {
+        val dir = os.temp.dir(prefix = "case-app-bash-test")
+        try {
+          for (name <- Seq("foo", "bar"))
+            os.write(dir / name, "")
+          val snippet = Bash.print(Nil)
+          // bash splits "--file=" and "org:" on '=' and ':', that are part of COMP_WORDBREAKS
+          for (sep <- Seq("=", ":")) {
+            assert(bashReply(dir, Seq("prog", "--file", sep), 2, snippet) == Seq("bar", "foo"))
+            assert(bashReply(dir, Seq("prog", "--file", sep, "f"), 3, snippet) == Seq("foo"))
+          }
+        }
+        finally os.remove.all(dir)
+      }
+      else
+        "bash not available, skipped"
+    }
   }
 }
