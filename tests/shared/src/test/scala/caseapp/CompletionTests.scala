@@ -227,5 +227,14 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
     }
+
+    test("hidden commands and options") {
+      import CompletionDefinitions.HiddenAndStopping._
+      test {
+        val res      = Prog.complete(Seq("visible", "--s"), 1)
+        val expected = Nil
+        assert(res == expected)
+      }
+    }
   }
 }

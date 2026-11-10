@@ -111,4 +111,21 @@ object CompletionDefinitions {
       )
     }
   }
+
+  object HiddenAndStopping {
+    case class VisibleOptions(
+      @HelpMessage("A value") value: String = "",
+      @Hidden secret: Boolean = false
+    )
+    object Visible extends Command[VisibleOptions] {
+      def run(options: VisibleOptions, args: RemainingArgs): Unit = ???
+    }
+
+    object Prog extends CommandsEntryPoint {
+      def progName = "prog"
+      def commands = Seq(
+        Visible
+      )
+    }
+  }
 }

@@ -14,6 +14,8 @@ class HelpCompleter[T](help: Help[T]) extends Completer[T] {
     help
       .args
       .iterator
+      // hidden arguments (see caseapp.Hidden) are left out, like they are in help messages
+      .filter(!_.noHelp)
       .flatMap { arg =>
         val names = arg.names
           .map(_.option(help.nameFormatter))
