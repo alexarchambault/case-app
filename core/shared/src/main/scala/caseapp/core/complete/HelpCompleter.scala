@@ -3,6 +3,11 @@ package caseapp.core.complete
 import caseapp.core.help.Help
 import caseapp.core.{Arg, RemainingArgs}
 
+/** Default [[Completer]], completing option names from `help`
+  *
+  * Option names are completed along with the help message of the corresponding argument. Option
+  * values and non-option arguments aren't completed.
+  */
 class HelpCompleter[T](help: Help[T]) extends Completer[T] {
   def optionName(prefix: String, state: Option[T], args: RemainingArgs): List[CompletionItem] =
     help

@@ -8,13 +8,41 @@ import caseapp.core.help.{Help, HelpFormat, RuntimeCommandHelp, RuntimeCommandsH
   */
 trait CommandsEntryPointLike[C <: CommandLike] {
 
+  /** Command to run when the arguments don't start with the name of a command
+    *
+    * `None` by default, in which case the help message of the entry point is printed in that case
+    * (see `printUsage`). When set, all the arguments are passed to this command, and its options
+    * are listed in the help message of the entry point.
+    */
   def defaultCommand: Option[C] = None
+
+  /** Commands of this entry point
+    *
+    * The command run is the one whose name (see [[CommandLike.names]]) matches the longest prefix
+    * of the arguments. The arguments that follow the command name are passed to it.
+    */
   def commands: Seq[C]
 
+  /** Program name, used in help messages
+    *
+    * Commands are passed this program name followed by their own name, as program name for their
+    * help messages (like `my-app my-command`).
+    */
   def progName: String
+
+  /** Description of the application, printed below the usage line of its help message
+    *
+    * Empty by default, in which case nothing is printed.
+    */
   def description: String = ""
+
+  /** Text printed at the end of the help message of the application
+    *
+    * Empty by default, in which case nothing is printed.
+    */
   def summaryDesc: String = ""
 
+  /** Help message of the application, listing its commands */
   def help: RuntimeCommandsHelp =
     RuntimeCommandsHelp(
       progName,
@@ -24,10 +52,19 @@ trait CommandsEntryPointLike[C <: CommandLike] {
       Some(summaryDesc).filter(_.nonEmpty)
     )
 
+  /** Format of the help message of the application
+    *
+    * Defaults to [[caseapp.core.help.HelpFormat.default()* HelpFormat.default()]], which uses ANSI
+    * colors. This doesn't change the format of the help messages of the commands, see
+    * [[CaseApp.helpFormat]] for those.
+    */
   def helpFormat: HelpFormat =
     HelpFormat.default()
 
   /** Finds the command to run for `args`
+    *
+    * Looks for the command whose name matches the longest prefix of `args`, falling back to
+    * [[defaultCommand]] if no command matches.
     *
     * @return
     *   the program name to use in that command's help messages, the command, and the arguments to

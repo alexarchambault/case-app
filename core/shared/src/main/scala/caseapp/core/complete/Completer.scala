@@ -3,30 +3,73 @@ package caseapp.core.complete
 import caseapp.core.help.{WithFullHelp, WithHelp}
 import caseapp.core.{Arg, RemainingArgs}
 
+/** Computes shell completions for the arguments of an application whose options are a `T`
+  *
+  * Used by [[caseapp.core.app.CaseApp.complete]], via [[caseapp.core.app.CaseApp.completer]]. The
+  * default completer, [[HelpCompleter]], only completes option names. To complete option values
+  * too, override `completer` in your [[caseapp.core.app.CaseApp]] or [[caseapp.core.app.Command]],
+  * with [[Completer.CompleterOps.completeOptionValue]] for example:
+  * {{{
+  * override def completer: Completer[Options] =
+  *   super.completer.completeOptionValue { (arg, prefix, state, args) =>
+  *     if (arg.name.name == "color")
+  *       Some(List("red", "green", "blue").filter(_.startsWith(prefix)).map(CompletionItem(_)))
+  *     else
+  *       None // use the completions of the underlying completer
+  *   }
+  * }}}
+  *
+  * In all methods, `prefix` is the argument being completed (possibly empty), `state` holds the
+  * options parsed from the other arguments (`None` if they couldn't be parsed), and `args` holds
+  * the non-option arguments.
+  */
 trait Completer[-T] { self =>
+
+  /** Completes an option name (an argument starting with `-`) */
   def optionName(prefix: String, state: Option[T], args: RemainingArgs): List[CompletionItem]
+
+  /** Completes the value of option `arg`, when passed as a separate argument (`--foo value`) */
   def optionValue(
     arg: Arg,
     prefix: String,
     state: Option[T],
     args: RemainingArgs
   ): List[CompletionItem]
+
+  /** Completes a non-option argument */
   def argument(prefix: String, state: Option[T], args: RemainingArgs): List[CompletionItem]
 
+  /** Completer for the arguments after `--`
+    *
+    * `None` by default, in which case arguments after `--` aren't completed.
+    */
   def postDoubleDash(state: Option[T], args: RemainingArgs): Option[Completer[T]] =
     None
 
+  /** Creates a `Completer[U]` out of this one, given a way to get a `T` from a `U` */
   final def contramapOpt[U](f: U => Option[T]): Completer[U] =
     Completer.Mapped(this, f)
+
+  /** Adapts this completer to [[caseapp.core.help.WithHelp]] */
   final def withHelp: Completer[WithHelp[T]] =
     contramapOpt(_.baseOrError.toOption)
+
+  /** Adapts this completer to [[caseapp.core.help.WithFullHelp]] */
   final def withFullHelp: Completer[WithFullHelp[T]] =
     contramapOpt(_.withHelp.baseOrError.toOption)
 }
 
 object Completer {
 
+  /** Adds methods to [[Completer]] */
   implicit class CompleterOps[T](private val completer: Completer[T]) extends AnyVal {
+
+    /** Creates a completer completing option values with `f`
+      *
+      * `f` is passed the option, the prefix, the state, and the non-option arguments (see
+      * [[Completer.optionValue]]). If it returns `None`, the option value is completed by the
+      * underlying completer.
+      */
     def completeOptionValue(f: (
       Arg,
       String,
@@ -36,6 +79,16 @@ object Completer {
       WithOptionValue(completer, f)
   }
 
+  /** Completer delegating everything to `default`
+    *
+    * Handy to override only some methods of an existing completer:
+    * {{{
+    * new Completer.DefaultTo(super.completer) {
+    *   override def argument(prefix: String, state: Option[Options], args: RemainingArgs) =
+    *     List(CompletionItem("foo"))
+    * }
+    * }}}
+    */
   class DefaultTo[-T](default: Completer[T]) extends Completer[T] {
     override def optionName(
       prefix: String,
