@@ -284,7 +284,8 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
         val needsWrite = !FileOps.exists(completionScriptDest) ||
           FileOps.readFile(completionScriptDest) != completionScript
         if (needsWrite) {
-          printLine(s"Writing $completionScriptDest")
+          // to stderr, as --env prints a script meant to be evaluated to stdout
+          printLine(s"Writing $completionScriptDest", toStderr = true)
           FileOps.createDirectories(completionScriptDest.getParent)
           FileOps.writeFile(completionScriptDest, completionScript)
         }
