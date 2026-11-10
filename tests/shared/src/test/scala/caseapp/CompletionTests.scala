@@ -151,7 +151,7 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
 
         val compRely         = Bash.print(res)
-        val expectedCompRely = """"--backtick  -- A pattern with backtick \`--\`"""".stripMargin
+        val expectedCompRely = "'--backtick  -- A pattern with backtick `--`'"
 
         assert(compRely.contains(expectedCompRely))
       }

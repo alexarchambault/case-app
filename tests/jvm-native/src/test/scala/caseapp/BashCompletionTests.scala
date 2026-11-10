@@ -1,6 +1,6 @@
 package caseapp
 
-import caseapp.core.complete.Bash
+import caseapp.core.complete.{Bash, CompletionItem}
 import utest._
 
 object BashCompletionTests extends TestSuite {
@@ -48,6 +48,31 @@ object BashCompletionTests extends TestSuite {
           assert(reply("--").isEmpty)
           assert(reply("-") == Seq("-dir1", "-foo"))
           assert(reply("b") == Seq("bar"))
+        }
+        finally os.remove.all(dir)
+      }
+      else
+        "bash not available, skipped"
+    }
+
+    test("values and descriptions are taken literally") {
+      if (hasBash) {
+        val dir = os.temp.dir(prefix = "case-app-bash-test")
+        try {
+          val items = Seq(
+            CompletionItem("it's", Some("Don't $HOME `pwd` $(echo no) \\"), Nil),
+            CompletionItem("a\"b", Some("Ends with a backslash \\"), Seq("$HOME"))
+          )
+          val reply = bashReply(dir, Seq("prog", ""), 1, Bash.print(items))
+          val expected = Seq(
+            "it's  -- Don't $HOME `pwd` $(echo no) \\",
+            "a\"b  -- Ends with a backslash \\",
+            "$HOME  -- Ends with a backslash \\"
+          ).sorted
+          assert(reply == expected)
+
+          val singleReply = bashReply(dir, Seq("prog", ""), 1, Bash.print(items.take(1)))
+          assert(singleReply == Seq("it's"))
         }
         finally os.remove.all(dir)
       }
