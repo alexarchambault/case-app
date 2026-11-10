@@ -69,7 +69,7 @@ object CompletionInstallTests extends TestSuite {
             """
               |# >>> prog completions >>>
               |fpath=("$HOME/.config/zsh/completions" $fpath)
-              |compinit
+              |autoload -Uz compinit && compinit
               |# <<< prog completions <<<
               |""".stripMargin
         )
@@ -125,7 +125,7 @@ object CompletionInstallTests extends TestSuite {
               """
                 |# >>> prog completions >>>
                 |fpath=("$HOME/.config/zsh/completions" $fpath)
-                |compinit
+                |autoload -Uz compinit && compinit
                 |# <<< prog completions <<<
                 |""".stripMargin
           ),

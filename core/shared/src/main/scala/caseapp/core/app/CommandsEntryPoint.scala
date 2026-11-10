@@ -289,7 +289,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
           FileOps.createDirectories(completionScriptDest.getParent)
           FileOps.writeFile(completionScriptDest, completionScript)
         }
-        val script = Seq(s"""fpath=("$dir" $$fpath)""", "compinit")
+        val script = Seq(s"""fpath=("$dir" $$fpath)""", "autoload -Uz compinit && compinit")
           .map(_ + System.lineSeparator())
           .mkString
         (script, zshrcFile)
