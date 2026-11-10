@@ -4,6 +4,13 @@ import caseapp.core.complete.{Bash, CompletionItem, Fish, Zsh}
 import utest._
 
 object CompletionTests extends TestSuite {
+
+  // added by CaseApp#complete to the options of the applications
+  private val helpItems = List(
+    CompletionItem("--usage", Some("Print usage and exit"), Nil),
+    CompletionItem("--help", Some("Print help message and exit"), List("-h"))
+  )
+
   val tests = Tests {
     test("simple") {
       import CompletionDefinitions.Simple._
@@ -11,7 +18,7 @@ object CompletionTests extends TestSuite {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value")
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -43,7 +50,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -75,7 +82,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -129,7 +136,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -138,7 +145,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -147,7 +154,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
 
         val compRely         = Bash.print(res)
@@ -172,7 +179,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
 
         val compRely         = Zsh.print(res)
@@ -205,7 +212,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -214,7 +221,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -223,7 +230,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
     }
@@ -255,5 +262,6 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
     }
+
   }
 }

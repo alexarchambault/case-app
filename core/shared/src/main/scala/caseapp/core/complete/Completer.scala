@@ -131,6 +131,26 @@ object Completer {
       }
   }
 
+  /** Adds `extraOptionNames(prefix)` to the option names completed by `completer`
+    */
+  def withExtraOptionNames[T](
+    completer: Completer[T],
+    extraOptionNames: String => List[CompletionItem]
+  ): Completer[T] =
+    WithExtraOptionNames(completer, extraOptionNames)
+
+  private final case class WithExtraOptionNames[T](
+    self: Completer[T],
+    extraOptionNames: String => List[CompletionItem]
+  ) extends DefaultTo[T](self) {
+    override def optionName(
+      prefix: String,
+      state: Option[T],
+      args: RemainingArgs
+    ): List[CompletionItem] =
+      super.optionName(prefix, state, args) ++ extraOptionNames(prefix)
+  }
+
   private final case class Mapped[T, U](self: Completer[T], f: U => Option[T])
       extends Completer[U] {
     def optionName(prefix: String, state: Option[U], args: RemainingArgs): List[CompletionItem] =
