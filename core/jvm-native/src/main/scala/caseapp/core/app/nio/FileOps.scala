@@ -10,7 +10,12 @@ object FileOps {
   def writeFile(path: Path, content: String): Unit =
     Files.write(path, content.getBytes(StandardCharsets.UTF_8))
   def appendToFile(path: Path, content: String): Unit =
-    Files.write(path, content.getBytes(StandardCharsets.UTF_8), StandardOpenOption.APPEND)
+    Files.write(
+      path,
+      content.getBytes(StandardCharsets.UTF_8),
+      StandardOpenOption.CREATE,
+      StandardOpenOption.APPEND
+    )
   def readEnv(varName: String): Option[String] =
     Option(System.getenv(varName))
   def homeDir: Path =

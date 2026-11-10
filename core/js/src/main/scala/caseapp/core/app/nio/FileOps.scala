@@ -14,7 +14,7 @@ object FileOps {
   def writeFile(path: Path, content: String): Unit =
     nodeFs.writeFileSync(path.underlying, content)
   def appendToFile(path: Path, content: String): Unit =
-    nodeFs.writeFileSync(path.underlying, content, js.Dictionary("mode" -> "a"))
+    nodeFs.writeFileSync(path.underlying, content, js.Dictionary("flag" -> "a"))
   def readEnv(varName: String): Option[String] =
     nodeProcess.env.asInstanceOf[js.Dictionary[String]].get(varName)
   def homeDir: Path =

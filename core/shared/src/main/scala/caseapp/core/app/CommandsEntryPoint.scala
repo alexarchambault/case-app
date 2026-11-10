@@ -144,7 +144,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
     */
   protected def completeMainHook(args: Array[String]): Unit =
     for (path <- completionDebugFile) {
-      val output = s"completeMain(${args.toSeq})"
+      val output = s"completeMain(${args.toSeq})" + System.lineSeparator()
       FileOps.appendToFile(path, output)
     }
 
