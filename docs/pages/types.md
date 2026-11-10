@@ -44,8 +44,8 @@ when the field doesn't have a default value.
 
 Option types are convenient to know whether an option was specified (the
 field value is then `Some(…)`) or not (field value is `None`),
-and behave differently if the option wasn't specified, like default to the value
-of another option say.
+and to behave differently if the option wasn't specified, like defaulting to the value
+of another option.
 
 ## Sequences
 
@@ -77,7 +77,7 @@ to be specified multiple times.
 Yet, unlike sequence types, it just discards the values passed to the option, but for the
 last one.
 
-So `Last` makes option parsing not fail if its option is specified multiple time, and just
+So `Last` makes option parsing not fail if its option is specified multiple times, and just
 retains the last occurrence of it.
 
 ## Counters
@@ -108,9 +108,9 @@ at helping "tagging" or "annotating" a type.
 
 Using `List[Unit]` as a type also works. `Unit` itself could be used as a type, but would
 be of little help. A field with type `Unit` is mapped to a flag option, like
-[`Boolean`](#booleans), but the `Unit` type itself doesn't allow to retain if the flag
+[`Boolean`](#booleans), but the `Unit` type itself doesn't allow retaining whether the flag
 was specified by users or not. In a `List` on the other hand, counting the number
-of `()` (`Unit` instance) in the list allows to know how many types the flag was specified.
+of `()` (`Unit` instance) in the list tells how many times the flag was specified.
 
 ## Custom parsers
 
@@ -120,11 +120,11 @@ import caseapp._
 
 For a type to be accepted as an option, it needs to have an implicit `ArgParser` in scope.
 
-The abstract and overriddable methods of `ArgParser` are quite low-level, but allow to
-implement all the kind of parsers defined in case-app.
+The abstract and overridable methods of `ArgParser` are quite low-level, but allow
+implementing all the kinds of parsers defined in case-app.
 
 For simple types, when one only wants to parse a string to a given type, `SimpleArgParser`
-allows to define an `ArgParser` out of a `String => T` method. For example, one can
+allows defining an `ArgParser` out of a `String => T` method. For example, one can
 define a parser for integer values with:
 ```scala mdoc:silent
 import caseapp.core.argparser.{ArgParser, SimpleArgParser}

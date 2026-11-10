@@ -1,7 +1,7 @@
 # Setup
 
 Depend on case-app via `com.github.alexarchambault::case-app:@VERSION@`.
-The latest version is [![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_3.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.alexarchambault/case-app_3).
+The latest version is [![Maven Central](https://img.shields.io/maven-central/v/com.github.alexarchambault/case-app_3.svg)](https://central.sonatype.com/artifact/com.github.alexarchambault/case-app_3).
 
 ## JVM
 
@@ -14,16 +14,16 @@ From [Mill](https://github.com/com-lihaoyi/Mill):
 def millMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
     println(
-      """def repositoriesTask = T {
-        |  super.repositoriesTask() ++ Seq(
-        |    coursier.Repositories.sonatype("snapshots")
+      """def repositories = Task {
+        |  super.repositories() ++ Seq(
+        |    "central:maven-snapshots"
         |  )
         |}""".stripMargin
     )
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def mvnDeps = Agg(
+  """def mvnDeps = Seq(
     |  mvn"com.github.alexarchambault::case-app:@VERSION@"
     |)""".stripMargin
 )
@@ -34,7 +34,7 @@ From [Scala CLI](https://github.com/VirtusLab/scala-cli):
 ```scala mdoc:passthrough
 def scalaCliMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
-    println("//> using repository sonatype:snapshots")
+    println("//> using repository central:maven-snapshots")
 println("```scala")
 scalaCliMaybeAddSonatypeSnapshots()
 println("//> using dep com.github.alexarchambault::case-app:@VERSION@")
@@ -45,7 +45,7 @@ From [sbt](https://github.com/sbt/sbt):
 ```scala mdoc:passthrough
 def sbtMaybeAddSonatypeSnapshots() =
   if (isSnapshot)
-    println("""resolvers ++= Resolver.sonatypeOssRepos("snapshots")""")
+    println("""resolvers += "Sonatype Central snapshots" at "https://central.sonatype.com/repository/maven-snapshots/"""")
 println("```scala")
 sbtMaybeAddSonatypeSnapshots()
 println("""libraryDependencies += "com.github.alexarchambault" %% "case-app" % "@VERSION@"""")
@@ -64,7 +64,7 @@ From [Mill](https://github.com/com-lihaoyi/Mill):
 println("```scala")
 millMaybeAddSonatypeSnapshots()
 println(
-  """def mvnDeps = Agg(
+  """def mvnDeps = Seq(
     |  mvn"com.github.alexarchambault::case-app::@VERSION@"
     |)""".stripMargin
 )

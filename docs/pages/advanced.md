@@ -6,7 +6,7 @@
 import caseapp._
 ```
 
-One can recover the exact positions of each options and remaining arguments.
+One can recover the exact positions of each option and remaining arguments.
 
 For options, one should use the `Indexed` class, like
 ```scala mdoc
@@ -36,7 +36,7 @@ import caseapp._
 
 One can stop parsing arguments at the first argument that is not an option,
 or that is an unknown option. This can be useful when "pre-processing" arguments
-passed to another application later on: case-app parses as much arguments as possible,
+passed to another application later on: case-app parses as many arguments as possible,
 then stops, so that the other application can parse the remaining arguments later on.
 
 ```scala mdoc:silent
@@ -109,8 +109,8 @@ object Options {
 val (options, args) = CaseApp.parse[Options](Seq("--other", "thing", "--foo", "a")).toOption.get
 ```
 
-Unrecognized options end up in the "remaining arguments", along with non-option or non-option
-values arguments.
+Unrecognized options end up in the "remaining arguments", along with arguments that are neither options nor
+option values.
 
 ```scala mdoc:reset-object:invisible
 import caseapp._

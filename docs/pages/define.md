@@ -18,15 +18,8 @@ import caseapp._
 ```
 
 When defining a case class for options, it is recommended to derive case-app
-type classes for it. In Scala 3, this is done with a `derives` clause, like
+type classes for it in its companion object. This works in both Scala 2 and Scala 3:
 ```scala mdoc:silent
-case class Options(
-  foo: Int
-) derives Parser, Help
-```
-
-In Scala 2, this is done in its companion object, like
-```scala
 case class Options(
   foo: Int
 )
@@ -37,10 +30,12 @@ object Options {
 }
 ```
 
-These derivations are omitted in all other examples through out the case-app
+In Scala 3, a `derives Parser, Help` clause on the case class is equivalent.
+
+These derivations are omitted in all other examples throughout the case-app
 documentation for brevity, but we highly recommend deriving them there, in order
 to make incremental compilation faster when the file defining the options isn't modified.
-This is especially the case in Scala 2, where those type class derivation can be somewhat
+This is especially the case in Scala 2, where those type class derivations can be somewhat
 slow.
 
 ## Mandatory options
@@ -92,7 +87,7 @@ types can also have fields marked with it, etc.
 import caseapp._
 ```
 
-Various annotations allow to customize options, like `@Name` to offer
+Various annotations allow customizing options, like `@Name` to offer
 several ways to specify an option:
 ```scala mdoc:silent
 case class Options(
@@ -115,8 +110,8 @@ Case class field names are assumed to follow the
 [kebab case](https://developer.mozilla.org/en-US/docs/Glossary/Kebab_case) (`kebab-case`) to
 get the corresponding option name.
 
-Names consisting in a single letter are
-prefixed with a single hyphen (like `-t`) while other are prefixed with two hyphens
+Names consisting of a single letter are
+prefixed with a single hyphen (like `-t`) while others are prefixed with two hyphens
 (like `--foo-thing`).
 ```scala mdoc:silent
 case class Options(
@@ -144,7 +139,7 @@ case class Options(
 
 ## Passing values to options
 
-For option types expecting a value (most of them), that value can be passed in a separated
+For option types expecting a value (most of them), that value can be passed in a separate
 argument, like
 ```text
 --foo value

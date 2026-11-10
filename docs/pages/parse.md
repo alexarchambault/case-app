@@ -66,7 +66,7 @@ val args = Array("a")
 ```
 
 It aims at being used from Scala CLI `.sc` files ("Scala scripts"), where one
-would rather have case-app handle all errors cases, like
+would rather have case-app handle all error cases, like
 ```scala mdoc:silent
 //> using dep com.github.alexarchambault::case-app::@VERSION@
 import caseapp._
@@ -102,7 +102,7 @@ object MyApp extends CaseApp[Options] {
 }
 ```
 
-In that example, case-app defines the `MainApp#main` method, so that
+In that example, `CaseApp` defines the `main` method, so that
 `MyApp` can be used as a "main class".
 
 ## Parsing
