@@ -96,7 +96,9 @@ import dataclass._
                     .linesIterator
                     .map(_.trim)
                     .filter(_.nonEmpty)
-                    .nextOption()
+                    .take(1)
+                    .toList
+                    .headOption
                 }
               val descOpt =
                 if (help.hidden)

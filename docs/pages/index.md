@@ -58,7 +58,7 @@ println("```")
 - runs on the JVM, [Scala.js](https://github.com/scala-js/scala-js), and
   [Scala Native](https://github.com/scala-native/scala-native)
 
-case-app is published for Scala 2.13 and Scala 3 on the JVM, and for Scala 3 on
+case-app is published for Scala 2.12, 2.13, and 3 on the JVM, and for Scala 3 on
 Scala.js and Scala Native (the cats-effect module is only published for Scala 3).
 
 ## Used by
