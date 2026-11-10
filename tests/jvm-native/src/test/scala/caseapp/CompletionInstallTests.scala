@@ -6,7 +6,8 @@ object CompletionInstallTests extends TestSuite {
 
   private def shellTest(
     shell: String,
-    expectedFiles: Seq[(os.SubPath, String)]
+    expectedFiles: Seq[(os.SubPath, String)],
+    completeCommandName0: List[String] = List("complete")
   ): Unit = {
     val shell0 = shell
     val dir    = os.temp.dir(prefix = "case-app-test")
@@ -17,6 +18,7 @@ object CompletionInstallTests extends TestSuite {
         override def completionXdgHome        = None
         override def completionZDotDir        = None
         override def enableCompletionsCommand = true
+        override def completeCommandName      = completeCommandName0
         def progName                          = "prog"
         def commands = Seq(
           CompletionDefinitions.Commands.First,
@@ -105,6 +107,66 @@ object CompletionInstallTests extends TestSuite {
               |""".stripMargin
         )
       )
+    }
+
+    test("custom complete command name") {
+      test("zsh") {
+        shellTest(
+          "zsh",
+          Seq(
+            os.sub / ".config" / "zsh" / "completions" / "_prog" ->
+              """#compdef _prog prog
+                |
+                |function _prog {
+                |  eval "$(prog internal complete zsh-v1 $CURRENT $words[@])"
+                |}
+                |""".stripMargin,
+            os.sub / ".zshrc" ->
+              """
+                |# >>> prog completions >>>
+                |fpath=("$HOME/.config/zsh/completions" $fpath)
+                |compinit
+                |# <<< prog completions <<<
+                |""".stripMargin
+          ),
+          completeCommandName0 = List("internal", "complete")
+        )
+      }
+
+      test("bash") {
+        shellTest(
+          "bash",
+          Seq(
+            os.sub / ".bashrc" ->
+              """
+                |# >>> prog completions >>>
+                |_prog_completions() {
+                |  local IFS=$'\n'
+                |  eval "$(prog internal complete bash-v1 "$(( $COMP_CWORD + 1 ))" "${COMP_WORDS[@]}")"
+                |}
+                |
+                |complete -F _prog_completions prog
+                |# <<< prog completions <<<
+                |""".stripMargin
+          ),
+          completeCommandName0 = List("internal", "complete")
+        )
+      }
+
+      test("fish") {
+        shellTest(
+          "fish",
+          Seq(
+            os.sub / ".config" / "fish" / "completions" / "prog.fish" ->
+              """
+                |# >>> prog completions >>>
+                |complete prog -a '(prog internal complete fish-v1 (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+                |# <<< prog completions <<<
+                |""".stripMargin
+          ),
+          completeCommandName0 = List("internal", "complete")
+        )
+      }
     }
   }
 }

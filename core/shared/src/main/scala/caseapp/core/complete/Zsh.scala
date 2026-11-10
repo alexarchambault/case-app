@@ -10,12 +10,23 @@ object Zsh {
     s"$shellName-v1"
 
   def script(progName: String): String =
+    script(progName, List("complete"))
+
+  /** Shell script enabling completions for `progName`
+    *
+    * @param completeCommand
+    *   name of the command that `progName` uses to compute completions (see
+    *   `CommandsEntryPoint.completeCommandName`)
+    */
+  def script(progName: String, completeCommand: Seq[String]): String = {
+    val complete = completeCommand.mkString(" ")
     s"""#compdef _$progName $progName
        |
        |function _$progName {
-       |  eval "$$($progName complete $id $$CURRENT $$words[@])"
+       |  eval "$$($progName $complete $id $$CURRENT $$words[@])"
        |}
        |""".stripMargin
+  }
 
   private def hash(content: Iterator[String]): String = {
     val hash = MurmurHash3.arrayHash(content.toArray)

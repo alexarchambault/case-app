@@ -7,11 +7,21 @@ object Bash {
   val id: String =
     s"$shellName-v1"
 
-  def script(progName: String): String = {
-    val ifs = "\\n"
+  def script(progName: String): String =
+    script(progName, List("complete"))
+
+  /** Shell script enabling completions for `progName`
+    *
+    * @param completeCommand
+    *   name of the command that `progName` uses to compute completions (see
+    *   `CommandsEntryPoint.completeCommandName`)
+    */
+  def script(progName: String, completeCommand: Seq[String]): String = {
+    val ifs      = "\\n"
+    val complete = completeCommand.mkString(" ")
     s"""_${progName}_completions() {
        |  local IFS=$$'$ifs'
-       |  eval "$$($progName complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
+       |  eval "$$($progName $complete $id "$$(( $$COMP_CWORD + 1 ))" "$${COMP_WORDS[@]}")"
        |}
        |
        |complete -F _${progName}_completions $progName

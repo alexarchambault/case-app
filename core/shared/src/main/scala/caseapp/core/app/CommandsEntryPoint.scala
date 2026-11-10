@@ -274,11 +274,11 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
 
     val (rcScript, defaultRcFile) = format match {
       case Bash.id | Bash.shellName =>
-        (Bash.script(name), bashrcFile)
+        (Bash.script(name, completeCommandName), bashrcFile)
       case Fish.id | Fish.shellName =>
-        (Fish.script(name), fishRcFile(name))
+        (Fish.script(name, completeCommandName), fishRcFile(name))
       case Zsh.id | Zsh.shellName =>
-        val completionScript     = Zsh.script(name)
+        val completionScript     = Zsh.script(name, completeCommandName)
         val dir                  = zshCompletionWorkingDir(options.output)
         val completionScriptDest = dir.resolve(s"_$name")
         val needsWrite = !FileOps.exists(completionScriptDest) ||
@@ -370,9 +370,9 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
 
     def script(format: String): String =
       format match {
-        case Bash.shellName | Bash.id => Bash.script(progName)
-        case Fish.shellName | Fish.id => Fish.script(progName)
-        case Zsh.shellName | Zsh.id   => Zsh.script(progName)
+        case Bash.shellName | Bash.id => Bash.script(progName, completeCommandName)
+        case Fish.shellName | Fish.id => Fish.script(progName, completeCommandName)
+        case Zsh.shellName | Zsh.id   => Zsh.script(progName, completeCommandName)
         case _ =>
           completeUnrecognizedFormat(format)
       }
