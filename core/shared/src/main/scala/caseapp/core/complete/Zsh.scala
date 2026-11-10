@@ -50,8 +50,13 @@ object Zsh {
     item.values.map(value => quote(describeEscape(firstLine(value)) + desc))
   }
 
+  // When nothing can be suggested, complete file names, also as '--option=…' values
+  private def fileCompletion: String =
+    "[[ $PREFIX == -*=* ]] && compset -P 1 '*='" + System.lineSeparator() +
+      "_files" + System.lineSeparator()
+
   private def render(commands: Seq[String]): String =
-    if (commands.isEmpty) "_files" + System.lineSeparator()
+    if (commands.isEmpty) fileCompletion
     else {
       val id = hash(commands.iterator)
       s"""local -a args$id

@@ -45,5 +45,14 @@ object ZshCompletionTests extends TestSuite {
       else
         "zsh not available, skipped"
     }
+
+    test("file fallback") {
+      if (hasZsh) {
+        val entries = zshEntries(Zsh.print(Nil))
+        assert(entries == Seq("<files>"))
+      }
+      else
+        "zsh not available, skipped"
+    }
   }
 }
