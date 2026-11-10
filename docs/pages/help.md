@@ -24,12 +24,11 @@ case class Options(
 
 This makes the help message look like
 ```scala mdoc:passthrough
-// FIXME Find a way to keep colors in the output
 import caseapp.core.help.HelpFormat
 val help: Help[Options] = Help.derive
-println("```text")
-println(help.help(HelpFormat.default(ansiColors = false), showHidden = false))
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  help.help(HelpFormat.default(), showHidden = false)
+)
 ```
 
 Without any of the annotations, the help message looks like
@@ -38,12 +37,11 @@ case class Options0(
   @Name("f")
     foo: Int = 0
 )
-// FIXME Find a way to keep colors in the output
 import caseapp.core.help.HelpFormat
 val help0: Help[Options0] = Help.derive
-println("```text")
-println(help0.help(HelpFormat.default(ansiColors = false), showHidden = false))
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  help0.help(HelpFormat.default(), showHidden = false)
+)
 ```
 
 ## Hidden options
@@ -63,7 +61,6 @@ case class Options(
 
 This makes the help message look like
 ```scala mdoc:passthrough
-// FIXME Find a way to keep colors in the output
 import caseapp.core.help.HelpFormat
 
 object MyHelperApp extends CaseApp[Options] {
@@ -72,9 +69,9 @@ object MyHelperApp extends CaseApp[Options] {
     ???
   }
 }
-println("```text")
-println(MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(), showHidden = false)
+)
 ```
 
 When using hidden options alongside the `CaseApp` class, you can let users
@@ -94,22 +91,9 @@ $ my-app --full-help
 ```
 
 ```scala mdoc:passthrough
-println("```text")
-println {
-  // FIXME Find a way to keep colors in the output
-  MyApp.finalHelp.copy(progName = "my-app").help(
-    // reset colors
-    MyApp.helpFormat
-      .copy(
-        progName = caseapp.core.util.fansi.Attrs.Empty,
-        commandName = caseapp.core.util.fansi.Attrs.Empty,
-        option = caseapp.core.util.fansi.Attrs.Empty,
-        hidden = caseapp.core.util.fansi.Attrs.Empty
-      ),
-    showHidden = true
-  )
-}
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyApp.finalHelp.copy(progName = "my-app").help(MyApp.helpFormat, showHidden = true)
+)
 ```
 
 ## Option groups
@@ -129,7 +113,6 @@ case class Options(
 
 This makes the help message look like
 ```scala mdoc:passthrough
-// FIXME Find a way to keep colors in the output
 import caseapp.core.help.HelpFormat
 
 object MyHelperApp extends CaseApp[Options] {
@@ -138,9 +121,9 @@ object MyHelperApp extends CaseApp[Options] {
     ???
   }
 }
-println("```text")
-println(MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(ansiColors = false), showHidden = false))
-println("```")
+caseapp.docs.DocHelpers.printHelp(
+  MyHelperApp.finalHelp.copy(progName = "my-app").help(HelpFormat.default(), showHidden = false)
+)
 ```
 
 When using the `CaseApp` or `Command` classes, you can sort groups with
@@ -157,20 +140,9 @@ object MyApp extends CaseApp[Options] {
 
 One then gets
 ```scala mdoc:passthrough
-// FIXME Find a way to keep colors in the output
-println("```text")
-println(MyApp.finalHelp.copy(progName = "my-app").help(
-  // reset colors
-  MyApp.helpFormat
-    .copy(
-      progName = caseapp.core.util.fansi.Attrs.Empty,
-      commandName = caseapp.core.util.fansi.Attrs.Empty,
-      option = caseapp.core.util.fansi.Attrs.Empty,
-      hidden = caseapp.core.util.fansi.Attrs.Empty
-    )
-  )
+caseapp.docs.DocHelpers.printHelp(
+  MyApp.finalHelp.copy(progName = "my-app").help(MyApp.helpFormat)
 )
-println("```")
 ```
 
 ## Application description

@@ -512,7 +512,8 @@ object docs extends ScalaModule {
   }
   def mkdocsBuild() = Task.Command[Unit] {
     mdoc()()
-    os.proc("mkdocs", "build", mkdocsConfigArgs(), mkdocsSiteDirArgs())
+    // --strict: fail on warnings, like broken links (see 'validation' in mkdocs.yml)
+    os.proc("mkdocs", "build", "--strict", mkdocsConfigArgs(), mkdocsSiteDirArgs())
       .call(cwd = moduleDir, stdin = os.Inherit, stdout = os.Inherit)
 
     ()
