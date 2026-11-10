@@ -8,8 +8,19 @@ object Fish {
     s"$shellName-v1"
 
   def script(progName: String): String =
-    s"""complete $progName -a '($progName complete $id (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+    script(progName, List("complete"))
+
+  /** Shell script enabling completions for `progName`
+    *
+    * @param completeCommand
+    *   name of the command that `progName` uses to compute completions (see
+    *   `CommandsEntryPoint.completeCommandName`)
+    */
+  def script(progName: String, completeCommand: Seq[String]): String = {
+    val complete = completeCommand.mkString(" ")
+    s"""complete $progName -a '($progName $complete $id (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
        |""".stripMargin
+  }
 
   private def escape(s: String): String =
     s.replace("\t", "  ").linesIterator.find(_ => true).getOrElse("")

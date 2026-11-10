@@ -14,6 +14,11 @@ This adds two (hidden) commands to your application:
   completions
 - `complete`: command run when users ask for completions in their shell
 
+The names of these commands can be changed by overriding `def completionsCommandName: List[String]`
+(and `def completionsCommandAliases: List[List[String]]`) and `def completeCommandName: List[String]`.
+The scripts installed by `completions install` call the command returned by `completeCommandName`,
+so these keep working if you rename it.
+
 Overriding `def completionsWorkingDirectory: Option[String]` and returning a non-empty
 value from it enables two more commands:
 - `completions install` (also aliased to `completion install`): command to install completions
