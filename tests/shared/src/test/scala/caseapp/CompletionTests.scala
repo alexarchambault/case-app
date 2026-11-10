@@ -240,6 +240,7 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq(""), 0)
         val expected = List(
+          CompletionItem("stopping", None, Nil),
           CompletionItem("visible", None, Nil)
         )
         assert(res == expected)
@@ -263,5 +264,27 @@ object CompletionTests extends TestSuite {
       }
     }
 
+    test("stop at first unrecognized") {
+      import CompletionDefinitions.HiddenAndStopping._
+      test {
+        val res = Prog.complete(Seq("stopping", "-"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), List("-V"))
+        ) ++ helpItems
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("stopping", "--value", "a", "-"), 3)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), List("-V"))
+        ) ++ helpItems
+        assert(res == expected)
+      }
+      test("not after the first unrecognized argument") {
+        val res      = Prog.complete(Seq("stopping", "foo", "-"), 2)
+        val expected = Nil
+        assert(res == expected)
+      }
+    }
   }
 }
