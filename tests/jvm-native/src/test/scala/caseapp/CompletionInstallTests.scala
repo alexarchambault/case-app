@@ -62,7 +62,7 @@ object CompletionInstallTests extends TestSuite {
             """#compdef _prog prog
               |
               |function _prog {
-              |  eval "$(prog complete zsh-v1 $CURRENT $words[@])"
+              |  eval "$(prog complete zsh-v1 $CURRENT "${words[@]}")"
               |}
               |""".stripMargin,
           os.sub / ".zshrc" ->
@@ -118,7 +118,7 @@ object CompletionInstallTests extends TestSuite {
               """#compdef _prog prog
                 |
                 |function _prog {
-                |  eval "$(prog internal complete zsh-v1 $CURRENT $words[@])"
+                |  eval "$(prog internal complete zsh-v1 $CURRENT "${words[@]}")"
                 |}
                 |""".stripMargin,
             os.sub / ".zshrc" ->

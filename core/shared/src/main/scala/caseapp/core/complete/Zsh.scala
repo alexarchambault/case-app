@@ -23,7 +23,7 @@ object Zsh {
     s"""#compdef _$progName $progName
        |
        |function _$progName {
-       |  eval "$$($progName $complete $id $$CURRENT $$words[@])"
+       |  eval "$$($progName $complete $id $$CURRENT "$${words[@]}")"
        |}
        |""".stripMargin
   }
