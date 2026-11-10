@@ -102,7 +102,18 @@ object CompletionInstallTests extends TestSuite {
           os.sub / ".config" / "fish" / "completions" / "prog.fish" ->
             """
               |# >>> prog completions >>>
-              |complete prog -a '(prog complete fish-v1 (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+              |function __prog_complete
+              |    set -l previous (__fish_print_cmd_args)
+              |    set -l current (commandline -ct)
+              |    set -l completions (prog complete fish-v1 (math 1 + (count $previous)) $previous $current | string match -v -- '')
+              |    if set -q completions[1]
+              |        printf '%s\n' $completions
+              |    else
+              |        __fish_complete_path $current
+              |    end
+              |end
+              |
+              |complete -c prog -f -a '(__prog_complete)'
               |# <<< prog completions <<<
               |""".stripMargin
         )
@@ -160,7 +171,18 @@ object CompletionInstallTests extends TestSuite {
             os.sub / ".config" / "fish" / "completions" / "prog.fish" ->
               """
                 |# >>> prog completions >>>
-                |complete prog -a '(prog internal complete fish-v1 (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+                |function __prog_complete
+                |    set -l previous (__fish_print_cmd_args)
+                |    set -l current (commandline -ct)
+                |    set -l completions (prog internal complete fish-v1 (math 1 + (count $previous)) $previous $current | string match -v -- '')
+                |    if set -q completions[1]
+                |        printf '%s\n' $completions
+                |    else
+                |        __fish_complete_path $current
+                |    end
+                |end
+                |
+                |complete -c prog -f -a '(__prog_complete)'
                 |# <<< prog completions <<<
                 |""".stripMargin
           ),
