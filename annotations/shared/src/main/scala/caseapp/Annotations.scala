@@ -99,6 +99,7 @@ final case class ProgName(progName: String) extends StaticAnnotation
   * Not used by case-app itself. To change the name of a `caseapp.core.app.Command`, use
   * [[ProgName]] on its options, or override its `name` or `names` methods.
   */
+@deprecated("Unused by case-app, override Command#names or Command#name instead", "2.2.1")
 final case class CommandName(commandName: String) extends StaticAnnotation
 
 /** Version of the application, for the annotated case class of arguments
