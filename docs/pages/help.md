@@ -172,3 +172,81 @@ println(MyApp.finalHelp.copy(progName = "my-app").help(
 )
 println("```")
 ```
+
+## Application description
+
+```scala mdoc:reset-object:invisible
+import caseapp._
+```
+
+Put `@HelpMessage` on the class defining options to add a description to the
+help message. Its `message` field is printed right after the usage line:
+```scala mdoc:silent
+@HelpMessage(
+  "Copies files around.",
+  detailedMessage = """Copies files around.
+                      |
+                      |Source files are left untouched.""".stripMargin
+)
+case class Options(
+  @HelpMessage("Overwrite existing files")
+    force: Boolean = false
+)
+
+object MyApp extends CaseApp[Options] {
+  override def name = "my-app"
+  override def hasFullHelp = true
+  def run(options: Options, args: RemainingArgs): Unit = {
+    ???
+  }
+}
+```
+
+```scala mdoc:passthrough
+// FIXME Find a way to keep colors in the output
+import caseapp.core.help.HelpFormat
+println("```text")
+println(MyApp.finalHelp.help(HelpFormat.default(ansiColors = false), showHidden = false))
+println("```")
+```
+
+The `detailedMessage` field, if non-empty, replaces `message` in the help message that
+includes [hidden options](#hidden-options), printed with `--full-help` by default:
+```scala mdoc:passthrough
+println("```text")
+println(MyApp.finalHelp.help(HelpFormat.default(ansiColors = false), showHidden = true))
+println("```")
+```
+
+For [commands](commands.md), the first non-empty line of `message` is also used
+to describe the command in the list of commands of the main help message.
+
+`detailedMessage` is only used for the description of applications or commands,
+not for individual options, whose help message always uses `message`.
+
+`@HelpMessage` also has a `messageMd` field. It isn't used by case-app itself,
+and is only there for your own needs, like keeping a Markdown version of the
+help message to generate documentation.
+
+## Tags
+
+```scala mdoc:reset-object:invisible
+import caseapp._
+```
+
+Options can be annotated with any number of `@Tag`. Tags have no effect on parsing
+or on the help message: case-app only keeps them in the `Arg` instances describing
+options, so that you can use them in your own code, to tell apart some options
+when generating documentation for example:
+```scala mdoc
+case class Options(
+  @Tag("experimental")
+    foo: Int = 0,
+  @Tag("experimental")
+  @Tag("network")
+    host: String = "",
+  verbose: Boolean = false
+)
+
+Help[Options].args.map(arg => arg.name.name -> arg.tags.map(_.name))
+```
