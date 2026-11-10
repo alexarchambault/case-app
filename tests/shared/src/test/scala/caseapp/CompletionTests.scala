@@ -231,6 +231,25 @@ object CompletionTests extends TestSuite {
     test("hidden commands and options") {
       import CompletionDefinitions.HiddenAndStopping._
       test {
+        val res = Prog.complete(Seq(""), 0)
+        val expected = List(
+          CompletionItem("visible", None, Nil)
+        )
+        assert(res == expected)
+      }
+      test {
+        val res      = Prog.complete(Seq("se"), 0)
+        val expected = Nil
+        assert(res == expected)
+      }
+      test("options of hidden commands are still completed") {
+        val res = Prog.complete(Seq("secret", "--v"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil)
+        )
+        assert(res == expected)
+      }
+      test {
         val res      = Prog.complete(Seq("visible", "--s"), 1)
         val expected = Nil
         assert(res == expected)

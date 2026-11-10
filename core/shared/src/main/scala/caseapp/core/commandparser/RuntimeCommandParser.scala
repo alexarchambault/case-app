@@ -60,7 +60,7 @@ object RuntimeCommandParser {
     val (commandName, command, commandArgs) =
       tree.command(args).getOrElse((Nil, defaultCommand, args))
     val prefix                 = args.applyOrElse(index, (_: Int) => "")
-    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
+    val commandNameCompletions = commandNames(commands, args.take(index), prefix)
     val commandCompletions =
       if (index < commandName.length) Nil
       else
@@ -79,7 +79,7 @@ object RuntimeCommandParser {
     val map                    = commandMap(commands)
     val tree                   = CommandTree.fromCommandMap(map)
     val prefix                 = args.applyOrElse(index, (_: Int) => "")
-    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
+    val commandNameCompletions = commandNames(commands, args.take(index), prefix)
     val commandArgsCompletions = tree.command(args).toList.flatMap {
       case (commandName, command, commandArgs) =>
         if (index < commandName.length) Nil
@@ -91,6 +91,16 @@ object RuntimeCommandParser {
     }
     commandNameCompletions ++ commandArgsCompletions
   }
+
+  // Hidden commands are left out of completions, like they are in help messages
+  private def commandNames(
+    commands: Seq[Command[_]],
+    previousArgs: List[String],
+    prefix: String
+  ): List[CompletionItem] =
+    CommandTree.fromCommandMap(commandMap(commands.filter(!_.hidden)))
+      .complete(previousArgs)
+      .flatMap(_.withPrefix(prefix).toSeq)
 
   private final case class CommandTree[T](defaultApp: Option[T], map: Map[String, CommandTree[T]]) {
 

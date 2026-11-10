@@ -120,11 +120,17 @@ object CompletionDefinitions {
     object Visible extends Command[VisibleOptions] {
       def run(options: VisibleOptions, args: RemainingArgs): Unit = ???
     }
+    object Secret extends Command[VisibleOptions] {
+      override def names                                          = List(List("secret"))
+      override def hidden                                         = true
+      def run(options: VisibleOptions, args: RemainingArgs): Unit = ???
+    }
 
     object Prog extends CommandsEntryPoint {
       def progName = "prog"
       def commands = Seq(
-        Visible
+        Visible,
+        Secret
       )
     }
   }
