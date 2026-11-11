@@ -24,9 +24,11 @@ import java.util.jar.{Attributes, JarOutputStream, Manifest}
 import mill.api.{BuildCtx, Result}
 
 object Versions {
+  def scala212 = "2.12.21"
   def scala213 = "2.13.18"
   def scala3   = "3.3.9"
-  def scala    = Seq(scala213, scala3)
+  def scala    = Seq(scala212, scala213, scala3)
+  def scala2   = Seq(scala212, scala213)
   // Scala.js, Scala Native, and cats modules are only built for Scala 3
   def scala3Only = Seq(scala3)
 
@@ -39,6 +41,7 @@ object Deps {
   def catsEffect      = mvn"org.typelevel::cats-effect::3.7.1"
   def dataClass       = mvn"io.github.alexarchambault::data-class:${Versions.dataClass}"
   def dataClassPlugin = mvn"io.github.alexarchambault:::data-class-plugin:${Versions.dataClass}"
+  def macroParadise   = mvn"org.scalamacros:::paradise:2.1.1"
   def mdoc            = mvn"org.scalameta::mdoc:2.9.2"
   def osLib           = mvn"com.lihaoyi::os-lib::0.11.10"
   def pprint          = mvn"com.lihaoyi::pprint::0.9.6"
@@ -77,7 +80,7 @@ object annotations extends Module {
   * expands these on its own options classes. So they're compiled here, and their classes are
   * bundled in the case-app JAR.
   */
-object util extends Cross[Util](Seq(Versions.scala213))
+object util extends Cross[Util](Versions.scala2)
 
 trait Util extends CrossScalaModule {
   def sources = Task.Sources(os.sub / "src/main/scala-2")
@@ -145,7 +148,11 @@ object core extends Module {
       val maybeDataClassPlugin =
         if (scalaVersion().startsWith("3.")) Seq(Deps.dataClassPlugin)
         else Nil
-      super.scalacPluginMvnDeps() ++ maybeDataClassPlugin
+      // Macro annotations (used by data-class) need macro paradise on Scala 2.12
+      val maybeMacroParadise =
+        if (scalaVersion().startsWith("2.12.")) Seq(Deps.macroParadise)
+        else Nil
+      super.scalacPluginMvnDeps() ++ maybeDataClassPlugin ++ maybeMacroParadise
     }
     def scalacOptions = Task {
       val maybeMacroAnn =
@@ -396,7 +403,7 @@ trait CoreMimaChecks extends MimaChecks {
   )
 }
 
-trait MimaChecks extends Mima with PublishModule {
+trait MimaChecks extends Mima with PublishModule with ScalaModule {
   def mimaPreviousVersions = Task {
     os.proc(
       "git",
@@ -414,7 +421,9 @@ trait MimaChecks extends Mima with PublishModule {
   }
 
   def mimaPreviousArtifacts = Task {
-    val versions = mimaPreviousVersions().distinct
+    val versions = mimaPreviousVersions().distinct.filter { version =>
+      !scalaVersion().startsWith("2.12.") || !MimaChecks.versionsWithoutScala212(version)
+    }
     Result.Success(
       versions.map { version =>
         mvn"${pomSettings().organization}:${artifactId()}:$version"
@@ -427,6 +436,11 @@ trait MimaChecks extends Mima with PublishModule {
     // initializers can't be called from user code anyway
     ProblemFilter.exclude[DirectMissingMethodProblem]("*.<clinit>")
   )
+}
+
+object MimaChecks {
+  // Versions released while Scala 2.12 support was dropped, that have no Scala 2.12 artifacts
+  def versionsWithoutScala212 = Set("2.2.0")
 }
 
 object docs extends ScalaModule {
