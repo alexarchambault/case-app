@@ -237,7 +237,7 @@ object CompletionTests extends TestSuite {
 
     test("hidden commands and options") {
       import CompletionDefinitions.HiddenAndStopping._
-      test {
+      test("hidden commands are left out if non-hidden ones can be completed") {
         val res = Prog.complete(Seq(""), 0)
         val expected = List(
           CompletionItem("stopping", None, Nil),
@@ -246,8 +246,17 @@ object CompletionTests extends TestSuite {
         assert(res == expected)
       }
       test {
-        val res      = Prog.complete(Seq("se"), 0)
-        val expected = Nil
+        val res = Prog.complete(Seq("s"), 0)
+        val expected = List(
+          CompletionItem("stopping", None, Nil)
+        )
+        assert(res == expected)
+      }
+      test("hidden commands are completed if only them can be completed") {
+        val res = Prog.complete(Seq("se"), 0)
+        val expected = List(
+          CompletionItem("secret", Some("(hidden)"), Nil, hidden = true)
+        )
         assert(res == expected)
       }
       test("options of hidden commands are still completed") {
@@ -257,9 +266,34 @@ object CompletionTests extends TestSuite {
         )
         assert(res == expected)
       }
+      test("hidden options are left out if non-hidden ones can be completed") {
+        val res = Prog.complete(Seq("visible", "--"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil),
+          CompletionItem("--usage", Some("Print usage and exit"), Nil),
+          CompletionItem("--help", Some("Print help message and exit"), Nil)
+        )
+        assert(res == expected)
+      }
       test {
-        val res      = Prog.complete(Seq("visible", "--s"), 1)
-        val expected = Nil
+        val res = Prog.complete(Seq("visible", "--v"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil)
+        )
+        assert(res == expected)
+      }
+      test("hidden options are completed if only them can be completed") {
+        val res = Prog.complete(Seq("visible", "--s"), 1)
+        val expected = List(
+          CompletionItem("--secret", Some("(hidden)"), Nil, hidden = true)
+        )
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("visible", "--value-"), 1)
+        val expected = List(
+          CompletionItem("--value-list", Some("(hidden) A list of values"), Nil, hidden = true)
+        )
         assert(res == expected)
       }
     }

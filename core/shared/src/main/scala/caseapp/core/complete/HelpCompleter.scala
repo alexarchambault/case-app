@@ -29,7 +29,8 @@ object HelpCompleter {
 
   /** Completion items for the names of `args` starting with `prefix`
     *
-    * Hidden arguments (see [[caseapp.Hidden]]) are left out, like they are in help messages.
+    * Items of hidden arguments (see [[caseapp.Hidden]]) are marked as hidden, and have a
+    * description starting with "(hidden)" (see [[CompletionItem.dropHidden]]).
     */
   def optionNames(
     args: Seq[Arg],
@@ -38,14 +39,25 @@ object HelpCompleter {
   ): List[CompletionItem] =
     args
       .iterator
-      .filter(!_.noHelp)
       .flatMap { arg =>
         val names = arg.names
           .map(_.option(nameFormatter))
           .filter(_.startsWith(prefix))
         if (names.isEmpty) Iterator.empty
-        else
-          Iterator(CompletionItem(names.head, arg.helpMessage.map(_.message), names.tail))
+        else {
+          val description = arg.helpMessage.map(_.message)
+          val item =
+            if (arg.noHelp)
+              CompletionItem(
+                names.head,
+                CompletionItem.hiddenDescription(description),
+                names.tail,
+                hidden = true
+              )
+            else
+              CompletionItem(names.head, description, names.tail)
+          Iterator(item)
+        }
       }
       .toList
 }

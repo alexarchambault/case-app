@@ -400,6 +400,9 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
 
   /** Computes completions, for command names and for the arguments of commands
     *
+    * Hidden items, like the names of hidden commands, are left out if there are non-hidden ones
+    * (see [[caseapp.core.complete.CompletionItem.dropHidden]]).
+    *
     * @param args
     *   arguments of the application (without the program name)
     * @param index
@@ -430,7 +433,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
           .flatMap { item =>
             val values = item.values.filter(_.startsWith(prefix))
             if (values.isEmpty) Nil
-            else Seq(CompletionItem(values.head, item.description, values.tail.toList))
+            else Seq(item.copy(value = values.head, extraValues = values.tail.toList))
           }
         format match {
           case Bash.id =>

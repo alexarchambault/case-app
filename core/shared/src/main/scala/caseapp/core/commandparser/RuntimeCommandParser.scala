@@ -1,6 +1,6 @@
 package caseapp.core.commandparser
 
-import caseapp.core.app.{CaseApp, Command, CommandLike}
+import caseapp.core.app.{Command, CommandLike}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -60,7 +60,7 @@ object RuntimeCommandParser {
     val (commandName, command, commandArgs) =
       tree.command(args).getOrElse((Nil, defaultCommand, args))
     val prefix                 = args.applyOrElse(index, (_: Int) => "")
-    val commandNameCompletions = commandNames(commands, args.take(index), prefix)
+    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
     val commandCompletions =
       if (index < commandName.length) Nil
       else
@@ -68,7 +68,7 @@ object RuntimeCommandParser {
           commandArgs,
           index - commandName.length
         )
-    commandNameCompletions ++ commandCompletions
+    CompletionItem.dropHidden(commandNameCompletions ++ commandCompletions)
   }
 
   def complete(
@@ -79,7 +79,7 @@ object RuntimeCommandParser {
     val map                    = commandMap(commands)
     val tree                   = CommandTree.fromCommandMap(map)
     val prefix                 = args.applyOrElse(index, (_: Int) => "")
-    val commandNameCompletions = commandNames(commands, args.take(index), prefix)
+    val commandNameCompletions = tree.complete(args.take(index)).flatMap(_.withPrefix(prefix).toSeq)
     val commandArgsCompletions = tree.command(args).toList.flatMap {
       case (commandName, command, commandArgs) =>
         if (index < commandName.length) Nil
@@ -89,33 +89,31 @@ object RuntimeCommandParser {
             index - commandName.length
           )
     }
-    commandNameCompletions ++ commandArgsCompletions
+    CompletionItem.dropHidden(commandNameCompletions ++ commandArgsCompletions)
   }
-
-  // Hidden commands are left out of completions, like they are in help messages
-  private def commandNames(
-    commands: Seq[Command[_]],
-    previousArgs: List[String],
-    prefix: String
-  ): List[CompletionItem] =
-    CommandTree.fromCommandMap(commandMap(commands.filter(!_.hidden)))
-      .complete(previousArgs)
-      .flatMap(_.withPrefix(prefix).toSeq)
 
   private final case class CommandTree[T](defaultApp: Option[T], map: Map[String, CommandTree[T]]) {
 
+    // whether all the commands of this tree are hidden
+    def hidden(implicit ev: T <:< Command[_]): Boolean =
+      defaultApp.forall(ev(_).hidden) && map.valuesIterator.forall(_.hidden)
+
+    // Names of hidden commands (or of command prefixes only leading to hidden commands)
+    // are marked as hidden, see CompletionItem.dropHidden
     @tailrec
-    def complete(prefix: List[String])(implicit ev: T <:< CaseApp[_]): List[CompletionItem] =
+    def complete(prefix: List[String])(implicit ev: T <:< Command[_]): List[CompletionItem] =
       prefix match {
         case Nil =>
-          val byApps = map.toList.groupBy(_._2.defaultApp)
+          val byApps = map.toList.groupBy { case (_, tree) => (tree.defaultApp, tree.hidden) }
           byApps.toList.sortBy(_._2.head._1).map {
-            case (appOpt, values) =>
-              val values0 = values.map(_._1)
+            case ((appOpt, hidden), values) =>
+              val values0     = values.map(_._1)
+              val description = appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message))
               CompletionItem(
                 values0.head,
-                appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message)),
-                values0.tail
+                if (hidden) CompletionItem.hiddenDescription(description) else description,
+                values0.tail,
+                hidden = hidden
               )
           }
         case h :: t =>
