@@ -405,6 +405,8 @@ trait ParserMethods[+T] { parser: Parser[T @Internal.uncheckedVarianceScala2] =>
             Nil
           case Step.FirstUnrecognized(_, true) =>
             completer.optionName(value, stateOpt, remArgs)
+          case Step.FirstUnrecognized(_, false) if value == "-" =>
+            completer.optionName(value, stateOpt, remArgs)
           case Step.FirstUnrecognized(_, false) =>
             completer.argument(value, stateOpt, remArgs)
           case Step.IgnoredUnrecognized(_) =>

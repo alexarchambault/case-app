@@ -23,7 +23,7 @@ object Zsh {
     s"""#compdef _$progName $progName
        |
        |function _$progName {
-       |  eval "$$($progName $complete $id $$CURRENT $$words[@])"
+       |  eval "$$($progName $complete $id $$CURRENT "$${words[@]}")"
        |}
        |""".stripMargin
   }
@@ -33,38 +33,30 @@ object Zsh {
     if (hash < 0) (hash * -1).toString
     else hash.toString
   }
-  private def escape(input: String): String =
-    input
-      .replace("'", "\\'")
-      .replace("`", "\\`")
-      .replace("|", "\\|")
-      .linesIterator
-      .take(1)
-      .toList
-      .headOption
-      .getOrElse("")
+
+  // The output of print is evaluated by the function of script, so anything coming from
+  // completion items is single-quoted, to be taken literally by zsh
+  private def quote(s: String): String =
+    "'" + s.replace("'", "'\\''") + "'"
+  private def firstLine(s: String): String =
+    s.linesIterator.take(1).toList.headOption.getOrElse("")
+
+  // _describe splits its entries on the first unescaped ':', and unescapes what precedes it
+  private def describeEscape(s: String): String =
+    s.replace("\\", "\\\\").replace(":", "\\:")
+
   private def defs(item: CompletionItem): Seq[String] = {
-    val (options, arguments) = item.values.partition(_.startsWith("-"))
-    val optionsOutput =
-      if (options.isEmpty) Nil
-      else {
-        val escapedOptions = options
-        val desc           = item.description.map(desc => ":" + escape(desc)).getOrElse("")
-        options.map { opt =>
-          "\"" + opt + desc + "\""
-        }
-      }
-    val argumentsOutput =
-      if (arguments.isEmpty) Nil
-      else {
-        val desc = item.description.map(desc => ":" + escape(desc)).getOrElse("")
-        arguments.map("'" + _.replace(":", "\\:") + desc + "'")
-      }
-    optionsOutput ++ argumentsOutput
+    val desc = item.description.map(firstLine).filter(_.nonEmpty).fold("")(":" + _)
+    item.values.map(value => quote(describeEscape(firstLine(value)) + desc))
   }
 
+  // When nothing can be suggested, complete file names, also as '--option=…' values
+  private def fileCompletion: String =
+    "[[ $PREFIX == -*=* ]] && compset -P 1 '*='" + System.lineSeparator() +
+      "_files" + System.lineSeparator()
+
   private def render(commands: Seq[String]): String =
-    if (commands.isEmpty) "_files" + System.lineSeparator()
+    if (commands.isEmpty) fileCompletion
     else {
       val id = hash(commands.iterator)
       s"""local -a args$id

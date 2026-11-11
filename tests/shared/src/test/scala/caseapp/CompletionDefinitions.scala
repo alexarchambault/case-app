@@ -111,4 +111,36 @@ object CompletionDefinitions {
       )
     }
   }
+
+  object HiddenAndStopping {
+    case class VisibleOptions(
+      @HelpMessage("A value") value: String = "",
+      @Hidden secret: Boolean = false,
+      @Hidden @HelpMessage("A list of values") valueList: String = ""
+    )
+    case class StoppingOptions(
+      @Name("V") @HelpMessage("A value") value: String = ""
+    )
+    object Visible extends Command[VisibleOptions] {
+      def run(options: VisibleOptions, args: RemainingArgs): Unit = ???
+    }
+    object Secret extends Command[VisibleOptions] {
+      override def names                                          = List(List("secret"))
+      override def hidden                                         = true
+      def run(options: VisibleOptions, args: RemainingArgs): Unit = ???
+    }
+    object Stopping extends Command[StoppingOptions] {
+      override def stopAtFirstUnrecognized                         = true
+      def run(options: StoppingOptions, args: RemainingArgs): Unit = ???
+    }
+
+    object Prog extends CommandsEntryPoint {
+      def progName = "prog"
+      def commands = Seq(
+        Visible,
+        Secret,
+        Stopping
+      )
+    }
+  }
 }

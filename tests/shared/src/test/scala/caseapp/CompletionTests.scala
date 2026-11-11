@@ -4,6 +4,13 @@ import caseapp.core.complete.{Bash, CompletionItem, Fish, Zsh}
 import utest._
 
 object CompletionTests extends TestSuite {
+
+  // added by CaseApp#complete to the options of the applications
+  private val helpItems = List(
+    CompletionItem("--usage", Some("Print usage and exit"), Nil),
+    CompletionItem("--help", Some("Print help message and exit"), List("-h"))
+  )
+
   val tests = Tests {
     test("simple") {
       import CompletionDefinitions.Simple._
@@ -11,7 +18,7 @@ object CompletionTests extends TestSuite {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
           CompletionItem("--value")
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -41,9 +48,9 @@ object CompletionTests extends TestSuite {
       test {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -73,9 +80,9 @@ object CompletionTests extends TestSuite {
       test {
         val res = App.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
       test {
@@ -127,9 +134,9 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -138,7 +145,7 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -147,17 +154,18 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
 
         val compRely         = Bash.print(res)
-        val expectedCompRely = """"--backtick  -- A pattern with backtick \`--\`"""".stripMargin
+        val expectedCompRely = "'--backtick  -- A pattern with backtick `--`'"
 
         assert(compRely.contains(expectedCompRely))
       }
       test("bash fallback to file completion") {
         val compRely = Bash.print(Nil)
-        assert(compRely.contains("""compgen -f -- "${COMP_WORDS[$COMP_CWORD]}""""))
+        assert(compRely.contains("compopt -o filenames"))
+        assert(compRely.contains("""compgen -f -- "$cur""""))
       }
       test("fish") {
         val res              = Prog.complete(Seq("back-tick", "-"), 1)
@@ -171,11 +179,11 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--backtick", Some("A pattern with backtick `--`\nwith multiline"), Nil),
           CompletionItem("--count", None, List("-d"))
-        )
+        ) ++ helpItems
         assert(res == expected)
 
         val compRely         = Zsh.print(res)
-        val expectedCompRely = """"--backtick:A pattern with backtick \`--\`"""".stripMargin
+        val expectedCompRely = "'--backtick:A pattern with backtick `--`'"
 
         assert(compRely.contains(expectedCompRely))
       }
@@ -202,18 +210,18 @@ object CompletionTests extends TestSuite {
       test {
         val res = Prog.complete(Seq("-"), 0)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
       test {
         val res = Prog.complete(Seq("first", "-"), 1)
         val expected = List(
-          CompletionItem("--value", Some("A value"), List("-v")),
+          CompletionItem("--value", Some("A value"), List("-V")),
           CompletionItem("--other", None, List("-n"))
-        )
+        ) ++ helpItems
         assert(res == expected)
       }
 
@@ -222,7 +230,93 @@ object CompletionTests extends TestSuite {
         val expected = List(
           CompletionItem("--glob", Some("A pattern"), List("-g")),
           CompletionItem("--count", None, List("-d"))
+        ) ++ helpItems
+        assert(res == expected)
+      }
+    }
+
+    test("hidden commands and options") {
+      import CompletionDefinitions.HiddenAndStopping._
+      test("hidden commands are left out if non-hidden ones can be completed") {
+        val res = Prog.complete(Seq(""), 0)
+        val expected = List(
+          CompletionItem("stopping", None, Nil),
+          CompletionItem("visible", None, Nil)
         )
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("s"), 0)
+        val expected = List(
+          CompletionItem("stopping", None, Nil)
+        )
+        assert(res == expected)
+      }
+      test("hidden commands are completed if only them can be completed") {
+        val res = Prog.complete(Seq("se"), 0)
+        val expected = List(
+          CompletionItem("secret", Some("(hidden)"), Nil, hidden = true)
+        )
+        assert(res == expected)
+      }
+      test("options of hidden commands are still completed") {
+        val res = Prog.complete(Seq("secret", "--v"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil)
+        )
+        assert(res == expected)
+      }
+      test("hidden options are left out if non-hidden ones can be completed") {
+        val res = Prog.complete(Seq("visible", "--"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil),
+          CompletionItem("--usage", Some("Print usage and exit"), Nil),
+          CompletionItem("--help", Some("Print help message and exit"), Nil)
+        )
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("visible", "--v"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), Nil)
+        )
+        assert(res == expected)
+      }
+      test("hidden options are completed if only them can be completed") {
+        val res = Prog.complete(Seq("visible", "--s"), 1)
+        val expected = List(
+          CompletionItem("--secret", Some("(hidden)"), Nil, hidden = true)
+        )
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("visible", "--value-"), 1)
+        val expected = List(
+          CompletionItem("--value-list", Some("(hidden) A list of values"), Nil, hidden = true)
+        )
+        assert(res == expected)
+      }
+    }
+
+    test("stop at first unrecognized") {
+      import CompletionDefinitions.HiddenAndStopping._
+      test {
+        val res = Prog.complete(Seq("stopping", "-"), 1)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), List("-V"))
+        ) ++ helpItems
+        assert(res == expected)
+      }
+      test {
+        val res = Prog.complete(Seq("stopping", "--value", "a", "-"), 3)
+        val expected = List(
+          CompletionItem("--value", Some("A value"), List("-V"))
+        ) ++ helpItems
+        assert(res == expected)
+      }
+      test("not after the first unrecognized argument") {
+        val res      = Prog.complete(Seq("stopping", "foo", "-"), 2)
+        val expected = Nil
         assert(res == expected)
       }
     }

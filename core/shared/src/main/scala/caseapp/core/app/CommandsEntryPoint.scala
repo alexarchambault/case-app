@@ -144,7 +144,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
     */
   protected def completeMainHook(args: Array[String]): Unit =
     for (path <- completionDebugFile) {
-      val output = s"completeMain(${args.toSeq})"
+      val output = s"completeMain(${args.toSeq})" + System.lineSeparator()
       FileOps.appendToFile(path, output)
     }
 
@@ -284,11 +284,12 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
         val needsWrite = !FileOps.exists(completionScriptDest) ||
           FileOps.readFile(completionScriptDest) != completionScript
         if (needsWrite) {
-          printLine(s"Writing $completionScriptDest")
+          // to stderr, as --env prints a script meant to be evaluated to stdout
+          printLine(s"Writing $completionScriptDest", toStderr = true)
           FileOps.createDirectories(completionScriptDest.getParent)
           FileOps.writeFile(completionScriptDest, completionScript)
         }
-        val script = Seq(s"""fpath=("$dir" $$fpath)""", "compinit")
+        val script = Seq(s"""fpath=("$dir" $$fpath)""", "autoload -Uz compinit && compinit")
           .map(_ + System.lineSeparator())
           .mkString
         (script, zshrcFile)
@@ -399,6 +400,9 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
 
   /** Computes completions, for command names and for the arguments of commands
     *
+    * Hidden items, like the names of hidden commands, are left out if there are non-hidden ones
+    * (see [[caseapp.core.complete.CompletionItem.dropHidden]]).
+    *
     * @param args
     *   arguments of the application (without the program name)
     * @param index
@@ -429,7 +433,7 @@ abstract class CommandsEntryPoint extends CommandsEntryPointLike[Command[_]] {
           .flatMap { item =>
             val values = item.values.filter(_.startsWith(prefix))
             if (values.isEmpty) Nil
-            else Seq(CompletionItem(values.head, item.description, values.tail.toList))
+            else Seq(item.copy(value = values.head, extraValues = values.tail.toList))
           }
         format match {
           case Bash.id =>

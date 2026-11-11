@@ -97,6 +97,17 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
   def completer: Completer[T] =
     new HelpCompleter[T](messages)
 
+  // completes the names of the options that the help wrappers add, like --help or --usage
+  private def helpOptionNames(withHelpMessages: Help[_]): String => List[CompletionItem] = {
+    val helpArgs = withHelpMessages.args.take(withHelpMessages.args.length - messages.args.length)
+    prefix =>
+      HelpCompleter.optionNames(helpArgs, messages.nameFormatter, prefix).flatMap { item =>
+        // leave out the single-dash aliases of the help options, like -help
+        val values = item.values.filter(v => v.startsWith("--") || v.length == 2)
+        values.headOption.map(v => item.copy(value = v, extraValues = values.tail)).toList
+      }
+  }
+
   /** Computes shell completions
     *
     * Called by [[CommandsEntryPoint]] when completing the arguments of this command.
@@ -107,14 +118,21 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
     *   index in `args` of the argument to complete (it can be equal to `args.length`, to complete a
     *   new argument)
     * @return
-    *   completion candidates
+    *   completion candidates (hidden ones are left out if there are non-hidden ones, see
+    *   [[caseapp.core.complete.CompletionItem.dropHidden]])
     */
   def complete(args: Seq[String], index: Int): List[CompletionItem] =
+    CompletionItem.dropHidden(completeAll(args, index))
+
+  private def completeAll(args: Seq[String], index: Int): List[CompletionItem] =
     if (hasFullHelp)
       parser.withFullHelp.complete(
         args,
         index,
-        completer.withFullHelp,
+        Completer.withExtraOptionNames(
+          completer.withFullHelp,
+          helpOptionNames(messages.withFullHelp)
+        ),
         stopAtFirstUnrecognized,
         ignoreUnrecognized
       )
@@ -122,7 +140,7 @@ abstract class CaseApp[T](implicit val parser0: Parser[T], val messages: Help[T]
       parser.withHelp.complete(
         args,
         index,
-        completer.withHelp,
+        Completer.withExtraOptionNames(completer.withHelp, helpOptionNames(messages.withHelp)),
         stopAtFirstUnrecognized,
         ignoreUnrecognized
       )

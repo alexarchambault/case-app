@@ -1,6 +1,6 @@
 package caseapp.core.commandparser
 
-import caseapp.core.app.{CaseApp, Command, CommandLike}
+import caseapp.core.app.{Command, CommandLike}
 
 import scala.annotation.tailrec
 import scala.collection.mutable
@@ -68,7 +68,7 @@ object RuntimeCommandParser {
           commandArgs,
           index - commandName.length
         )
-    commandNameCompletions ++ commandCompletions
+    CompletionItem.dropHidden(commandNameCompletions ++ commandCompletions)
   }
 
   def complete(
@@ -89,23 +89,31 @@ object RuntimeCommandParser {
             index - commandName.length
           )
     }
-    commandNameCompletions ++ commandArgsCompletions
+    CompletionItem.dropHidden(commandNameCompletions ++ commandArgsCompletions)
   }
 
   private final case class CommandTree[T](defaultApp: Option[T], map: Map[String, CommandTree[T]]) {
 
+    // whether all the commands of this tree are hidden
+    def hidden(implicit ev: T <:< Command[_]): Boolean =
+      defaultApp.forall(ev(_).hidden) && map.valuesIterator.forall(_.hidden)
+
+    // Names of hidden commands (or of command prefixes only leading to hidden commands)
+    // are marked as hidden, see CompletionItem.dropHidden
     @tailrec
-    def complete(prefix: List[String])(implicit ev: T <:< CaseApp[_]): List[CompletionItem] =
+    def complete(prefix: List[String])(implicit ev: T <:< Command[_]): List[CompletionItem] =
       prefix match {
         case Nil =>
-          val byApps = map.toList.groupBy(_._2.defaultApp)
+          val byApps = map.toList.groupBy { case (_, tree) => (tree.defaultApp, tree.hidden) }
           byApps.toList.sortBy(_._2.head._1).map {
-            case (appOpt, values) =>
-              val values0 = values.map(_._1)
+            case ((appOpt, hidden), values) =>
+              val values0     = values.map(_._1)
+              val description = appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message))
               CompletionItem(
                 values0.head,
-                appOpt.map(ev).flatMap(_.messages.helpMessage.map(_.message)),
-                values0.tail
+                if (hidden) CompletionItem.hiddenDescription(description) else description,
+                values0.tail,
+                hidden = hidden
               )
           }
         case h :: t =>

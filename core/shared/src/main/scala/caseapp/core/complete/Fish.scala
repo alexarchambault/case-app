@@ -18,7 +18,22 @@ object Fish {
     */
   def script(progName: String, completeCommand: Seq[String]): String = {
     val complete = completeCommand.mkString(" ")
-    s"""complete $progName -a '($progName $complete $id (math 1 + (count (__fish_print_cmd_args))) (__fish_print_cmd_args))'
+    // __fish_print_cmd_args prints the arguments before the current one, which is passed
+    // on its own. Empty lines are dropped, as there's one when there are no completions.
+    // -f disables the default file completion, that would mix file names with
+    // the completions of the application: files are completed only when it has none.
+    s"""function __${progName}_complete
+       |    set -l previous (__fish_print_cmd_args)
+       |    set -l current (commandline -ct)
+       |    set -l completions ($progName $complete $id (math 1 + (count $$previous)) $$previous $$current | string match -v -- '')
+       |    if set -q completions[1]
+       |        printf '%s\\n' $$completions
+       |    else
+       |        __fish_complete_path $$current
+       |    end
+       |end
+       |
+       |complete -c $progName -f -a '(__${progName}_complete)'
        |""".stripMargin
   }
 
