@@ -33,7 +33,7 @@ object Versions {
   def scala3Only = Seq(scala3)
 
   def dataClass   = "0.3.0"
-  def scalaJs     = "1.22.0"
+  def scalaJs     = "1.23.0"
   def scalaNative = "0.5.12"
 }
 
