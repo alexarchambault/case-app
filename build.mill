@@ -32,7 +32,7 @@ object Versions {
   // Scala.js, Scala Native, and cats modules are only built for Scala 3
   def scala3Only = Seq(scala3)
 
-  def dataClass   = "0.3.0"
+  def dataClass   = "0.3.1"
   def scalaJs     = "1.23.0"
   def scalaNative = "0.5.12"
 }
