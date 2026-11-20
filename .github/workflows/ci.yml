@@ -43,6 +43,9 @@ jobs:
     - uses: coursier/setup-action@v3.1
       with:
         jvm: 21
+    # The completion tests run the scripts generated for these shells, and fail if they're missing
+    - name: Install zsh and fish
+      run: sudo apt-get update && sudo apt-get install -y zsh fish
     - name: Test
       run: ./mill -i '__[${{ matrix.SCALA_VERSION }}].test'
 
