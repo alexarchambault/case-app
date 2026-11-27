@@ -34,7 +34,7 @@ object Versions {
 
   def dataClass   = "0.3.1"
   def scalaJs     = "1.23.0"
-  def scalaNative = "0.5.12"
+  def scalaNative = "0.5.13"
 }
 
 object Deps {
