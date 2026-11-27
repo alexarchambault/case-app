@@ -42,7 +42,7 @@ object Deps {
   def dataClass       = mvn"io.github.alexarchambault::data-class:${Versions.dataClass}"
   def dataClassPlugin = mvn"io.github.alexarchambault:::data-class-plugin:${Versions.dataClass}"
   def macroParadise   = mvn"org.scalamacros:::paradise:2.1.1"
-  def mdoc            = mvn"org.scalameta::mdoc:2.9.2"
+  def mdoc            = mvn"org.scalameta::mdoc:2.9.3"
   def osLib           = mvn"com.lihaoyi::os-lib::0.11.10"
   def pprint          = mvn"com.lihaoyi::pprint::0.9.6"
   def scalaCompiler(sv: String) = mvn"org.scala-lang:scala-compiler:$sv"
